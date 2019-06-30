@@ -1,0 +1,141 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{C3795900-AF05-880B-18B4-880B045F880B}</ProjectGuid>
+    <IgnoreWarnCompileDuplicatedFilename>true</IgnoreWarnCompileDuplicatedFilename>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>ui</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+    <OutDir>bin\Debug\</OutDir>
+    <IntDir>obj\Debug\ui\</IntDir>
+    <TargetName>uix86</TargetName>
+    <TargetExt>.dll</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+    <OutDir>bin\Release\</OutDir>
+    <IntDir>obj\Release\ui\</IntDir>
+    <TargetName>uix86</TargetName>
+    <TargetExt>.dll</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\code\cgame;..\..\code\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <Optimization>Disabled</Optimization>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ImportLibrary>bin\Debug\uix86.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\code\cgame;..\..\code\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Optimization>Full</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <MinimalRebuild>false</MinimalRebuild>
+      <StringPooling>true</StringPooling>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <ImportLibrary>bin\Release\uix86.lib</ImportLibrary>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\code\common\bg_public.h" />
+    <ClInclude Include="..\..\code\common\tr_types.h" />
+    <ClInclude Include="..\..\code\ui\keycodes.h" />
+    <ClInclude Include="..\..\code\ui\stv_version.h" />
+    <ClInclude Include="..\..\code\ui\ui_local.h" />
+    <ClInclude Include="..\..\code\ui\ui_public.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\code\common\bg_misc.c" />
+    <ClCompile Include="..\..\code\common\q_math.c" />
+    <ClCompile Include="..\..\code\common\q_shared.c" />
+    <ClCompile Include="..\..\code\ui\ui_addbots.c" />
+    <ClCompile Include="..\..\code\ui\ui_atoms.c" />
+    <ClCompile Include="..\..\code\ui\ui_cdkey.c" />
+    <ClCompile Include="..\..\code\ui\ui_confirm.c" />
+    <ClCompile Include="..\..\code\ui\ui_connect.c" />
+    <ClCompile Include="..\..\code\ui\ui_controls2.c" />
+    <ClCompile Include="..\..\code\ui\ui_cvars.c" />
+    <ClCompile Include="..\..\code\ui\ui_demo2.c" />
+    <ClCompile Include="..\..\code\ui\ui_fonts.c" />
+    <ClCompile Include="..\..\code\ui\ui_gameinfo.c" />
+    <ClCompile Include="..\..\code\ui\ui_ingame.c" />
+    <ClCompile Include="..\..\code\ui\ui_main.c" />
+    <ClCompile Include="..\..\code\ui\ui_menu.c" />
+    <ClCompile Include="..\..\code\ui\ui_mfield.c" />
+    <ClCompile Include="..\..\code\ui\ui_mods.c" />
+    <ClCompile Include="..\..\code\ui\ui_network.c" />
+    <ClCompile Include="..\..\code\ui\ui_playermodel.c" />
+    <ClCompile Include="..\..\code\ui\ui_players.c" />
+    <ClCompile Include="..\..\code\ui\ui_playersettings.c" />
+    <ClCompile Include="..\..\code\ui\ui_preferences.c" />
+    <ClCompile Include="..\..\code\ui\ui_qmenu.c" />
+    <ClCompile Include="..\..\code\ui\ui_removebots.c" />
+    <ClCompile Include="..\..\code\ui\ui_serverinfo.c" />
+    <ClCompile Include="..\..\code\ui\ui_servers2.c" />
+    <ClCompile Include="..\..\code\ui\ui_sound.c" />
+    <ClCompile Include="..\..\code\ui\ui_sparena.c" />
+    <ClCompile Include="..\..\code\ui\ui_specifyserver.c" />
+    <ClCompile Include="..\..\code\ui\ui_splevel.c" />
+    <ClCompile Include="..\..\code\ui\ui_sppostgame.c" />
+    <ClCompile Include="..\..\code\ui\ui_spskill.c" />
+    <ClCompile Include="..\..\code\ui\ui_startserver.c" />
+    <ClCompile Include="..\..\code\ui\ui_syscalls.c" />
+    <ClCompile Include="..\..\code\ui\ui_team.c" />
+    <ClCompile Include="..\..\code\ui\ui_teamorders.c" />
+    <ClCompile Include="..\..\code\ui\ui_video.c" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="common">
+      <UniqueIdentifier>{AEFEE3F6-9AA0-0ECD-835B-22216F9C951D}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ui">
+      <UniqueIdentifier>{C3795900-AF05-880B-18B4-880B045F880B}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\code\common\bg_public.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\common\tr_types.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\ui\keycodes.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\ui\stv_version.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\ui\ui_local.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\ui\ui_public.h">
+      <Filter>ui</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\code\common\bg_misc.c">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\common\q_math.c">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\common\q_shared.c">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_addbots.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_atoms.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_cdkey.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_confirm.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_connect.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_controls2.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_cvars.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_demo2.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_fonts.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_gameinfo.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_ingame.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_main.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_menu.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_mfield.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_mods.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_network.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_playermodel.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_players.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_playersettings.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_preferences.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_qmenu.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_removebots.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_serverinfo.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_servers2.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_sound.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_sparena.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_specifyserver.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_splevel.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_sppostgame.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_spskill.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_startserver.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_syscalls.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_team.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_teamorders.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_video.c">
+      <Filter>ui</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

@@ -1,13 +1,27 @@
 -- premake5.lua
+
 workspace "StefGame"
    configurations { "Debug", "Release" }
+   platforms { "Win64", "Win32" }
 
-project "game"
    kind "SharedLib"
    language "C"
    targetdir "bin/%{cfg.buildcfg}"
-   targetname ("qagamex86")
 
+   defines { "_CRT_SECURE_NO_WARNINGS" }
+
+   filter "platforms:Win64"
+      architecture "x64"
+
+   filter "configurations:Debug"
+      defines { "DEBUG" }
+      symbols "On"
+
+   filter "configurations:Release"
+      defines { "NDEBUG" }
+      optimize "On"
+
+project "game"
    files { "../../code/game/*.h",
       "../../code/game/*.c",
       "../../code/common/*.h",
@@ -15,25 +29,15 @@ project "game"
 
    removefiles { "../../code/common/bg_lib.*" }
 
-   includedirs{"../../code/game",
-      "../../code/common"}
+   includedirs { "../../code/game",
+      "../../code/common" }
 
-   defines { "_CRT_SECURE_NO_WARNINGS" }
+   targetname "qagamex86"
 
-   filter "configurations:Debug"
-      defines { "DEBUG" }
-      symbols "On"
-
-   filter "configurations:Release"
-      defines { "NDEBUG" }
-      optimize "On"
+   filter "platforms:Win64"
+      targetname "qagamex86_64"
 
 project "cgame"
-   kind "SharedLib"
-   language "C"
-   targetdir "bin/%{cfg.buildcfg}"
-   targetname ("cgamex86")
-
    files { "../../code/cgame/*.h",
       "../../code/cgame/*.c",
       "../../code/common/*.h",
@@ -41,25 +45,15 @@ project "cgame"
 
    removefiles { "../../code/common/bg_lib.*" }
 
-   includedirs{"../../code/cgame",
-      "../../code/common"}
+   includedirs { "../../code/cgame",
+      "../../code/common" }
 
-   defines { "_CRT_SECURE_NO_WARNINGS" }
+   targetname "cgamex86"
 
-   filter "configurations:Debug"
-      defines { "DEBUG" }
-      symbols "On"
-
-   filter "configurations:Release"
-      defines { "NDEBUG" }
-      optimize "On"
+   filter "platforms:Win64"
+      targetname "cgamex86_64"
 
 project "ui"
-   kind "SharedLib"
-   language "C"
-   targetdir "bin/%{cfg.buildcfg}"
-   targetname ("uix86")
-
    files { "../../code/ui/*.h",
       "../../code/ui/*.c",
       "../../code/common/bg_misc.c",
@@ -68,15 +62,10 @@ project "ui"
       "../../code/common/bg_public.h",
       "../../code/common/tr_types.h" }
 
-   includedirs{"../../code/cgame",
-      "../../code/common"}
+   includedirs { "../../code/ui",
+      "../../code/common" }
 
-   defines { "_CRT_SECURE_NO_WARNINGS" }
+   targetname "uix86"
 
-   filter "configurations:Debug"
-      defines { "DEBUG" }
-      symbols "On"
-
-   filter "configurations:Release"
-      defines { "NDEBUG" }
-      optimize "On"
+   filter "platforms:Win64"
+      targetname "uix86_64"

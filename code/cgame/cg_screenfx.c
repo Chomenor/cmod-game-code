@@ -40,7 +40,7 @@ void CG_AddFullScreenEffect(int screenfx, int clientNum)
 	}
 	for (i = 0; i < MAX_SCREENFX; i++)
 	{
-		// if we already have one of these effects going, just add to the duration of 
+		// if we already have one of these effects going, just add to the duration of
 		//the existing one...don't create a new instance of the same effect
 		if (theScreenFX.events[i] == screenfx)
 		{
@@ -78,7 +78,7 @@ CG_DrawScreenQuad
 */
 
 
-static void CG_DrawScreenQuad(float alpha, qhandle_t screenshader) 
+static void CG_DrawScreenQuad(float alpha, qhandle_t screenshader)
 {
 	refEntity_t		ent;
 	float radius;
@@ -107,7 +107,7 @@ static void CG_DrawScreenQuad(float alpha, qhandle_t screenshader)
 
 	VectorMA( cg.refdef.vieworg, 8, cg.refdef.viewaxis[0], ent.origin );
 
-	ent.data.sprite.radius = radius;		
+	ent.data.sprite.radius = radius;
 	ent.customShader = screenshader;
 	ent.shaderRGBA[0] = alpha * 255;
 	ent.shaderRGBA[1] = alpha * 255;
@@ -117,7 +117,7 @@ static void CG_DrawScreenQuad(float alpha, qhandle_t screenshader)
 }
 
 /*
-static void CG_DrawDirectionalScreenQuad(float alpha, qhandle_t screenshader) 
+static void CG_DrawDirectionalScreenQuad(float alpha, qhandle_t screenshader)
 {
 	refEntity_t		ent;
 	vec3_t			screencenter;
@@ -136,10 +136,10 @@ static void CG_DrawDirectionalScreenQuad(float alpha, qhandle_t screenshader)
 	ent.reType = RT_ALPHAVERTPOLY;
 	ent.renderfx = RF_FIRST_PERSON;
 
-	ent.data.sprite.radius = 4;		
+	ent.data.sprite.radius = 4;
 	ent.customShader = screenshader;
 	* (unsigned int *) ent.shaderRGBA = 0xffffffff;
-	* (unsigned int *) ent.data.sprite.vertRGBA[0] = 0xffffffff; 
+	* (unsigned int *) ent.data.sprite.vertRGBA[0] = 0xffffffff;
 	* (unsigned int *) ent.data.sprite.vertRGBA[1] = 0xffffffff;
 	* (unsigned int *) ent.data.sprite.vertRGBA[2] = 0xffffffff;
 	* (unsigned int *) ent.data.sprite.vertRGBA[3] = 0xffffffff;
@@ -150,7 +150,7 @@ static void CG_DrawDirectionalScreenQuad(float alpha, qhandle_t screenshader)
 		left=0;
 	else if (val>1.0)
 		left=255;
-	else 
+	else
 		left=255.0*val;
 
 	// upper left
@@ -159,7 +159,7 @@ static void CG_DrawDirectionalScreenQuad(float alpha, qhandle_t screenshader)
 		topleft=0;
 	else if (val>1.0)
 		topleft=255;
-	else 
+	else
 		topleft=255.0*val;
 
 	// top
@@ -168,7 +168,7 @@ static void CG_DrawDirectionalScreenQuad(float alpha, qhandle_t screenshader)
 		top=0;
 	else if (val>1.0)
 		top=255;
-	else 
+	else
 		top=255.0*val;
 
 	// upper right
@@ -177,7 +177,7 @@ static void CG_DrawDirectionalScreenQuad(float alpha, qhandle_t screenshader)
 		topright=0;
 	else if (val>1.0)
 		topright=255;
-	else 
+	else
 		topright=255.0*val;
 
 	// right
@@ -186,7 +186,7 @@ static void CG_DrawDirectionalScreenQuad(float alpha, qhandle_t screenshader)
 		right=0;
 	else if (val>1.0)
 		right=255;
-	else 
+	else
 		right=255.0*val;
 
 	// lower right
@@ -195,7 +195,7 @@ static void CG_DrawDirectionalScreenQuad(float alpha, qhandle_t screenshader)
 		lowright=0;
 	else if (val>1.0)
 		lowright=255;
-	else 
+	else
 		lowright=255.0*val;
 
 	// bottom
@@ -204,7 +204,7 @@ static void CG_DrawDirectionalScreenQuad(float alpha, qhandle_t screenshader)
 		low=0;
 	else if (val>1.0)
 		low=255;
-	else 
+	else
 		low=255.0*val;
 
 	// lower left
@@ -213,7 +213,7 @@ static void CG_DrawDirectionalScreenQuad(float alpha, qhandle_t screenshader)
 		lowleft=0;
 	else if (val>1.0)
 		lowleft=255;
-	else 
+	else
 		lowleft=255.0*val;
 
 
@@ -339,7 +339,7 @@ void CG_DrawFullScreenEffect(int screenfx, int start, int end)
 }
 
 
-void CG_DrawFullScreenFX( void ) 
+void CG_DrawFullScreenFX( void )
 {
 	int i = 0, t;
 	float alpha, redalpha, greenalpha;
@@ -350,7 +350,7 @@ void CG_DrawFullScreenFX( void )
 	}
 
 	t = cg.time - cg.damageTime;
-	if ( t > 0 && t < DAMAGE_TIME) 
+	if ( t > 0 && t < DAMAGE_TIME)
 	{	// Draw the blobs.
 		alpha = 1.0 - ((float)t / (float)DAMAGE_TIME);
 

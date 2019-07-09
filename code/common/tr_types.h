@@ -95,13 +95,13 @@ typedef struct {
 
 	// extra sprite information
 	union {
-		struct 
+		struct
 		{
 			float rotation;
 			float radius;
 			byte  vertRGBA[4][4];
 		} sprite;
-		struct 
+		struct
 		{
 			float width;
 			float width2;
@@ -122,7 +122,7 @@ typedef struct {
 			float bias;
 			qboolean wrap;
 		} cylinder;
-		struct 
+		struct
 		{
 			float width;
 			float deviation;

@@ -164,12 +164,12 @@ cvarTable_t		gameCvarTable[] = {
 
 	{ &g_holoIntro, "g_holoIntro", "1", CVAR_ARCHIVE, 0, qfalse},
 	{ &g_ghostRespawn, "g_ghostRespawn", "5", CVAR_ARCHIVE, 0, qfalse},		// How long the player is ghosted, in seconds.
-	{ &g_team_group_red, "g_team_group_red", "", CVAR_LATCH, 0, qfalse  },		// Used to have CVAR_ARCHIVE	
+	{ &g_team_group_red, "g_team_group_red", "", CVAR_LATCH, 0, qfalse  },		// Used to have CVAR_ARCHIVE
 	{ &g_team_group_blue, "g_team_group_blue", "", CVAR_LATCH, 0, qfalse  },		// Used to have CVAR_ARCHIVE
 	{ &g_random_skin_limit, "g_random_skin_limit", "4", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_noJoinTimeout, "g_noJoinTimeout", "120", CVAR_ARCHIVE, 0, qfalse  },
 	{ &g_classChangeDebounceTime, "g_classChangeDebounceTime", "180", CVAR_ARCHIVE, 0, qfalse },
-		
+
 	{ &ui_playerclass, "ui_playerclass", "", CVAR_ARCHIVE, 0, qfalse },
 
 };
@@ -274,7 +274,7 @@ void G_initGroupsList(void)
 	for (i=0; i<numdirs ; i++,dirptr+=dirlen+1)
 	{
 		dirlen = strlen(dirptr);
-		
+
 		if (dirlen && dirptr[dirlen-1]=='/')
 		{
 			dirptr[dirlen-1]='\0';
@@ -290,7 +290,7 @@ void G_initGroupsList(void)
 			G_Printf("Number of possible models larger than group array - limiting to first %d models\n", MAX_GROUP_MEMBERS);
 			break;
 		}
-		// work out racename to 
+		// work out racename to
 		Com_sprintf(filename, sizeof(filename), "models/players2/%s/groups.cfg", dirptr);
 		race_list = BG_RegisterRace(filename);
 
@@ -452,7 +452,7 @@ void G_UpdateCvars( void ) {
 				if ( cv->trackChange ) {
 					if ( !levelExiting )
 					{//no need to do this during level changes
-						trap_SendServerCommand( -1, va("print \"Server: %s changed to %s\n\"", 
+						trap_SendServerCommand( -1, va("print \"Server: %s changed to %s\n\"",
 							cv->cvarName, cv->vmCvar->string ) );
 					}
 				}
@@ -568,7 +568,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	level.num_entities = MAX_CLIENTS;
 
 	// let the server system know where the entites are
-	trap_LocateGameData( level.gentities, level.num_entities, sizeof( gentity_t ), 
+	trap_LocateGameData( level.gentities, level.num_entities, sizeof( gentity_t ),
 		&level.clients[0].ps, sizeof( level.clients[0] ) );
 
 	// reserve some spots for dead player bodies
@@ -606,7 +606,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	}
 
 	G_InitModRules();
-	
+
 	levelExiting = qfalse;
 }
 
@@ -752,7 +752,7 @@ void AddTournamentPlayer( void ) {
 			continue;
 		}
 		// never select the dedicated follow or scoreboard clients
-		if ( client->sess.spectatorState == SPECTATOR_SCOREBOARD || 
+		if ( client->sess.spectatorState == SPECTATOR_SCOREBOARD ||
 			client->sess.spectatorClient < 0  ) {
 			continue;
 		}
@@ -920,7 +920,7 @@ void CalculateRanks( qboolean fromExit ) {
 
 			if ( level.clients[i].sess.sessionTeam != TEAM_SPECTATOR ) {
 				level.numNonSpectatorClients++;
-			
+
 				// decide if this should be auto-followed
 				if ( level.clients[i].pers.connected == CON_CONNECTED ) {
 					level.numPlayingClients++;
@@ -937,7 +937,7 @@ void CalculateRanks( qboolean fromExit ) {
 		}
 	}
 
-	qsort( level.sortedClients, level.numConnectedClients, 
+	qsort( level.sortedClients, level.numConnectedClients,
 		sizeof(level.sortedClients[0]), SortRanks );
 
 	// set the rank value for all clients that are connected and not spectators
@@ -953,7 +953,7 @@ void CalculateRanks( qboolean fromExit ) {
 				cl->ps.persistant[PERS_RANK] = 1;
 			}
 		}
-	} else {	
+	} else {
 		rank = -1;
 		score = 0;
 		for ( i = 0;  i < level.numPlayingClients; i++ ) {
@@ -1105,7 +1105,7 @@ void ClearFiringFlags()
 	int i = 0;
 	gentity_t	*ent = NULL;
 
-	for (i=0 ; i< level.maxclients ; i++) 
+	for (i=0 ; i< level.maxclients ; i++)
 	{
 		ent = g_entities + i;
 		if (!ent->inuse)
@@ -1198,7 +1198,7 @@ void G_ClearObjectives( void )
 ExitLevel
 
 When the intermission has been exited, the server is either killed
-or moved to a new level based on the "nextmap" cvar 
+or moved to a new level based on the "nextmap" cvar
 
 =============
 */
@@ -1222,7 +1222,7 @@ void ExitLevel (void) {
 			level.changemap = NULL;
 			level.intermissiontime = 0;
 		}
-		return;	
+		return;
 	}
 
 
@@ -1356,7 +1356,7 @@ qboolean ScoreIsTied( void ) {
 	if ( level.numPlayingClients < 2 ) {
 		return qfalse;
 	}
-	
+
 	if ( g_gametype.integer >= GT_TEAM ) {
 		return level.teamScores[TEAM_RED] == level.teamScores[TEAM_BLUE];
 	}
@@ -1482,10 +1482,10 @@ void CheckExitRules( void ) {
 		return;
 	}
 
-	if ( g_timelimit.integer && !level.warmupTime ) 
+	if ( g_timelimit.integer && !level.warmupTime )
 	{//check timelimit
 		if ( level.time - level.startTime >= g_timelimit.integer*60000 ) {
-			// check for sudden death 
+			// check for sudden death
 			if ( g_gametype.integer != GT_CTF && ScoreIsTied() ) {
 				// score is tied, so don't end the game
 				return;
@@ -1521,7 +1521,7 @@ void CheckExitRules( void ) {
 		}
 	}
 
-	if ( g_gametype.integer != GT_CTF && g_fraglimit.integer ) 
+	if ( g_gametype.integer != GT_CTF && g_fraglimit.integer )
 	{//check fraglimit
 		if ( level.teamScores[TEAM_RED] >= g_fraglimit.integer ) {
 			trap_SendServerCommand( -1, "print \"Red hit the point limit.\n\"" );
@@ -1553,7 +1553,7 @@ void CheckExitRules( void ) {
 		}
 	}
 
-	if ( g_gametype.integer == GT_CTF && g_capturelimit.integer ) 
+	if ( g_gametype.integer == GT_CTF && g_capturelimit.integer )
 	{//check CTF
 		if ( level.teamScores[TEAM_RED] >= g_capturelimit.integer ) {
 			trap_SendServerCommand( -1, "print \"Red hit the capturelimit.\n\"" );
@@ -1756,7 +1756,7 @@ void G_RunThink (gentity_t *ent) {
 	if (thinktime > level.time) {
 		return;
 	}
-	
+
 	ent->nextthink = 0;
 	if (!ent->think) {
 		G_Error ( "NULL ent->think");

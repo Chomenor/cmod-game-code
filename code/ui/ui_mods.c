@@ -12,7 +12,7 @@
 #define ID_MAINMENU			100
 
 
-typedef struct 
+typedef struct
 {
 	menuframework_s	menu;
 
@@ -44,14 +44,14 @@ static mods_t	s_mods;
 Mods_MenuEvent
 ===============
 */
-static void Mods_MenuEvent( void *ptr, int event ) 
+static void Mods_MenuEvent( void *ptr, int event )
 {
-	if( event != QM_ACTIVATED ) 
+	if( event != QM_ACTIVATED )
 	{
 		return;
 	}
 
-	switch ( ((menucommon_s*)ptr)->id ) 
+	switch ( ((menucommon_s*)ptr)->id )
 	{
 	case ID_GO:
 		trap_Cvar_Set( "fs_game", s_mods.fs_gameList[s_mods.list.curvalue] );
@@ -71,7 +71,7 @@ static void Mods_MenuEvent( void *ptr, int event )
 UI_Mods_ParseInfos
 ===============
 */
-static void UI_Mods_ParseInfos( char *modDir, char *modDesc ) 
+static void UI_Mods_ParseInfos( char *modDir, char *modDesc )
 {
 	s_mods.fs_gameList[s_mods.list.numitems] = s_mods.fs_gamePtr;
 	Q_strncpyz( s_mods.fs_gamePtr, modDir, 16 );
@@ -92,20 +92,20 @@ UI_Mods_LoadModsFromFile
 ===============
 */
 /*
-static void UI_Mods_LoadModsFromFile( char *filename ) 
+static void UI_Mods_LoadModsFromFile( char *filename )
 {
 	int				len;
 	fileHandle_t	f;
 	char			buf[1024];
 
 	len = trap_FS_FOpenFile( filename, &f, FS_READ );
-	if ( !f ) 
+	if ( !f )
 	{
 		trap_Print( va( S_COLOR_RED "File not found: %s\n", filename ) );
 		return;
 	}
 
-	if ( len >= sizeof(buf) ) 
+	if ( len >= sizeof(buf) )
 	{
 		trap_Print( va( S_COLOR_RED "File too large: %s is %i, max allowed is %i", filename, len, sizeof(buf) ));
 		trap_FS_FCloseFile( f );
@@ -117,7 +117,7 @@ static void UI_Mods_LoadModsFromFile( char *filename )
 	trap_FS_FCloseFile( f );
 
 	len = strlen( filename );
-	if( !Q_stricmp(filename +  len - 4,".mod") ) 
+	if( !Q_stricmp(filename +  len - 4,".mod") )
 	{
 		filename[len-4] = '\0';
 	}
@@ -131,7 +131,7 @@ static void UI_Mods_LoadModsFromFile( char *filename )
 Mods_LoadMods
 ===============
 */
-static void Mods_LoadMods( void ) 
+static void Mods_LoadMods( void )
 {
 	int		numdirs;
 	char	dirlist[2048];
@@ -151,16 +151,16 @@ static void Mods_LoadMods( void )
 
 	numdirs = trap_FS_GetFileList( "$modlist", "", dirlist, sizeof(dirlist) );
 	dirptr  = dirlist;
-	for( i = 0; i < numdirs; i++ ) 
+	for( i = 0; i < numdirs; i++ )
 	{
 		dirlen = strlen( dirptr ) + 1;
 		descptr = dirptr + dirlen;
-  		UI_Mods_ParseInfos( dirptr, descptr);
+		UI_Mods_ParseInfos( dirptr, descptr);
 		dirptr += dirlen + strlen(descptr) + 1;
 	}
 
 	trap_Print(va("%i mods parsed\n", s_mods.list.numitems));
-	if (s_mods.list.numitems > MAX_MODS) 
+	if (s_mods.list.numitems > MAX_MODS)
 	{
 		s_mods.list.numitems = MAX_MODS;
 	}
@@ -184,7 +184,7 @@ void ModsMenu_Graphics (void)
 	UI_DrawProportionalString(  74,  395, "2000",UI_RIGHT|UI_TINYFONT, colorTable[CT_BLACK]);
 
 	trap_R_SetColor( colorTable[CT_LTBROWN1]);
-	UI_DrawHandlePic(30,203,  47, 123, uis.whiteShader);	// Top left column square on bottom 3rd 
+	UI_DrawHandlePic(30,203,  47, 123, uis.whiteShader);	// Top left column square on bottom 3rd
 	UI_DrawHandlePic(30,328,  47, 61, uis.whiteShader);	// Bottom left column square on bottom 3rd
 
 	UI_DrawProportionalString(  74,  206, "38",UI_RIGHT|UI_TINYFONT, colorTable[CT_BLACK]);
@@ -227,7 +227,7 @@ void ModsMenu_Draw (void)
 UI_Mods_Cache
 =================
 */
-void UI_ModsMenu_Cache( void ) 
+void UI_ModsMenu_Cache( void )
 {
 	s_mods.corner_ul	= trap_R_RegisterShaderNoMip("menu/common/corner_ul_18_18.tga");
 	s_mods.corner_ur	= trap_R_RegisterShaderNoMip("menu/common/corner_ur_18_18.tga");
@@ -240,7 +240,7 @@ void UI_ModsMenu_Cache( void )
 UI_Mods_MenuInit
 ===============
 */
-static void UI_Mods_MenuInit( void ) 
+static void UI_Mods_MenuInit( void )
 {
 	// Menu Data
 	memset( &s_mods, 0 ,sizeof(mods_t) );
@@ -248,7 +248,7 @@ static void UI_Mods_MenuInit( void )
 	s_mods.menu.fullscreen					= qtrue;
 	s_mods.menu.draw						= ModsMenu_Draw;
 	s_mods.menu.descX						= MENU_DESC_X;
-	s_mods.menu.descY						= MENU_DESC_Y;	
+	s_mods.menu.descY						= MENU_DESC_Y;
 	s_mods.menu.titleX						= MENU_TITLE_X;
 	s_mods.menu.titleY						= MENU_TITLE_Y;
 	s_mods.menu.titleI						= MNT_MODS_TITLE;
@@ -257,7 +257,7 @@ static void UI_Mods_MenuInit( void )
 	UI_ModsMenu_Cache();
 
 	// Button Data
-	s_mods.mainmenu.generic.type			= MTYPE_BITMAP;      
+	s_mods.mainmenu.generic.type			= MTYPE_BITMAP;
 	s_mods.mainmenu.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_mods.mainmenu.generic.x				= 482;
 	s_mods.mainmenu.generic.y				= 136;
@@ -314,7 +314,7 @@ static void UI_Mods_MenuInit( void )
 UI_ModsMenu
 ===============
 */
-void UI_ModsMenu( void ) 
+void UI_ModsMenu( void )
 {
 	UI_Mods_MenuInit();
 	UI_PushMenu( &s_mods.menu );

@@ -82,7 +82,7 @@ void QDECL PrintMsg( gentity_t *ent, const char *fmt, ... ) {
 	char		msg[1024];
 	va_list		argptr;
 	char		*p;
-	
+
 	va_start (argptr,fmt);
 	if (vsprintf (msg, fmt, argptr) > sizeof(msg)) {
 		G_Error ( "PrintMsg overrun" );
@@ -262,7 +262,7 @@ void Team_FragBonuses(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker
 		break;
 	case TEAM_BLUE:
 		c = "team_CTF_blueflag";
-		break;		
+		break;
 	default:
 		return;
 	}
@@ -301,11 +301,11 @@ void Team_FragBonuses(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker
 		attacker->client->pers.teamState.basedefense++;
 		if (flag->r.svFlags & SVF_NOCLIENT) {
 			PrintMsg(NULL, "%s" S_COLOR_WHITE " defends the %s base.\n",
-				attacker->client->pers.netname, 
+				attacker->client->pers.netname,
 				TeamName(attacker->client->sess.sessionTeam));
 		} else {
 			PrintMsg(NULL, "%s" S_COLOR_WHITE " defends the %s flag.\n",
-				attacker->client->pers.netname, 
+				attacker->client->pers.netname,
 				TeamName(attacker->client->sess.sessionTeam));
 		}
 		return;
@@ -323,7 +323,7 @@ void Team_FragBonuses(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker
 			AddScore(attacker, CTF_CARRIER_PROTECT_BONUS);
 			attacker->client->pers.teamState.carrierdefense++;
 			PrintMsg(NULL, "%s" S_COLOR_WHITE " defends the %s's flag carrier.\n",
-				attacker->client->pers.netname, 
+				attacker->client->pers.netname,
 				TeamName(attacker->client->sess.sessionTeam));
 			return;
 		}
@@ -469,7 +469,7 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 
 	if ( ent->flags & FL_DROPPED_ITEM ) {
 		// hey, its not home.  return it by teleporting it back
-		PrintMsg( NULL, "%s" S_COLOR_WHITE " returned the %s flag!\n", 
+		PrintMsg( NULL, "%s" S_COLOR_WHITE " returned the %s flag!\n",
 			cl->pers.netname, TeamName(team));
 		AddScore(other, CTF_RECOVERY_BONUS);
 		other->client->pers.teamState.flagrecovery++;
@@ -526,18 +526,18 @@ int Team_TouchOurFlag( gentity_t *ent, gentity_t *other, int team ) {
 			if (player != other)
 				AddScore(player, CTF_TEAM_BONUS);
 			// award extra points for capture assists
-			if (player->client->pers.teamState.lastreturnedflag + 
+			if (player->client->pers.teamState.lastreturnedflag +
 				CTF_RETURN_FLAG_ASSIST_TIMEOUT > level.time) {
-				PrintMsg( NULL, 
-						"%s" S_COLOR_WHITE " gets an assist for returning the %s flag!\n", 
+				PrintMsg( NULL,
+						"%s" S_COLOR_WHITE " gets an assist for returning the %s flag!\n",
 						player->client->pers.netname,
 						TeamName(team));
 				AddScore (player, CTF_RETURN_FLAG_ASSIST_BONUS);
 				other->client->pers.teamState.assists++;
 			}
-			if (player->client->pers.teamState.lastfraggedcarrier + 
+			if (player->client->pers.teamState.lastfraggedcarrier +
 				CTF_FRAG_CARRIER_ASSIST_TIMEOUT > level.time) {
-				PrintMsg( NULL, "%s" S_COLOR_WHITE " gets an assist for eliminating the %s flag carrier!\n", 
+				PrintMsg( NULL, "%s" S_COLOR_WHITE " gets an assist for eliminating the %s flag carrier!\n",
 						player->client->pers.netname,
 						TeamName(OtherTeam(team)));
 				AddScore(player, CTF_FRAG_CARRIER_ASSIST_BONUS);
@@ -568,14 +568,14 @@ int Team_TouchEnemyFlag( gentity_t *ent, gentity_t *other, int team ) {
 	cl->pers.teamState.flagsince = level.time;
 
 	Team_SetFlagStatus( team, FLAG_TAKEN );
-	
+
 	return -1; // Do not respawn this automatically, but do delete it if it was FL_DROPPED
 }
 
 int Pickup_Team( gentity_t *ent, gentity_t *other ) {
 	int team;
 	gclient_t *cl = other->client;
-	
+
 	// figure out what team this flag is
 	if (strcmp(ent->classname, "team_CTF_redflag") == 0)
 		team = TEAM_RED;
@@ -642,7 +642,7 @@ qboolean Team_GetLocationMsg(gentity_t *ent, char *loc, int loclen)
 	gentity_t *best;
 
 	best = Team_GetLocation( ent );
-	
+
 	if (!best)
 		return qfalse;
 
@@ -769,7 +769,7 @@ Format:
 
 ==================
 */
-void CheckHealthInfoMessage( void ) 
+void CheckHealthInfoMessage( void )
 {
 	char		entry[1024];
 	char		string[1400];
@@ -782,7 +782,7 @@ void CheckHealthInfoMessage( void )
 	int			sendToClients[MAX_CLIENTS];
 
 	//only send this to medics and spectators
-	for (i = 0, sendToCnt = 0; i < g_maxclients.integer; i++) 
+	for (i = 0, sendToCnt = 0; i < g_maxclients.integer; i++)
 	{
 		if ( level.clients[i].pers.connected == CON_CONNECTED && level.clients[i].ps.stats[STAT_HEALTH] > 0 &&//make sure they've actually spawned in already
 			level.clients[i].sess.sessionTeam == TEAM_SPECTATOR || level.clients[i].sess.sessionClass == PC_MEDIC )
@@ -797,10 +797,10 @@ void CheckHealthInfoMessage( void )
 	}
 
 	//only send those clients whose health has changed this cycle
-	for (i = 0, cnt = 0; i < g_maxclients.integer; i++) 
+	for (i = 0, cnt = 0; i < g_maxclients.integer; i++)
 	{
 		player = g_entities + i;
-		if ( player->inuse && player->old_health != player->health && ( player->health > 0 || player->old_health > 0 )) 
+		if ( player->inuse && player->old_health != player->health && ( player->health > 0 || player->old_health > 0 ))
 		{
 			clients[cnt++] = i;
 			player->old_health = player->health;
@@ -821,7 +821,7 @@ void CheckHealthInfoMessage( void )
 		string[0] = 0;
 		stringlength = 0;
 
-		for (i = 0; i < cnt; i++) 
+		for (i = 0; i < cnt; i++)
 		{
 			player = g_entities + clients[i];
 			if ( ent->client->sess.sessionTeam == player->client->sess.sessionTeam && ent->client->pers.teamInfo )
@@ -885,7 +885,7 @@ void TeamplayInfoMessage( gentity_t *ent ) {
 	// but in client order (so they don't keep changing position on the overlay)
 	for (i = 0, cnt = 0; i < g_maxclients.integer && cnt < TEAM_MAXOVERLAY; i++) {
 		player = g_entities + level.sortedClients[i];
-		if (player->inuse && player->client->sess.sessionTeam == 
+		if (player->inuse && player->client->sess.sessionTeam ==
 			ent->client->sess.sessionTeam ) {
 			clients[cnt++] = level.sortedClients[i];
 		}
@@ -900,7 +900,7 @@ void TeamplayInfoMessage( gentity_t *ent ) {
 
 	for (i = 0, cnt = 0; i < g_maxclients.integer && cnt < TEAM_MAXOVERLAY; i++) {
 		player = g_entities + i;
-		if (player->inuse && player->client->sess.sessionTeam == 
+		if (player->inuse && player->client->sess.sessionTeam ==
 			ent->client->sess.sessionTeam ) {
 
 			h = player->client->ps.stats[STAT_HEALTH];
@@ -909,9 +909,9 @@ void TeamplayInfoMessage( gentity_t *ent ) {
 			if (a < 0) a = 0;
 
 			Com_sprintf (entry, sizeof(entry),
-				" %i %i %i %i %i %i", 
-//				level.sortedClients[i], player->client->pers.teamState.location, h, a, 
-				i, player->client->pers.teamState.location, h, a, 
+				" %i %i %i %i %i %i",
+//				level.sortedClients[i], player->client->pers.teamState.location, h, a,
+				i, player->client->pers.teamState.location, h, a,
 				player->client->ps.weapon, player->s.powerups);
 			j = strlen(entry);
 			if (stringlength + j > sizeof(string))
@@ -936,7 +936,7 @@ void CheckTeamStatus(void)
 
 		for (i = 0; i < g_maxclients.integer; i++) {
 			ent = g_entities + i;
-			if (ent->inuse && 
+			if (ent->inuse &&
 				(ent->client->sess.sessionTeam == TEAM_RED ||
 				ent->client->sess.sessionTeam == TEAM_BLUE)) {
 				loc = Team_GetLocation( ent );
@@ -949,7 +949,7 @@ void CheckTeamStatus(void)
 
 		for (i = 0; i < g_maxclients.integer; i++) {
 			ent = g_entities + i;
-			if (ent->inuse && 
+			if (ent->inuse &&
 				(ent->client->sess.sessionTeam == TEAM_RED ||
 				ent->client->sess.sessionTeam == TEAM_BLUE)) {
 				TeamplayInfoMessage( ent );

@@ -84,7 +84,7 @@ static void UpdatePlayerClass(void)
 	}
 
 
-	switch( s_teammain.playerClass.curvalue ) 
+	switch( s_teammain.playerClass.curvalue )
 	{
 	case TM_NOCLASS:
 		trap_Cmd_ExecuteText( EXEC_APPEND, "cmd class noclass\n" );
@@ -126,12 +126,12 @@ TeamMain_MenuEvent
 */
 static void TeamMain_MenuEvent( void* ptr, int event )
 {
-	if( event != QM_ACTIVATED ) 
+	if( event != QM_ACTIVATED )
 	{
 		return;
 	}
 
-	switch( ((menucommon_s*)ptr)->id ) 
+	switch( ((menucommon_s*)ptr)->id )
 	{
 	case ID_INGAMEMENU:
 		UpdatePlayerClass();
@@ -177,7 +177,7 @@ static void TeamMain_MenuEvent( void* ptr, int event )
 UI_TeamMainMenu_Draw
 =================
 */
-static void UI_TeamMainMenu_Draw( void ) 
+static void UI_TeamMainMenu_Draw( void )
 {
 	UI_MenuFrame(&s_teammain.menu);
 
@@ -186,24 +186,24 @@ static void UI_TeamMainMenu_Draw( void )
 
 
 	trap_R_SetColor( colorTable[CT_WHITE]);
-	UI_DrawHandlePic(s_teammain.playerClass.generic.x + 160, s_teammain.playerClass.generic.y, 
+	UI_DrawHandlePic(s_teammain.playerClass.generic.x + 160, s_teammain.playerClass.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, s_teammain.pClassShaders[s_teammain.playerClass.curvalue]);
 
 	// Left rounded ends for buttons
 	trap_R_SetColor( colorTable[CT_DKPURPLE1]);
-	UI_DrawHandlePic(s_teammain.joinred.generic.x - 14, s_teammain.joinred.generic.y, 
+	UI_DrawHandlePic(s_teammain.joinred.generic.x - 14, s_teammain.joinred.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
-	UI_DrawHandlePic(s_teammain.joinblue.generic.x - 14, s_teammain.joinblue.generic.y, 
+	UI_DrawHandlePic(s_teammain.joinblue.generic.x - 14, s_teammain.joinblue.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
-	UI_DrawHandlePic(s_teammain.joinauto.generic.x - 14, s_teammain.joinauto.generic.y, 
+	UI_DrawHandlePic(s_teammain.joinauto.generic.x - 14, s_teammain.joinauto.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
-	UI_DrawHandlePic(s_teammain.joingame.generic.x - 14, s_teammain.joingame.generic.y, 
+	UI_DrawHandlePic(s_teammain.joingame.generic.x - 14, s_teammain.joingame.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
-	UI_DrawHandlePic(s_teammain.spectate.generic.x - 14, s_teammain.spectate.generic.y, 
+	UI_DrawHandlePic(s_teammain.spectate.generic.x - 14, s_teammain.spectate.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
 	// standard menu drawing
@@ -214,7 +214,7 @@ static void UI_TeamMainMenu_Draw( void )
 static sfxHandle_t TeamMenu_MenuKey( int key )
 {
 		switch (key)
-		{		
+		{
 			case K_ESCAPE:
 				UpdatePlayerClass();
 				break;
@@ -233,7 +233,7 @@ void SetServerButtons(int gameType,menulist_s *assimilation,menulist_s *specialt
 TeamMain_MenuInit
 ===============
 */
-void TeamMain_MenuInit( void ) 
+void TeamMain_MenuInit( void )
 {
 	int		y,pad,x;
 	int		gametype;
@@ -243,7 +243,7 @@ void TeamMain_MenuInit( void )
 
 	TeamMain_Cache();
 
-	trap_GetConfigString(CS_SERVERINFO, info, MAX_INFO_STRING);   
+	trap_GetConfigString(CS_SERVERINFO, info, MAX_INFO_STRING);
 
 	s_teammain.menu.wrapAround					= qtrue;
 	s_teammain.menu.fullscreen					= qtrue;
@@ -256,7 +256,7 @@ void TeamMain_MenuInit( void )
 	s_teammain.menu.titleI						= MNT_TEAMMENU_TITLE;
 	s_teammain.menu.footNoteEnum				= MNT_TEAM_MENU;
 
-	s_teammain.ingamemenu.generic.type			= MTYPE_BITMAP;      
+	s_teammain.ingamemenu.generic.type			= MTYPE_BITMAP;
 	s_teammain.ingamemenu.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_teammain.ingamemenu.generic.x				= 482;
 	s_teammain.ingamemenu.generic.y				= 136;
@@ -330,20 +330,20 @@ void TeamMain_MenuInit( void )
 	s_teammain.joinauto.textcolor2				= CT_WHITE;
 
 	y += pad;
-	s_teammain.playerClass.generic.type				= MTYPE_SPINCONTROL;      
+	s_teammain.playerClass.generic.type				= MTYPE_SPINCONTROL;
 	s_teammain.playerClass.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_teammain.playerClass.generic.x				= x - 14;
 	s_teammain.playerClass.generic.y				= y;
 	s_teammain.playerClass.generic.name				= GRAPHIC_SQUARE;
 	s_teammain.playerClass.generic.id				= ID_PLAYERCLASS;
-	s_teammain.playerClass.generic.callback			= TeamMain_MenuEvent; 
+	s_teammain.playerClass.generic.callback			= TeamMain_MenuEvent;
 	s_teammain.playerClass.color					= CT_DKPURPLE1;
 	s_teammain.playerClass.color2					= CT_LTPURPLE1;
 	s_teammain.playerClass.textX					= MENU_BUTTON_TEXT_X;
 	s_teammain.playerClass.textY					= MENU_BUTTON_TEXT_Y;
 	s_teammain.playerClass.textEnum					= MBT_PLAYERCLASS;
 	s_teammain.playerClass.textcolor				= CT_BLACK;
-	s_teammain.playerClass.textcolor2				= CT_WHITE;	
+	s_teammain.playerClass.textcolor2				= CT_WHITE;
 
 	// If assimilation is on then use player_class2 which includes Borg as a class
 /*	if (atoi( Info_ValueForKey( info, "g_pModAssimilation" )) == 0)
@@ -406,9 +406,9 @@ void TeamMain_MenuInit( void )
 
 
 	gametype = atoi( Info_ValueForKey( info,"g_gametype" ) );
-			      
+
 	// set initial states
-	switch( gametype ) 
+	switch( gametype )
 	{
 	case GT_SINGLE_PLAYER:
 	case GT_FFA:
@@ -436,39 +436,39 @@ void TeamMain_MenuInit( void )
 	Menu_AddItem( &s_teammain.menu, (void*) &s_teammain.spectate );
 
 	// Set up current value based on class
-	if ( !Q_stricmp( ui_playerclass.string, "NOCLASS" ) ) 
+	if ( !Q_stricmp( ui_playerclass.string, "NOCLASS" ) )
 	{
 		s_teammain.playerClass.curvalue = TM_NOCLASS;
 	}
-	else if ( !Q_stricmp( ui_playerclass.string, "INFILTRATOR" ) ) 
+	else if ( !Q_stricmp( ui_playerclass.string, "INFILTRATOR" ) )
 	{
 		s_teammain.playerClass.curvalue = TM_INFILTRATOR;
 	}
-	else if ( !Q_stricmp( ui_playerclass.string, "SNIPER" ) ) 
+	else if ( !Q_stricmp( ui_playerclass.string, "SNIPER" ) )
 	{
 		s_teammain.playerClass.curvalue = TM_SNIPER;
 	}
-	else if ( !Q_stricmp( ui_playerclass.string, "HEAVY" ) ) 
+	else if ( !Q_stricmp( ui_playerclass.string, "HEAVY" ) )
 	{
 		s_teammain.playerClass.curvalue = TM_HEAVY;
 	}
-	else if ( !Q_stricmp( ui_playerclass.string, "DEMO" ) ) 
+	else if ( !Q_stricmp( ui_playerclass.string, "DEMO" ) )
 	{
 		s_teammain.playerClass.curvalue = TM_DEMO;
 	}
-	else if ( !Q_stricmp( ui_playerclass.string, "MEDIC" ) ) 
+	else if ( !Q_stricmp( ui_playerclass.string, "MEDIC" ) )
 	{
 		s_teammain.playerClass.curvalue = TM_MEDIC;
 	}
-	else if ( !Q_stricmp( ui_playerclass.string, "TECH" ) ) 
+	else if ( !Q_stricmp( ui_playerclass.string, "TECH" ) )
 	{
 		s_teammain.playerClass.curvalue = TM_TECH;
 	}
-	else if ( !Q_stricmp( ui_playerclass.string, "BORG" ) ) 
+	else if ( !Q_stricmp( ui_playerclass.string, "BORG" ) )
 	{
 		s_teammain.playerClass.curvalue = TM_BORG;
 	}
-	else if ( !Q_stricmp( ui_playerclass.string, "HERO" ) ) 
+	else if ( !Q_stricmp( ui_playerclass.string, "HERO" ) )
 	{
 		s_teammain.playerClass.curvalue = TM_ACTIONHERO;
 	}
@@ -487,7 +487,7 @@ void TeamMain_MenuInit( void )
 TeamMain_Cache
 ===============
 */
-void TeamMain_Cache( void ) 
+void TeamMain_Cache( void )
 {
 	s_teammain.pClassShaders[TM_NOCLASS] = trap_R_RegisterShaderNoMip( "menu/art/pc_noclass.tga" );//PC_NOCLASS,
 	s_teammain.pClassShaders[TM_INFILTRATOR] = trap_R_RegisterShaderNoMip( "menu/art/pc_infiltrator.tga" );//PC_INFILTRATOR,//fast, low attack

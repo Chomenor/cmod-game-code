@@ -12,7 +12,7 @@ qboolean AltCompressionAftereffect(localEntity_t *le)
 	float		length = 20;
 	vec3_t		vec2, dir2;
 
-	cyl = FX_AddCylinder(	le->refEntity.origin, 
+	cyl = FX_AddCylinder(	le->refEntity.origin,
 							le->data.spawner.dir,
 							length,// height,
 							0,// dheight,
@@ -20,16 +20,16 @@ qboolean AltCompressionAftereffect(localEntity_t *le)
 							210,// dscale,
 							10+(30*percentLife),// scale2,
 							210,// dscale2,
-							alpha,// startalpha, 
-							0.0,// endalpha, 
-							500,// killTime, 
+							alpha,// startalpha,
+							0.0,// endalpha,
+							500,// killTime,
 							shader,
 							15);// bias );
 	cyl->leFlags |= LEF_ONE_FRAME;
 
 	VectorMA(le->refEntity.origin, length*2.0, le->data.spawner.dir, vec2);
 	VectorScale(le->data.spawner.dir, -1.0, dir2);
-	cyl = FX_AddCylinder(	vec2, 
+	cyl = FX_AddCylinder(	vec2,
 							dir2,
 							length,// height,
 							0,// dheight,
@@ -37,9 +37,9 @@ qboolean AltCompressionAftereffect(localEntity_t *le)
 							210,// dscale,
 							10+(30*percentLife),// scale2,
 							210,// dscale2,
-							alpha,// startalpha, 
-							0.0,// endalpha, 
-							500,// killTime, 
+							alpha,// startalpha,
+							0.0,// endalpha,
+							500,// killTime,
 							shader,
 							15);// bias );
 	cyl->leFlags |= LEF_ONE_FRAME;
@@ -71,7 +71,7 @@ void FX_CompressionShot( vec3_t start, vec3_t dir )
 
 	// draw an impact at the endpoint of the trace
 	// If the beam hits a skybox, etc. it would look foolish to add in an explosion
-	if ( trace.surfaceFlags & SURF_NOIMPACT ) 
+	if ( trace.surfaceFlags & SURF_NOIMPACT )
 	{
 		render_impact = qfalse;
 	}
@@ -82,8 +82,8 @@ void FX_CompressionShot( vec3_t start, vec3_t dir )
 		if ( (trace.entityNum != ENTITYNUM_WORLD) && (clientNum >= 0 || clientNum < MAX_CLIENTS) )
 		{
 			FX_CompressionHit(trace.endpos);
-		} 
-		else 
+		}
+		else
 		{
 			FX_CompressionExplosion(start, trace.endpos, trace.plane.normal, qfalse);
 		}
@@ -110,11 +110,11 @@ void FX_CompressionAltShot( vec3_t start, vec3_t dir )
 	FX_AddLine( start, trace.endpos, 1.0f, 6.0f, 20.0f, 0.6f, 0.0f, 800/*175.0f*/, cgs.media.phaserShader);//compressionAltBeamShader );
 
 	FX_AddSpawner( start, dir, vel, NULL, qfalse, 0,
-							 0, 500, AltCompressionAftereffect, 10 );
+							0, 500, AltCompressionAftereffect, 10 );
 
 	// draw an impact at the endpoint of the trace
 	// If the beam hits a skybox, etc. it would look foolish to add in an explosion
-	if ( trace.surfaceFlags & SURF_NOIMPACT ) 
+	if ( trace.surfaceFlags & SURF_NOIMPACT )
 	{
 		render_impact = qfalse;
 	}
@@ -125,8 +125,8 @@ void FX_CompressionAltShot( vec3_t start, vec3_t dir )
 		if ( (trace.entityNum != ENTITYNUM_WORLD) && (clientNum >= 0 || clientNum < MAX_CLIENTS) )
 		{
 			FX_CompressionHit(trace.endpos);
-		} 
-		else 
+		}
+		else
 		{
 			FX_CompressionExplosion(start, trace.endpos, trace.plane.normal, qtrue);
 		}
@@ -150,13 +150,13 @@ void FX_CompressionExplosion( vec3_t start, vec3_t origin, vec3_t normal, qboole
 
 	//Sparks
 	numSparks = 4 + (random() * 4.0f);
-	
+
 	if (altfire)
 	{
 		numSparks *= 1.5f;
 	}
 	for ( i = 0; i < numSparks; i++ )
-	{	
+	{
 		scale = 0.25f + (random() * 1.0f);
 		dscale = -scale;
 
@@ -190,9 +190,9 @@ void FX_CompressionExplosion( vec3_t start, vec3_t origin, vec3_t normal, qboole
 	VectorMA( origin, 8, normal, dir );
 	VectorSet(velocity, 0, 0, 8);
 /*
-	FX_AddSprite(	dir, 
-					velocity, 
-					qfalse, 
+	FX_AddSprite(	dir,
+					velocity,
+					qfalse,
 					(altfire?50.0f:32.0f),
 					16.0f,
 					1.0f,
@@ -208,7 +208,7 @@ void FX_CompressionExplosion( vec3_t start, vec3_t origin, vec3_t normal, qboole
 
 	if (!altfire)
 	{
-		le = CG_MakeExplosion2( origin, dir, cgs.media.explosionModel, 5, cgs.media.electricalExplosionSlowShader, 
+		le = CG_MakeExplosion2( origin, dir, cgs.media.explosionModel, 5, cgs.media.electricalExplosionSlowShader,
 								475, qfalse, 1.2f + ( crandom() * 0.3f), LEF_NONE);
 		le->light = 150;
 		le->refEntity.renderfx |= RF_NOSHADOW;
@@ -221,7 +221,7 @@ void FX_CompressionExplosion( vec3_t start, vec3_t origin, vec3_t normal, qboole
 	}
 	else
 	{
-		le = CG_MakeExplosion2( origin, dir, cgs.media.explosionModel, 5, cgs.media.electricalExplosionSlowShader, 
+		le = CG_MakeExplosion2( origin, dir, cgs.media.explosionModel, 5, cgs.media.electricalExplosionSlowShader,
 								500, qfalse, 2.2f + ( crandom() * 0.4f), LEF_NONE);
 		le->light = 200;
 		le->refEntity.renderfx |= RF_NOSHADOW;
@@ -245,7 +245,7 @@ FX_CompressionHit
 
 void FX_CompressionHit( vec3_t origin )
 {
-	FX_AddSprite( origin, 
+	FX_AddSprite( origin,
 					NULL,
 					qfalse,
 					32.0f,

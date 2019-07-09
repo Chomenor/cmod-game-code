@@ -39,7 +39,7 @@ int rate_items[] =
 };
 
 
-typedef struct 
+typedef struct
 {
 	menuframework_s	menu;
 
@@ -57,14 +57,14 @@ static networkOptionsInfo_t	networkOptionsInfo;
 UI_NetworkOptionsMenu_Event
 =================
 */
-static void UI_NetworkOptionsMenu_Event( void* ptr, int event ) 
+static void UI_NetworkOptionsMenu_Event( void* ptr, int event )
 {
-	if( event != QM_ACTIVATED ) 
+	if( event != QM_ACTIVATED )
 	{
 		return;
 	}
 
-	switch( ((menucommon_s*)ptr)->id ) 
+	switch( ((menucommon_s*)ptr)->id )
 	{
 	case ID_GRAPHICS:
 		UI_PopMenu();
@@ -85,23 +85,23 @@ static void UI_NetworkOptionsMenu_Event( void* ptr, int event )
 		break;
 
 	case ID_RATE:
-		if( networkOptionsInfo.rate.curvalue == 0 ) 
+		if( networkOptionsInfo.rate.curvalue == 0 )
 		{
 			trap_Cvar_SetValue( "rate", 2500 );
 		}
-		else if( networkOptionsInfo.rate.curvalue == 1 ) 
+		else if( networkOptionsInfo.rate.curvalue == 1 )
 		{
 			trap_Cvar_SetValue( "rate", 3000 );
 		}
-		else if( networkOptionsInfo.rate.curvalue == 2 ) 
+		else if( networkOptionsInfo.rate.curvalue == 2 )
 		{
 			trap_Cvar_SetValue( "rate", 4000 );
 		}
-		else if( networkOptionsInfo.rate.curvalue == 3 ) 
+		else if( networkOptionsInfo.rate.curvalue == 3 )
 		{
 			trap_Cvar_SetValue( "rate", 5000 );
 		}
-		else if( networkOptionsInfo.rate.curvalue == 4 ) 
+		else if( networkOptionsInfo.rate.curvalue == 4 )
 		{
 			trap_Cvar_SetValue( "rate", 25000 );
 		}
@@ -131,9 +131,9 @@ void M_NetworkMenu_Graphics (void)
 
 	// Rest of Bottom1_Graphics
 	trap_R_SetColor( colorTable[CT_LTBROWN1]);
-	UI_DrawHandlePic(  30, 203, 47, 69, uis.whiteShader);	// Top Left column above 
+	UI_DrawHandlePic(  30, 203, 47, 69, uis.whiteShader);	// Top Left column above
 	UI_DrawHandlePic(  30, 275, 47, 66, uis.whiteShader);	// Top Left column middle
-	UI_DrawHandlePic(  30, 344, 47, 45, uis.whiteShader);	// Top Left column below 
+	UI_DrawHandlePic(  30, 344, 47, 45, uis.whiteShader);	// Top Left column below
 
 	// Brackets around Video Data
 	trap_R_SetColor( colorTable[CT_LTPURPLE1]);
@@ -174,7 +174,7 @@ static void Network_MenuDraw (void)
 UI_NetworkOptionsMenu_Init
 ===============
 */
-static void UI_NetworkOptionsMenu_Init( void ) 
+static void UI_NetworkOptionsMenu_Init( void )
 {
 	int		rate;
 
@@ -218,23 +218,23 @@ static void UI_NetworkOptionsMenu_Init( void )
 	Menu_AddItem( &networkOptionsInfo.menu, ( void * ) &networkOptionsInfo.rate );
 
 	rate = trap_Cvar_VariableValue( "rate" );
-	if( rate <= 2500 ) 
+	if( rate <= 2500 )
 	{
 		networkOptionsInfo.rate.curvalue = 0;
 	}
-	else if( rate <= 3000 ) 
+	else if( rate <= 3000 )
 	{
 		networkOptionsInfo.rate.curvalue = 1;
 	}
-	else if( rate <= 4000 ) 
+	else if( rate <= 4000 )
 	{
 		networkOptionsInfo.rate.curvalue = 2;
 	}
-	else if( rate <= 5000 ) 
+	else if( rate <= 5000 )
 	{
 		networkOptionsInfo.rate.curvalue = 3;
 	}
-	else 
+	else
 	{
 		networkOptionsInfo.rate.curvalue = 4;
 	}
@@ -246,7 +246,7 @@ static void UI_NetworkOptionsMenu_Init( void )
 UI_NetworkOptionsMenu_Cache
 ===============
 */
-void UI_NetworkOptionsMenu_Cache( void ) 
+void UI_NetworkOptionsMenu_Cache( void )
 {
 	networkOptionsInfo.swooshTop = trap_R_RegisterShaderNoMip("menu/common/swoosh_top.tga");
 	networkOptionsInfo.swooshBottom= trap_R_RegisterShaderNoMip("menu/common/swoosh_bottom.tga");
@@ -258,7 +258,7 @@ void UI_NetworkOptionsMenu_Cache( void )
 UI_NetworkOptionsMenu
 ===============
 */
-void UI_NetworkOptionsMenu( void ) 
+void UI_NetworkOptionsMenu( void )
 {
 
 	UI_NetworkOptionsMenu_Init();

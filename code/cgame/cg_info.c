@@ -92,7 +92,7 @@ void CG_LoadingClient( int clientNum ) {
 	}
 
 	Com_sprintf( iconName, MAX_QPATH, "models/players2/%s/icon_%s.jpg", model, skin );
-		
+
 	loadingPlayerIcon = trap_R_RegisterShaderNoMip( iconName );
 
 	Q_strncpyz( personality, Info_ValueForKey( info, "n" ), sizeof(personality) );
@@ -165,7 +165,7 @@ void CG_DrawInformation( void ) {
 	CG_DrawPic( 10 + strlength + 6, 11, length,  22,cgs.media.whiteShader);
 //	CG_DrawPic( 224, 11, 368,  22,cgs.media.whiteShader);
 	CG_DrawPic( 595, 11,  32, 32,cgs.media.halfroundr_22);		// Right End
-	
+
 	trap_R_SetColor( colorTable[CT_DKPURPLE1]);
 
 	CG_DrawPic(  274+333, 232, -32,  32,cgs.media.corner_12_18);		// LR
@@ -241,7 +241,7 @@ void CG_DrawInformation( void ) {
 	}
 
 	// game type
-	switch ( cgs.gametype ) 
+	switch ( cgs.gametype )
 	{
 	case GT_FFA:
 		s = ingame_text[IGT_GAME_FREEFORALL];
@@ -274,7 +274,7 @@ void CG_DrawInformation( void ) {
 	}
 
 	y += PROP_HEIGHT;
-		
+
 	value = atoi( Info_ValueForKey( info, "timelimit" ) );
 	if ( value ) {
 		UI_DrawProportionalString( x, y, va( "%s %i",ingame_text[IGT_TIME_LIMIT], value ),
@@ -469,7 +469,7 @@ void CG_LoadBar(void)
 	case 3 :
 		CG_DrawPic( x +  61,   y +117,  32, -32,cgs.media.loadingquarter);	// Quad LL
 		break;
-	} 
+	}
 
 	UI_DrawProportionalString( x +  21, y + 150, "0987",UI_TINYFONT, colorTable[CT_BLACK]);
 	UI_DrawProportionalString( x +   3, y +  90,   "18",UI_TINYFONT, colorTable[CT_BLACK]);
@@ -487,15 +487,15 @@ void CG_LoadBar(void)
 
 	trap_R_SetColor( colorTable[CT_DKBROWN1]);
 	y +=10;
-	CG_DrawPic( x + 130, y - 10 ,  64, 16,cgs.media.loadingtrim);	
-	CG_DrawPic( x +  130, y + 150,  64, -16,cgs.media.loadingtrim);	
+	CG_DrawPic( x + 130, y - 10 ,  64, 16,cgs.media.loadingtrim);
+	CG_DrawPic( x +  130, y + 150,  64, -16,cgs.media.loadingtrim);
 
 	CG_DrawPic( x +  150, y - 10,   432,  8, cgs.media.whiteShader);		// Top line
 	CG_DrawPic( x +  150, y + 142, 432,  8, cgs.media.whiteShader);		// Bottom line
 	CG_DrawPic( x +  583, y - 7,      16, 151, cgs.media.whiteShader);	// Side line
 
-	CG_DrawPic( x +  580, y + 1,      32, -16,cgs.media.loadingcorner);	
-	CG_DrawPic( x +  580, y + 139,    32, 16,cgs.media.loadingcorner);	
+	CG_DrawPic( x +  580, y + 1,      32, -16,cgs.media.loadingcorner);
+	CG_DrawPic( x +  580, y + 139,    32, 16,cgs.media.loadingcorner);
 
 }
 
@@ -579,14 +579,14 @@ static void ObjectivePrint_Line(int strIndex,int color,centity_t *cent)
 		holdText2[1] = '\0';
 		strBegin = str;
 
-		while( *str ) 
+		while( *str )
 		{
 			holdText2[0] = *str;
 			pixelLen += UI_ProportionalStringWidth(holdText2,UI_SMALLFONT);
 			pixelLen += 2; // For kerning
 			++charLen;
 
-			if (pixelLen > maxPixLength ) 
+			if (pixelLen > maxPixLength )
 			{	//Reached max length of this line
 				//step back until we find a space
 				while ((charLen) && (*str != ' ' ))
@@ -610,7 +610,7 @@ static void ObjectivePrint_Line(int strIndex,int color,centity_t *cent)
 
 				UI_DrawProportionalString(OBJ_TEXT_XPOS + OBJ_CIRCLE_SIZE + OBJ_CIRCLE_TEXT_MARGIN, y, holdText, UI_SMALLFONT, colorTable[color] );
 				++missionYcnt;
-			} 
+			}
 			else if (*(str+1) == '\0')
 			{
 				++charLen;
@@ -621,8 +621,8 @@ static void ObjectivePrint_Line(int strIndex,int color,centity_t *cent)
 				++missionYcnt;
 				break;
 			}
-			++str; 
-		} 
+			++str;
+		}
 	}
 }
 
@@ -664,14 +664,14 @@ static int Objective_LineCnt(int strIndex,centity_t *cent)
 		holdText2[1] = '\0';
 		strBegin = str;
 
-		while( *str ) 
+		while( *str )
 		{
 			holdText2[0] = *str;
 			pixelLen += UI_ProportionalStringWidth(holdText2,UI_SMALLFONT);
 			pixelLen += 2; // For kerning
 			++charLen;
 
-			if (pixelLen > maxPixLength ) 
+			if (pixelLen > maxPixLength )
 			{	//Reached max length of this line
 				//step back until we find a space
 				while ((charLen) && (*str != ' ' ))
@@ -692,15 +692,15 @@ static int Objective_LineCnt(int strIndex,centity_t *cent)
 				charLen = 1;
 
 				lineCnt++;
-			} 
+			}
 			else if (*(str+1) == '\0')
 			{
 				++charLen;
 				lineCnt++;
 				break;
 			}
-			++str; 
-		} 
+			++str;
+		}
 	}
 	return (lineCnt);
 }
@@ -715,7 +715,7 @@ static void Objectives_Draw( centity_t *cent )
 {
 	int objCnt,i,lineCnt,maxLines;
 	int	total,textYCnt,length,color;
-	vec4_t newColor; 
+	vec4_t newColor;
 
 	objCnt=0;
 	for (i=0;i<MAX_OBJECTIVES;i++)
@@ -768,28 +768,28 @@ static void Objectives_Draw( centity_t *cent )
 
 	// Print top of frame
 	trap_R_SetColor( colorTable[CT_DKPURPLE3]);
-	CG_DrawPic( OBJ_HORIZONTAL_BORDER_X + 10,   missionInfoScreenY - (OBJ_SCREEN_YMARGIN + OBJ_SCREEN_YBORDERTOP) ,   
+	CG_DrawPic( OBJ_HORIZONTAL_BORDER_X + 10,   missionInfoScreenY - (OBJ_SCREEN_YMARGIN + OBJ_SCREEN_YBORDERTOP) ,
 		SCREEN_WIDTH - (OBJ_HORIZONTAL_BORDER_X +  OBJ_TEXT_X_BORDER_RIGHT + 10), OBJ_SCREEN_YBORDERTOP, cgs.media.whiteShader);	// Middle column
 
 	// Print bottom of frame
-	CG_DrawPic( OBJ_HORIZONTAL_BORDER_X + 10,   missionInfoScreenY - OBJ_SCREEN_YMARGIN + textYCnt + (2 * OBJ_SCREEN_YMARGIN),   
+	CG_DrawPic( OBJ_HORIZONTAL_BORDER_X + 10,   missionInfoScreenY - OBJ_SCREEN_YMARGIN + textYCnt + (2 * OBJ_SCREEN_YMARGIN),
 		SCREEN_WIDTH - (OBJ_HORIZONTAL_BORDER_X +  OBJ_TEXT_X_BORDER_RIGHT + 10), OBJ_SCREEN_YBORDERBOT, cgs.media.whiteShader);	// Middle column
 
-	length = (missionInfoScreenY - OBJ_SCREEN_YMARGIN + textYCnt + (2 * OBJ_SCREEN_YMARGIN)) - (missionInfoScreenY - (OBJ_SCREEN_YMARGIN + OBJ_SCREEN_YBORDERTOP)) - 15; 
+	length = (missionInfoScreenY - OBJ_SCREEN_YMARGIN + textYCnt + (2 * OBJ_SCREEN_YMARGIN)) - (missionInfoScreenY - (OBJ_SCREEN_YMARGIN + OBJ_SCREEN_YBORDERTOP)) - 15;
 
 	// Print left hand column of frame
-	CG_DrawPic( OBJ_HORIZONTAL_BORDER_X,  (missionInfoScreenY - (OBJ_SCREEN_YMARGIN + OBJ_SCREEN_YBORDERTOP)) + 10,   
+	CG_DrawPic( OBJ_HORIZONTAL_BORDER_X,  (missionInfoScreenY - (OBJ_SCREEN_YMARGIN + OBJ_SCREEN_YBORDERTOP)) + 10,
 		OBJ_HORIZONTAL_BORDER_WIDTH, length, cgs.media.whiteShader);	// Middle column
 
 	// Top corner
 	trap_R_SetColor( colorTable[CT_DKPURPLE3]);
-	CG_DrawPic( OBJ_HORIZONTAL_BORDER_X,  
-		missionInfoScreenY - (OBJ_SCREEN_YMARGIN + OBJ_SCREEN_YBORDERTOP),   
+	CG_DrawPic( OBJ_HORIZONTAL_BORDER_X,
+		missionInfoScreenY - (OBJ_SCREEN_YMARGIN + OBJ_SCREEN_YBORDERTOP),
 		32, 32, cgs.media.corner_ul_20_30);	// Top corner
 
 	// Bottom corner
-	CG_DrawPic( OBJ_HORIZONTAL_BORDER_X,  
-		(missionInfoScreenY - OBJ_SCREEN_YMARGIN + textYCnt + (2 * OBJ_SCREEN_YMARGIN))-5,   
+	CG_DrawPic( OBJ_HORIZONTAL_BORDER_X,
+		(missionInfoScreenY - OBJ_SCREEN_YMARGIN + textYCnt + (2 * OBJ_SCREEN_YMARGIN))-5,
 		32, 32, cgs.media.corner_ll_8_30);	// Bottom corner
 
 	UI_DrawProportionalString( OBJ_HORIZONTAL_BORDER_X + 30, missionInfoScreenY - (OBJ_SCREEN_YMARGIN + OBJ_SCREEN_YBORDERTOP) + 2, ingame_text[IGT_OBJECTIVES],UI_SMALLFONT, colorTable[CT_BLACK]);
@@ -801,7 +801,7 @@ static void Objectives_Draw( centity_t *cent )
 	newColor[2] = colorTable[CT_BLACK][2];
 	newColor[3] = 0.5;
 	trap_R_SetColor(newColor);
-	CG_DrawPic( (OBJ_TEXT_XPOS - OBJ_TEXT_X_BORDER_LEFT), missionInfoScreenY - OBJ_SCREEN_YMARGIN, SCREEN_WIDTH - ((OBJ_TEXT_XPOS - OBJ_TEXT_X_BORDER_LEFT)+OBJ_TEXT_X_BORDER_RIGHT)  , textYCnt + (2 * OBJ_SCREEN_YMARGIN), cgs.media.whiteShader);	
+	CG_DrawPic( (OBJ_TEXT_XPOS - OBJ_TEXT_X_BORDER_LEFT), missionInfoScreenY - OBJ_SCREEN_YMARGIN, SCREEN_WIDTH - ((OBJ_TEXT_XPOS - OBJ_TEXT_X_BORDER_LEFT)+OBJ_TEXT_X_BORDER_RIGHT)  , textYCnt + (2 * OBJ_SCREEN_YMARGIN), cgs.media.whiteShader);
 
 	// Print the lines
 	for (i=0;i<objCnt;i++)
@@ -827,7 +827,7 @@ static void Objectives_Draw( centity_t *cent )
 CG_DrawObjectiveInformation
 ====================
 */
-void CG_DrawObjectiveInformation( void ) 
+void CG_DrawObjectiveInformation( void )
 {
 	centity_t *cent;
 

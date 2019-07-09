@@ -31,7 +31,7 @@ qboolean DetpackAftereffect(localEntity_t *le)
 	float		ringAlpha = 0.6 - (0.6*ringLife*ringLife);
 	vec3_t		up = {0,0,1},origin1;
 
-	
+
 	slowRingShaders[0] = cgs.media.testDetpackRingShader1;
 	slowRingShaders[1] = cgs.media.testDetpackRingShader2;
 	slowRingShaders[2] = cgs.media.testDetpackRingShader3;
@@ -51,7 +51,7 @@ qboolean DetpackAftereffect(localEntity_t *le)
 	}
 	shader = slowRingShaders[le->data.spawner.data1++];
 	// fast, outer ring
-	cyl = FX_AddCylinder(	origin1, 
+	cyl = FX_AddCylinder(	origin1,
 							up,
 							0.1,// height,
 							0,// dheight,
@@ -59,9 +59,9 @@ qboolean DetpackAftereffect(localEntity_t *le)
 							0,// dscale,
 							scale6,// scale2,
 							0,// dscale2,
-							ringAlpha,// startalpha, 
-							0.0,// endalpha, 
-							500,// killTime, 
+							ringAlpha,// startalpha,
+							0.0,// endalpha,
+							500,// killTime,
 							shader,
 							15);// bias );
 	cyl->leFlags |= LEF_ONE_FRAME;
@@ -70,7 +70,7 @@ qboolean DetpackAftereffect(localEntity_t *le)
 	{
 		origin1[2] += height2;
 		shader = cgs.media.phaserShader;
-		cyl = FX_AddCylinder(	origin1, 
+		cyl = FX_AddCylinder(	origin1,
 								up,
 								height1,// height,
 								0,// dheight,
@@ -78,14 +78,14 @@ qboolean DetpackAftereffect(localEntity_t *le)
 								0,// dscale,
 								scale2,// scale2,
 								0,// dscale2,
-								alpha,// startalpha, 
-								0.0,// endalpha, 
-								500,// killTime, 
+								alpha,// startalpha,
+								0.0,// endalpha,
+								500,// killTime,
 								shader,
 								15);// bias );
 		cyl->leFlags |= LEF_ONE_FRAME;
 
-		cyl = FX_AddCylinder(	le->refEntity.origin, 
+		cyl = FX_AddCylinder(	le->refEntity.origin,
 								up,
 								height2,	// height,
 								0,			// dheight,
@@ -93,21 +93,21 @@ qboolean DetpackAftereffect(localEntity_t *le)
 								0,			// dscale,
 								scale1,		// scale2,
 								0,			// dscale2,
-								alpha,		// startalpha, 
-								0.0,		// endalpha, 
-								500,		// killTime, 
+								alpha,		// startalpha,
+								0.0,		// endalpha,
+								500,		// killTime,
 								shader,
 								15);		// bias );
 		cyl->leFlags |= LEF_ONE_FRAME;
-	}		
+	}
 	// flat energy wave thingy
 	if (ringLife <= 1.0f)
 	{
 		shader = cgs.media.testDetpackShader3;
 		VectorCopy(le->refEntity.origin, origin1);
 		// fast, outer ring
-		
-		cyl = FX_AddCylinder(	origin1, 
+
+		cyl = FX_AddCylinder(	origin1,
 								up,
 								0.1,// height,
 								0,// dheight,
@@ -115,9 +115,9 @@ qboolean DetpackAftereffect(localEntity_t *le)
 								0,// dscale,
 								scale4,// scale2,
 								0,// dscale2,
-								ringAlpha,// startalpha, 
-								0.0,// endalpha, 
-								500,// killTime, 
+								ringAlpha,// startalpha,
+								0.0,// endalpha,
+								500,// killTime,
 								shader,
 								15);// bias );
 		cyl->leFlags |= LEF_ONE_FRAME;
@@ -153,19 +153,19 @@ void FX_Detpack(vec3_t origin)
 		FXE_Spray( norm, 470, 325, 0.5f, vel);
 		length = 50.0 + random() * 12;
 		width = 1.5 + random() * 2;
-		FX_AddTrail( origin, vel, qtrue, length, -length, width, -width, 
+		FX_AddTrail( origin, vel, qtrue, length, -length, width, -width,
 						1.0f, 1.0f, 0.5f, 1000.0f,  cgs.media.orangeTrailShader);
 	}
 
-//	trap_S_StartSound( origin, ENTITYNUM_WORLD, CHAN_AUTO, cgs.media.detpackExplodeSound );	
+//	trap_S_StartSound( origin, ENTITYNUM_WORLD, CHAN_AUTO, cgs.media.detpackExplodeSound );
 
 	// Smoke and impact
-	CG_ImpactMark( cgs.media.compressionMarkShader, origin, norm, random()*360, 1,1,1,1.0, qfalse, 
+	CG_ImpactMark( cgs.media.compressionMarkShader, origin, norm, random()*360, 1,1,1,1.0, qfalse,
 				random() * 16 + 48, qfalse );
 
 	// mondo explosion shock wave cloud thing
 	le = FX_AddSpawner( origin, norm, NULL, NULL, qfalse, 0,
-							 0, 1500, DetpackAftereffect, 10 );
+							0, 1500, DetpackAftereffect, 10 );
 	le->data.spawner.data1 = 0;
 
 	// shake absolutely _everyone_

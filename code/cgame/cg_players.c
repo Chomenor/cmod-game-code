@@ -112,7 +112,7 @@ static qboolean	CG_ParseAnimationFile( const char *filename, clientInfo_t *ci ) 
 	ci->footsteps = FOOTSTEP_NORMAL;
 	VectorClear( ci->headOffset );
 	ci->gender = GENDER_MALE;
-	
+
 	Q_strncpyz(ci->soundPath, ci->modelName, sizeof(ci->soundPath));
 
 	// read optional parameters
@@ -137,7 +137,7 @@ static qboolean	CG_ParseAnimationFile( const char *filename, clientInfo_t *ci ) 
 				ci->footsteps = FOOTSTEP_SPECIES;
 			} else if ( !Q_stricmp( token, "warbot" ) ) {
 				ci->footsteps = FOOTSTEP_WARBOT;
-			} else if ( !Q_stricmp( token, "boot" ) ) {		
+			} else if ( !Q_stricmp( token, "boot" ) ) {
 				ci->footsteps = FOOTSTEP_BOOT;
 			} else if ( !Q_stricmp( token, "flesh" ) ) {	// Old Q3 defaults, for compatibility.	-PJL
 				ci->footsteps = FOOTSTEP_SPECIES;
@@ -401,7 +401,7 @@ static void CG_LoadClientInfo( clientInfo_t *ci , int clientNum) {
 			if ( noMoreTaunts )	{continue;}
 			loadingTaunt = qtrue;
 		} else {loadingTaunt=qfalse;}
-		
+
 		ci->sounds[i] = trap_S_RegisterSound( va("sound/voice/%s/misc/%s", dir, s + 1) );
 		if ( !ci->sounds[i] ) {
 			ci->sounds[i] = trap_S_RegisterSound( va("sound/player/%s/%s", fallback, s + 1) );
@@ -427,7 +427,7 @@ static void CG_LoadClientInfo( clientInfo_t *ci , int clientNum) {
 	}
 }
 
-// we need to check here to see if the clientinfo model variable is the same as the one that is in the 
+// we need to check here to see if the clientinfo model variable is the same as the one that is in the
 // clientinfo block. This is because it is possible for the server to change skins on us when we hit a CTF
 // teamplay game where groups are defined.
 // most of the time this will not hit
@@ -670,11 +670,11 @@ void CG_NewClientInfo( int clientNum ) {
 		forceDefer = trap_MemoryRemaining() < 2000000;
 
 		// if we are defering loads, just have it pick the first valid
-		if ( forceDefer || 
-			( cg_deferPlayers.integer && !cg_buildScript.integer && !cg.loading && 
+		if ( forceDefer ||
+			( cg_deferPlayers.integer && !cg_buildScript.integer && !cg.loading &&
 			((clientNum != cg.predictedPlayerState.clientNum) && cg.validPPS) ) ) {
 			// keep whatever they had if it won't violate team skins
-			if ( ci->infoValid && 
+			if ( ci->infoValid &&
 				( cgs.gametype < GT_TEAM || !Q_stricmp( newInfo.skinName, ci->skinName ) ) ) {
 				CG_CopyClientInfoModel( ci, &newInfo );
 				newInfo.deferred = qtrue;
@@ -927,7 +927,7 @@ static void CG_SwingAngles( float destination, float swingTolerance, float clamp
 	if ( !*swinging ) {
 		return;
 	}
-	
+
 	// modify the speed depending on the delta
 	// so it doesn't seem so linear
 	swing = AngleSubtract( destination, *angle );
@@ -1020,7 +1020,7 @@ static void CG_PlayerAngles( centity_t *cent, vec3_t legs[3], vec3_t torso[3], v
 	// --------- yaw -------------
 
 	// allow yaw to drift a bit
-	if ( ( cent->currentState.legsAnim & ~ANIM_TOGGLEBIT ) != LEGS_IDLE 
+	if ( ( cent->currentState.legsAnim & ~ANIM_TOGGLEBIT ) != LEGS_IDLE
 		|| ( cent->currentState.torsoAnim & ~ANIM_TOGGLEBIT ) != TORSO_STAND  ) {
 		// if not standing still, always point all in the same direction
 		cent->pe.torso.yawing = qtrue;	// always center
@@ -1169,7 +1169,7 @@ static void CG_TrailItem( centity_t *cent, qhandle_t hModel ) {
 	vec3_t			angles;
 	float			frame;
 
-	if ( cent->currentState.number == cg.snap->ps.clientNum && !cg.renderingThirdPerson ) 
+	if ( cent->currentState.number == cg.snap->ps.clientNum && !cg.renderingThirdPerson )
 	{
 		return;
 	}
@@ -1411,7 +1411,7 @@ static void CG_PlayerSprites( centity_t *cent ) {
 	}
 
 	team = cgs.clientinfo[ cent->currentState.clientNum ].team;
-	if ( !(cent->currentState.eFlags & EF_DEAD) && 
+	if ( !(cent->currentState.eFlags & EF_DEAD) &&
 			cg.snap->ps.persistant[PERS_TEAM] == team &&
 			cgs.gametype >= GT_TEAM &&
 			cent->currentState.number != cg.snap->ps.clientNum )	// Don't show a sprite above a player's own head in 3rd person.
@@ -1479,7 +1479,7 @@ static qboolean CG_PlayerShadow( centity_t *cent, float *shadowPlane ) {
 
 	// add the mark as a temporary, so it goes directly to the renderer
 	// without taking a spot in the cg_marks array
-	CG_ImpactMark( cgs.media.shadowMarkShader, trace.endpos, trace.plane.normal, 
+	CG_ImpactMark( cgs.media.shadowMarkShader, trace.endpos, trace.plane.normal,
 		cent->pe.legs.yawAngle, 1,1,1,alpha, qfalse, 16, qtrue );
 
 	return qtrue;
@@ -1599,7 +1599,7 @@ void CG_AddRefEntityWithPowerups( refEntity_t *ent, int powerups, int eFlags, qb
 		// The lowest the alpha goes is 4.0-2.5-1.0=0.5.
 		f1 = 4.0 + 2.5*sin(52.423 + cg.time/205.243);
 		f2 = sin(14.232 + cg.time/63.572);
-		
+
 		f1 = f1+f2;
 		if (f1 > 1.0)
 		{	// Just draw him solid.
@@ -1611,7 +1611,7 @@ void CG_AddRefEntityWithPowerups( refEntity_t *ent, int powerups, int eFlags, qb
 				ent->shaderRGBA[2] = 128;
 			}
 
-			trap_R_AddRefEntityToScene( ent );		
+			trap_R_AddRefEntityToScene( ent );
 		}
 		else
 		{	// Draw him faded.
@@ -1625,15 +1625,15 @@ void CG_AddRefEntityWithPowerups( refEntity_t *ent, int powerups, int eFlags, qb
 			}
 
 			ent->renderfx |= RF_FORCE_ENT_ALPHA;	// Override the skin shader info and use this alpha value.
-			ent->shaderRGBA[3] = 255.0*f1;			
-			trap_R_AddRefEntityToScene( ent );		
-			ent->renderfx &= ~RF_FORCE_ENT_ALPHA;	
-			ent->shaderRGBA[3] = 255;				
+			ent->shaderRGBA[3] = 255.0*f1;
+			trap_R_AddRefEntityToScene( ent );
+			ent->renderfx &= ~RF_FORCE_ENT_ALPHA;
+			ent->shaderRGBA[3] = 255;
 
 			// ...with a static shader.
 			ent->customShader = cgs.media.holoDecoyShader;
-			ent->shaderRGBA[0] = 
-			ent->shaderRGBA[1] = 
+			ent->shaderRGBA[0] =
+			ent->shaderRGBA[1] =
 			ent->shaderRGBA[2] = 255.0*(1.0-f1);	// More solid as the player fades out...
 			trap_R_AddRefEntityToScene(ent);
 		}
@@ -1655,7 +1655,7 @@ void CG_AddRefEntityWithPowerups( refEntity_t *ent, int powerups, int eFlags, qb
 		trap_R_AddRefEntityToScene( ent );
 		ent->renderfx &= ~RF_FORCE_ENT_ALPHA;
 		ent->shaderRGBA[3] = 255;
-		
+
 		// Now draw the static shader over it.
 		// Alpha in over half the time, out over half.
 		alpha = sin(M_PI*alpha);
@@ -1682,7 +1682,7 @@ void CG_AddRefEntityWithPowerups( refEntity_t *ent, int powerups, int eFlags, qb
 	}
 	else if (powerups & (1<<PW_DISINTEGRATE))
 	{
-		int dtime; 
+		int dtime;
 
 		dtime = cg.time-timeParam;
 		if (dtime < 1000)
@@ -1693,7 +1693,7 @@ void CG_AddRefEntityWithPowerups( refEntity_t *ent, int powerups, int eFlags, qb
 			ent->renderfx &= ~RF_FORCE_ENT_ALPHA;
 			ent->shaderRGBA[3] = 255;
 		}
-		
+
 		if (dtime < 2000)
 		{
 			ent->customShader = cgs.media.disruptorShader;
@@ -1703,14 +1703,14 @@ void CG_AddRefEntityWithPowerups( refEntity_t *ent, int powerups, int eFlags, qb
 	}
 	else if (powerups & (1<<PW_EXPLODE))
 	{
-		int dtime; 
+		int dtime;
 
 		dtime = cg.time-timeParam;
 
 		if (dtime < 300)
 		{
 			ent->renderfx |= RF_FORCE_ENT_ALPHA;
-			ent->shaderRGBA[3] = (int)(255.0 - (dtime / 300.0) * 254.0); 
+			ent->shaderRGBA[3] = (int)(255.0 - (dtime / 300.0) * 254.0);
 			trap_R_AddRefEntityToScene( ent );
 			ent->renderfx &= ~RF_FORCE_ENT_ALPHA;
 			ent->shaderRGBA[3] = 255;
@@ -1738,7 +1738,7 @@ void CG_AddRefEntityWithPowerups( refEntity_t *ent, int powerups, int eFlags, qb
 		trap_R_AddRefEntityToScene( ent );
 
 		// Quad should JUST be on the weapon now, sparky.
-/*		if ( powerups & ( 1 << PW_QUAD ) ) 
+/*		if ( powerups & ( 1 << PW_QUAD ) )
 		{
 			if (team == TEAM_RED)
 				ent->customShader = cgs.media.redQuadShader;
@@ -1746,8 +1746,8 @@ void CG_AddRefEntityWithPowerups( refEntity_t *ent, int powerups, int eFlags, qb
 				ent->customShader = cgs.media.quadShader;
 			trap_R_AddRefEntityToScene( ent );
 		}
-*/		
-		
+*/
+
 
 		if ( powerups & ( 1 << PW_REGEN ) ) {
 			if ( ( ( cg.time / 100 ) % 10 ) == 1 ) {
@@ -1761,7 +1761,7 @@ void CG_AddRefEntityWithPowerups( refEntity_t *ent, int powerups, int eFlags, qb
 			trap_R_AddRefEntityToScene( ent );
 			return;
 		}
-		if ( powerups & ( 1 << PW_BATTLESUIT )) 
+		if ( powerups & ( 1 << PW_BATTLESUIT ))
 		{
 				ent->customShader = cgs.media.battleSuitShader;
 			trap_R_AddRefEntityToScene( ent );
@@ -1772,15 +1772,15 @@ void CG_AddRefEntityWithPowerups( refEntity_t *ent, int powerups, int eFlags, qb
 			ent->customShader = cgs.media.holoOuchShader;
 			// set rgb to 1 of 16 values from 0 to 255. don't use random so that the three
 			//parts of the player model as well as the gun will all look the same
-			ent->shaderRGBA[0] = 
-			ent->shaderRGBA[1] = 
+			ent->shaderRGBA[0] =
+			ent->shaderRGBA[1] =
 			ent->shaderRGBA[2] = ((cg.time % 17)*0.0625)*255.0;//irandom(0,255);
 			trap_R_AddRefEntityToScene(ent);
 		}
-		
+
 		if (powerups & (1<<PW_ARCWELD_DISINT))
 		{
-			int dtime; 
+			int dtime;
 
 			dtime = cg.time-timeParam;
 
@@ -1789,8 +1789,8 @@ void CG_AddRefEntityWithPowerups( refEntity_t *ent, int powerups, int eFlags, qb
 				// Add an electrical shell, faded out over the first three seconds.
 				ent->customShader = cgs.media.electricBodyShader;
 //				ent->shaderTime = timeParam / 1000.0f;
-				ent->shaderRGBA[0] = 
-				ent->shaderRGBA[1] = 
+				ent->shaderRGBA[0] =
+				ent->shaderRGBA[1] =
 				ent->shaderRGBA[2] = (int)(1.0 + ((4000.0 - dtime) / 4000.0f * 254.0f ));
 				ent->shaderRGBA[3] = 255;
 				trap_R_AddRefEntityToScene( ent );
@@ -1844,7 +1844,7 @@ void CG_DrawPlayerShield(centity_t *cent, vec3_t origin)
 	refEntity_t ent;
 	int			alpha;
 	float		scale;
-	
+
 	// Don't draw the shield when the player is dead.
 	if (cent->currentState.eFlags & EF_DEAD)
 	{
@@ -1914,8 +1914,8 @@ void CG_BorgEyebeam( centity_t *cent, const refEntity_t *parent )
 	//Note the above will also prevent the beam from being drawn in first person view if you don't have a tag_ear
 
 	// well, we are in thirdperson or whatnot, so we should just render from a bolt-on ( tag_ear )
-	if ( cent->currentState.clientNum != cg.predictedPlayerState.clientNum 
-					|| cg.renderingThirdPerson 
+	if ( cent->currentState.clientNum != cg.predictedPlayerState.clientNum
+					|| cg.renderingThirdPerson
 					|| cg.snap->ps.pm_type == PM_INTERMISSION )
 	{
 		VectorCopy( temp.origin, beamOrg );
@@ -1933,7 +1933,7 @@ void CG_BorgEyebeam( centity_t *cent, const refEntity_t *parent )
 		VectorMA( beamOrg,		  1024, axis[0], beamEnd );//forward to end
 		large = qtrue; // render a fatter line
 	}
-			
+
 	trap_CM_BoxTrace( &trace, beamOrg, beamEnd, NULL, NULL, 0, MASK_SHOT );
 	VectorCopy( trace.endpos, beamEnd );
 	VectorMA( beamOrg, 0.5, parent->axis[0], beamOrg );//forward
@@ -1991,16 +1991,16 @@ void CG_Player( centity_t *cent ) {
 
 	// get the rotation information
 	CG_PlayerAngles( cent, legs.axis, torso.axis, head.axis );
-	
+
 	// get the animation state (after rotation, to allow feet shuffle)
 	CG_PlayerAnimation( cent, &legs.oldframe, &legs.frame, &legs.backlerp,
-		 &torso.oldframe, &torso.frame, &torso.backlerp );
+		&torso.oldframe, &torso.frame, &torso.backlerp );
 
 	// add powerups floating behind the player
 	CG_PlayerPowerups( cent );
 
 	// add the talk baloon or disconnect icon (not in intermission)
-	if ( !cg.intermissionStarted ) 
+	if ( !cg.intermissionStarted )
 	{
 		CG_PlayerSprites( cent );
 	}
@@ -2136,7 +2136,7 @@ A player just came into view or teleported, so reset all animation info
 */
 void CG_ResetPlayerEntity( centity_t *cent ) {
 	cent->errorTime = -99999;		// guarantee no error decay added
-	cent->extrapolated = qfalse;	
+	cent->extrapolated = qfalse;
 
 	CG_ClearLerpFrame( &cgs.clientinfo[ cent->currentState.clientNum ], &cent->pe.legs, cent->currentState.legsAnim );
 	CG_ClearLerpFrame( &cgs.clientinfo[ cent->currentState.clientNum ], &cent->pe.torso, cent->currentState.torsoAnim );

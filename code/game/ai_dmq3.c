@@ -6,7 +6,7 @@
  * desc:		Quake3 bot AI
  *
  * $Archive: /StarTrek/Code-DM/game/ai_dmq3.c $
- * $Author: Mgummelt $ 
+ * $Author: Mgummelt $
  * $Revision: 33 $
  * $Modtime: 4/04/01 5:01p $
  * $Date: 4/04/01 5:17p $
@@ -148,11 +148,11 @@ qboolean EntityIsInvisible(aas_entityinfo_t *entinfo) {
 			return qfalse;
 		}
 	}
-	else if (entinfo->powerups & (1 << PW_INVIS)) 
+	else if (entinfo->powerups & (1 << PW_INVIS))
 	{
 		return qtrue;
 	}
-	else if ( entinfo->flags & EF_NODRAW ) 
+	else if ( entinfo->flags & EF_NODRAW )
 	{
 		return qtrue;
 	}
@@ -486,7 +486,7 @@ char *EasyClientName(int client, char *buf, int size) {
 }
 
 qboolean BotUseMeleeWeapon(bot_state_t *bs) {
-	if ( bs->inventory[ENEMY_HORIZONTAL_DIST] < 64 ) 
+	if ( bs->inventory[ENEMY_HORIZONTAL_DIST] < 64 )
 	{
 		if ( bs->cur_ps.persistant[PERS_CLASS] == PC_BORG || bs->cur_ps.persistant[PERS_CLASS] == PC_MEDIC )
 		{
@@ -620,7 +620,7 @@ void BotUpdateBattleInventory(bot_state_t *bs, int enemy) {
 	aas_entityinfo_t entinfo;
 
 	BotEntityInfo(enemy, &entinfo);
-	VectorSubtract(entinfo.origin, bs->origin, dir); 
+	VectorSubtract(entinfo.origin, bs->origin, dir);
 	bs->inventory[ENEMY_HEIGHT] = (int) dir[2];
 	dir[2] = 0;
 	bs->inventory[ENEMY_HORIZONTAL_DIST] = (int) VectorLength(dir);
@@ -654,7 +654,7 @@ qboolean BotShouldDetonateDetPack(bot_state_t *bs)
 	{
 		VectorCopy(detpack->r.currentOrigin, packOrg);
 	}
-	
+
 	// determine who would be killed in the blast radius
 	for (botNum = 0; botNum < MAX_CLIENTS; botNum++)
 	{
@@ -668,7 +668,7 @@ qboolean BotShouldDetonateDetPack(bot_state_t *bs)
 		if (dist < DETPACK_RADIUS) // bot would get caught in blast radius
 		{
 			if (BotSameTeam(bs, botNum)) // friendly casualty potential
-			{ 
+			{
 				if (botNum == bs->client) // suicide...  bad
 				{
 					detWeight--;
@@ -688,11 +688,11 @@ qboolean BotShouldDetonateDetPack(bot_state_t *bs)
 				}
 				detWeight++;
 			}
-		}	
+		}
 	}
 
 //	Com_Printf("detWeight %d\n", detWeight);
-	
+
 	if (detWeight > 0)
 	{
 		return qtrue;
@@ -723,7 +723,7 @@ void BotBattleUseItems(bot_state_t *bs) {
 			}
 		}
 
-		if (bs->inventory[INVENTORY_DETPACK_PLACED] == 1) //  placed 
+		if (bs->inventory[INVENTORY_DETPACK_PLACED] == 1) //  placed
 		{
 			if (BotShouldDetonateDetPack(bs)) // logic
 			{
@@ -1528,9 +1528,9 @@ int BotFindEnemy(bot_state_t *bs, int curenemy) {
 		curdist = 0;
 	}
 	//
-	
+
 	//FIXME: This only finds lowest numbered enemy, not the closest or best!!!
-	// 6/15/00 dpk changed this 
+	// 6/15/00 dpk changed this
 	for (i = 0; i < maxclients && i < MAX_CLIENTS; i++) {
 
 		if (i == bs->client) continue;
@@ -1558,8 +1558,8 @@ int BotFindEnemy(bot_state_t *bs, int curenemy) {
 		//calculate the distance towards the enemy
 		VectorSubtract(entinfo.origin, bs->origin, dir);
 		dist = VectorLength(dir);
-		
-	
+
+
 		//if this entity is not carrying a flag
 		if (!EntityCarriesFlag(&entinfo))
 //		if (EntityCarriesFlag(&entinfo))
@@ -1570,11 +1570,11 @@ int BotFindEnemy(bot_state_t *bs, int curenemy) {
 */		{
 			//if this enemy is further away than the current one
 			if (curenemy >= 0 && dist > curdist) continue;
-		}		
+		}
 
 			//if the bot in too far away for me to notice
 			if (dist > 900 + alertness * 4000) continue;
-			
+
 
 			//if the bot's health decreased or the enemy is shooting
 			if (curenemy < 0 && (healthdecrease || EntityIsShooting(&entinfo))) f = 360;

@@ -142,9 +142,9 @@ void CG_RegisterWeapon( int weaponNum ) {
 		cgs.media.phaserShader			= trap_R_RegisterShader( "gfx/misc/phaser" );
 		cgs.media.phaserEmptyShader		= trap_R_RegisterShader( "gfx/misc/phaserempty" );
 
-		cgs.media.phaserAltShader		= trap_R_RegisterShader("gfx/effects/whitelaser");	// "gfx/misc/phaser_alt" ); 
+		cgs.media.phaserAltShader		= trap_R_RegisterShader("gfx/effects/whitelaser");	// "gfx/misc/phaser_alt" );
 
-		cgs.media.phaserAltEmptyShader	= trap_R_RegisterShader( "gfx/misc/phaser_altempty" ); 
+		cgs.media.phaserAltEmptyShader	= trap_R_RegisterShader( "gfx/misc/phaser_altempty" );
 		cgs.media.phaserMuzzleEmptyShader= trap_R_RegisterShader( "models/weapons2/phaser/muzzle_empty" );
 
 		break;
@@ -176,7 +176,7 @@ void CG_RegisterWeapon( int weaponNum ) {
 		weaponInfo->flashSound = trap_S_RegisterSound( SOUND_DIR "stasis/fire.wav" );
 		weaponInfo->altFlashSnd = trap_S_RegisterSound( SOUND_DIR "stasis/alt_fire.wav" );
 		weaponInfo->mainHitSound = trap_S_RegisterSound(SOUND_DIR "stasis/hit_wall.wav");
-	
+
 		cgs.media.stasisRingShader			= trap_R_RegisterShader( "gfx/misc/stasis_ring" );
 		cgs.media.stasisAltShader			= trap_R_RegisterShader( "gfx/misc/stasis_altfire" );
 		cgs.media.altIMOD2Shader			= trap_R_RegisterShader( "gfx/misc/IMOD2alt" );
@@ -233,7 +233,7 @@ void CG_RegisterWeapon( int weaponNum ) {
 
 		weaponInfo->missileTrailFunc = FX_QuantumThink;
 		weaponInfo->alt_missileTrailFunc = FX_QuantumAltThink;
-		
+
 		weaponInfo->missileDlight = 75;
 		weaponInfo->alt_missileDlight = 100;
 		MAKERGB( weaponInfo->missileDlightColor, 1.0, 1.0, 0.5);	//yellowish
@@ -241,8 +241,8 @@ void CG_RegisterWeapon( int weaponNum ) {
 		weaponInfo->flashSound = trap_S_RegisterSound( SOUND_DIR "quantum/fire.wav" );
 		weaponInfo->altFlashSnd = trap_S_RegisterSound( SOUND_DIR "quantum/alt_fire.wav" );
 
-		weaponInfo->mainHitSound = trap_S_RegisterSound( SOUND_DIR "quantum/hit_wall.wav" );;		
-		weaponInfo->altHitSound = trap_S_RegisterSound( SOUND_DIR "quantum/alt_hit_wall.wav" );;		
+		weaponInfo->mainHitSound = trap_S_RegisterSound( SOUND_DIR "quantum/hit_wall.wav" );;
+		weaponInfo->altHitSound = trap_S_RegisterSound( SOUND_DIR "quantum/alt_hit_wall.wav" );;
 
 		cgs.media.whiteRingShader			= trap_R_RegisterShader( "gfx/misc/whitering" );
 		cgs.media.orangeRingShader			= trap_R_RegisterShader( "gfx/misc/orangering" );
@@ -275,8 +275,8 @@ void CG_RegisterWeapon( int weaponNum ) {
 		weaponInfo->flashSound = trap_S_RegisterSound( SOUND_DIR "prifle/fire.wav" );
 		weaponInfo->altFlashSnd = trap_S_RegisterSound( SOUND_DIR "prifle/alt_fire_new.wav" );
 
-		weaponInfo->mainHitSound = trap_S_RegisterSound( SOUND_DIR "prifle/impact.wav" );;		
-		
+		weaponInfo->mainHitSound = trap_S_RegisterSound( SOUND_DIR "prifle/impact.wav" );;
+
 		cgs.media.prifleImpactShader	= trap_R_RegisterShader( "gfx/effects/prifle_hit" );
 		cgs.media.compressionAltBeamShader	= trap_R_RegisterShader( "gfx/effects/prifle_altbeam" );
 		cgs.media.compressionAltBlastShader	= trap_R_RegisterShader( "gfx/effects/prifle_altblast" );
@@ -285,7 +285,7 @@ void CG_RegisterWeapon( int weaponNum ) {
 
 	case WP_TETRION_DISRUPTOR:
 		MAKERGB( weaponInfo->flashDlightColor, 0.6, 0.6, 1 );
-		
+
 		weaponInfo->flashSound = trap_S_RegisterSound( SOUND_DIR "tetrion/fire.wav" );
 		weaponInfo->altFlashSnd = trap_S_RegisterSound( SOUND_DIR "tetrion/alt_fire.wav" );
 		cgs.media.tetrionRicochetSound1 = trap_S_RegisterSound(SOUND_DIR "tetrion/ricochet1.wav");
@@ -335,7 +335,7 @@ void CG_RegisterWeapon( int weaponNum ) {
 		cgs.media.compressionMarkShader		= trap_R_RegisterShader( "gfx/damage/burnmark1" );
 		break;
 
-	 default:
+	default:
 		MAKERGB( weaponInfo->flashDlightColor, 1, 1, 1 );
 		weaponInfo->flashSound = trap_S_RegisterSound( SOUND_DIR "prifle/fire.wav" );
 		break;
@@ -414,23 +414,23 @@ CG_MapTorsoToWeaponFrame
 static int CG_MapTorsoToWeaponFrame( clientInfo_t *ci, int frame ) {
 
 	// change weapon
-	if ( frame >= ci->animations[TORSO_DROP].firstFrame 
+	if ( frame >= ci->animations[TORSO_DROP].firstFrame
 		&& frame < ci->animations[TORSO_DROP].firstFrame + 9 ) {
 		return frame - ci->animations[TORSO_DROP].firstFrame + 6;
 	}
 
 	// stand attack
-	if ( frame >= ci->animations[TORSO_ATTACK].firstFrame 
+	if ( frame >= ci->animations[TORSO_ATTACK].firstFrame
 		&& frame < ci->animations[TORSO_ATTACK].firstFrame + 6 ) {
 		return 1 + frame - ci->animations[TORSO_ATTACK].firstFrame;
 	}
 
 	// stand attack 2
-	if ( frame >= ci->animations[TORSO_ATTACK2].firstFrame 
+	if ( frame >= ci->animations[TORSO_ATTACK2].firstFrame
 		&& frame < ci->animations[TORSO_ATTACK2].firstFrame + 6 ) {
 		return 1 + frame - ci->animations[TORSO_ATTACK2].firstFrame;
 	}
-	
+
 	return 0;
 }
 
@@ -465,7 +465,7 @@ static void CG_CalculateWeaponPosition( vec3_t origin, vec3_t angles ) {
 	if ( delta < LAND_DEFLECT_TIME ) {
 		origin[2] += cg.landChange*0.25 * delta / LAND_DEFLECT_TIME;
 	} else if ( delta < LAND_DEFLECT_TIME + LAND_RETURN_TIME ) {
-		origin[2] += cg.landChange*0.25 * 
+		origin[2] += cg.landChange*0.25 *
 			(LAND_DEFLECT_TIME + LAND_RETURN_TIME - delta) / LAND_RETURN_TIME;
 	}
 
@@ -503,7 +503,7 @@ angle)
 #define RANGE_BEAM (2048.0)
 #define BEAM_VARIATION	6
 
-void CG_LightningBolt( centity_t *cent, vec3_t origin ) 
+void CG_LightningBolt( centity_t *cent, vec3_t origin )
 {
 	trace_t		trace;
 //	gentity_t	*traceEnt;
@@ -511,7 +511,7 @@ void CG_LightningBolt( centity_t *cent, vec3_t origin )
 	qboolean	spark = qfalse, impact = qtrue;
 	int i;
 
-	if ( cg.snap->ps.pm_type == PM_INTERMISSION ) 
+	if ( cg.snap->ps.pm_type == PM_INTERMISSION )
 	{
 		return;		// Don't draw a phaser during an intermission you crezzy mon!
 	}
@@ -520,24 +520,24 @@ void CG_LightningBolt( centity_t *cent, vec3_t origin )
 	if ( cent->currentState.clientNum == cg.snap->ps.clientNum
 		&& !cg.renderingThirdPerson ) {
 		// different checks for first person view
-		if ( ( cg.snap->ps.weapon == WP_DREADNOUGHT && !( cg.snap->ps.eFlags & EF_ALT_FIRING )) 
+		if ( ( cg.snap->ps.weapon == WP_DREADNOUGHT && !( cg.snap->ps.eFlags & EF_ALT_FIRING ))
 				|| cg.snap->ps.weapon == WP_PHASER)
 		{	/*continue*/	}
 		else
 			return;
 	} else {
-		if ( ( cent->currentState.weapon == WP_DREADNOUGHT && !( cent->currentState.eFlags & EF_ALT_FIRING )) 
+		if ( ( cent->currentState.weapon == WP_DREADNOUGHT && !( cent->currentState.eFlags & EF_ALT_FIRING ))
 				|| cent->currentState.weapon == WP_PHASER)
 		{	/*continue*/	}
 		else
 			return;
 	}
-	
+
 	// Find the impact point of the beam
 	if ( cent->currentState.clientNum == cg.snap->ps.clientNum
 		&& !cg.renderingThirdPerson ) {
 		// take origin from view
-/*		
+/*
 		VectorCopy( cg.refdef.vieworg, origin );
 		VectorMA( origin, -8, cg.refdef.viewaxis[2], origin );
 		VectorMA( origin, 8, cg.refdef.viewaxis[0], origin );
@@ -545,8 +545,8 @@ void CG_LightningBolt( centity_t *cent, vec3_t origin )
 */
 		VectorCopy( cg.refdef.viewaxis[0], forward );
 		VectorCopy( cg.refdef.vieworg, startpos);
-	} 
-	else 
+	}
+	else
 	{
 		// take origin from entity
 		AngleVectors( cent->lerpAngles, forward, NULL, NULL );
@@ -584,7 +584,7 @@ void CG_LightningBolt( centity_t *cent, vec3_t origin )
 	{
 		impact = qfalse;
 	}
-	
+
 	// Add in the effect
 	switch ( cent->currentState.weapon )
 	{
@@ -652,7 +652,7 @@ CG_AddWeaponWithPowerups
 ========================
 */
 
-static void CG_AddWeaponWithPowerups( refEntity_t *gun, int powerups ) 
+static void CG_AddWeaponWithPowerups( refEntity_t *gun, int powerups )
 {
 	// add powerup effects
 	if ( powerups & ( 1 << PW_INVIS ) ) {
@@ -684,8 +684,8 @@ static void CG_AddWeaponWithPowerups( refEntity_t *gun, int powerups )
 			gun->customShader = cgs.media.holoOuchShader;
 			// set rgb to 1 of 16 values from 0 to 255. don't use random so that the three
 			//parts of the player model as well as the gun will all look the same
-			gun->shaderRGBA[0] = 
-			gun->shaderRGBA[1] = 
+			gun->shaderRGBA[0] =
+			gun->shaderRGBA[1] =
 			gun->shaderRGBA[2] = ((cg.time % 17)*0.0625)*255;//irandom(0,255);
 			trap_R_AddRefEntityToScene(gun);
 		}
@@ -726,13 +726,13 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 
 	// set custom shading for railgun refire rate
 	if ( ps ) {
-		if ( cg.predictedPlayerState.weapon == WP_IMOD 
+		if ( cg.predictedPlayerState.weapon == WP_IMOD
 			&& cg.predictedPlayerState.weaponstate == WEAPON_FIRING ) {
 			float	f;
 
 			f = (float)cg.predictedPlayerState.weaponTime / 1500;
 			gun.shaderRGBA[1] = 0;
-			gun.shaderRGBA[0] = 
+			gun.shaderRGBA[0] =
 			gun.shaderRGBA[2] = 255 * ( 1.0 - f );
 		} else {
 			gun.shaderRGBA[0] = 255;
@@ -801,7 +801,7 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 
 	// add the spinning barrel
 	//
-	// 
+	//
 	for (barrelInfo = wpnBarrelData; barrelInfo->giTag != WP_NONE; barrelInfo++)
 	{
 		if (barrelInfo->giTag == weaponNum)
@@ -854,11 +854,11 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 	// add the flash
 	if ( (	weaponNum == WP_PHASER ||
 			weaponNum == WP_DREADNOUGHT)
-		&& ( nonPredictedCent->currentState.eFlags & EF_FIRING ) ) 
+		&& ( nonPredictedCent->currentState.eFlags & EF_FIRING ) )
 	{
 		// continuous flash
-	} 
-	else 
+	}
+	else
 	{
 		// impulse flash
 		if ( cg.time - cent->muzzleFlashTime > MUZZLE_FLASH_TIME) {
@@ -895,7 +895,7 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 	}
 	trap_R_AddRefEntityToScene( &flash );
 
-	if ( ps || cg.renderingThirdPerson || cent->currentState.number != cg.predictedPlayerState.clientNum ) 
+	if ( ps || cg.renderingThirdPerson || cent->currentState.number != cg.predictedPlayerState.clientNum )
 	{
 		// add phaser/dreadnought
 		// grrr nonPredictedCent doesn't have the proper empty setting
@@ -1079,7 +1079,7 @@ void CG_DrawWeaponSelect( void ) {
 	// Left end cap
 	trap_R_SetColor(colorTable[CT_LTPURPLE2]);
 	CG_DrawPic( x - 16, y - 4, 16, 50, cgs.media.weaponcap1);
-	trap_R_SetColor(NULL);	
+	trap_R_SetColor(NULL);
 
 	for ( i = 1 ; i < 16 ; i++ ) {
 		if ( !( bits & ( 1 << i ) ) ) {
@@ -1089,7 +1089,7 @@ void CG_DrawWeaponSelect( void ) {
 		CG_RegisterWeaponIcon( i );	//short version
 
 		// draw selection marker
-		if ( i == cg.weaponSelect ) 
+		if ( i == cg.weaponSelect )
 		{
 			trap_R_SetColor(colorTable[CT_LTPURPLE1]);
 		}
@@ -1120,7 +1120,7 @@ void CG_DrawWeaponSelect( void ) {
 	// Right end cap
 	trap_R_SetColor(colorTable[CT_LTPURPLE2]);
 	CG_DrawPic( x - 20 + 18, y - 4, 16, 50, cgs.media.weaponcap2);
-	trap_R_SetColor(NULL);	
+	trap_R_SetColor(NULL);
 
 	// draw the selected name
 	if ( cg_weapons[ cg.weaponSelect ].item ) {
@@ -1159,14 +1159,14 @@ extern int altAmmoUsage[];
 /*
 {
 	0,				//WP_NONE,
-	2,				//WP_PHASER,				
-	10,				//WP_COMPRESSION_RIFLE,	
-	3,				//WP_IMOD,				
-	5,				//WP_SCAVENGER_RIFLE,		
-	1,				//WP_STASIS,				
-	1,				//WP_GRENADE_LAUNCHER,	
-	2,				//WP_TETRION_DISRUPTOR,	
-	2,				//WP_QUANTUM_BURST,		
+	2,				//WP_PHASER,
+	10,				//WP_COMPRESSION_RIFLE,
+	3,				//WP_IMOD,
+	5,				//WP_SCAVENGER_RIFLE,
+	1,				//WP_STASIS,
+	1,				//WP_GRENADE_LAUNCHER,
+	2,				//WP_TETRION_DISRUPTOR,
+	2,				//WP_QUANTUM_BURST,
 	5				//WP_DREADNOUGHT,
 	20,				//WP_VOYAGER_HYPO,
 	##,				//WP_BORG_ASSIMILATOR,
@@ -1430,7 +1430,7 @@ CG_MissileHitWall
 Caused by an EV_MISSILE_MISS event, or directly by local bullet tracing
 =================
 */
-void CG_MissileHitWall( centity_t *cent, int weapon, vec3_t origin, vec3_t dir ) 
+void CG_MissileHitWall( centity_t *cent, int weapon, vec3_t origin, vec3_t dir )
 {
 	qhandle_t		mod;
 	qhandle_t		mark;
@@ -1465,7 +1465,7 @@ void CG_MissileHitWall( centity_t *cent, int weapon, vec3_t origin, vec3_t dir )
 		// no explosion at LG impact, it is added with the beam
 		mark = cgs.media.holeMarkShader;
 		radius = 12;
-		break;	
+		break;
 	case WP_DREADNOUGHT:
 		// no explosion at LG impact, it is added with the beam
 		mark = cgs.media.holeMarkShader;
@@ -1535,9 +1535,9 @@ void CG_MissileHitWall( centity_t *cent, int weapon, vec3_t origin, vec3_t dir )
 	// create the explosion
 	//
 	if ( mod ) {
-		le = CG_MakeExplosion( origin, dir, 
-							   mod,	shader,
-							   duration, isSprite );
+		le = CG_MakeExplosion( origin, dir,
+								mod,	shader,
+								duration, isSprite );
 		le->light = light;
 		VectorCopy( lightColor, le->lightColor );
 	}
@@ -1590,7 +1590,7 @@ void CG_BounceEffect( centity_t *cent, int weapon, vec3_t origin, vec3_t normal 
 
 	case WP_TETRION_DISRUPTOR:
 		trap_S_StartSound( origin, ENTITYNUM_WORLD, CHAN_AUTO, trap_S_RegisterSound ( va(SOUND_DIR "tetrion/ricochet%d.wav", irandom(1, 3)) ) );
-		FX_TetrionRicochet( origin, normal );	
+		FX_TetrionRicochet( origin, normal );
 		break;
 
 	default:
@@ -1683,11 +1683,11 @@ void CG_SurfaceExplosion( vec3_t origin, vec3_t normal, float radius, float shak
 	//Sparks
 
 	numSparks = 32 + (random() * 16.0f);
-	
+
 	//VectorSet( normal, 0, 0, 1 );
 
 	for ( i = 0; i < numSparks; i++ )
-	{	
+	{
 		scale = 0.25f + (random() * 2.0f);
 		dscale = -scale*0.5;
 
@@ -1719,15 +1719,15 @@ void CG_SurfaceExplosion( vec3_t origin, vec3_t normal, float radius, float shak
 		VectorSet( temp_vel, velocity[0] + (crandom() * 8.0f), velocity[1] + (crandom() * 8.0f), velocity[2] + (crandom() * 8.0f) );
 
 		FX_AddSprite(	temp_org,
-						temp_vel, 
-						qfalse, 
-						96.0f + (random() * 32.0f), 
-						16.0f, 
-						1.0f, 
+						temp_vel,
+						qfalse,
+						96.0f + (random() * 32.0f),
+						16.0f,
+						1.0f,
 						0.0f,
 						20.0f + (crandom() * 90.0f),
 						0.5f,
-						2000.0f, 
+						2000.0f,
 						cgs.media.smokeShader);
 	}
 
@@ -1738,7 +1738,7 @@ void CG_SurfaceExplosion( vec3_t origin, vec3_t normal, float radius, float shak
 	VectorNormalize( direction );
 
 	//Tag the last one with a light
-	le = CG_MakeExplosion2( origin, direction, cgs.media.explosionModel, 5, cgs.media.surfaceExplosionShader, 
+	le = CG_MakeExplosion2( origin, direction, cgs.media.explosionModel, 5, cgs.media.surfaceExplosionShader,
 							500, qfalse, radius * 0.02f + (random() * 0.3f), LEF_NONE);
 	le->light = 150;
 	VectorSet( le->lightColor, 0.9f, 0.8f, 0.5f );
@@ -1746,7 +1746,7 @@ void CG_SurfaceExplosion( vec3_t origin, vec3_t normal, float radius, float shak
 	for ( i = 0; i < NUM_EXPLOSIONS-1; i ++)
 	{
 		VectorSet( new_org, (origin[0] + (32 + (crandom() * 8))*crandom()), (origin[1] + (32 + (crandom() * 8))*crandom()), (origin[2] + (32 + (crandom() * 8))*crandom()) );
-		le = CG_MakeExplosion2( new_org, direction, cgs.media.explosionModel, 5, cgs.media.surfaceExplosionShader, 
+		le = CG_MakeExplosion2( new_org, direction, cgs.media.explosionModel, 5, cgs.media.surfaceExplosionShader,
 								300 + (rand() & 99), qfalse, radius * 0.05f + (crandom() *0.3f), LEF_NONE);
 	}
 

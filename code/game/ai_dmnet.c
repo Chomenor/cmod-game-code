@@ -7,7 +7,7 @@
  * desc:		Quake3 bot AI
  *
  * $Archive: /StarTrek/Code-DM/game/ai_dmnet.c $
- * $Author: Mgummelt $ 
+ * $Author: Mgummelt $
  * $Revision: 7 $
  * $Modtime: 3/28/01 11:12a $
  * $Date: 3/28/01 11:15a $
@@ -185,7 +185,7 @@ int BotNearbyGoal(bot_state_t *bs, int tfl, bot_goal_t *ltg, float range) {
 	if (BotGoForAir(bs, tfl, ltg, range)) return qtrue;
 	//if the bot is carrying the enemy flag
 	if (BotCTFCarryingFlag(bs)) {
-		//if the bot is just a few secs away from the base 
+		//if the bot is just a few secs away from the base
 		if (trap_AAS_AreaTravelTimeToGoalArea(bs->areanum, bs->origin,
 				bs->teamgoal.areanum, TFL_DEFAULT) < 300) {
 			//make the range really small
@@ -454,7 +454,7 @@ int BotGetLongTermGoal(bot_state_t *bs, int tfl, int retreat, bot_goal_t *goal) 
 		if (entinfo.valid) {
 			areanum = BotPointAreaNum(entinfo.origin);
 			if (areanum && trap_AAS_AreaReachability(areanum)) {
-				//update team goal so bot will accompany 
+				//update team goal so bot will accompany
 				bs->teamgoal.entitynum = bs->teammate;
 				bs->teamgoal.areanum = areanum;
 				VectorCopy(entinfo.origin, bs->teamgoal.origin);

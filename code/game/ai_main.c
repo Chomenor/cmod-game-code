@@ -7,7 +7,7 @@
  * desc:		Quake3 bot AI
  *
  * $Archive: /StarTrek/Code-DM/game/ai_main.c $
- * $Author: Jmonroe $ 
+ * $Author: Jmonroe $
  * $Revision: 4 $
  * $Modtime: 11/30/00 5:17p $
  * $Date: 11/30/00 5:19p $
@@ -648,7 +648,7 @@ void BotInputToUserCommand(bot_input_t *bi, usercmd_t *ucmd, int delta_angles[3]
 	{
 		ucmd->buttons |= BUTTON_ALT_ATTACK;
 	}
-	
+
 	ucmd->weapon = bi->weapon;
 	//set the view angles
 	//NOTE: the ucmd->angles are the angles WITHOUT the delta angles
@@ -952,7 +952,7 @@ int BotAIShutdownClient(int client) {
 	}
 
 	trap_BotFreeMoveState(bs->ms);
-	//free the goal state`			
+	//free the goal state`
 	trap_BotFreeGoalState(bs->gs);
 	//free the chat file
 	trap_BotFreeChatState(bs->cs);

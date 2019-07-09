@@ -20,11 +20,11 @@ static void UI_ReadableSize ( char *buf, int bufsize, int value )
 {
 	if (value > 1024*1024*1024 ) { // gigs
 		Com_sprintf( buf, bufsize, "%d", value / (1024*1024*1024) );
-		Com_sprintf( buf+strlen(buf), bufsize-strlen(buf), ".%02d GB", 
+		Com_sprintf( buf+strlen(buf), bufsize-strlen(buf), ".%02d GB",
 			(value % (1024*1024*1024))*100 / (1024*1024*1024) );
 	} else if (value > 1024*1024 ) { // megs
 		Com_sprintf( buf, bufsize, "%d", value / (1024*1024) );
-		Com_sprintf( buf+strlen(buf), bufsize-strlen(buf), ".%02d MB", 
+		Com_sprintf( buf+strlen(buf), bufsize-strlen(buf), ".%02d MB",
 			(value % (1024*1024))*100 / (1024*1024) );
 	} else if (value > 1024 ) { // kilos
 		Com_sprintf( buf, bufsize, "%d KB", value / 1024 );
@@ -188,7 +188,7 @@ void UI_DrawConnectScreen( qboolean overlay ) {
 
 	x = 288;
 	info[0] = '\0';
-	if( trap_GetConfigString( CS_SERVERINFO, info, sizeof(info) ) ) 
+	if( trap_GetConfigString( CS_SERVERINFO, info, sizeof(info) ) )
 	{
 		UI_DrawProportionalString( x, 80, va( "%s",Info_ValueForKey( info, "mapname" ) ), UI_BIGFONT, colorTable[CT_WHITE] );
 	}
@@ -197,9 +197,9 @@ void UI_DrawConnectScreen( qboolean overlay ) {
 //	UI_DrawProportionalString( 320, y, menu_normal_text[MNT_PRESSESCAPETOABORT], UI_CENTER|UI_SMALLFONT|UI_DROPSHADOW, menu_text_color );
 
 	// display global MOTD at bottom
-	UI_DrawProportionalString( SCREEN_WIDTH/2, 262, 
+	UI_DrawProportionalString( SCREEN_WIDTH/2, 262,
 		Info_ValueForKey( cstate.updateInfoString, "motd" ), UI_CENTER|UI_SMALLFONT|UI_DROPSHADOW, colorTable[CT_WHITE]  );
-	
+
 	// print any server info (server full, bad version, etc)
 	if ( cstate.connState < CA_CONNECTED ) {
 		UI_DrawProportionalString( x, 192, cstate.messageString, UI_SMALLFONT|UI_DROPSHADOW, colorTable[CT_LTGOLD1]  );
@@ -220,7 +220,7 @@ void UI_DrawConnectScreen( qboolean overlay ) {
 		Field_Clear( &passwordField.field );
 		passwordField.width = 256;
 		passwordField.field.widthInChars = 16;
-		Q_strncpyz( passwordField.field.buffer, Cvar_VariableString("password"), 
+		Q_strncpyz( passwordField.field.buffer, Cvar_VariableString("password"),
 			sizeof(passwordField.field.buffer) );
 
 		Menu_AddItem( &s_ingame_menu, ( void * ) &s_customize_player_action );
@@ -246,7 +246,7 @@ void UI_DrawConnectScreen( qboolean overlay ) {
 		break;
 	case CA_CONNECTED: {
 			char downloadName[MAX_INFO_VALUE];
-	
+
 			trap_Cvar_VariableStringBuffer( "cl_downloadName", downloadName, sizeof(downloadName) );
 			if (*downloadName) {
 				UI_DisplayDownloadInfo( downloadName );

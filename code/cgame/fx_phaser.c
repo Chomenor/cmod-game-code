@@ -51,7 +51,7 @@ void FX_PhaserFire( vec3_t startpos, vec3_t endpos, vec3_t normal, qboolean spar
 	trap_R_AddRefEntityToScene( &beam );
 
 	// Now draw the hit graphic
- 
+
 	// no explosion at LG impact, it is added with the beam
 
 	if ( sfx )
@@ -67,14 +67,14 @@ void FX_PhaserFire( vec3_t startpos, vec3_t endpos, vec3_t normal, qboolean spar
 	{
 		if (!empty)
 		{	// normal.
-			CG_ImpactMark( cgs.media.scavMarkShader, endpos, normal, random()*360, 1,1,1,0.2, qfalse, 
+			CG_ImpactMark( cgs.media.scavMarkShader, endpos, normal, random()*360, 1,1,1,0.2, qfalse,
 						random() + 1, qfalse );
-			FX_AddQuad2( endpos, normal, random() * 1.25 + 1.5f, 0.0f, 1.0f, 0.0f, rgb, rgb2, rand() % 360, 500 + random() * 200, 
+			FX_AddQuad2( endpos, normal, random() * 1.25 + 1.5f, 0.0f, 1.0f, 0.0f, rgb, rgb2, rand() % 360, 500 + random() * 200,
 						cgs.media.sunnyFlareShader );
 		}
 		else
 		{	// Wuss hit when empty.
-			FX_AddQuad2( endpos, normal, random() * .75 + 1.0f, 0.0f, 0.5f, 0.0f, rgb, rgb2, rand() % 360, 300 + random() * 200, 
+			FX_AddQuad2( endpos, normal, random() * .75 + 1.0f, 0.0f, 0.5f, 0.0f, rgb, rgb2, rand() % 360, 300 + random() * 200,
 						cgs.media.sunnyFlareShader );
 		}
 	}
@@ -84,7 +84,7 @@ void FX_PhaserFire( vec3_t startpos, vec3_t endpos, vec3_t normal, qboolean spar
 	{
 		sparks = rand() & 1 + 1;
 		for(;sparks>0;sparks--)
-		{	
+		{
 			size = 0.2f + (random() * 0.4);
 			FXE_Spray( normal, 200, 75, 0.8f, velocity);
 			if (rand() & LEF_USE_COLLISION)
@@ -230,12 +230,12 @@ void FX_PhaserAltFire( vec3_t start, vec3_t end, vec3_t normal, qboolean spark, 
 		beam.data.line.stscale = 1.0;
 		trap_R_AddRefEntityToScene( &beam );
 	}
-	
+
 
 	// Phaser beam
 //	FX_AddLine( start, end, 1.0f, scale, 0.0f, 0.9f, 0.9f, 2, cgs.media.phaserShader );
 //	FX_AddLine( start, end, 1.0f, scale * 0.5f, 0.0f, 0.8f, 0.8f, 2, cgs.media.phaserShader );
-	
+
 	// Per frame impact mark
 	FX_AddQuad( end, normal, random() * 1.5 + 1.75f, 0.0f, 1.0f, 0.0f, 0.0f, 1, cgs.media.sparkShader );
 	FX_AddQuad( end, normal, random() * 5 + 2.75f, 0.0f, 1.0f, 0.0f, 0.0f, 1, cgs.media.yellowParticleShader );
@@ -243,10 +243,10 @@ void FX_PhaserAltFire( vec3_t start, vec3_t end, vec3_t normal, qboolean spark, 
 	// Multi frame impacts--never do this when it hits a player because it will just look stupid
 	if ( impact )
 	{
-		FX_AddQuad2( end, normal, random() * 2.0 + 5.0f, 2.5f, 0.6f, 0.0f, rgb, rgb2, 0.0f, 500 + random() * 200, 
+		FX_AddQuad2( end, normal, random() * 2.0 + 5.0f, 2.5f, 0.6f, 0.0f, rgb, rgb2, 0.0f, 500 + random() * 200,
 					cgs.media.sunnyFlareShader );
 
-		CG_ImpactMark( cgs.media.scavMarkShader, end, normal, random()*360, 1,1,1,0.1, qfalse, 
+		CG_ImpactMark( cgs.media.scavMarkShader, end, normal, random()*360, 1,1,1,0.1, qfalse,
 					random() + 6.0, qfalse );
 	}
 
@@ -262,7 +262,7 @@ void FX_PhaserAltFire( vec3_t start, vec3_t end, vec3_t normal, qboolean spark, 
 		end2[1] = flrandom(-1.0, 1.0) + end[1];
 		end2[2] = flrandom(-1.0, 1.0) + end[2];
 		for( i = 0; i < sparks; i++ )
-		{	
+		{
 			scale = 0.5f + (random() * 0.5);
 			FXE_Spray( normal, 200, 75, 0.8f, /*1024*/vel);
 			FX_AddTrail2(	end2, vel, qfalse,

@@ -28,13 +28,13 @@ int Max_Ammo[WP_NUM_WEAPONS] =
 	0,						// WP_NONE,
 	50,						// WP_PHASER,	!! this should match PHASER_AMMO_MAX defined in bg_public
 	128,					// WP_COMPRESSION_RIFLE,
-	60,						// WP_IMOD,			
-	100,					// WP_SCAVENGER_RIFLE,	
-	50,						// WP_STASIS,			
+	60,						// WP_IMOD,
+	100,					// WP_SCAVENGER_RIFLE,
+	50,						// WP_STASIS,
 	30,						// WP_GRENADE_LAUNCHER,
 	120,					// WP_TETRION_DISRUPTOR,
-	20,						// WP_QUANTUM_BURST,	
-	120,					// WP_DREADNOUGHT,		
+	20,						// WP_QUANTUM_BURST,
+	120,					// WP_DREADNOUGHT,
 	100,					// WP_VOYAGER_HYPO,
 	100,					// WP_BORG_ASSIMILATOR,
 	100						// WP_BORG_WEAPON,
@@ -57,7 +57,7 @@ An item fires all of its targets when it is picked up.  If the toucher can't car
 "count" override quantity or duration on most items.
 */
 
-gitem_t	bg_itemlist[] = 
+gitem_t	bg_itemlist[] =
 {
 	{
 		NULL,							//char		*classname;	// spawning name
@@ -74,15 +74,15 @@ gitem_t	bg_itemlist[] =
 	},	// leave index 0 alone
 
 	//
-	// WEAPONS 
+	// WEAPONS
 	//
 
 /*QUAKED weapon_phaser (.3 .3 1) (-16 -16 -16) (16 16 16) suspended
 */
 	{
-		"weapon_phaser", 
+		"weapon_phaser",
 		"sound/weapons/w_pkup.wav",
-        "models/weapons2/phaser/phaser_w.md3",	//world
+		"models/weapons2/phaser/phaser_w.md3",	//world
 		"models/weapons2/phaser/phaser.md3",	//view
 /* icon */		"icons/w_icon_phaser",
 /* pickup */	"Phaser",
@@ -96,9 +96,9 @@ gitem_t	bg_itemlist[] =
 /*QUAKED weapon_compressionrifle (.3 .3 1) (-16 -16 -16) (16 16 16) suspended
 */
 	{
-		"weapon_compressionrifle", 
+		"weapon_compressionrifle",
 		"sound/weapons/w_pkup.wav",
-        "models/weapons2/prifle/prifle_w.md3", //world
+		"models/weapons2/prifle/prifle_w.md3", //world
 		"models/weapons2/prifle/prifle.md3",	//view
 /* icon */		"icons/w_icon_rifle",
 /* pickup */	"Phaser Compression Rifle",
@@ -112,9 +112,9 @@ gitem_t	bg_itemlist[] =
 /*QUAKED weapon_imod (.3 .3 1) (-16 -16 -16) (16 16 16) suspended
 */
 	{
-		"weapon_imod", 
+		"weapon_imod",
 		"sound/weapons/w_pkup.wav",
-        "models/weapons2/imod/imod2_w.md3", //world
+		"models/weapons2/imod/imod2_w.md3", //world
 		"models/weapons2/imod/imod2.md3",	//view
 /* icon */		"icons/w_icon_imod",
 /* pickup */	"I-MOD",
@@ -128,9 +128,9 @@ gitem_t	bg_itemlist[] =
 /*QUAKED weapon_scavenger (.3 .3 1) (-16 -16 -16) (16 16 16) suspended
 */
 	{
-		"weapon_scavenger", 
+		"weapon_scavenger",
 		"sound/weapons/w_pkup.wav",
-        "models/weapons2/scavenger/scavenger_w.md3", //world
+		"models/weapons2/scavenger/scavenger_w.md3", //world
 		"models/weapons2/scavenger/scavenger.md3",	//view
 /* icon */		"icons/w_icon_scav",
 /* pickup */	"Scavenger Weapon",
@@ -146,7 +146,7 @@ gitem_t	bg_itemlist[] =
 	{
 		"weapon_stasisweapon",
 		"sound/weapons/w_pkup.wav",
-        "models/weapons2/stasis/stasis_w.md3",	//world
+		"models/weapons2/stasis/stasis_w.md3",	//world
 		"models/weapons2/stasis/stasis.md3",	//view
 /* icon */		"icons/w_icon_stasis",
 /* pickup */	"Stasis Weapon",
@@ -162,7 +162,7 @@ gitem_t	bg_itemlist[] =
 	{
 		"weapon_grenadelauncher",
 		"sound/weapons/w_pkup.wav",
-        "models/weapons2/launcher/launcher_w.md3",	//world
+		"models/weapons2/launcher/launcher_w.md3",	//world
 		"models/weapons2/launcher/launcher.md3",	//view
 /* icon */		"icons/w_icon_grenade",
 /* pickup */	"Compound Grenade Launcher",
@@ -176,9 +176,9 @@ gitem_t	bg_itemlist[] =
 /*QUAKED weapon_tetriondisruptor (.3 .3 1) (-16 -16 -16) (16 16 16) suspended
 */
 	{
-		"weapon_tetriondisruptor", 
+		"weapon_tetriondisruptor",
 		"sound/weapons/w_pkup.wav",
-        "models/weapons2/tpd/tpd_w.md3",//world
+		"models/weapons2/tpd/tpd_w.md3",//world
 		"models/weapons2/tpd/tpd.md3",	//view
 /* icon */		"icons/w_icon_tetrion",
 /* pickup */	"Tetryon Pulse Disruptor",
@@ -192,9 +192,9 @@ gitem_t	bg_itemlist[] =
 /*QUAKED weapon_quantumburst (.3 .3 1) (-16 -16 -16) (16 16 16) suspended
 */
 	{
-		"weapon_quantumburst", 
+		"weapon_quantumburst",
 		"sound/weapons/w_pkup.wav",
-        "models/weapons2/q_burst/q_burst_w.md3",	//world
+		"models/weapons2/q_burst/q_burst_w.md3",	//world
 		"models/weapons2/q_burst/q_burst.md3",	//view
 /* icon */		"icons/w_icon_quantum",
 /* pickup */	"Photon Burst",
@@ -208,9 +208,9 @@ gitem_t	bg_itemlist[] =
 /*QUAKED weapon_dreadnought (.3 .3 1) (-16 -16 -16) (16 16 16) suspended
 */
 	{
-		"weapon_dreadnought", 
+		"weapon_dreadnought",
 		"sound/weapons/w_pkup.wav",
-        "models/weapons2/arc_welder/arc_w.md3",	//world
+		"models/weapons2/arc_welder/arc_w.md3",	//world
 		"models/weapons2/arc_welder/arc.md3",	//view
 /* icon */		"icons/w_icon_dreadnought",
 /* pickup */	"Arc Welder",
@@ -231,7 +231,7 @@ gitem_t	bg_itemlist[] =
 	{
 		"ammo_compressionrifle",
 		"sound/player/pickupenergy.wav",
-        "models/powerups/trek/prifle_ammo.md3",	//world
+		"models/powerups/trek/prifle_ammo.md3",	//world
 		NULL,
 /* icon */		"icons/dm_phaser_sm",
 /* pickup */	"Phaser Compression Rifle Ammo",
@@ -248,7 +248,7 @@ gitem_t	bg_itemlist[] =
 	{
 		"ammo_imod",
 		"sound/player/pickupenergy.wav",
-        "models/powerups/trek/imod_ammo.md3",	//world
+		"models/powerups/trek/imod_ammo.md3",	//world
 		NULL,
 /* icon */		"icons/dm_imod",
 /* pickup */	"I-MOD Ammo",
@@ -265,7 +265,7 @@ gitem_t	bg_itemlist[] =
 	{
 		"ammo_scavenger",
 		"sound/player/pickupenergy.wav",
-        "models/powerups/trek/scavenger_ammo.md3",	//world
+		"models/powerups/trek/scavenger_ammo.md3",	//world
 		NULL,
 /* icon */		"icons/dm_scav",
 /* pickup */	"Scavenger Weapon Ammo",
@@ -282,7 +282,7 @@ gitem_t	bg_itemlist[] =
 	{
 		"ammo_stasis",
 		"sound/player/pickupenergy.wav",
-        "models/powerups/trek/stasis_ammo.md3",	//world
+		"models/powerups/trek/stasis_ammo.md3",	//world
 		NULL,
 /* icon */		"icons/dm_stasis_sm",
 /* pickup */	"Stasis Weapon Ammo",
@@ -299,7 +299,7 @@ gitem_t	bg_itemlist[] =
 	{
 		"ammo_grenades",
 		"sound/player/pickupenergy.wav",
-        "models/powerups/trek/glauncher_ammo.md3",	//world
+		"models/powerups/trek/glauncher_ammo.md3",	//world
 		NULL,
 /* icon */		"icons/dm_glauncher_sm",
 /* pickup */	"Compound Grenade Launcher Ammo",
@@ -316,7 +316,7 @@ gitem_t	bg_itemlist[] =
 	{
 		"ammo_tetriondisruptor",
 		"sound/player/pickupenergy.wav",
-        "models/powerups/trek/tetrion_ammo.md3",	//world
+		"models/powerups/trek/tetrion_ammo.md3",	//world
 		NULL,
 /* icon */		"icons/dm_tetrion_sm",
 /* pickup */	"Tetryon Pulse Disruptor Ammo",
@@ -333,7 +333,7 @@ gitem_t	bg_itemlist[] =
 	{
 		"ammo_quantumburst",
 		"sound/player/pickupenergy.wav",
-        "models/powerups/trek/torpedo.md3",	//world
+		"models/powerups/trek/torpedo.md3",	//world
 		NULL,
 /* icon */		"icons/dm_torpedo_sm",
 /* pickup */	"Photon Burst Ammo",
@@ -350,7 +350,7 @@ gitem_t	bg_itemlist[] =
 	{
 		"ammo_dreadnought",
 		"sound/player/pickupenergy.wav",
-        "models/powerups/trek/arc_ammo.md3",	//world
+		"models/powerups/trek/arc_ammo.md3",	//world
 		NULL,
 /* icon */		"icons/dm_a_arc_sm",
 /* pickup */	"Arc Welder Ammo",
@@ -370,9 +370,9 @@ gitem_t	bg_itemlist[] =
 5 points of shields
 */
 	{
-		"item_armor_shard", 
+		"item_armor_shard",
 		"sound/player/pickupenergy.wav",
-        "models/powerups/trek/armor_shard.md3",	//world
+		"models/powerups/trek/armor_shard.md3",	//world
 		NULL,
 /* icon */		"icons/icon_shards",
 /* pickup */	"Incremental Shield Boost",
@@ -387,9 +387,9 @@ gitem_t	bg_itemlist[] =
 50 points of shields
 */
 	{
-		"item_armor_combat", 
+		"item_armor_combat",
 		"sound/player/pickupenergy.wav",
-        "models/powerups/trek/armor.md3",	//world
+		"models/powerups/trek/armor.md3",	//world
 		NULL,
 /* icon */		"icons/dm_armor_sm",
 /* pickup */	"Personal Deflector Screen",
@@ -404,9 +404,9 @@ gitem_t	bg_itemlist[] =
 100 points of shields
 */
 	{
-		"item_armor_body", 
+		"item_armor_body",
 		"sound/player/suitenergy.wav",
-        "models/powerups/trek/armor2.md3",	//world
+		"models/powerups/trek/armor2.md3",	//world
 		NULL,
 /* icon */		"icons/dm_superarmor_sm",
 /* pickup */	"Isokinetic Deflector Screen",
@@ -427,7 +427,7 @@ gitem_t	bg_itemlist[] =
 	{
 		"item_hypo_small",
 		"sound/player/pickuphealth.wav",
-        "models/powerups/trek/hypo_single.md3",	//world
+		"models/powerups/trek/hypo_single.md3",	//world
 		NULL,
 /* icon */		"icons/dm_health_sm",
 /* pickup */	"Booster Hypospray",
@@ -444,7 +444,7 @@ gitem_t	bg_itemlist[] =
 	{
 		"item_hypo",
 		"sound/player/suithealth.wav",
-        "models/powerups/trek/hypo_double.md3",	//world
+		"models/powerups/trek/hypo_double.md3",	//world
 		NULL,
 /* icon */		"icons/dm_health2_sm",
 /* pickup */	"Emergency Hypospray",
@@ -463,9 +463,9 @@ pick it up and it stays in your inventory until used, at which time you drop it 
 kind of resides in your inventory. when you use it _again_ it activates and anyone can walk through the transporter.
 */
 	{
-		"holdable_transporter", 
+		"holdable_transporter",
 		"sound/items/holdable.wav",
-        "models/powerups/trek/transporter.md3",	//world
+		"models/powerups/trek/transporter.md3",	//world
 		NULL,
 /* icon */		"icons/dm_transport_sm",
 /* pickup */	"Personal Transporter Device",
@@ -480,9 +480,9 @@ kind of resides in your inventory. when you use it _again_ it activates and anyo
 pick it up and it stays in your inventory until used, at which time it sets your health to 100
 */
 	{
-		"holdable_medkit", 
+		"holdable_medkit",
 		"sound/items/holdable.wav",
-        "models/powerups/trek/med_kit.md3", //world
+		"models/powerups/trek/med_kit.md3", //world
 		NULL,
 /* icon */		"icons/dm_health3_sm",
 /* pickup */	"Portable Medkit",
@@ -502,9 +502,9 @@ pick it up and it stays in your inventory until used, at which time it sets your
 multiplies your weapon's damage for 30 seconds
 */
 	{
-		"item_quad", 
+		"item_quad",
 		"sound/items/quaddamage.wav",
-        "models/powerups/trek/quad_damage.md3",	//world
+		"models/powerups/trek/quad_damage.md3",	//world
 		NULL,
 /* icon */		"icons/dm_quad",
 /* pickup */	"Quantum Weapon Enhancer",
@@ -521,7 +521,7 @@ multiplies your weapon's damage for 30 seconds
 	{
 		"item_enviro",
 		"sound/items/protect.wav",
-        "models/powerups/trek/armor3.md3",	//world
+		"models/powerups/trek/armor3.md3",	//world
 		NULL,
 /* icon */		"icons/envirosuit",
 /* pickup */	"Metaphasic Shielding",
@@ -538,7 +538,7 @@ for 30 seconds you run at %150 of your normal speed and your firing delays are 3
 	{
 		"item_haste",
 		"sound/items/haste.wav",
-        "models/powerups/trek/haste.md3",	//world
+		"models/powerups/trek/haste.md3",	//world
 		NULL,
 /* icon */		"icons/dm_haste",
 /* pickup */	"Temporal Accelerator",
@@ -555,7 +555,7 @@ for 30 seconds you run at %150 of your normal speed and your firing delays are 3
 	{
 		"item_invis",
 		"sound/items/invisibility.wav",
-        "models/powerups/trek/invisible.md3",	//world
+		"models/powerups/trek/invisible.md3",	//world
 		NULL,
 /* icon */		"icons/dm_invisibility",
 /* pickup */	"Personal Cloaking Device",
@@ -572,7 +572,7 @@ for 30 seconds you get 5 health every second, up to 200 health
 	{
 		"item_regen",
 		"sound/items/regeneration.wav",
-        "models/powerups/trek/regen.md3",	//world
+		"models/powerups/trek/regen.md3",	//world
 		NULL,
 /* icon */		"icons/regen",
 /* pickup */	"Nano-Regenerative Protoplasmer",
@@ -589,7 +589,7 @@ for 30 seconds you get 5 health every second, up to 200 health
 	{
 		"item_flight",
 		"sound/items/flight.wav",
-        "models/powerups/trek/flight.md3",	//world
+		"models/powerups/trek/flight.md3",	//world
 		NULL,
 /* icon */		"icons/dm_flight",
 /* pickup */	"Anti-Gravity Pack",
@@ -606,7 +606,7 @@ Only in CTF games
 	{
 		"team_CTF_redflag",
 		"sound/voice/computer/misc/haveflag.wav",
-        "models/flags/flag_red.md3",	//world  !! must match cg_main media and botfiles/items.c !!
+		"models/flags/flag_red.md3",	//world  !! must match cg_main media and botfiles/items.c !!
 		NULL,
 /* icon */		"icons/iconf_red",
 /* pickup */	"Red Flag",
@@ -623,7 +623,7 @@ Only in CTF games
 	{
 		"team_CTF_blueflag",
 		"sound/voice/computer/misc/haveflag.wav",
-        "models/flags/flag_blue.md3",//must match cg_main media and botfiles/items.c
+		"models/flags/flag_blue.md3",//must match cg_main media and botfiles/items.c
 		NULL,
 /* icon */		"icons/iconf_blu",
 /* pickup */	"Blue Flag",
@@ -638,9 +638,9 @@ Only in CTF games
 BLAMMO!
 */
 	{
-		"holdable_detpack", 
+		"holdable_detpack",
 		"sound/player/pickupenergy.wav",
-        "models/powerups/trek/detpak.md3",	//world
+		"models/powerups/trek/detpak.md3",	//world
 		NULL,
 /* icon */		"icons/icon_detpack",
 /* pickup */	"Ultritium Explosive Charge",
@@ -655,9 +655,9 @@ BLAMMO!
 30 seconds of seeker drone
 */
 	{
-		"item_seeker", 
+		"item_seeker",
 		"sound/player/pickupenergy.wav",
-        "models/powerups/trek/flyer.md3",	//world
+		"models/powerups/trek/flyer.md3",	//world
 		NULL,
 /* icon */		"icons/icon_seeker",
 /* pickup */	"Seeker Drone",
@@ -672,9 +672,9 @@ BLAMMO!
 About 25 seconds or 250 hit points of a portashield.
 */
 	{
-		"holdable_shield", 
+		"holdable_shield",
 		"sound/player/pickupenergy.wav",
-        "models/powerups/trek/shield_gen.md3",	//world
+		"models/powerups/trek/shield_gen.md3",	//world
 		NULL,
 /* icon */		"icons/icon_shield",
 /* pickup */	"Portable Force Field",
@@ -683,16 +683,16 @@ About 25 seconds or 250 hit points of a portashield.
 		HI_SHIELD,
 /* precache */ "",
 /* sounds */ "sound/weapons/detpacklatch.wav sound/movers/forceup.wav sound/ambience/spark5.wav"
-	},	
+	},
 
 
 /*QUAKED Holographic_decoy (.3 .3 1) (-16 -16 -16) (16 16 16) suspended
 About 1 minute of a holographic decoy.
 */
 	{
-		"Holographic_decoy", 
+		"Holographic_decoy",
 		"sound/items/holdable.wav",
-        "models/powerups/trek/decoy.md3",	//world
+		"models/powerups/trek/decoy.md3",	//world
 		NULL,
 /* icon */		"icons/icon_decoy",
 /* pickup */	"Holographic Decoy",
@@ -701,7 +701,7 @@ About 1 minute of a holographic decoy.
 		HI_DECOY,
 /* precache */ "",
 /* sounds */ ""
-	},	
+	},
 
 	//
 	// New Weapons
@@ -710,9 +710,9 @@ About 1 minute of a holographic decoy.
 /*QUAKED weapon_voyager_hypo (.3 .3 1) (-16 -16 -16) (16 16 16) suspended
 */
 	{
-		"weapon_voyager_hypo", 
+		"weapon_voyager_hypo",
 		"sound/weapons/w_pkup.wav",
-        "models/weapons2/tricorder/hypo.md3",	//world
+		"models/weapons2/tricorder/hypo.md3",	//world
 		"models/weapons2/tricorder/hypo.md3",	//view
 /* icon */		"icons/w_icon_hypo",
 /* pickup */	"Hypo",
@@ -726,9 +726,9 @@ About 1 minute of a holographic decoy.
 /*QUAKED weapon_borg_assimilator (.3 .3 1) (-16 -16 -16) (16 16 16) suspended
 */
 	{
-		"weapon_borg_assimilator", 
+		"weapon_borg_assimilator",
 		"sound/weapons/w_pkup.wav",
-        "models/weapons2/borg/hand_w.md3",	//world
+		"models/weapons2/borg/hand_w.md3",	//world
 		"models/weapons2/borg/hand.md3",	//view
 /* icon */		"icons/w_icon_borg_assimilator",
 /* pickup */	"Assimilator",
@@ -742,9 +742,9 @@ About 1 minute of a holographic decoy.
 /*QUAKED weapon_borg_weapon (.3 .3 1) (-16 -16 -16) (16 16 16) suspended
 */
 	{
-		"weapon_borg_weapon", 
+		"weapon_borg_weapon",
 		"sound/weapons/w_pkup.wav",
-        "models/weapons2/borg/claw-1_w.md3",	//world
+		"models/weapons2/borg/claw-1_w.md3",	//world
 		"models/weapons2/borg/claw-1.md3",	//view
 /* icon */		"icons/w_icon_borg_weapon",
 /* pickup */	"Borg Weapon",
@@ -811,8 +811,8 @@ gitem_t	*BG_FindItemForPowerup( powerup_t pw ) {
 	int		i;
 
 	for ( i = 0 ; i < bg_numItems ; i++ ) {
-		if ( (bg_itemlist[i].giType == IT_POWERUP || 
-				bg_itemlist[i].giType == IT_TEAM) && 
+		if ( (bg_itemlist[i].giType == IT_POWERUP ||
+				bg_itemlist[i].giType == IT_TEAM) &&
 			bg_itemlist[i].giTag == pw ) {
 			return &bg_itemlist[i];
 		}
@@ -850,7 +850,7 @@ BG_FindItemForWeapon
 */
 gitem_t	*BG_FindItemForWeapon( weapon_t weapon ) {
 	gitem_t	*it;
-	
+
 	for ( it = bg_itemlist + 1 ; it->classname ; it++) {
 		if ( it->giType == IT_WEAPON && it->giTag == weapon ) {
 			return it;
@@ -869,7 +869,7 @@ BG_FindItemForAmmo
 */
 gitem_t	*BG_FindItemForAmmo( weapon_t weapon ) {
 	gitem_t	*it;
-	
+
 	for ( it = bg_itemlist + 1 ; it->classname ; it++) {
 		if ( it->giType == IT_AMMO && it->giTag == weapon ) {
 			return it;
@@ -888,7 +888,7 @@ BG_FindItem
 */
 gitem_t	*BG_FindItem( const char *pickupName ) {
 	gitem_t	*it;
-	
+
 	for ( it = bg_itemlist + 1 ; it->classname ; it++ ) {
 		if ( !Q_stricmp( it->pickup_name, pickupName ) )
 			return it;
@@ -946,13 +946,13 @@ int Max_Ammo[WP_NUM_WEAPONS] =
 	0,						//		WP_NONE,
 	50,						// WP_PHASER,	!! this should match PHASER_AMMO_MAX defined in bg_public
 	128,					// WP_COMPRESSION_RIFLE,
-	60,						// WP_IMOD,			
-	100,					// WP_SCAVENGER_RIFLE,	
-	50,						// WP_STASIS,			
+	60,						// WP_IMOD,
+	100,					// WP_SCAVENGER_RIFLE,
+	50,						// WP_STASIS,
 	30,						// WP_GRENADE_LAUNCHER,
 	120,					// WP_TETRION_DISRUPTOR,
-	20,						// WP_QUANTUM_BURST,	
-	120,					// WP_DREADNOUGHT,		
+	20,						// WP_QUANTUM_BURST,
+	120,					// WP_DREADNOUGHT,
 	100,					// WP_VOYAGER_HYPO,
 	100,					// WP_BORG_ASSIMILATOR,
 	100						// WP_BORG_WEAPON
@@ -1086,8 +1086,8 @@ int Max_Ammo[WP_NUM_WEAPONS] =
 		}
 		return qtrue;
 
-        case IT_BAD:
-            Com_Error( ERR_DROP, "BG_CanItemBeGrabbed: IT_BAD" );
+	case IT_BAD:
+		Com_Error( ERR_DROP, "BG_CanItemBeGrabbed: IT_BAD" );
 	}
 
 	return qfalse;
@@ -1270,7 +1270,7 @@ void BG_PlayerStateToEntityState( playerState_t *ps, entityState_t *s, qboolean 
 
 #define MAX_ITEMNAMES 42
 
-const char *itemnames[MAX_ITEMNAMES] = 
+const char *itemnames[MAX_ITEMNAMES] =
 {
 
 "nothing",
@@ -1339,7 +1339,7 @@ void BG_ParseItemsText(char *buff)
 	COM_BeginParseSession();
 
 	buffer = buff;
-	while ( buffer ) 
+	while ( buffer )
 	{
 		token = COM_ParseExt( &buffer, qtrue );
 
@@ -1350,7 +1350,7 @@ void BG_ParseItemsText(char *buff)
 			{
 				token = COM_ParseExt( &buffer, qtrue );
 				if (token[0])
-				{	
+				{
 					len = strlen(token);
 					if (len)
 					{
@@ -1411,20 +1411,20 @@ void BG_LoadItemNames(void)
 
 	len = trap_FS_FOpenFile( fileName, &f, FS_READ );
 
-	if ( !f ) 
+	if ( !f )
 	{
 		Com_Printf( S_COLOR_RED "BG_LoadItemNames : MP_ITEMNAMES.DAT file not found!\n");
 		return;
 	}
 
-	if ( len > MAX_ITEMNAMEFILE ) 
+	if ( len > MAX_ITEMNAMEFILE )
 	{
 		Com_Printf( S_COLOR_RED "BG_LoadItemNames : MP_ITEMNAMES.DAT too big!\n");
 		return;
 	}
 
 	// initialise the data area
-	memset(itemNameBuffer, 0, sizeof(itemNameBuffer));	
+	memset(itemNameBuffer, 0, sizeof(itemNameBuffer));
 
 	trap_FS_Read( itemNameBuffer, len, f );
 
@@ -1519,7 +1519,7 @@ char* BG_RegisterRace( const char *name ) {
 		Com_sprintf(races, sizeof(races), "unknown");
 		return races;
 	}
-	if ( len >= sizeof( text ) - 1) 
+	if ( len >= sizeof( text ) - 1)
 	{
 		Com_Printf( S_COLOR_RED "file too large: %s is %i, max allowed is %i", name, len, sizeof( text ) );
 		trap_FS_FCloseFile( f );
@@ -1528,7 +1528,7 @@ char* BG_RegisterRace( const char *name ) {
 
 	trap_FS_Read( text, len, f );
 	trap_FS_FCloseFile( f );
-	
+
 	theSex = G_ParseAnimationFileSex(name);
 	if (theSex == GENDER_MALE) {
 		strcat(races, "Male,");

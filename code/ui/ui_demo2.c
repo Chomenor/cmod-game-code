@@ -34,7 +34,7 @@ DEMOS MENU
 
 #define PIC_UNDERLINE			"menu/common/underline.tga"
 
-typedef struct 
+typedef struct
 {
 	menuframework_s	menu;
 
@@ -80,18 +80,18 @@ menufield_s	s_demoline12;
 
 static void* g_demoline[] =
 {
-	&s_demoline1, 
-	&s_demoline2, 
-	&s_demoline3, 
-	&s_demoline4, 
-	&s_demoline5, 
-	&s_demoline6, 
-	&s_demoline7, 
-	&s_demoline8, 
-	&s_demoline9, 
-	&s_demoline10, 
-	&s_demoline11, 
-	&s_demoline12, 
+	&s_demoline1,
+	&s_demoline2,
+	&s_demoline3,
+	&s_demoline4,
+	&s_demoline5,
+	&s_demoline6,
+	&s_demoline7,
+	&s_demoline8,
+	&s_demoline9,
+	&s_demoline10,
+	&s_demoline11,
+	&s_demoline12,
 	NULL,
 };
 
@@ -164,7 +164,7 @@ Demos_MenuDraw
 */
 static void Demos_MenuDraw (void)
 {
-	
+
 	// Draw graphics particular to Demo Menu
 	DemoMenu_Graphics();
 
@@ -177,16 +177,16 @@ static void Demos_MenuDraw (void)
 Demos_MenuEvent
 ===============
 */
-static void Demos_MenuEvent( void *ptr, int event ) 
+static void Demos_MenuEvent( void *ptr, int event )
 {
 	int index;
 
-	if( event != QM_ACTIVATED ) 
+	if( event != QM_ACTIVATED )
 	{
 		return;
 	}
 
-	switch( ((menucommon_s*)ptr)->id ) 
+	switch( ((menucommon_s*)ptr)->id )
 	{
 		case ID_DEMOCOMMENT1:
 		case ID_DEMOCOMMENT2:
@@ -228,7 +228,7 @@ static void Demos_MenuEvent( void *ptr, int event )
 UI_DemosMenu_Key
 =================
 */
-static sfxHandle_t UI_DemosMenu_Key( int key ) 
+static sfxHandle_t UI_DemosMenu_Key( int key )
 {
 	menucommon_s	*item;
 
@@ -242,7 +242,7 @@ static sfxHandle_t UI_DemosMenu_Key( int key )
 UI_DemosMenu_Cache
 ===============
 */
-void UI_DemosMenu_Cache( void ) 
+void UI_DemosMenu_Cache( void )
 {
 	s_demos.currentGameTopLeft = trap_R_RegisterShaderNoMip("menu/common/corner_ul_18_24.tga");
 	s_demos.currentGameBotLeft = trap_R_RegisterShaderNoMip("menu/common/corner_ll_18_18.tga");
@@ -260,7 +260,7 @@ void UI_DemosMenu_Cache( void )
 Demos_MenuInit
 ===============
 */
-static void Demos_MenuInit( void ) 
+static void Demos_MenuInit( void )
 {
 	int		i,x,y;
 	int		len;
@@ -275,13 +275,13 @@ static void Demos_MenuInit( void )
 	s_demos.menu.wrapAround					= qtrue;
 	s_demos.menu.draw						= Demos_MenuDraw;
 	s_demos.menu.descX						= MENU_DESC_X;
-	s_demos.menu.descY						= MENU_DESC_Y;	
+	s_demos.menu.descY						= MENU_DESC_Y;
 	s_demos.menu.titleX						= MENU_TITLE_X;
 	s_demos.menu.titleY						= MENU_TITLE_Y;
 	s_demos.menu.titleI						= MNT_DEMOS_TITLE;
 	s_demos.menu.footNoteEnum				= MNT_DEMOS;
 
-	s_demos.main.generic.type				= MTYPE_BITMAP;      
+	s_demos.main.generic.type				= MTYPE_BITMAP;
 	s_demos.main.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
 	s_demos.main.generic.x					= 482;
 	s_demos.main.generic.y					= 136;
@@ -298,7 +298,7 @@ static void Demos_MenuInit( void )
 	s_demos.main.textcolor					= CT_BLACK;
 	s_demos.main.textcolor2					= CT_WHITE;
 
-	s_demos.engage.generic.type				= MTYPE_BITMAP;      
+	s_demos.engage.generic.type				= MTYPE_BITMAP;
 	s_demos.engage.generic.flags			= (QMF_INACTIVE|QMF_GRAYED);
 	s_demos.engage.generic.x				= 283;
 	s_demos.engage.generic.y				= 101;
@@ -315,7 +315,7 @@ static void Demos_MenuInit( void )
 	s_demos.engage.textcolor				= CT_BLACK;
 	s_demos.engage.textcolor2				= CT_WHITE;
 
-	s_demos.currentFile.generic.type		= MTYPE_BITMAP;      
+	s_demos.currentFile.generic.type		= MTYPE_BITMAP;
 	s_demos.currentFile.generic.flags		= QMF_INACTIVE;
 	s_demos.currentFile.generic.x			= 218;
 	s_demos.currentFile.generic.y			= 68;
@@ -349,7 +349,7 @@ static void Demos_MenuInit( void )
 	i=0;
 	while (g_demoline[i])
 	{
-		((menubitmap_s *)g_demoline[i])->generic.type			= MTYPE_BITMAP;      
+		((menubitmap_s *)g_demoline[i])->generic.type			= MTYPE_BITMAP;
 		((menubitmap_s *)g_demoline[i])->generic.flags			= QMF_INACTIVE | QMF_HIDDEN;
 		((menubitmap_s *)g_demoline[i])->generic.x				= x;
 		((menubitmap_s *)g_demoline[i])->generic.y				= y;
@@ -374,7 +374,7 @@ static void Demos_MenuInit( void )
 	}
 
 	// No demos??
-	if (!s_demos.list.numitems) 
+	if (!s_demos.list.numitems)
 	{
 		strcpy( s_demos.names, menu_normal_text[MNT_NO_DEMOS_FOUND] );
 		s_demos.list.numitems = 1;
@@ -433,7 +433,7 @@ static void Demos_MenuInit( void )
 UI_DemosMenu
 ===============
 */
-void UI_DemosMenu( void ) 
+void UI_DemosMenu( void )
 {
 	Demos_MenuInit();
 	UI_PushMenu( &s_demos.menu );

@@ -67,7 +67,7 @@ static void	 swapfunc(char *, char *, int, int);
 		register TYPE	t = *pi;		\
 		*pi++ = *pj;				\
 		*pj++ = t;				\
-        } while (--i > 0);				\
+	} while (--i > 0);				\
 }
 
 #define SWAPINIT(a, es) swaptype = ((char *)a - (char *)0) % sizeof(long) || \
@@ -100,8 +100,8 @@ med3(a, b, c, cmp)
 	cmp_t *cmp;
 {
 	return cmp(a, b) < 0 ?
-	       (cmp(b, c) < 0 ? b : (cmp(a, c) < 0 ? c : a ))
-              :(cmp(b, c) > 0 ? b : (cmp(a, c) < 0 ? a : c ));
+			(cmp(b, c) < 0 ? b : (cmp(a, c) < 0 ? c : a ))
+				:(cmp(b, c) > 0 ? b : (cmp(a, c) < 0 ? a : c ));
 }
 
 void
@@ -118,7 +118,7 @@ loop:	SWAPINIT(a, es);
 	if (n < 7) {
 		for (pm = (char *)a + es; pm < (char *)a + n * es; pm += es)
 			for (pl = pm; pl > (char *)a && cmp(pl - es, pl) > 0;
-			     pl -= es)
+					pl -= es)
 				swap(pl, pl - es);
 		return;
 	}
@@ -165,7 +165,7 @@ loop:	SWAPINIT(a, es);
 	if (swap_cnt == 0) {  /* Switch to insertion sort */
 		for (pm = (char *)a + es; pm < (char *)a + n * es; pm += es)
 			for (pl = pm; pl > (char *)a && cmp(pl - es, pl) > 0;
-			     pl -= es)
+					pl -= es)
 				swap(pl, pl - es);
 		return;
 	}
@@ -584,7 +584,7 @@ double atan2( double y, double x ) {
 		}
 	}
 
-	return base + dir * i * ( M_PI/2048); 
+	return base + dir * i * ( M_PI/2048);
 }
 
 

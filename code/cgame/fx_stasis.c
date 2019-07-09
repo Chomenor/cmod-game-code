@@ -47,7 +47,7 @@ void FX_SmallStasisBeam(centity_t *cent, vec3_t start, vec3_t dir)
 		if ( rand() & 1 )
 			FX_AddSprite( org, vel, qfalse, random() + 1.5, -3, 1.0, 1.0, 0.0, 0.0, 500, cgs.media.blueParticleShader);
 		else
-			FX_AddSprite( org, vel, qfalse, random() + 1.5, -3, 1.0, 1.0, 0.0, 0.0, 500, cgs.media.purpleParticleShader);	
+			FX_AddSprite( org, vel, qfalse, random() + 1.5, -3, 1.0, 1.0, 0.0, 0.0, 500, cgs.media.purpleParticleShader);
 	}
 
 	// Impact graphic if needed.
@@ -71,7 +71,7 @@ void FX_SmallStasisBeam(centity_t *cent, vec3_t start, vec3_t dir)
 		FX_AddQuad( end, tr.plane.normal, 4, 16, 1.0, 0.0, random() * 360, 500, cgs.media.blueParticleShader );
 		FX_AddQuad( end, tr.plane.normal, 3, 12, 1.0, 0.0, random() * 360, 420, cgs.media.ltblueParticleShader );
 
-		CG_ImpactMark( cgs.media.scavMarkShader, end, tr.plane.normal, random()*360, 1,1,1,0.6, qfalse, 
+		CG_ImpactMark( cgs.media.scavMarkShader, end, tr.plane.normal, random()*360, 1,1,1,0.6, qfalse,
 					5 + random() * 2, qfalse );
 	}
 
@@ -123,7 +123,7 @@ void FX_StasisShot( centity_t *cent, vec3_t end, vec3_t start )
 		if ( rand() & 1 )
 			FX_AddSprite( org, vel, qfalse, random() + 2, -4, 1.0, 1.0, 0.0, 0.0, 600, cgs.media.blueParticleShader);
 		else
-			FX_AddSprite( org, vel, qfalse, random() + 2, -4, 1.0, 1.0, 0.0, 0.0, 600, cgs.media.purpleParticleShader);	
+			FX_AddSprite( org, vel, qfalse, random() + 2, -4, 1.0, 1.0, 0.0, 0.0, 600, cgs.media.purpleParticleShader);
 	}
 	VectorMA(start, FX_MAXRANGE_STASIS, fwd, end2);
 	CG_Trace(&tr, start, NULL, NULL, end2, cent->currentState.number, MASK_SHOT);
@@ -220,7 +220,7 @@ void FX_StasisShot( centity_t *cent, vec3_t end, vec3_t start )
 	{
 		VectorCopy(newdir, bolt2vec);
 	}
-		
+
 	// Put a big gigant-mo sprite at the muzzle end so people can't see the crappy edges of the line
 	FX_AddSprite( start, NULL, qfalse, random()*3 + 15, -20, 1.0, 0.5, 0.0, 0.0, 600, cgs.media.blueParticleShader);
 
@@ -254,7 +254,7 @@ void FX_StasisShotImpact( vec3_t end, vec3_t dir )
 	FX_AddQuad( org, dir, 7, 35, 1.0, 0.0, random() * 360, 500, cgs.media.blueParticleShader );
 	FX_AddQuad( org, dir, 5, 25, 1.0, 0.0, random() * 360, 420, cgs.media.ltblueParticleShader );
 
-//	CG_ImpactMark( cgs.media.scavMarkShader, org, dir, random()*360, 1,1,1,0.6, qfalse, 
+//	CG_ImpactMark( cgs.media.scavMarkShader, org, dir, random()*360, 1,1,1,0.6, qfalse,
 //				8 + random() * 2, qfalse );
 
 //	FX_StasisDischarge( org, dir, irandom( 2,4 ), 24 + random() * 12, 64 + random() * 48 );
@@ -281,7 +281,7 @@ void FX_StasisShotMiss( vec3_t end, vec3_t dir )
 	FX_AddQuad( org, dir, 5, 25, 1.0, 0.0, random() * 360, 500, cgs.media.blueParticleShader );
 	FX_AddQuad( org, dir, 4, 17, 1.0, 0.0, random() * 360, 420, cgs.media.ltblueParticleShader );
 
-	CG_ImpactMark( cgs.media.scavMarkShader, org, dir, random()*360, 1,1,1,0.6, qfalse, 
+	CG_ImpactMark( cgs.media.scavMarkShader, org, dir, random()*360, 1,1,1,0.6, qfalse,
 				6 + random() * 2, qfalse );
 
 	FX_AddSprite( end, NULL, qfalse, flrandom(40,60), -50, 1.0, 0.0, random() * 360, 0, 500, cgs.media.blueParticleShader );
@@ -410,7 +410,7 @@ void FX_StasisDischarge( vec3_t origin, vec3_t normal, int count, float dist_out
 	{
 		//Move out a set distance
 		VectorMA( origin, dist_out, normal, org );
-		
+
 		//Even out the hits
 		dir[ROLL] += (360 / count) + (rand() & 31);
 		AngleVectors( dir, NULL, vr, NULL );
@@ -423,9 +423,9 @@ void FX_StasisDischarge( vec3_t origin, vec3_t normal, int count, float dist_out
 		VectorMA( org, -dist_out * 3, normal, dest );
 
 		CG_Trace( &trace, org, NULL, NULL, dest, 0, MASK_SHOT );
-		
+
 		//No surface found, start over
-		if (trace.fraction == 1) 
+		if (trace.fraction == 1)
 			continue;
 
 		//Connect the two points with bolts
@@ -457,13 +457,13 @@ void FX_StasisWeaponHitWall( vec3_t origin, vec3_t dir, int size )
 	VectorMA(origin, size, dir, hitpos);
 
 	// Set an oriented residual glow effect
-	FX_AddQuad( hitpos, dir, size * size * 15.0f, -150.0f, 
+	FX_AddQuad( hitpos, dir, size * size * 15.0f, -150.0f,
 				1.0f, 0.0f, 0, 300, cgs.media.blueParticleShader );
 
-	CG_ImpactMark( cgs.media.scavMarkShader, origin, dir, random()*360, 1,1,1,0.6, qfalse, 
+	CG_ImpactMark( cgs.media.scavMarkShader, origin, dir, random()*360, 1,1,1,0.6, qfalse,
 					size * 12 + 1, qfalse );
 
-	FX_AddSprite( hitpos, NULL, qfalse, size * size * 15.0f, -150.0f, 
+	FX_AddSprite( hitpos, NULL, qfalse, size * size * 15.0f, -150.0f,
 				1.0f, 0.0f, 360*random(), 0, 400, cgs.media.blueParticleShader );
 
 	// Only play the impact sound and throw off the purple particles when it's the main projectile

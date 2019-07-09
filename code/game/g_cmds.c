@@ -65,7 +65,7 @@ void DeathmatchScoreboardMessage( gentity_t *ent ) {
 		stringlength += j;
 	}
 
-	trap_SendServerCommand( ent-g_entities, va("scores %i %i %i%s", i, 
+	trap_SendServerCommand( ent-g_entities, va("scores %i %i %i%s", i,
 		level.teamScores[TEAM_RED], level.teamScores[TEAM_BLUE],
 		string ) );
 }
@@ -377,7 +377,7 @@ void Cmd_LevelShot_f( gentity_t *ent ) {
 
 	// doesn't work in single player
 	if ( g_gametype.integer != 0 ) {
-		trap_SendServerCommand( ent-g_entities, 
+		trap_SendServerCommand( ent-g_entities,
 			"print \"Must be in g_gametype 0 for levelshot\n\"" );
 		return;
 	}
@@ -458,39 +458,39 @@ void SetPlayerClassCvar(gentity_t *ent)
 	{
 	case PC_INFILTRATOR:
 //		trap_Cvar_Set("ui_playerclass", "INFILTRATOR");
-		trap_SendServerCommand(ent-g_entities,"pc INFILTRATOR");  
+		trap_SendServerCommand(ent-g_entities,"pc INFILTRATOR");
 		break;
 	case PC_SNIPER:
 //		trap_Cvar_Set("ui_playerclass", "SNIPER");
-		trap_SendServerCommand(ent-g_entities,"pc SNIPER");  
+		trap_SendServerCommand(ent-g_entities,"pc SNIPER");
 		break;
 	case PC_HEAVY:
 //		trap_Cvar_Set("ui_playerclass", "HEAVY");
-		trap_SendServerCommand(ent-g_entities,"pc HEAVY");  
+		trap_SendServerCommand(ent-g_entities,"pc HEAVY");
 		break;
 	case PC_DEMO:
 //		trap_Cvar_Set("ui_playerclass", "DEMO");
-		trap_SendServerCommand(ent-g_entities,"pc DEMO");  
+		trap_SendServerCommand(ent-g_entities,"pc DEMO");
 		break;
 	case PC_MEDIC:
 //		trap_Cvar_Set("ui_playerclass", "MEDIC");
-		trap_SendServerCommand(ent-g_entities,"pc MEDIC");  
+		trap_SendServerCommand(ent-g_entities,"pc MEDIC");
 		break;
 	case PC_TECH:
 //		trap_Cvar_Set("ui_playerclass", "TECH");
-		trap_SendServerCommand(ent-g_entities,"pc TECH");  
+		trap_SendServerCommand(ent-g_entities,"pc TECH");
 		break;
 	case PC_BORG:
 //		trap_Cvar_Set("ui_playerclass", "BORG");
-		trap_SendServerCommand(ent-g_entities,"pc BORG");  
+		trap_SendServerCommand(ent-g_entities,"pc BORG");
 		break;
 	case PC_ACTIONHERO:
 //		trap_Cvar_Set("ui_playerclass", "HERO");
-		trap_SendServerCommand(ent-g_entities,"pc HERO");  
+		trap_SendServerCommand(ent-g_entities,"pc HERO");
 		break;
 	case PC_NOCLASS:
 //		trap_Cvar_Set("ui_playerclass", "NOCLASS");
-		trap_SendServerCommand(ent-g_entities,"pc NOCLASS");  
+		trap_SendServerCommand(ent-g_entities,"pc NOCLASS");
 		break;
 	}
 }
@@ -597,12 +597,12 @@ qboolean SetTeam( gentity_t *ent, char *s ) {
 
 			// We allow a spread of two
 			if ( team == TEAM_RED && counts[TEAM_RED] - counts[TEAM_BLUE] > 1 ) {
-				trap_SendServerCommand( ent->client->ps.clientNum, 
+				trap_SendServerCommand( ent->client->ps.clientNum,
 					"cp \"Red team has too many players.\n\"" );
 				return qfalse; // ignore the request
 			}
 			if ( team == TEAM_BLUE && counts[TEAM_BLUE] - counts[TEAM_RED] > 1 ) {
-				trap_SendServerCommand( ent->client->ps.clientNum, 
+				trap_SendServerCommand( ent->client->ps.clientNum,
 					"cp \"Blue team has too many players.\n\"" );
 				return qfalse; // ignore the request
 			}
@@ -619,7 +619,7 @@ qboolean SetTeam( gentity_t *ent, char *s ) {
 	if ( g_gametype.integer == GT_TOURNAMENT
 		&& level.numNonSpectatorClients >= 2 ) {
 		team = TEAM_SPECTATOR;
-	} else if ( g_maxGameClients.integer > 0 && 
+	} else if ( g_maxGameClients.integer > 0 &&
 		level.numNonSpectatorClients >= g_maxGameClients.integer ) {
 		team = TEAM_SPECTATOR;
 	}
@@ -664,7 +664,7 @@ qboolean SetTeam( gentity_t *ent, char *s ) {
 
 	// get and distribute relevent paramters
 	ClientUserinfoChanged( clientNum );
-	
+
 	//THIS IS VERY VERY BAD, CAUSED ENDLESS WARMUP, FOUND ANOTHER WAY TO PREVENT DOORS
 	/*
 	if (level.time - client->pers.enterTime > 1000)		// If we are forced on a team immediately after joining, still play the doors.
@@ -678,7 +678,7 @@ qboolean SetTeam( gentity_t *ent, char *s ) {
 	return qtrue;
 }
 
-char *ClassNameForValue( pclass_t pClass ) 
+char *ClassNameForValue( pclass_t pClass )
 {
 	switch ( pClass )
 	{
@@ -736,39 +736,39 @@ qboolean SetClass( gentity_t *ent, char *s, char *teamName ) {
 
 	clientNum = client - level.clients;
 
-	if ( !Q_stricmp( s, "infiltrator" ) ) 
+	if ( !Q_stricmp( s, "infiltrator" ) )
 	{
 		pclass = PC_INFILTRATOR;
 	}
-	else if ( !Q_stricmp( s, "sniper" ) ) 
+	else if ( !Q_stricmp( s, "sniper" ) )
 	{
 		pclass = PC_SNIPER;
-	} 
-	else if ( !Q_stricmp( s, "heavy" ) ) 
+	}
+	else if ( !Q_stricmp( s, "heavy" ) )
 	{
 		pclass = PC_HEAVY;
-	} 
-	else if ( !Q_stricmp( s, "demo" ) ) 
+	}
+	else if ( !Q_stricmp( s, "demo" ) )
 	{
 		pclass = PC_DEMO;
-	} 
-	else if ( !Q_stricmp( s, "medic" ) ) 
+	}
+	else if ( !Q_stricmp( s, "medic" ) )
 	{
 		pclass = PC_MEDIC;
-	} 
-	else if ( !Q_stricmp( s, "tech" ) ) 
+	}
+	else if ( !Q_stricmp( s, "tech" ) )
 	{
 		pclass = PC_TECH;
-	} 
-	else if ( !Q_stricmp( s, "borg" ) ) 
+	}
+	else if ( !Q_stricmp( s, "borg" ) )
 	{
 		pclass = PC_BORG;
-	} 
-	else if ( !Q_stricmp( s, "noclass" ) ) 
+	}
+	else if ( !Q_stricmp( s, "noclass" ) )
 	{
 		pclass = PC_NOCLASS;
-	} 
-	else 
+	}
+	else
 	{
 		pclass = irandom( PC_INFILTRATOR, PC_TECH );
 	}
@@ -870,8 +870,8 @@ to free floating spectator mode
 =================
 */
 void StopFollowing( gentity_t *ent ) {
-	ent->client->ps.persistant[ PERS_TEAM ] = TEAM_SPECTATOR;	
-	ent->client->sess.sessionTeam = TEAM_SPECTATOR;	
+	ent->client->ps.persistant[ PERS_TEAM ] = TEAM_SPECTATOR;
+	ent->client->sess.sessionTeam = TEAM_SPECTATOR;
 	ent->client->sess.spectatorState = SPECTATOR_FREE;
 	ent->client->ps.pm_flags &= ~PMF_FOLLOW;
 	ent->r.svFlags &= ~SVF_BOT;
@@ -973,7 +973,7 @@ void Cmd_Class_f( gentity_t *ent ) {
 	char		s[MAX_TOKEN_CHARS];
 	qboolean	check = qtrue;
 
-	if ( trap_Argc() != 2 ) 
+	if ( trap_Argc() != 2 )
 	{//Just asking what class they're on
 		char	*className;
 		switch ( ent->client->sess.sessionClass ) {
@@ -1113,7 +1113,7 @@ void Cmd_Class_f( gentity_t *ent ) {
 			}
 			else
 			{
-				if ( seconds > 1 ) 
+				if ( seconds > 1 )
 				{
 					trap_SendServerCommand( ent-g_entities, va("cp \"Cannot change classes again for %d seconds\"", seconds ) );
 				}
@@ -1134,7 +1134,7 @@ void Cmd_Class_f( gentity_t *ent ) {
 		trap_SendServerCommand( ent-g_entities, va( "print \"Cannot manually change to class %s\n\"", s ) );
 		return;
 	}
-	
+
 	//can't change from a Borg class
 	if ( ent->client->sess.sessionClass == PC_BORG )
 	{
@@ -1323,7 +1323,7 @@ static void G_SayTo( gentity_t *ent, gentity_t *other, int mode, int color, cons
 		return;
 	}
 
-	trap_SendServerCommand( other-g_entities, va("%s \"%s%c%c%s\"", 
+	trap_SendServerCommand( other-g_entities, va("%s \"%s%c%c%s\"",
 		mode == SAY_TEAM ? "tchat" : "chat",
 		name, Q_COLOR_ESCAPE, color, message));
 }
@@ -1351,10 +1351,10 @@ void G_Say( gentity_t *ent, gentity_t *target, int mode, const char *chatText ) 
 	case SAY_TEAM:
 		G_LogPrintf( "sayteam: %s: %s\n", ent->client->pers.netname, chatText );
 		if (Team_GetLocationMsg(ent, location, sizeof(location)))
-			Com_sprintf (name, sizeof(name), "(%s%c%c) (%s): ", 
+			Com_sprintf (name, sizeof(name), "(%s%c%c) (%s): ",
 				ent->client->pers.netname, Q_COLOR_ESCAPE, COLOR_WHITE, location);
 		else
-			Com_sprintf (name, sizeof(name), "(%s%c%c): ", 
+			Com_sprintf (name, sizeof(name), "(%s%c%c): ",
 				ent->client->pers.netname, Q_COLOR_ESCAPE, COLOR_WHITE );
 		color = COLOR_CYAN;
 		break;
@@ -1567,9 +1567,9 @@ void Cmd_CallVote_f( gentity_t *ent ) {
 	ent->client->ps.eFlags |= EF_VOTED;
 
 	trap_SetConfigstring( CS_VOTE_TIME, va("%i", level.voteTime ) );
-	trap_SetConfigstring( CS_VOTE_STRING, level.voteString );	
+	trap_SetConfigstring( CS_VOTE_STRING, level.voteString );
 	trap_SetConfigstring( CS_VOTE_YES, va("%i", level.voteYes ) );
-	trap_SetConfigstring( CS_VOTE_NO, va("%i", level.voteNo ) );	
+	trap_SetConfigstring( CS_VOTE_NO, va("%i", level.voteNo ) );
 }
 
 /*
@@ -1600,7 +1600,7 @@ void Cmd_Vote_f( gentity_t *ent ) {
 		trap_SetConfigstring( CS_VOTE_YES, va("%i", level.voteYes ) );
 	} else {
 		level.voteNo++;
-		trap_SetConfigstring( CS_VOTE_NO, va("%i", level.voteNo ) );	
+		trap_SetConfigstring( CS_VOTE_NO, va("%i", level.voteNo ) );
 	}
 
 	// a majority will be determined in G_CheckVote, which will also account

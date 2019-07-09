@@ -1,13 +1,13 @@
 #include "g_local.h"
 
-void breakable_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath ) 
+void breakable_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath )
 {
 	vec3_t		size, org, dir;
 	gentity_t	*te = NULL;
 
 	self->s.frame = 0;
 	//self->r.svFlags &= ~SVF_ANIMATING;
-			
+
 	self->health = 0;
 
 	self->pain = 0/*NULL*/;
@@ -100,23 +100,23 @@ void breakable_use (gentity_t *self, gentity_t *other, gentity_t *activator)
 	breakable_die( self, other, activator, self->health, MOD_UNKNOWN );
 }
 
-static void InitBBrush ( gentity_t *ent ) 
+static void InitBBrush ( gentity_t *ent )
 {
 	float		light;
 	vec3_t		color;
 	qboolean	lightSet, colorSet;
 
 	VectorCopy( ent->s.origin, ent->pos1 );
-	
+
 	trap_SetBrushModel( ent, ent->model );
 
 	ent->die = breakable_die;
-	
+
 	//ent->r.svFlags |= SVF_BBRUSH;
 
 	// if the "model2" key is set, use a seperate model
 	// for drawing, but clip against the brushes
-	if ( ent->model2 ) 
+	if ( ent->model2 )
 	{
 		ent->s.modelindex2 = G_ModelIndex( ent->model2 );
 	}
@@ -124,7 +124,7 @@ static void InitBBrush ( gentity_t *ent )
 	// if the "color" or "light" keys are set, setup constantLight
 	lightSet = G_SpawnFloat( "light", "100", &light );
 	colorSet = G_SpawnVector( "color", "1 1 1", color );
-	if ( lightSet || colorSet ) 
+	if ( lightSet || colorSet )
 	{
 		int		r, g, b, i;
 
@@ -180,12 +180,12 @@ Damage: default is none
  4 - wood
  5 - stone
 
-Don't know if these work:  
+Don't know if these work:
 "color"		constantLight color
 "light"		constantLight radius
 
 */
-void SP_func_breakable( gentity_t *self ) 
+void SP_func_breakable( gentity_t *self )
 {
 	if(!(self->spawnflags & 1))
 	{
@@ -195,7 +195,7 @@ void SP_func_breakable( gentity_t *self )
 		}
 	}
 
-	if (self->health) 
+	if (self->health)
 	{
 		self->takedamage = qtrue;
 	}
@@ -242,17 +242,17 @@ Damage: default is none
  4 - wood
  5 - stone
 
-FIXME/TODO: 
+FIXME/TODO:
 set size better?
 multiple damage models?
 don't throw chunks on pain, or throw level 1 chunks only on pains?
 custom explosion effect/sound?
 */
-void SP_misc_model_breakable( gentity_t *ent ) 
+void SP_misc_model_breakable( gentity_t *ent )
 {
 	char	damageModel[MAX_QPATH];
 	int		len;
-	
+
 	//Main model
 	ent->s.modelindex = ent->sound2to1 = G_ModelIndex( ent->model );
 
@@ -265,9 +265,9 @@ void SP_misc_model_breakable( gentity_t *ent )
 		ent->r.contents = CONTENTS_SHOTCLIP;
 	}
 
-	ent->use = breakable_use;	
+	ent->use = breakable_use;
 
-	if ( ent->health ) 
+	if ( ent->health )
 	{
 		G_SoundIndex("sound/weapons/explosions/cargoexplode.wav");
 		//ent->max_health = ent->health;
@@ -279,7 +279,7 @@ void SP_misc_model_breakable( gentity_t *ent )
 	len = strlen( ent->model ) - 4;
 	strncpy( damageModel, ent->model, len );
 	damageModel[len] = 0;	//chop extension
-	
+
 	if (ent->takedamage) {
 		//Dead/damaged model
 		if( !(ent->spawnflags & 8) ) {	//no dmodel
@@ -319,7 +319,7 @@ int Add_Ammo2 (gentity_t *ent, int weapon, int count)
 {
 	ent->client->ps.ammo[weapon] += count;
 
-	if ( ent->client->ps.ammo[weapon] > Max_Ammo[weapon] ) 
+	if ( ent->client->ps.ammo[weapon] > Max_Ammo[weapon] )
 	{
 		ent->client->ps.ammo[weapon] = Max_Ammo[weapon];
 		return qfalse;
@@ -355,7 +355,7 @@ void ammo_think( gentity_t *ent )
 	if ( ent->enemy && ent->enemy->client )
 	{
 		//assume that we'll finish here, if we don't, it will be overridden
-		ent->use = ammo_use;	
+		ent->use = ammo_use;
 		ent->think = 0;//qvm complains about using NULL
 		ent->nextthink = -1;
 		for ( i = 0; i < WP_NUM_WEAPONS && ent->count > 0; i++ )
@@ -368,9 +368,9 @@ void ammo_think( gentity_t *ent )
 				{
 					dif= 2;
 				}
-				else if (dif < 0) 
+				else if (dif < 0)
 				{
-					dif= 0;	
+					dif= 0;
 				}
 
 				if (ent->count < dif)	// Can't give more than count
@@ -378,8 +378,8 @@ void ammo_think( gentity_t *ent )
 					dif = ent->count;
 				}
 
-				// Give player ammo 
-				if (Add_Ammo2(ent->enemy,i,dif) && (dif!=0))	
+				// Give player ammo
+				if (Add_Ammo2(ent->enemy,i,dif) && (dif!=0))
 				{
 					ent->count-=dif;
 					if ( ent->splashDamage )
@@ -446,7 +446,7 @@ void ammo_use( gentity_t *self, gentity_t *other, gentity_t *activator)
 			{
 				ammo_shutdown(self);
 			}
-		}	
+		}
 		else
 		{
 			G_Sound(self, G_SoundIndex("sound/weapons/noammo.wav") );
@@ -454,14 +454,14 @@ void ammo_use( gentity_t *self, gentity_t *other, gentity_t *activator)
 		// Use target when used
 		if (self->spawnflags & 8)
 		{
-			G_UseTargets( self, activator );	
+			G_UseTargets( self, activator );
 		}
 
 		self->use = 0; /*NULL*/
 		self->enemy = other;
 		self->think = ammo_think;
 		self->nextthink = level.time + 50;
-	}	
+	}
 }
 
 void ammo_station_finish_spawning ( gentity_t *self )
@@ -472,7 +472,7 @@ void ammo_station_finish_spawning ( gentity_t *self )
 	self->use = ammo_use;
 }
 //------------------------------------------------------------
-/*QUAKED misc_ammo_station (1 0 0) (-16 -16 -16) (16 16 16) 
+/*QUAKED misc_ammo_station (1 0 0) (-16 -16 -16) (16 16 16)
 
 "health" - how much health the model has - default 60 (zero makes non-breakable)
 "target" - what to use when it dies
@@ -507,10 +507,10 @@ void SP_misc_ammo_station( gentity_t *ent )
 	ent->r.contents = CONTENTS_CORPSE;
 
 	// Set a generic use function
-	ent->use = ammo_use;	
+	ent->use = ammo_use;
 	G_SoundIndex( "sound/player/suitenergy.wav" );
 
-	if ( ent->health ) 
+	if ( ent->health )
 	{
 		ent->takedamage = qtrue;
 		ent->pain = breakable_pain;

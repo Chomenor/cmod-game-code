@@ -6,7 +6,7 @@
  * desc:		bot AI library
  *
  * $Archive: /StarTrek/Code-DM/game/botlib.h $
- * $Author: Mgummelt $ 
+ * $Author: Mgummelt $
  * $Revision: 4 $
  * $Modtime: 3/12/01 3:08p $
  * $Date: 3/12/01 4:43p $

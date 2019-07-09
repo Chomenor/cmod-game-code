@@ -5,7 +5,7 @@
  * desc:		bot AI
  *
  * $Archive: /StarTrek/Code-DM/game/botai.h $
- * $Author: Jmonroe $ 
+ * $Author: Jmonroe $
  * $Revision: 1 $
  * $Modtime: 1/21/00 10:12p $
  * $Date: 1/25/00 6:27p $

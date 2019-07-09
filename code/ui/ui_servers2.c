@@ -96,7 +96,7 @@ static const char *sortkey_items[] = {
 };
 */
 
-static int master_items[] = 
+static int master_items[] =
 {
 	MNT_MASTER_ITEMS_LOCAL,
 //	MNT_MASTER_ITEMS_MPLAYER,
@@ -109,7 +109,7 @@ static int master_items[] =
 	0
 };
 
-static int servertype_items[] = 
+static int servertype_items[] =
 {
 	MNT_SERVERTYPE_ALL,
 	MNT_SERVERTYPE_FREE_FOR_ALL,
@@ -119,7 +119,7 @@ static int servertype_items[] =
 	0
 };
 
-static int sortkey_items[] = 
+static int sortkey_items[] =
 {
 	MNT_SORTKEY_SERVER_NAME,
 	MNT_SORTKEY_MAP_NAME,
@@ -129,14 +129,14 @@ static int sortkey_items[] =
 	0
 };
 
-static int noyes_items[] = 
+static int noyes_items[] =
 {
 	MNT_NO,
 	MNT_YES,
 	0
 };
 
-static float server_buttons[5][2] = 
+static float server_buttons[5][2] =
 {
 {274, 72},	//	Server type
 {274, 92},	//	Sort by
@@ -185,7 +185,7 @@ typedef struct servernode_s {
 	int		maxPing;
 	qboolean	isPure;
 	qboolean	isExpansion;
-} servernode_t; 
+} servernode_t;
 
 typedef struct {
 	char			buff[MAX_LISTBOXWIDTH];
@@ -222,7 +222,7 @@ typedef struct {
 	char*				items[MAX_LISTBOXITEMS];
 	int					numqueriedservers;
 	int					*numservers;
-	servernode_t		*serverlist;	
+	servernode_t		*serverlist;
 	int					currentping;
 	qboolean			refreshservers;
 	int					nextpingtime;
@@ -234,7 +234,7 @@ typedef struct {
 
 static arenaservers_t	g_arenaservers;
 
-typedef struct 
+typedef struct
 {
 	menuframework_s		menu;
 	menubitmap_s		main;
@@ -406,13 +406,13 @@ static void ArenaServers_UpdateMenu( void ) {
 			g_arenaservers.list.generic.flags		&= ~QMF_GRAYED;
 			g_arenaservers.refresh.generic.flags	&= ~QMF_GRAYED;
 			g_arenaservers.go.generic.flags			&= ~QMF_GRAYED;
-			
+
 			// update status bar
-			if(( g_servertype >= AS_GLOBAL1) && ( g_servertype <= AS_GLOBAL5)) 
+			if(( g_servertype >= AS_GLOBAL1) && ( g_servertype <= AS_GLOBAL5))
 			{
 				g_arenaservers.statusbar.string = quake3worldMessage;
 			}
-			else 
+			else
 			{
 				g_arenaservers.statusbar.string = "";
 			}
@@ -420,7 +420,7 @@ static void ArenaServers_UpdateMenu( void ) {
 	}
 	else {
 		// no servers found
-		if( g_arenaservers.refreshservers ) 
+		if( g_arenaservers.refreshservers )
 		{
 			strcpy( g_arenaservers.status.string,menu_normal_text[MNT_SCANNINGFORSERVERS] );
 			g_arenaservers.statusbar.string = (char*)menu_normal_text[MNT_SPACETOSTOP];
@@ -446,7 +446,7 @@ static void ArenaServers_UpdateMenu( void ) {
 			}
 
 			// update status bar
-			if(( g_servertype >= AS_GLOBAL1) && ( g_servertype <= AS_GLOBAL5)) 
+			if(( g_servertype >= AS_GLOBAL1) && ( g_servertype <= AS_GLOBAL5))
 			{
 				g_arenaservers.statusbar.string = quake3worldMessage;
 			}
@@ -542,9 +542,9 @@ static void ArenaServers_UpdateMenu( void ) {
 			pingColor = S_COLOR_RED;
 		}
 
-		Com_sprintf( buff, MAX_LISTBOXWIDTH, "%-23.23s %-11.11s %3d/%3d %-8.8s %3s %s%3d", 
+		Com_sprintf( buff, MAX_LISTBOXWIDTH, "%-23.23s %-11.11s %3d/%3d %-8.8s %3s %s%3d",
 			servernodeptr->hostname, servernodeptr->mapname, servernodeptr->numclients,
-	 		servernodeptr->maxclients, servernodeptr->gamename,
+			servernodeptr->maxclients, servernodeptr->gamename,
 			netnames[servernodeptr->nettype], pingColor, servernodeptr->pingtime);
 		if (!servernodeptr->isPure) {	//prev length is 62, we can safely add 2 more chars.
 			strcat(buff, " *");	//mark this unpure server!
@@ -603,7 +603,7 @@ static void ArenaServers_Remove( void )
 			memcpy( &g_arenaservers.favoriteaddresses[i], &g_arenaservers.favoriteaddresses[i+1], (g_arenaservers.numfavoriteaddresses - i - 1)*sizeof(MAX_ADDRESSLENGTH));
 		}
 		g_arenaservers.numfavoriteaddresses--;
-	}	
+	}
 
 	// find address in server list
 	for (i=0; i<g_numfavoriteservers; i++)
@@ -619,7 +619,7 @@ static void ArenaServers_Remove( void )
 			memcpy( &g_favoriteserverlist[i], &g_favoriteserverlist[i+1], (g_numfavoriteservers - i - 1)*sizeof(servernode_t));
 		}
 		g_numfavoriteservers--;
-	}	
+	}
 
 	g_arenaservers.numqueriedservers = g_arenaservers.numfavoriteaddresses;
 	g_arenaservers.currentping       = g_arenaservers.numfavoriteaddresses;
@@ -841,9 +841,9 @@ static void ArenaServers_StopRefresh( void )
 	if (g_arenaservers.numqueriedservers >= 0)
 	{
 		g_arenaservers.currentping       = *g_arenaservers.numservers;
-		g_arenaservers.numqueriedservers = *g_arenaservers.numservers; 
+		g_arenaservers.numqueriedservers = *g_arenaservers.numservers;
 	}
-	
+
 	// sort
 	qsort( g_arenaservers.serverlist, *g_arenaservers.numservers, sizeof( servernode_t ), ArenaServers_Compare);
 
@@ -876,7 +876,7 @@ static void ArenaServers_DoRefresh( void )
 				return;
 			}
 		}
-		else if(( g_servertype >= AS_GLOBAL1) && ( g_servertype <= AS_GLOBAL5)) 
+		else if(( g_servertype >= AS_GLOBAL1) && ( g_servertype <= AS_GLOBAL5))
 		{
 			if (trap_LAN_GetGlobalServerCount() < 0)
 			{
@@ -940,7 +940,7 @@ static void ArenaServers_DoRefresh( void )
 
 			// clear this query from internal list
 			g_arenaservers.pinglist[j].adrstr[0] = '\0';
-   		}
+		}
 
 		// clear this query from external list
 		trap_LAN_ClearPing( i );
@@ -992,7 +992,7 @@ static void ArenaServers_DoRefresh( void )
 		// get an address to ping
 		switch (g_servertype)
 		{
-			case AS_LOCAL:	
+			case AS_LOCAL:
 				trap_LAN_GetLocalServerAddressString( g_arenaservers.currentping, adrstr, MAX_ADDRESSLENGTH );
 				break;
 
@@ -1005,7 +1005,7 @@ static void ArenaServers_DoRefresh( void )
 				break;
 
 			case AS_FAVORITES:
-				strcpy( adrstr, g_arenaservers.favoriteaddresses[g_arenaservers.currentping] ); 		
+				strcpy( adrstr, g_arenaservers.favoriteaddresses[g_arenaservers.currentping] );
 				break;
 
 		}
@@ -1014,7 +1014,7 @@ static void ArenaServers_DoRefresh( void )
 		g_arenaservers.pinglist[j].start = uis.realtime;
 
 		trap_Cmd_ExecuteText( EXEC_NOW, va( "ping %s\n", adrstr )  );
-		
+
 		// advance to next server
 		g_arenaservers.currentping++;
 	}
@@ -1066,7 +1066,7 @@ static void ArenaServers_StartRefresh( void )
 		return;
 	}
 
-	if(( g_servertype >= AS_GLOBAL1) && ( g_servertype <= AS_GLOBAL5)) 
+	if(( g_servertype >= AS_GLOBAL1) && ( g_servertype <= AS_GLOBAL5))
 	{
 		i = g_servertype - AS_GLOBAL1;
 
@@ -1263,7 +1263,7 @@ void ArenaServers_SetType( int type )
 	else {
 		// avoid slow operation, use existing results
 		g_arenaservers.currentping       = *g_arenaservers.numservers;
-		g_arenaservers.numqueriedservers = *g_arenaservers.numservers; 
+		g_arenaservers.numqueriedservers = *g_arenaservers.numservers;
 		ArenaServers_UpdateMenu();
 	}
 	strcpy(g_arenaservers.status.string,menu_normal_text[MNT_HITREFRESH]);
@@ -1296,7 +1296,7 @@ void ArenaServers_Favorites_Add( void )
 			// already in list
 			return;
 		}
-		
+
 		// use first empty or non-numeric available slot
 		if ((adrstr[0]  < '0' || adrstr[0] > '9' ) && !best)
 			best = i+1;
@@ -1320,14 +1320,14 @@ static void ArenaServers_Event( void* ptr, int event ) {
 
 	id = ((menucommon_s*)ptr)->id;
 
-	if( event != QM_ACTIVATED && id != ID_LIST ) 
+	if( event != QM_ACTIVATED && id != ID_LIST )
 	{
 		return;
 	}
 
 	m = ((menucommon_s*)ptr)->parent;
 
-	switch( id ) 
+	switch( id )
 	{
 	case ID_MAINMENU:
 		UI_PopMenu();
@@ -1481,11 +1481,11 @@ void ArenaServers_Graphics (void)
 
 	// Left rounded ends for buttons
 	trap_R_SetColor( colorTable[g_arenaservers.mainmenu.color]);
-	UI_DrawHandlePic(g_arenaservers.mainmenu.generic.x - 14, g_arenaservers.mainmenu.generic.y, 
+	UI_DrawHandlePic(g_arenaservers.mainmenu.generic.x - 14, g_arenaservers.mainmenu.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
 	trap_R_SetColor( colorTable[g_arenaservers.back.color]);
-	UI_DrawHandlePic(g_arenaservers.back.generic.x - 14, g_arenaservers.back.generic.y, 
+	UI_DrawHandlePic(g_arenaservers.back.generic.x - 14, g_arenaservers.back.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
 }
@@ -1516,7 +1516,7 @@ ArenaServers_MenuKey
 */
 static sfxHandle_t ArenaServers_MenuKey( int key ) {
 	if( key == K_SPACE  && g_arenaservers.refreshservers ) {
-		ArenaServers_StopRefresh();	
+		ArenaServers_StopRefresh();
 		return menu_move_sound;
 	}
 
@@ -1542,7 +1542,7 @@ static sfxHandle_t ArenaServers_MenuKey( int key ) {
 ArenaServers_MenuInit
 =================
 */
-static void ArenaServers_MenuInit( void ) 
+static void ArenaServers_MenuInit( void )
 {
 	int			i;
 	int			type;
@@ -1555,7 +1555,7 @@ static void ArenaServers_MenuInit( void )
 
 	g_arenaservers.menu.fullscreen					= qtrue;
 	g_arenaservers.menu.wrapAround					= qtrue;
-    g_arenaservers.menu.draw						= ArenaServers_MenuDraw;
+	g_arenaservers.menu.draw						= ArenaServers_MenuDraw;
 	g_arenaservers.menu.key							= ArenaServers_MenuKey;
 	g_arenaservers.menu.descX						= MENU_DESC_X;
 	g_arenaservers.menu.descY						= MENU_DESC_Y;
@@ -1565,7 +1565,7 @@ static void ArenaServers_MenuInit( void )
 	g_arenaservers.menu.footNoteEnum				= MNT_FINDSERVER;
 
 
-	g_arenaservers.mainmenu.generic.type			= MTYPE_BITMAP;      
+	g_arenaservers.mainmenu.generic.type			= MTYPE_BITMAP;
 	g_arenaservers.mainmenu.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	g_arenaservers.mainmenu.generic.x				= 110;
 	g_arenaservers.mainmenu.generic.y				= 391;
@@ -1582,7 +1582,7 @@ static void ArenaServers_MenuInit( void )
 	g_arenaservers.mainmenu.textcolor				= CT_BLACK;
 	g_arenaservers.mainmenu.textcolor2				= CT_WHITE;
 
-	g_arenaservers.back.generic.type				= MTYPE_BITMAP;      
+	g_arenaservers.back.generic.type				= MTYPE_BITMAP;
 	g_arenaservers.back.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
 	g_arenaservers.back.generic.x					= 110;
 	g_arenaservers.back.generic.y					= 415;
@@ -1689,11 +1689,11 @@ static void ArenaServers_MenuInit( void )
 	g_arenaservers.list.width					= MAX_LISTBOXWIDTH;
 	g_arenaservers.list.height					= 11;
 	g_arenaservers.list.itemnames				= (const char **)g_arenaservers.items;
-	for( i = 0; i < MAX_LISTBOXITEMS; i++ ) 
+	for( i = 0; i < MAX_LISTBOXITEMS; i++ )
 	{
 		g_arenaservers.items[i] = g_arenaservers.table[i].buff;
 	}
-	
+
 	g_arenaservers.mappic.generic.type			= MTYPE_BITMAP;
 	g_arenaservers.mappic.generic.flags			= QMF_LEFT_JUSTIFY|QMF_INACTIVE;
 	g_arenaservers.mappic.generic.x				= 95;
@@ -1832,7 +1832,7 @@ static void ArenaServers_MenuInit( void )
 	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.showempty );
 
 	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.mappic );
-	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.list );	
+	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.list );
 	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.status );
 
 //	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.statusbar );
@@ -1867,7 +1867,7 @@ static void ArenaServers_MenuInit( void )
 	g_servertype = -1;
 	ArenaServers_SetType( type );
 
-	
+
 	if (master_items[g_arenaservers.master.curvalue] == MNT_MASTER_ITEMS_FAVORITES)
 	{
 		g_arenaservers.favorite.generic.flags			|= QMF_GRAYED;
@@ -1885,7 +1885,7 @@ static void ArenaServers_MenuInit( void )
 ArenaServers_Cache
 =================
 */
-void ArenaServers_Cache( void ) 
+void ArenaServers_Cache( void )
 {
 	trap_R_RegisterShaderNoMip( ART_UNKNOWNMAP );
 }
@@ -1896,11 +1896,11 @@ void ArenaServers_Cache( void )
 UI_ArenaServersMenu
 =================
 */
-void UI_ArenaServersMenu( void ) 
+void UI_ArenaServersMenu( void )
 {
 	ArenaServers_MenuInit();
 	UI_PushMenu( &g_arenaservers.menu );
-}						  
+}
 
 
 /*
@@ -1908,7 +1908,7 @@ void UI_ArenaServersMenu( void )
 ChooseServerType_MenuKey
 =================
 */
-static sfxHandle_t ChooseServerType_MenuKey( int key ) 
+static sfxHandle_t ChooseServerType_MenuKey( int key )
 {
 	return Menu_DefaultKey( &g_chooseservertype.menu, key );
 }
@@ -1933,15 +1933,15 @@ void ChooseServerType_Graphics (void)
 
 	// Left rounded ends for buttons
 	trap_R_SetColor( colorTable[s_find_server.color]);
-	UI_DrawHandlePic(s_find_server.generic.x - 14, s_find_server.generic.y, 
+	UI_DrawHandlePic(s_find_server.generic.x - 14, s_find_server.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
 	trap_R_SetColor( colorTable[s_create_server.color]);
-	UI_DrawHandlePic(s_create_server.generic.x - 14, s_create_server.generic.y, 
+	UI_DrawHandlePic(s_create_server.generic.x - 14, s_create_server.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
 	trap_R_SetColor( colorTable[s_specific_server.color]);
-	UI_DrawHandlePic(s_specific_server.generic.x - 14, s_specific_server.generic.y, 
+	UI_DrawHandlePic(s_specific_server.generic.x - 14, s_specific_server.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
 }
@@ -1963,7 +1963,7 @@ static void ChooseServerType_MenuDraw( void )
 UI_ChooseServerTypeMenu_Cache
 =================
 */
-void UI_ChooseServerTypeMenu_Cache( void ) 
+void UI_ChooseServerTypeMenu_Cache( void )
 {
 }
 /*
@@ -1971,14 +1971,14 @@ void UI_ChooseServerTypeMenu_Cache( void )
 ChooseServerType_MenuInit
 =================
 */
-static void ChooseServerType_MenuInit( void ) 
+static void ChooseServerType_MenuInit( void )
 {
 	// zero set all our globals
 	memset( &g_chooseservertype, 0 ,sizeof(chooseservertype_t) );
 
 	g_chooseservertype.menu.fullscreen					= qtrue;
 	g_chooseservertype.menu.wrapAround					= qtrue;
-    g_chooseservertype.menu.draw						= ChooseServerType_MenuDraw;
+	g_chooseservertype.menu.draw						= ChooseServerType_MenuDraw;
 	g_chooseservertype.menu.key							= ChooseServerType_MenuKey;
 	g_chooseservertype.menu.descX						= MENU_DESC_X;
 	g_chooseservertype.menu.descY						= MENU_DESC_Y;
@@ -2004,7 +2004,7 @@ static void ChooseServerType_MenuInit( void )
 	g_chooseservertype.main.textcolor				= CT_BLACK;
 	g_chooseservertype.main.textcolor2				= CT_WHITE;
 
-	s_find_server.generic.type					= MTYPE_BITMAP;      
+	s_find_server.generic.type					= MTYPE_BITMAP;
 	s_find_server.generic.flags					= QMF_HIGHLIGHT_IF_FOCUS;
 	s_find_server.generic.x						= 282;
 	s_find_server.generic.y						= 229;
@@ -2021,7 +2021,7 @@ static void ChooseServerType_MenuInit( void )
 	s_find_server.textcolor						= CT_BLACK;
 	s_find_server.textcolor2					= CT_WHITE;
 
-	s_create_server.generic.type				= MTYPE_BITMAP;      
+	s_create_server.generic.type				= MTYPE_BITMAP;
 	s_create_server.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
 	s_create_server.generic.x					= 282;
 	s_create_server.generic.y					= 279;
@@ -2038,7 +2038,7 @@ static void ChooseServerType_MenuInit( void )
 	s_create_server.textcolor					= CT_BLACK;
 	s_create_server.textcolor2					= CT_WHITE;
 
-	s_specific_server.generic.type				= MTYPE_BITMAP;      
+	s_specific_server.generic.type				= MTYPE_BITMAP;
 	s_specific_server.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
 	s_specific_server.generic.x					= 282;
 	s_specific_server.generic.y					= 329;
@@ -2068,10 +2068,10 @@ static void ChooseServerType_MenuInit( void )
 UI_ChooseServerTypeMenu
 =================
 */
-void UI_ChooseServerTypeMenu( void ) 
+void UI_ChooseServerTypeMenu( void )
 {
 	ChooseServerType_MenuInit();
 	UI_PushMenu( &g_chooseservertype.menu );
 
-}						  
+}
 

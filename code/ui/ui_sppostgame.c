@@ -51,9 +51,9 @@ typedef struct {
 static postgameMenuInfo_t	postgameMenuInfo;
 static char					arenainfo[MAX_INFO_VALUE];
 
-char	*ui_medalNames[] = 
+char	*ui_medalNames[] =
 {
-	"Efficiency",		// AWARD_EFFICIENCY,		Accuracy	
+	"Efficiency",		// AWARD_EFFICIENCY,		Accuracy
 	"Sharpshooter",		// AWARD_SHARPSHOOTER,		Most compression rifle frags
 	"Untouchable",		// AWARD_UNTOUCHABLE,		Perfect (no deaths)
 	"Logistics",		// AWARD_LOGISTICS,			Most pickups
@@ -65,27 +65,27 @@ char	*ui_medalNames[] =
 };
 
 char	*ui_medalPicNames[] = {
-	"menu/medals/medal_efficiency",		// AWARD_EFFICIENCY,		
-	"menu/medals/medal_sharpshooter",	// AWARD_SHARPSHOOTER,		
-	"menu/medals/medal_untouchable",	// AWARD_UNTOUCHABLE,		
-	"menu/medals/medal_logistics",		// AWARD_LOGISTICS,			
-	"menu/medals/medal_tactician",		// AWARD_TACTICIAN,			
-	"menu/medals/medal_demolitionist",	// AWARD_DEMOLITIONIST,		
-	"menu/medals/medal_ace",			// AWARD_STREAK,			
-	"menu/medals/medal_teammvp",		// AWARD_TEAM,				
-	"menu/medals/medal_section31"		// AWARD_SECTION31			
+	"menu/medals/medal_efficiency",		// AWARD_EFFICIENCY,
+	"menu/medals/medal_sharpshooter",	// AWARD_SHARPSHOOTER,
+	"menu/medals/medal_untouchable",	// AWARD_UNTOUCHABLE,
+	"menu/medals/medal_logistics",		// AWARD_LOGISTICS,
+	"menu/medals/medal_tactician",		// AWARD_TACTICIAN,
+	"menu/medals/medal_demolitionist",	// AWARD_DEMOLITIONIST,
+	"menu/medals/medal_ace",			// AWARD_STREAK,
+	"menu/medals/medal_teammvp",		// AWARD_TEAM,
+	"menu/medals/medal_section31"		// AWARD_SECTION31
 };
 
 char	*ui_medalSounds[] = {
-	"sound/voice/computer/misc/effic.wav",		// AWARD_EFFICIENCY,		
-	"sound/voice/computer/misc/sharp.wav",		// AWARD_SHARPSHOOTER,		
-	"sound/voice/computer/misc/untouch.wav",	// AWARD_UNTOUCHABLE,		
-	"sound/voice/computer/misc/log.wav",		// AWARD_LOGISTICS,			
-	"sound/voice/computer/misc/tact.wav",		// AWARD_TACTICIAN,			
-	"sound/voice/computer/misc/demo.wav",		// AWARD_DEMOLITIONIST,		
-	"sound/voice/computer/misc/ace.wav",		// AWARD_STREAK,			
-	"sound/voice/computer/misc/mvp.wav",		// AWARD_TEAM,				
-	"sound/voice/computer/misc/sec31.wav",		// AWARD_SECTION31			
+	"sound/voice/computer/misc/effic.wav",		// AWARD_EFFICIENCY,
+	"sound/voice/computer/misc/sharp.wav",		// AWARD_SHARPSHOOTER,
+	"sound/voice/computer/misc/untouch.wav",	// AWARD_UNTOUCHABLE,
+	"sound/voice/computer/misc/log.wav",		// AWARD_LOGISTICS,
+	"sound/voice/computer/misc/tact.wav",		// AWARD_TACTICIAN,
+	"sound/voice/computer/misc/demo.wav",		// AWARD_DEMOLITIONIST,
+	"sound/voice/computer/misc/ace.wav",		// AWARD_STREAK,
+	"sound/voice/computer/misc/mvp.wav",		// AWARD_TEAM,
+	"sound/voice/computer/misc/sec31.wav",		// AWARD_SECTION31
 };
 
 
@@ -383,7 +383,7 @@ void UI_SPPostgameMenu_f( void ) {
 	UI_SPPostgameMenu_Init();
 	UI_PushMenu( &postgameMenuInfo.menu );
 
-	if (playerGameRank == 0) 
+	if (playerGameRank == 0)
 	{
 		postgameMenuInfo.won = 1;
 		Menu_SetCursorToItem( &postgameMenuInfo.menu, &postgameMenuInfo.item_next );

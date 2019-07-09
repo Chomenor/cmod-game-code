@@ -111,7 +111,7 @@ void TeleportPlayer( gentity_t *player, vec3_t origin, vec3_t angles, tpType_t t
 
 	// use temp events at source and destination to prevent the effect
 	// from getting dropped by a second player event
-	if ( player->client->sess.sessionTeam != TEAM_SPECTATOR && !(player->client->ps.eFlags&EF_ELIMINATED) ) 
+	if ( player->client->sess.sessionTeam != TEAM_SPECTATOR && !(player->client->ps.eFlags&EF_ELIMINATED) )
 	{
 		if ( tpType == TP_BORG )
 		{
@@ -299,7 +299,7 @@ void locateCamera( gentity_t *ent ) {
 		G_FreeEntity( ent );
 		return;
 	}
-	
+
 	setCamera( ent, owner->s.number );
 
 	if ( G_Find( owner, FOFS(targetname), ent->target) != NULL  )

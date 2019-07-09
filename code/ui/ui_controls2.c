@@ -37,7 +37,7 @@ void *holdControlPtr;
 int holdControlEvent;
 static menuaction_s *vid_apply_action;
 
-float setup_menubuttons[8][2] = 
+float setup_menubuttons[8][2] =
 {
 {125,62},
 {125,86},
@@ -83,12 +83,12 @@ static menuframework_s		s_controlsother_menu;
 static menulist_s			s_lookspring_box;
 static menuslider_s			s_keyturnspeed_slider;
 
-static struct 
+static struct
 {
 	qhandle_t mon_bar;
 } s_controlsother;
 
-static struct 
+static struct
 {
 	qhandle_t mouse1;
 	qhandle_t mouse2;
@@ -109,7 +109,7 @@ static struct
 #define ID_LOOKSPRING			44
 #define ID_AUTOSWITCHWEAPONS	48
 
-typedef enum 
+typedef enum
 {
 	AMG_MIDLEFT,
 	AMG_UPPERLEFT,
@@ -128,7 +128,7 @@ typedef enum
 	AMG_MAX
 } attackmenu_graphics_t;
 
-menugraphics_s attackmenu_graphics[AMG_MAX] = 
+menugraphics_s attackmenu_graphics[AMG_MAX] =
 {
 //	type		timer	x		y		width	height	file/text						graphic,	min		max	target	inc		style	color
 	MG_GRAPHIC,	0.0,	158,	280,	4,		32,		"menu/common/square.tga",	0,	0,		0,		0,	0,		0,		0,		CT_VDKPURPLE1,	NULL,	// AMG_MIDLEFT
@@ -257,7 +257,7 @@ typedef struct
 {
 	char*	name;
 	float	defaultvalue;
-	float	value;	
+	float	value;
 } configcvar_t;
 
 #define SAVE_NOOP		0
@@ -276,33 +276,33 @@ typedef struct
 
 // bindable actions
 #define ID_SHOWSCORES	0
-#define ID_USEITEM		1	
-#define ID_SPEED		2	
-#define ID_FORWARD		3	
+#define ID_USEITEM		1
+#define ID_SPEED		2
+#define ID_FORWARD		3
 #define ID_BACKPEDAL	4
 #define ID_MOVELEFT		5
 #define ID_MOVERIGHT	6
-#define ID_MOVEUP		7	
+#define ID_MOVEUP		7
 #define ID_MOVEDOWN		8
-#define ID_LEFT			9	
-#define ID_RIGHT		10	
-#define ID_STRAFE		11	
-#define ID_LOOKUP		12	
+#define ID_LEFT			9
+#define ID_RIGHT		10
+#define ID_STRAFE		11
+#define ID_LOOKUP		12
 #define ID_LOOKDOWN		13
 #define ID_MOUSELOOK	14
 #define ID_CENTERVIEW	15
 #define ID_ZOOMVIEW		16
-#define ID_WEAPON1		17	
-#define ID_WEAPON2		18	
-#define ID_WEAPON3		19	
-#define ID_WEAPON4		20	
-#define ID_WEAPON5		21	
-#define ID_WEAPON6		22	
-#define ID_WEAPON7		23	
-#define ID_WEAPON8		24	
-#define ID_WEAPON9		25	
+#define ID_WEAPON1		17
+#define ID_WEAPON2		18
+#define ID_WEAPON3		19
+#define ID_WEAPON4		20
+#define ID_WEAPON5		21
+#define ID_WEAPON6		22
+#define ID_WEAPON7		23
+#define ID_WEAPON8		24
+#define ID_WEAPON9		25
 #define ID_ATTACK		26
-#define ID_ALT_ATTACK	27	
+#define ID_ALT_ATTACK	27
 #define ID_WEAPPREV		28
 #define ID_WEAPNEXT		29
 #define ID_GESTURE		30
@@ -314,7 +314,7 @@ typedef struct
 #define ID_OBJECTIVES	36
 
 
-#define ID_USE			1	
+#define ID_USE			1
 
 
 
@@ -417,13 +417,13 @@ typedef struct
 
 	menubitmap_s		back;
 	menutext_s			name;
-} controls_t; 	
+} controls_t;
 
 static controls_t s_controls;
 
 static vec4_t controls_binding_color  = {1.00, 0.43, 0.00, 1.00};
 
-static bind_t g_bindings[] = 
+static bind_t g_bindings[] =
 {
 	{"+info",			MNT_SHORTCUT_SCORES,		ID_SHOWSCORES,	ANIM_IDLE,		K_TAB,			-1,		-1, -1,MNT_SHORTCUT_KEY},
 	{"+use",			MNT_SHORTCUT_USEOBJECT,		ID_USEITEM,		ANIM_IDLE,		K_ENTER,		-1,		-1, -1,MNT_SHORTCUT_KEY},
@@ -493,8 +493,8 @@ static void* g_attack_controls[] =
 	&s_attack_weapon7_action,
 	&s_attack_weapon8_action,
 	&s_attack_weapon9_action,
-	&s_attack_weapon_next_action, 
-	&s_attack_weapon_prev_action, 
+	&s_attack_weapon_next_action,
+	&s_attack_weapon_prev_action,
 	NULL,
 };
 
@@ -503,15 +503,15 @@ static void* g_move_controls[] =
 {
 	&s_move_walkforward_action,
 	&s_move_backpedal_action,
-	&s_move_turnleft_action,      
-	&s_move_turnright_action,     
-	&s_move_run_action,            
-	&s_move_stepleft_action,      
-	&s_move_stepright_action,     
+	&s_move_turnleft_action,
+	&s_move_turnright_action,
+	&s_move_run_action,
+	&s_move_stepleft_action,
+	&s_move_stepright_action,
 	&s_move_sidestep_action,
-	&s_move_moveup_action,        
-	&s_move_movedown_action,      
-//	&s_alwaysrun_box,     
+	&s_move_moveup_action,
+	&s_move_movedown_action,
+//	&s_alwaysrun_box,
 	NULL
 };
 
@@ -534,10 +534,10 @@ static void* g_attacklook_controls[] =
 	&s_attack_use_action,
 	&s_attack_use_inv_action,
 	&s_attack_objectives,
-	&s_look_lookup_action, 
-	&s_look_lookdown_action, 
-	&s_look_mouselook_action, 
-	&s_look_centerview_action, 
+	&s_look_lookup_action,
+	&s_look_lookdown_action,
+	&s_look_mouselook_action,
+	&s_look_centerview_action,
 	&s_zoomview_action,
 	&s_controls.showscores,
 	NULL,
@@ -545,9 +545,9 @@ static void* g_attacklook_controls[] =
 
 static void* g_mouse_controls[] =
 {
-	&s_controls.freelook, 
+	&s_controls.freelook,
 	&s_controls.sensitivity,
-	&s_controls.invertmouse, 
+	&s_controls.invertmouse,
 	&s_controls.smoothmouse,
 	NULL,
 };
@@ -564,22 +564,22 @@ static void** g_controls[] =
 
 static menucommon_s *g_movement_controls[] =
 {
-	(menucommon_s *)&s_controls.alwaysrun,     
-	(menucommon_s *)&s_controls.run,            
+	(menucommon_s *)&s_controls.alwaysrun,
+	(menucommon_s *)&s_controls.run,
 	(menucommon_s *)&s_controls.walkforward,
 	(menucommon_s *)&s_controls.backpedal,
-	(menucommon_s *)&s_controls.stepleft,      
-	(menucommon_s *)&s_controls.stepright,     
-	(menucommon_s *)&s_controls.moveup,        
-	(menucommon_s *)&s_controls.movedown,      
-	(menucommon_s *)&s_controls.turnleft,      
-	(menucommon_s *)&s_controls.turnright,     
+	(menucommon_s *)&s_controls.stepleft,
+	(menucommon_s *)&s_controls.stepright,
+	(menucommon_s *)&s_controls.moveup,
+	(menucommon_s *)&s_controls.movedown,
+	(menucommon_s *)&s_controls.turnleft,
+	(menucommon_s *)&s_controls.turnright,
 	(menucommon_s *)&s_controls.sidestep,
 	NULL
 };
 
 
-static menucommon_s *g_looking_controls[] = 
+static menucommon_s *g_looking_controls[] =
 {
 	(menucommon_s *)&s_controls.sensitivity,
 	(menucommon_s *)&s_controls.smoothmouse,
@@ -595,9 +595,9 @@ static menucommon_s *g_looking_controls[] =
 	NULL,
 };
 
-static menucommon_s *g_misc_controls[] = 
+static menucommon_s *g_misc_controls[] =
 {
-	(menucommon_s *)&s_controls.showscores, 
+	(menucommon_s *)&s_controls.showscores,
 	(menucommon_s *)&s_controls.useitem,
 	(menucommon_s *)&s_controls.gesture,
 	(menucommon_s *)&s_controls.chat,
@@ -704,7 +704,7 @@ static float Controls_GetCvarValue( char* name )
 Controls_UpdateModel
 =================
 */
-static void Controls_UpdateModel( int anim ) 
+static void Controls_UpdateModel( int anim )
 {
 	VectorClear( s_controls.playerViewangles );
 	VectorClear( s_controls.playerMoveangles );
@@ -717,23 +717,23 @@ static void Controls_UpdateModel( int anim )
 
 
 	switch( anim ) {
-	case ANIM_RUN:	
+	case ANIM_RUN:
 		s_controls.playerLegs = LEGS_RUN;
 		break;
 
-	case ANIM_WALK:	
+	case ANIM_WALK:
 		s_controls.playerLegs = LEGS_WALK;
 		break;
 
-	case ANIM_BACK:	
+	case ANIM_BACK:
 		s_controls.playerLegs = LEGS_BACK;
 		break;
 
-	case ANIM_JUMP:	
+	case ANIM_JUMP:
 		s_controls.playerLegs = LEGS_JUMP;
 		break;
 
-	case ANIM_CROUCH:	
+	case ANIM_CROUCH:
 		s_controls.playerLegs = LEGS_IDLECR;
 		break;
 
@@ -903,7 +903,7 @@ static void Controls_DrawKeyBinding( void *self )
 			buttontextcolor = CT_BLACK;
 			color = CT_DKORANGE;
 		}
-	}	
+	}
 
 	if ((c) && (g_bindings[a->generic.id].desc))
 	{
@@ -1020,11 +1020,11 @@ static void Controls_ClearKeyAssignment (char *command)
 	for ( i = 0; i < 256; i++ )
 	{
 		trap_Key_GetBindingBuf( i, b, 256 );
-		if ( *b == 0 ) 
+		if ( *b == 0 )
 		{
 			continue;
 		}
-		if ( !Q_stricmp( b, command ) ) 
+		if ( !Q_stricmp( b, command ) )
 		{
 			trap_Key_SetBinding( i, "" );
 		}
@@ -1111,7 +1111,7 @@ static void Controls_SetConfig( void )
 			break;
 
 		if (bindptr->bind1 != -1)
-		{	
+		{
 			trap_Key_SetBinding( bindptr->bind1, bindptr->command );
 
 			if (bindptr->bind2 != -1)
@@ -1214,12 +1214,12 @@ static sfxHandle_t Controls_MenuKey( int key )
 			case K_KP_DEL:
 				key = -1;
 				break;
-		
+
 			case K_MOUSE2:
 			case K_ESCAPE:
 				if (s_controls.changesmade)
 					Controls_SetConfig();
-				goto ignorekey;	
+				goto ignorekey;
 
 			default:
 				goto ignorekey;
@@ -1243,21 +1243,21 @@ static sfxHandle_t Controls_MenuKey( int key )
 				s_attack_waiting_action.generic.flags			= QMF_HIDDEN;
 				Controls_UpdateNew();
 				return (menu_out_sound);
-	
+
 			case '`':
 				goto ignorekey;
 		}
 	}
 
 	s_controls.changesmade = qtrue;
-	
+
 	if (key != -1)
 	{
 		// remove from any other bind
 		bindptr = g_bindings;
 		for (i=0; ;i++,bindptr++)
 		{
-			if (!bindptr->label)	
+			if (!bindptr->label)
 				break;
 
 			if (bindptr->bind3 == key)
@@ -1271,8 +1271,8 @@ static sfxHandle_t Controls_MenuKey( int key )
 			}
 			else if (bindptr->bind1 == key)
 			{
-				bindptr->bind1 = bindptr->bind2;	
-				bindptr->bind2 = bindptr->bind3;	
+				bindptr->bind1 = bindptr->bind2;
+				bindptr->bind2 = bindptr->bind3;
 				bindptr->bind3 = -1;
 			}
 
@@ -1288,9 +1288,9 @@ static sfxHandle_t Controls_MenuKey( int key )
 	bindptr = g_bindings;
 	for (i=0; ;i++,bindptr++)
 	{
-		if (!bindptr->label)	
+		if (!bindptr->label)
 			break;
-		
+
 		if (bindptr->id == id)
 		{
 			found = qtrue;
@@ -1302,22 +1302,22 @@ static sfxHandle_t Controls_MenuKey( int key )
 				bindptr->bind2 = -1;
 				bindptr->bind3 = -1;
 /*
-				if( bindptr->bind1 != -1 ) 
+				if( bindptr->bind1 != -1 )
 				{
 					trap_Key_SetBinding( bindptr->bind1, "" );
 					bindptr->bind1 = -1;
 				}
-				if( bindptr->bind2 != -1 ) 
+				if( bindptr->bind2 != -1 )
 				{
 					trap_Key_SetBinding( bindptr->bind2, "" );
 					bindptr->bind2 = -1;
 				}*/
 			}
-			else if (bindptr->bind1 == -1) 
+			else if (bindptr->bind1 == -1)
 			{
 				bindptr->bind1 = key;
 			}
-			else if (bindptr->bind1 != key && bindptr->bind2 == -1) 
+			else if (bindptr->bind1 != key && bindptr->bind2 == -1)
 			{
 				bindptr->bind2 = key;
 			}
@@ -1326,16 +1326,16 @@ static sfxHandle_t Controls_MenuKey( int key )
 				bindptr->bind3 = bindptr->bind2;
 				bindptr->bind2 = bindptr->bind1;
 				bindptr->bind1 = key;
-			}						
+			}
 			break;
 		}
-	}				
-		
+	}
+
 	s_controls.waitingforkey = qfalse;
 	s_controls.changesmade = qfalse;
 
 	if (found)
-	{	
+	{
 		Controls_SetConfig();
 		Controls_UpdateNew();
 		return (menu_out_sound);
@@ -1351,7 +1351,7 @@ Controls_ResetDefaults_Action
 =================
 */
 /*
-static void Controls_ResetDefaults_Action( qboolean result ) 
+static void Controls_ResetDefaults_Action( qboolean result )
 {
 	if( !result ) {
 		return;
@@ -1419,7 +1419,7 @@ void SetupMenu_TopButtons(menuframework_s *menu,int menuType,menuaction_s *s_vid
 {
 	vid_apply_action = s_video_apply_action;
 
-	s_controls_mainmenu.generic.type			= MTYPE_BITMAP;      
+	s_controls_mainmenu.generic.type			= MTYPE_BITMAP;
 	s_controls_mainmenu.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_controls_mainmenu.generic.x				= 482;
 	s_controls_mainmenu.generic.y				= 136;
@@ -1451,7 +1451,7 @@ void SetupMenu_TopButtons(menuframework_s *menu,int menuType,menuaction_s *s_vid
 	s_controls_mainmenu.textcolor				= CT_BLACK;
 	s_controls_mainmenu.textcolor2				= CT_WHITE;
 
-	s_controls_controls.generic.type		= MTYPE_BITMAP;      
+	s_controls_controls.generic.type		= MTYPE_BITMAP;
 	s_controls_controls.generic.flags	= QMF_HIGHLIGHT_IF_FOCUS;
 	s_controls_controls.generic.x		= setup_menubuttons[0][0];
 	s_controls_controls.generic.y		= setup_menubuttons[0][1];
@@ -1475,7 +1475,7 @@ void SetupMenu_TopButtons(menuframework_s *menu,int menuType,menuaction_s *s_vid
 	s_controls_controls.textcolor		= CT_BLACK;
 	s_controls_controls.textcolor2		= CT_WHITE;
 
-	s_controls_video.generic.type		= MTYPE_BITMAP;      
+	s_controls_video.generic.type		= MTYPE_BITMAP;
 	s_controls_video.generic.flags	= QMF_HIGHLIGHT_IF_FOCUS;
 	s_controls_video.generic.x		= setup_menubuttons[1][0];
 	s_controls_video.generic.y		= setup_menubuttons[1][1];
@@ -1499,7 +1499,7 @@ void SetupMenu_TopButtons(menuframework_s *menu,int menuType,menuaction_s *s_vid
 	s_controls_video.textcolor		= CT_BLACK;
 	s_controls_video.textcolor2		= CT_WHITE;
 
-	s_controls_sound.generic.type		= MTYPE_BITMAP;      
+	s_controls_sound.generic.type		= MTYPE_BITMAP;
 	s_controls_sound.generic.flags	= QMF_HIGHLIGHT_IF_FOCUS;
 	s_controls_sound.generic.x		= setup_menubuttons[2][0];
 	s_controls_sound.generic.y		= setup_menubuttons[2][1];
@@ -1523,7 +1523,7 @@ void SetupMenu_TopButtons(menuframework_s *menu,int menuType,menuaction_s *s_vid
 	s_controls_sound.textcolor		= CT_BLACK;
 	s_controls_sound.textcolor2		= CT_WHITE;
 
-	s_controls_game.generic.type		= MTYPE_BITMAP;      
+	s_controls_game.generic.type		= MTYPE_BITMAP;
 	s_controls_game.generic.flags	= QMF_HIGHLIGHT_IF_FOCUS;
 	s_controls_game.generic.x		= setup_menubuttons[3][0];
 	s_controls_game.generic.y		= setup_menubuttons[3][1];
@@ -1547,7 +1547,7 @@ void SetupMenu_TopButtons(menuframework_s *menu,int menuType,menuaction_s *s_vid
 	s_controls_game.textcolor		= CT_BLACK;
 	s_controls_game.textcolor2		= CT_WHITE;
 
-	s_controls_player.generic.type		= MTYPE_BITMAP;      
+	s_controls_player.generic.type		= MTYPE_BITMAP;
 	s_controls_player.generic.flags	= QMF_HIGHLIGHT_IF_FOCUS;
 	s_controls_player.generic.x		= setup_menubuttons[4][0];
 	s_controls_player.generic.y		= setup_menubuttons[4][1];
@@ -1571,7 +1571,7 @@ void SetupMenu_TopButtons(menuframework_s *menu,int menuType,menuaction_s *s_vid
 	s_controls_player.textcolor		= CT_BLACK;
 	s_controls_player.textcolor2		= CT_WHITE;
 
-	s_controls_default.generic.type		= MTYPE_BITMAP;      
+	s_controls_default.generic.type		= MTYPE_BITMAP;
 	s_controls_default.generic.flags	= QMF_HIGHLIGHT_IF_FOCUS;
 	s_controls_default.generic.x		= setup_menubuttons[5][0];
 	s_controls_default.generic.y		= setup_menubuttons[5][1];
@@ -1595,7 +1595,7 @@ void SetupMenu_TopButtons(menuframework_s *menu,int menuType,menuaction_s *s_vid
 	s_controls_default.textcolor		= CT_BLACK;
 	s_controls_default.textcolor2		= CT_WHITE;
 
-	s_controls_cdkey.generic.type		= MTYPE_BITMAP;      
+	s_controls_cdkey.generic.type		= MTYPE_BITMAP;
 	s_controls_cdkey.generic.flags	= QMF_HIGHLIGHT_IF_FOCUS;
 	s_controls_cdkey.generic.x		= setup_menubuttons[6][0];
 	s_controls_cdkey.generic.y		= setup_menubuttons[6][1];
@@ -1624,7 +1624,7 @@ void SetupMenu_TopButtons(menuframework_s *menu,int menuType,menuaction_s *s_vid
 		s_controls_cdkey.generic.flags			|= QMF_GRAYED;
 	}
 /*
-	s_controls_network.generic.type		= MTYPE_BITMAP;      
+	s_controls_network.generic.type		= MTYPE_BITMAP;
 	s_controls_network.generic.flags	= QMF_HIGHLIGHT_IF_FOCUS;
 	s_controls_network.generic.x		= setup_menubuttons[6][0];
 	s_controls_network.generic.y		= setup_menubuttons[6][1];
@@ -1641,7 +1641,7 @@ void SetupMenu_TopButtons(menuframework_s *menu,int menuType,menuaction_s *s_vid
 	s_controls_network.textcolor		= CT_BLACK;
 	s_controls_network.textcolor2		= CT_WHITE;
 */
-	s_controls_fonts.generic.type		= MTYPE_BITMAP;      
+	s_controls_fonts.generic.type		= MTYPE_BITMAP;
 	s_controls_fonts.generic.flags	= QMF_HIGHLIGHT_IF_FOCUS;
 	s_controls_fonts.generic.x		= setup_menubuttons[7][0];
 	s_controls_fonts.generic.y		= setup_menubuttons[7][1];
@@ -1680,49 +1680,49 @@ void SetupMenu_TopButtons(menuframework_s *menu,int menuType,menuaction_s *s_vid
 	switch (menuType)
 	{
 	case MENU_CONTROLS :
-		s_controls_controls.textcolor		= CT_LTGOLD1;	
-		s_controls_controls.textcolor2		= CT_LTGOLD1;	
+		s_controls_controls.textcolor		= CT_LTGOLD1;
+		s_controls_controls.textcolor2		= CT_LTGOLD1;
 		s_controls_controls.generic.flags	= QMF_GRAYED;
 		break;
 	case MENU_VIDEO :
 	case MENU_VIDEODATA :
-		s_controls_video.textcolor		= CT_LTGOLD1;	
-		s_controls_video.textcolor2		= CT_LTGOLD1;	
+		s_controls_video.textcolor		= CT_LTGOLD1;
+		s_controls_video.textcolor2		= CT_LTGOLD1;
 		s_controls_video.generic.flags	= QMF_GRAYED;
 		break;
 	case MENU_SOUND :
-		s_controls_sound.textcolor		= CT_LTGOLD1;	
-		s_controls_sound.textcolor2		= CT_LTGOLD1;	
+		s_controls_sound.textcolor		= CT_LTGOLD1;
+		s_controls_sound.textcolor2		= CT_LTGOLD1;
 		s_controls_sound.generic.flags	= QMF_GRAYED;
 		break;
 	case MENU_GAME :
-		s_controls_game.textcolor		= CT_LTGOLD1;	
-		s_controls_game.textcolor2		= CT_LTGOLD1;	
+		s_controls_game.textcolor		= CT_LTGOLD1;
+		s_controls_game.textcolor2		= CT_LTGOLD1;
 		s_controls_game.generic.flags	= QMF_GRAYED;
 		break;
 	case MENU_DEFAULT :
-		s_controls_default.textcolor		= CT_LTGOLD1;	
-		s_controls_default.textcolor2		= CT_LTGOLD1;	
+		s_controls_default.textcolor		= CT_LTGOLD1;
+		s_controls_default.textcolor2		= CT_LTGOLD1;
 		s_controls_default.generic.flags	= QMF_GRAYED;
 		break;
 	case MENU_CDKEY :
-		s_controls_cdkey.textcolor		= CT_LTGOLD1;	
-		s_controls_cdkey.textcolor2		= CT_LTGOLD1;	
+		s_controls_cdkey.textcolor		= CT_LTGOLD1;
+		s_controls_cdkey.textcolor2		= CT_LTGOLD1;
 		s_controls_cdkey.generic.flags	= QMF_GRAYED;
 		break;
 	case MENU_PLAYER :
-		s_controls_player.textcolor		= CT_LTGOLD1;	
-		s_controls_player.textcolor2		= CT_LTGOLD1;	
+		s_controls_player.textcolor		= CT_LTGOLD1;
+		s_controls_player.textcolor2		= CT_LTGOLD1;
 		s_controls_player.generic.flags	= QMF_GRAYED;
 		break;
 	case MENU_NETWORK :
-		s_controls_network.textcolor		= CT_LTGOLD1;	
-		s_controls_network.textcolor2		= CT_LTGOLD1;	
+		s_controls_network.textcolor		= CT_LTGOLD1;
+		s_controls_network.textcolor2		= CT_LTGOLD1;
 		s_controls_network.generic.flags	= QMF_GRAYED;
 		break;
 	case MENU_FONTS :
-		s_controls_fonts.textcolor		= CT_LTGOLD1;	
-		s_controls_fonts.textcolor2		= CT_LTGOLD1;	
+		s_controls_fonts.textcolor		= CT_LTGOLD1;
+		s_controls_fonts.textcolor2		= CT_LTGOLD1;
 		s_controls_fonts.generic.flags	= QMF_GRAYED;
 		break;
 	}
@@ -2153,7 +2153,7 @@ static void SetupMenu_SideButtons(menuframework_s *menu,int menuType)
 	inc = 6;
 	x = 30;
 
-	s_controls_weapon.generic.type			= MTYPE_BITMAP;      
+	s_controls_weapon.generic.type			= MTYPE_BITMAP;
 	s_controls_weapon.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_controls_weapon.generic.x				= x;
 	s_controls_weapon.generic.y				= y;
@@ -2171,7 +2171,7 @@ static void SetupMenu_SideButtons(menuframework_s *menu,int menuType)
 	s_controls_weapon.textcolor2			= CT_WHITE;
 
 	y += inc+MENU_BUTTON_MED_HEIGHT;
-	s_controls_look.generic.type			= MTYPE_BITMAP;      
+	s_controls_look.generic.type			= MTYPE_BITMAP;
 	s_controls_look.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_controls_look.generic.x				= x;
 	s_controls_look.generic.y				= y;
@@ -2189,7 +2189,7 @@ static void SetupMenu_SideButtons(menuframework_s *menu,int menuType)
 	s_controls_look.textcolor2				= CT_WHITE;
 
 	y += inc+MENU_BUTTON_MED_HEIGHT;
-	s_controls_movement.generic.type		= MTYPE_BITMAP;      
+	s_controls_movement.generic.type		= MTYPE_BITMAP;
 	s_controls_movement.generic.flags		= QMF_HIGHLIGHT_IF_FOCUS;
 	s_controls_movement.generic.x			= x;
 	s_controls_movement.generic.y			= y;
@@ -2207,7 +2207,7 @@ static void SetupMenu_SideButtons(menuframework_s *menu,int menuType)
 	s_controls_movement.textcolor2			= CT_WHITE;
 
 	y += inc+MENU_BUTTON_MED_HEIGHT;
-	s_controls_command.generic.type			= MTYPE_BITMAP;      
+	s_controls_command.generic.type			= MTYPE_BITMAP;
 	s_controls_command.generic.flags		= QMF_HIGHLIGHT_IF_FOCUS;
 	s_controls_command.generic.x			= x;
 	s_controls_command.generic.y			= y;
@@ -2226,7 +2226,7 @@ static void SetupMenu_SideButtons(menuframework_s *menu,int menuType)
 
 	y += inc+MENU_BUTTON_MED_HEIGHT;
 	y += inc+MENU_BUTTON_MED_HEIGHT;
-	s_controls_mouse.generic.type			= MTYPE_BITMAP;      
+	s_controls_mouse.generic.type			= MTYPE_BITMAP;
 	s_controls_mouse.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_controls_mouse.generic.x				= x;
 	s_controls_mouse.generic.y				= y;
@@ -2244,7 +2244,7 @@ static void SetupMenu_SideButtons(menuframework_s *menu,int menuType)
 	s_controls_mouse.textcolor2				= CT_WHITE;
 
 	y += inc+MENU_BUTTON_MED_HEIGHT;
-	s_controls_other.generic.type			= MTYPE_BITMAP;      
+	s_controls_other.generic.type			= MTYPE_BITMAP;
 	s_controls_other.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_controls_other.generic.x				= x;
 	s_controls_other.generic.y				= y;
@@ -2262,7 +2262,7 @@ static void SetupMenu_SideButtons(menuframework_s *menu,int menuType)
 	s_controls_other.textcolor2				= CT_WHITE;
 
 /*	y += inc+MENU_BUTTON_MED_HEIGHT;
-	s_controls_loadconfig.generic.type		= MTYPE_BITMAP;      
+	s_controls_loadconfig.generic.type		= MTYPE_BITMAP;
 	s_controls_loadconfig.generic.flags		= QMF_HIGHLIGHT_IF_FOCUS;
 	s_controls_loadconfig.generic.x			= x;
 	s_controls_loadconfig.generic.y			= y;
@@ -2280,7 +2280,7 @@ static void SetupMenu_SideButtons(menuframework_s *menu,int menuType)
 	s_controls_loadconfig.textcolor2		= CT_WHITE;
 
 	y += inc+MENU_BUTTON_MED_HEIGHT;
-	s_controls_saveconfig.generic.type		= MTYPE_BITMAP;      
+	s_controls_saveconfig.generic.type		= MTYPE_BITMAP;
 	s_controls_saveconfig.generic.flags		= QMF_HIGHLIGHT_IF_FOCUS;
 	s_controls_saveconfig.generic.x			= x;
 	s_controls_saveconfig.generic.y			= y;
@@ -2373,7 +2373,7 @@ static void Controls_UpdateNew( void )
 			// end of list
 			break;
 		}
-	
+
 		((menucommon_s*)controlptr[0])->flags &= ~(QMF_GRAYED);
 	}
 
@@ -2386,7 +2386,7 @@ static void Controls_UpdateNew( void )
 
 }
 
-void ControlsVideoDataAction( qboolean result ) 
+void ControlsVideoDataAction( qboolean result )
 {
 	if ( result )	// Yes - do it
 	{
@@ -2409,7 +2409,7 @@ static void Controls_MenuEventVideo (void* ptr, int event)
 
 	if (vid_apply_action->generic.flags & QMF_BLINK)	// Video apply changes button is flashing
 	{
-		UI_ConfirmMenu(menu_normal_text[MNT_LOOSEVIDSETTINGS], 0, ControlsVideoDataAction);	
+		UI_ConfirmMenu(menu_normal_text[MNT_LOOSEVIDSETTINGS], 0, ControlsVideoDataAction);
 	}
 	else	// Go ahead, act normal
 	{
@@ -2539,7 +2539,7 @@ static void Controls_MenuEvent (void* ptr, int event)
 //			{
 //				s_controls.changesmade = qtrue;
 //			}
-			break;		
+			break;
 	}
 }
 /*
@@ -3379,13 +3379,13 @@ static void ControlsDefault_MenuInit( void )
 	s_controls_other.textcolor						= CT_LTGOLD1;
 	s_controls_other.textcolor2						= CT_LTGOLD1;
 
-	s_controls_default_yes.generic.type				= MTYPE_BITMAP;      
+	s_controls_default_yes.generic.type				= MTYPE_BITMAP;
 	s_controls_default_yes.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_controls_default_yes.generic.x				= 215;
 	s_controls_default_yes.generic.y				= 365;
 	s_controls_default_yes.generic.name				= GRAPHIC_SQUARE;
 	s_controls_default_yes.generic.id				= ID_DEFAULT_YES;
-	s_controls_default_yes.generic.callback			= M_Default_Event; 
+	s_controls_default_yes.generic.callback			= M_Default_Event;
 	s_controls_default_yes.width					= 103;
 	s_controls_default_yes.height					= MENU_BUTTON_MED_HEIGHT;
 	s_controls_default_yes.color					= CT_DKPURPLE1;
@@ -3397,13 +3397,13 @@ static void ControlsDefault_MenuInit( void )
 	s_controls_default_yes.textcolor2				= CT_WHITE;
 	s_controls_default_yes.textStyle				= UI_SMALLFONT;
 
-	s_controls_default_no.generic.type				= MTYPE_BITMAP;      
+	s_controls_default_no.generic.type				= MTYPE_BITMAP;
 	s_controls_default_no.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
 	s_controls_default_no.generic.x					= 371;
 	s_controls_default_no.generic.y					= 365;
 	s_controls_default_no.generic.name				= GRAPHIC_SQUARE;
 	s_controls_default_no.generic.id				= ID_DEFAULT_NO;
-	s_controls_default_no.generic.callback			= M_Default_Event; 
+	s_controls_default_no.generic.callback			= M_Default_Event;
 	s_controls_default_no.width						= 103;
 	s_controls_default_no.height					= MENU_BUTTON_MED_HEIGHT;
 	s_controls_default_no.color						= CT_DKPURPLE1;
@@ -3456,11 +3456,11 @@ void M_ControlsOtherMenu_Graphics (void)
 	UI_DrawProportionalString(  592,  419, "575",UI_RIGHT|UI_TINYFONT, colorTable[CT_DKGOLD1]);
 
 	trap_R_SetColor( colorTable[CT_DKPURPLE3]);
-	UI_DrawHandlePic( 288,  364,  32,  64, s_controlsother.mon_bar);	// 
-	UI_DrawHandlePic( 366,  364,  32,  64, s_controlsother.mon_bar);	// 
-	UI_DrawHandlePic( 444,  364,  32,  64, s_controlsother.mon_bar);	// 
-	UI_DrawHandlePic( 522,  364,  32,  64, s_controlsother.mon_bar);	// 
-	UI_DrawHandlePic( 600,  364,  32,  64, s_controlsother.mon_bar);	// 
+	UI_DrawHandlePic( 288,  364,  32,  64, s_controlsother.mon_bar);	//
+	UI_DrawHandlePic( 366,  364,  32,  64, s_controlsother.mon_bar);	//
+	UI_DrawHandlePic( 444,  364,  32,  64, s_controlsother.mon_bar);	//
+	UI_DrawHandlePic( 522,  364,  32,  64, s_controlsother.mon_bar);	//
+	UI_DrawHandlePic( 600,  364,  32,  64, s_controlsother.mon_bar);	//
 
 
 	UI_DrawProportionalString(  74,  66, "5-0987",UI_RIGHT|UI_TINYFONT, colorTable[CT_BLACK]);

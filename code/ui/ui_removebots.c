@@ -177,7 +177,7 @@ static void UI_RemoveBotsMenu_GetBots( void ) {
 UI_RemoveMenu_Draw
 =================
 */
-static void UI_RemoveMenu_Draw( void ) 
+static void UI_RemoveMenu_Draw( void )
 {
 	UI_MenuFrame(&removeBotsMenuInfo.menu);
 
@@ -200,7 +200,7 @@ static void UI_RemoveMenu_Draw( void )
 UI_RemoveBots_Cache
 =================
 */
-void UI_RemoveBots_Cache( void ) 
+void UI_RemoveBots_Cache( void )
 {
 	trap_R_RegisterShaderNoMip( "menu/common/arrow_up_16.tga" );
 	trap_R_RegisterShaderNoMip( "menu/common/arrow_dn_16.tga" );
@@ -259,7 +259,7 @@ static void UI_RemoveBotsMenu_Init( void ) {
 	removeBotsMenuInfo.down.generic.name				= "menu/common/arrow_dn_16.tga";
 
 
-	for( n = 0, y = 194; n < count; n++, y += 20 ) 
+	for( n = 0, y = 194; n < count; n++, y += 20 )
 	{
 		removeBotsMenuInfo.bots[n].generic.type			= MTYPE_PTEXT;
 		removeBotsMenuInfo.bots[n].generic.flags		= QMF_HIGHLIGHT_IF_FOCUS;
@@ -310,7 +310,7 @@ static void UI_RemoveBotsMenu_Init( void ) {
 
 	Menu_AddItem( &removeBotsMenuInfo.menu, &removeBotsMenuInfo.up );
 	Menu_AddItem( &removeBotsMenuInfo.menu, &removeBotsMenuInfo.down );
-	for( n = 0; n < count; n++ ) 
+	for( n = 0; n < count; n++ )
 	{
 		Menu_AddItem( &removeBotsMenuInfo.menu, &removeBotsMenuInfo.bots[n] );
 	}
@@ -328,7 +328,7 @@ static void UI_RemoveBotsMenu_Init( void ) {
 UI_RemoveBotsMenu
 =================
 */
-void UI_RemoveBotsMenu( void ) 
+void UI_RemoveBotsMenu( void )
 {
 	UI_RemoveBotsMenu_Init();
 	UI_PushMenu( &removeBotsMenuInfo.menu );

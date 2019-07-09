@@ -365,7 +365,7 @@ static void CG_RegisterItemSounds( int itemNum ) {
 
 		len = s-start;
 		if (len >= MAX_QPATH || len < 5) {
-			CG_Error( "PrecacheItem: %s has bad precache string", 
+			CG_Error( "PrecacheItem: %s has bad precache string",
 				item->classname);
 			return;
 		}
@@ -552,11 +552,11 @@ static void CG_RegisterSounds( void )
 	cgs.media.glassChunkSound	= trap_S_RegisterSound( "sound/weapons/explosions/glassbreak1.wav" );
 	cgs.media.woodChunkSound	= trap_S_RegisterSound( "sound/weapons/explosions/metalexplode.wav" );
 	cgs.media.stoneChunkSound	= trap_S_RegisterSound( "sound/weapons/explosions/metalexplode.wav" );
-	
+
 
 //	cgs.media.sfx_rockexp = trap_S_RegisterSound ("sound/weapons/rocket/rocklx1a.wav");
 
-	// trek sounds	
+	// trek sounds
 	cgs.media.envSparkSound1 = trap_S_RegisterSound ("sound/ambience/spark1.wav");
 	cgs.media.envSparkSound2 = trap_S_RegisterSound ("sound/ambience/spark2.wav");
 	cgs.media.envSparkSound3 = trap_S_RegisterSound ("sound/ambience/spark3.wav");
@@ -580,47 +580,47 @@ static void PrecacheAwardsAssets()
 {
 	// kef -- precaching bot victory sounds (e.g. Desperado_wins.wav) in PlayerModel_BuildList()
 
-	trap_R_RegisterShaderNoMip("menu/medals/medal_efficiency");			
-	trap_R_RegisterShaderNoMip("menu/medals/medal_sharpshooter");		
-	trap_R_RegisterShaderNoMip("menu/medals/medal_untouchable");		
-	trap_R_RegisterShaderNoMip("menu/medals/medal_logistics");			
-	trap_R_RegisterShaderNoMip("menu/medals/medal_tactician");			
-	trap_R_RegisterShaderNoMip("menu/medals/medal_demolitionist");		
-	trap_R_RegisterShaderNoMip("menu/medals/medal_ace");				
-	trap_R_RegisterShaderNoMip("menu/medals/medal_teammvp");			
-	trap_R_RegisterShaderNoMip("menu/medals/medal_section31");			
+	trap_R_RegisterShaderNoMip("menu/medals/medal_efficiency");
+	trap_R_RegisterShaderNoMip("menu/medals/medal_sharpshooter");
+	trap_R_RegisterShaderNoMip("menu/medals/medal_untouchable");
+	trap_R_RegisterShaderNoMip("menu/medals/medal_logistics");
+	trap_R_RegisterShaderNoMip("menu/medals/medal_tactician");
+	trap_R_RegisterShaderNoMip("menu/medals/medal_demolitionist");
+	trap_R_RegisterShaderNoMip("menu/medals/medal_ace");
+	trap_R_RegisterShaderNoMip("menu/medals/medal_teammvp");
+	trap_R_RegisterShaderNoMip("menu/medals/medal_section31");
 
-	trap_S_RegisterSound("sound/voice/computer/misc/effic.wav");			
-	trap_S_RegisterSound("sound/voice/computer/misc/sharp.wav");			
-	trap_S_RegisterSound("sound/voice/computer/misc/untouch.wav");		
-	trap_S_RegisterSound("sound/voice/computer/misc/log.wav");			
-	trap_S_RegisterSound("sound/voice/computer/misc/tact.wav");			
-	trap_S_RegisterSound("sound/voice/computer/misc/demo.wav");			
-	trap_S_RegisterSound("sound/voice/computer/misc/ace.wav");			
+	trap_S_RegisterSound("sound/voice/computer/misc/effic.wav");
+	trap_S_RegisterSound("sound/voice/computer/misc/sharp.wav");
+	trap_S_RegisterSound("sound/voice/computer/misc/untouch.wav");
+	trap_S_RegisterSound("sound/voice/computer/misc/log.wav");
+	trap_S_RegisterSound("sound/voice/computer/misc/tact.wav");
+	trap_S_RegisterSound("sound/voice/computer/misc/demo.wav");
+	trap_S_RegisterSound("sound/voice/computer/misc/ace.wav");
 	trap_S_RegisterSound("sound/voice/computer/misc/sec31.wav");
 
-	trap_R_RegisterShaderNoMip("menu/medals/medal_teammvp");		
-	trap_R_RegisterShaderNoMip("menu/medals/medal_teamdefender");	
-	trap_R_RegisterShaderNoMip("menu/medals/medal_teamwarrior");	
-	trap_R_RegisterShaderNoMip("menu/medals/medal_teamcarrier");	
-	trap_R_RegisterShaderNoMip("menu/medals/medal_teaminterceptor");	
-	trap_R_RegisterShaderNoMip("menu/medals/medal_teambravery");		
+	trap_R_RegisterShaderNoMip("menu/medals/medal_teammvp");
+	trap_R_RegisterShaderNoMip("menu/medals/medal_teamdefender");
+	trap_R_RegisterShaderNoMip("menu/medals/medal_teamwarrior");
+	trap_R_RegisterShaderNoMip("menu/medals/medal_teamcarrier");
+	trap_R_RegisterShaderNoMip("menu/medals/medal_teaminterceptor");
+	trap_R_RegisterShaderNoMip("menu/medals/medal_teambravery");
 
-	trap_S_RegisterSound("sound/voice/computer/misc/mvp.wav");			
-	trap_S_RegisterSound("sound/voice/computer/misc/defender.wav");		
-	trap_S_RegisterSound("sound/voice/computer/misc/warrior.wav");		
-	trap_S_RegisterSound("sound/voice/computer/misc/carrier.wav");			
-	trap_S_RegisterSound("sound/voice/computer/misc/intercept.wav");				
-	trap_S_RegisterSound("sound/voice/computer/misc/bravery.wav");	
+	trap_S_RegisterSound("sound/voice/computer/misc/mvp.wav");
+	trap_S_RegisterSound("sound/voice/computer/misc/defender.wav");
+	trap_S_RegisterSound("sound/voice/computer/misc/warrior.wav");
+	trap_S_RegisterSound("sound/voice/computer/misc/carrier.wav");
+	trap_S_RegisterSound("sound/voice/computer/misc/intercept.wav");
+	trap_S_RegisterSound("sound/voice/computer/misc/bravery.wav");
 
-	trap_R_RegisterShaderNoMip("menu/medals/medal_ace");			
-	trap_R_RegisterShaderNoMip("menu/medals/medal_expert");			
-	trap_R_RegisterShaderNoMip("menu/medals/medal_master");			
-	trap_R_RegisterShaderNoMip("menu/medals/medal_champion");				
+	trap_R_RegisterShaderNoMip("menu/medals/medal_ace");
+	trap_R_RegisterShaderNoMip("menu/medals/medal_expert");
+	trap_R_RegisterShaderNoMip("menu/medals/medal_master");
+	trap_R_RegisterShaderNoMip("menu/medals/medal_champion");
 
-	trap_S_RegisterSound("sound/voice/computer/misc/ace.wav");				
-	trap_S_RegisterSound("sound/voice/computer/misc/expert.wav");			
-	trap_S_RegisterSound("sound/voice/computer/misc/master.wav");			
+	trap_S_RegisterSound("sound/voice/computer/misc/ace.wav");
+	trap_S_RegisterSound("sound/voice/computer/misc/expert.wav");
+	trap_S_RegisterSound("sound/voice/computer/misc/master.wav");
 	trap_S_RegisterSound("sound/voice/computer/misc/champion.wav");
 
 	trap_S_RegisterSound("sound/voice/computer/misc/commendations.wav");
@@ -1231,7 +1231,7 @@ void CG_ParseIngameText(void)
 
 	buffer = ingameText;
 	i = 1;	// Zero is null string
-	while ( buffer ) 
+	while ( buffer )
 	{
 		token = COM_ParseExt( &buffer, qtrue );
 
@@ -1309,7 +1309,7 @@ void CG_LoadIngameText(void)
 
 	len = trap_FS_FOpenFile( fileName, &f, FS_READ );
 
-	if ( !f ) 
+	if ( !f )
 	{
 		Com_Printf( S_COLOR_RED "CG_LoadIngameText : mp_ingametext.dat file not found!\n");
 		return;
@@ -1322,7 +1322,7 @@ void CG_LoadIngameText(void)
 	}
 
 	// initialise the data area
-	memset(ingameText, 0, sizeof(ingameText));	
+	memset(ingameText, 0, sizeof(ingameText));
 
 	trap_FS_Read( ingameText, len, f );
 
@@ -1365,7 +1365,7 @@ void CG_LoadObjectivesForMap(void)
 
 	buf = objtext;
 	//Now parse out each objective
-	while ( 1 ) 
+	while ( 1 )
 	{
 		token = COM_ParseExt( &buf, qtrue );
 		if ( !token[0] ) {
@@ -1373,7 +1373,7 @@ void CG_LoadObjectivesForMap(void)
 		}
 
 		// Normal objective text
-		if ( !Q_strncmp( token, "obj", 3 ) ) 
+		if ( !Q_strncmp( token, "obj", 3 ) )
 		{
 			objnum = atoi( &token[3] );
 
@@ -1387,11 +1387,11 @@ void CG_LoadObjectivesForMap(void)
 			Q_strncpyz( cgs.objectives[objnum-1].text, token, sizeof(cgs.objectives[objnum-1].text) );
 		}
 
-		else if ( !Q_strncmp( token, "abridged_obj", 12 ) ) 
+		else if ( !Q_strncmp( token, "abridged_obj", 12 ) )
 		{
 			objnum = atoi( &token[12] );
 
-			if ( objnum < 1 || objnum == MAX_OBJECTIVES ) 
+			if ( objnum < 1 || objnum == MAX_OBJECTIVES )
 			{
 				Com_Printf( "Invalid objective number (%d), valid range is 1 to %d\n", objnum, MAX_OBJECTIVES );
 				break;

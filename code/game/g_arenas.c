@@ -37,7 +37,7 @@ void UpdateTournamentInfo( void ) {
 	gclient_t	*cl = NULL;
 	gclient_t	*cl2= NULL;
 	int			secondPlaceTied=0;
-	
+
 	memset(msg, 0, AWARDS_MSG_LENGTH);
 	memset(msg2, 0, AWARDS_MSG_LENGTH);
 
@@ -48,7 +48,7 @@ void UpdateTournamentInfo( void ) {
 	cl2= &level.clients[level.sortedClients[2]];
 	if (cl->ps.persistant[PERS_SCORE] == cl2->ps.persistant[PERS_SCORE])
 		secondPlaceTied=1;
-	
+
 	winningTeam = level.clients[0].ps.persistant[PERS_RANK]+1;
 	if ( winningTeam != TEAM_BLUE && winningTeam != TEAM_RED )
 	{//tie or not a team game
@@ -60,7 +60,7 @@ void UpdateTournamentInfo( void ) {
 	{
 		ent = &g_entities[i];
 		if (ent->client &&
-			(ent->client->sess.sessionTeam != TEAM_SPECTATOR) && 
+			(ent->client->sess.sessionTeam != TEAM_SPECTATOR) &&
 			CalculateTeamMVPByRank(ent))
 		{
 			// found the winning team's MVP
@@ -191,7 +191,7 @@ void UpdateTournamentInfo( void ) {
 	if (g_gametype.integer == GT_SINGLE_PLAYER)
 	{
 		Com_sprintf( msg, sizeof(msg), "postgame %i", playerRank);
-		trap_SendConsoleCommand( EXEC_APPEND, msg); 
+		trap_SendConsoleCommand( EXEC_APPEND, msg);
 	}
 
 }
@@ -269,7 +269,7 @@ static void CelebrateStop( gentity_t *player ) {
 
 #define	TIMER_GESTURE	(34*66+50)
 extern void	BG_AddPredictableEventToPlayerstate( int newEvent, int eventParm, playerState_t *ps );
-static void CelebrateStart( gentity_t *player ) 
+static void CelebrateStart( gentity_t *player )
 {
 	player->s.torsoAnim = ( ( player->s.torsoAnim & ANIM_TOGGLEBIT ) ^ ANIM_TOGGLEBIT ) | TORSO_GESTURE;
 	player->nextthink = level.time + TIMER_GESTURE;

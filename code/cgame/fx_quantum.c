@@ -9,15 +9,15 @@ qboolean explosionTailThink(localEntity_t *le)
 	float		length = 20;
 
 	// leave a cool tail
-	CG_AddTrail(FX_AddTrail( re->origin, 
-					le->data.particle.dir, qtrue, 
-					length, 0, 
-					le->data.particle.radius*0.8, le->data.particle.dradius, 
+	CG_AddTrail(FX_AddTrail( re->origin,
+					le->data.particle.dir, qtrue,
+					length, 0,
+					le->data.particle.radius*0.8, le->data.particle.dradius,
 					0.2, 0.0, // alpha, dalpha
-					0, 
-					1, 
+					0,
+					1,
 					cgs.media.yellowParticleShader ));
-	
+
 	return qtrue;
 }
 
@@ -31,7 +31,7 @@ void FX_QuantumThink( centity_t *cent, const struct weaponInfo_s *weapon )
 {
 	vec3_t	line1end, line2end, axis[3], rgb;
 
-	AxisClear( axis ); 
+	AxisClear( axis );
 
 	// convert direction of travel into axis
 	if ( VectorNormalize2( cent->currentState.pos.trDelta, axis[0] ) == 0 ) {
@@ -45,7 +45,7 @@ void FX_QuantumThink( centity_t *cent, const struct weaponInfo_s *weapon )
 	VectorMA( cent->lerpOrigin,  24.0f, axis[1], line2end );
 	FX_AddLine( line1end, line2end, 1.0f, random() * 6 + 2, 0.0f, 0.2 + random() * 0.2, 0.0f, 1, cgs.media.yellowParticleShader );
 
-	AxisClear( axis ); 
+	AxisClear( axis );
 
 	// convert direction of travel into axis
 	if ( VectorNormalize2( cent->currentState.pos.trDelta, axis[0] ) == 0 ) {
@@ -61,9 +61,9 @@ void FX_QuantumThink( centity_t *cent, const struct weaponInfo_s *weapon )
 
 	VectorSet( rgb, 1.0f, 0.45f, 0.15f ); // orange
 
-	FX_AddSprite( cent->lerpOrigin, NULL,qfalse,random() * 60 + 30, 4, 0.5f, 0.0f, 0, 0.0f, 1.0f, cgs.media.orangeParticleShader );	
+	FX_AddSprite( cent->lerpOrigin, NULL,qfalse,random() * 60 + 30, 4, 0.5f, 0.0f, 0, 0.0f, 1.0f, cgs.media.orangeParticleShader );
 	FX_AddSprite2(cent->lerpOrigin, NULL,qfalse,random() * 10 + 60, 0.0f, 0.1f, 0.1f, rgb, rgb, 0.0f, 0.0f, 1, cgs.media.whiteRingShader );
-	FX_AddSprite( cent->lerpOrigin, NULL,qfalse,random() * 16 + 8, 4, 0.5f, 0.0f, 0, 0.0f, 1.0f, cgs.media.yellowParticleShader );	
+	FX_AddSprite( cent->lerpOrigin, NULL,qfalse,random() * 16 + 8, 4, 0.5f, 0.0f, 0, 0.0f, 1.0f, cgs.media.yellowParticleShader );
 }
 
 /*
@@ -76,7 +76,7 @@ void FX_QuantumAltThink( centity_t *cent, const struct weaponInfo_s *weapon )
 	vec3_t	line1end, line2end, axis[3], vel, rgb;
 	float	scale;
 
-	AxisClear( axis ); 
+	AxisClear( axis );
 
 	// convert direction of travel into axis
 	if ( VectorNormalize2( cent->currentState.pos.trDelta, axis[0] ) == 0 ) {
@@ -96,9 +96,9 @@ void FX_QuantumAltThink( centity_t *cent, const struct weaponInfo_s *weapon )
 
 	VectorSet( rgb, 1.0f, 0.45f, 0.15f ); // orange
 
-	FX_AddSprite( cent->lerpOrigin, NULL,qfalse,random() * 60 + 30, 4, 0.5f, 0.0f, 0, 0.0f, 1.0f, cgs.media.orangeParticleShader );	
+	FX_AddSprite( cent->lerpOrigin, NULL,qfalse,random() * 60 + 30, 4, 0.5f, 0.0f, 0, 0.0f, 1.0f, cgs.media.orangeParticleShader );
 	FX_AddSprite2(cent->lerpOrigin, NULL,qfalse,random() * 10 + 60, 0.0f, 0.1f, 0.1f, rgb, rgb, 0.0f, 0.0f, 1, cgs.media.whiteRingShader );
-	FX_AddSprite( cent->lerpOrigin, NULL,qfalse,random() * 16 + 8, 4, 0.5f, 0.0f, 0, 0.0f, 1.0f, cgs.media.yellowParticleShader );	
+	FX_AddSprite( cent->lerpOrigin, NULL,qfalse,random() * 16 + 8, 4, 0.5f, 0.0f, 0, 0.0f, 1.0f, cgs.media.yellowParticleShader );
 
 	scale = ( 2.0f + cos( cg.time * ( M_PI * 0.001f * 4 ))) * 0.5f;
 
@@ -111,10 +111,10 @@ void FX_QuantumAltThink( centity_t *cent, const struct weaponInfo_s *weapon )
 	VectorMA( vel, 0.25f, cent->currentState.pos.trDelta, vel);
 
 	if ( rand() & 1 )
-		FX_AddSprite( cent->lerpOrigin, vel,qfalse,random() * 12.0f + scale * 14, -10, 0.2f + random() * 0.2f, 0.0, random()*360, 0, 800 + random() * 200.0f, 
+		FX_AddSprite( cent->lerpOrigin, vel,qfalse,random() * 12.0f + scale * 14, -10, 0.2f + random() * 0.2f, 0.0, random()*360, 0, 800 + random() * 200.0f,
 						cgs.media.orangeRingShader );
 	else
-		FX_AddSprite2(cent->lerpOrigin, vel,qfalse,random() * 12.0f + scale * 14, -10, 0.5, 0.0, rgb, rgb, random()*360, 0, 800 + random() * 200.0f, 
+		FX_AddSprite2(cent->lerpOrigin, vel,qfalse,random() * 12.0f + scale * 14, -10, 0.5, 0.0, rgb, rgb, random()*360, 0, 800 + random() * 200.0f,
 						cgs.media.whiteRingShader );
 }
 
@@ -176,9 +176,9 @@ void FX_QuantumHitWall( vec3_t origin, vec3_t normal )
 	for ( i = 0; i < 3; i++ ) {
 		org[i] = origin[i] + crandom() * 4;
 	}
-	
+
 	CG_MakeExplosion( org, dir, 0, cgs.media.quantumExplosionShader, 700, qtrue );
-	CG_ImpactMark( cgs.media.compressionMarkShader, origin, normal, random()*360, 1,1,1,1.0, qfalse, 
+	CG_ImpactMark( cgs.media.compressionMarkShader, origin, normal, random()*360, 1,1,1,1.0, qfalse,
 					random() * 16 + 48, qfalse );
 
 	CG_ExplosionEffects( origin, 3.0f, 256 );
@@ -248,9 +248,9 @@ void FX_QuantumAltHitWall( vec3_t origin, vec3_t normal )
 	for ( i = 0; i < 3; i++ ) {
 		org[i] = origin[i] + crandom() * 4;
 	}
-	
+
 	CG_MakeExplosion( org, dir, 0, cgs.media.quantumExplosionShader, 700, qtrue );
-	CG_ImpactMark( cgs.media.compressionMarkShader, origin, normal, random()*360, 1,1,1,1.0, qfalse, 
+	CG_ImpactMark( cgs.media.compressionMarkShader, origin, normal, random()*360, 1,1,1,1.0, qfalse,
 					random() * 16 + 48, qfalse );
 
 	CG_ExplosionEffects( origin, 3.0f, 256 );
@@ -315,10 +315,10 @@ void FX_QuantumColumns( vec3_t origin )
 	VectorSubtract( cg.refdef.vieworg, origin, dir );
 	VectorNormalize( dir );
 
-	//=== Sound === 
-	trap_S_StartSound( origin, ENTITYNUM_WORLD, CHAN_AUTO, cgs.media.quantumBoom );	
+	//=== Sound ===
+	trap_S_StartSound( origin, ENTITYNUM_WORLD, CHAN_AUTO, cgs.media.quantumBoom );
 
-	//=== columns === 
+	//=== columns ===
 	VectorCopy( origin, bottom );
 	bottom[2] -= 256;
 

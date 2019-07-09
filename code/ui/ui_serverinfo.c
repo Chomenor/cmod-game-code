@@ -17,7 +17,7 @@ typedef struct
 	menubitmap_s	add;
 	char			info[MAX_INFO_STRING];
 	qhandle_t		cornerLower;
-	int				lineCnt;	
+	int				lineCnt;
 	int				lineStartCnt;
 	menubitmap_s	arrowdwn;
 	menubitmap_s	arrowup;
@@ -96,7 +96,7 @@ void Favorites_Add( void )
 			// already in list
 			return;
 		}
-		
+
 		// use first empty or non-numeric available slot
 		if ((adrstr[0]  < '0' || adrstr[0] > '9' ) && !best)
 			best = i+1;
@@ -119,7 +119,7 @@ static void ServerInfo_Event( void* ptr, int event )
 		case ID_ADD:
 			if (event != QM_ACTIVATED)
 				break;
-		
+
 			Favorites_Add();
 			UI_PopMenu();
 			break;
@@ -162,7 +162,7 @@ static void ServerInfo_Event( void* ptr, int event )
 			{
 				s_serverinfo.arrowdwn.generic.flags |= QMF_HIDDEN|QMF_INACTIVE;
 
-				s_serverinfo.lineStartCnt = s_serverinfo.lineCnt - MAX_VIDEODRIVER_LINES; 
+				s_serverinfo.lineStartCnt = s_serverinfo.lineCnt - MAX_VIDEODRIVER_LINES;
 			}
 			break;
 
@@ -218,7 +218,7 @@ static void ServerInfo_LinePrep( void)
 	hold_value = &s_serverinfo.value1;
 	s_serverinfo.lineCnt = 0;
 	i=0;
-	while ( s ) 
+	while ( s )
 	{
 		Info_NextPair( &s, key, value );
 		if (!key[0])
@@ -226,7 +226,7 @@ static void ServerInfo_LinePrep( void)
 			break;
 		}
 
-		Q_strcat( key, MAX_INFO_KEY, ":" ); 
+		Q_strcat( key, MAX_INFO_KEY, ":" );
 
 		if ((s_serverinfo.lineStartCnt <= s_serverinfo.lineCnt) && (i < MAX_VIDEODRIVER_LINES))
 		{
@@ -265,7 +265,7 @@ void ServerInfo_Cache( void )
 PlayerSettings_MenuInit
 =================
 */
-static void UI_ServerInfoMenu_Init(void) 
+static void UI_ServerInfoMenu_Init(void)
 {
 	int	i,x,y;
 	menutext_s	*hold_key,*hold_value;
@@ -291,7 +291,7 @@ static void UI_ServerInfoMenu_Init(void)
 
 	y = 400;
 	// Button Data
-	s_serverinfo.mainmenu.generic.type			= MTYPE_BITMAP;      
+	s_serverinfo.mainmenu.generic.type			= MTYPE_BITMAP;
 	s_serverinfo.mainmenu.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_serverinfo.mainmenu.generic.x				= 90;
 	s_serverinfo.mainmenu.generic.y				= 400;
@@ -308,7 +308,7 @@ static void UI_ServerInfoMenu_Init(void)
 	s_serverinfo.mainmenu.textcolor				= CT_BLACK;
 	s_serverinfo.mainmenu.textcolor2			= CT_WHITE;
 
-	s_serverinfo.add.generic.type				= MTYPE_BITMAP;      
+	s_serverinfo.add.generic.type				= MTYPE_BITMAP;
 	s_serverinfo.add.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
 	s_serverinfo.add.generic.x					= 460;
 	s_serverinfo.add.generic.y					= y;
@@ -324,8 +324,8 @@ static void UI_ServerInfoMenu_Init(void)
 	s_serverinfo.add.textEnum					= MBT_ADDTOFAVS;
 	s_serverinfo.add.textcolor					= CT_BLACK;
 	s_serverinfo.add.textcolor2					= CT_WHITE;
-	
-	s_serverinfo.arrowup.generic.type			= MTYPE_BITMAP;      
+
+	s_serverinfo.arrowup.generic.type			= MTYPE_BITMAP;
 	s_serverinfo.arrowup.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_serverinfo.arrowup.generic.x				= 270;
 	s_serverinfo.arrowup.generic.y				= y+2;
@@ -342,7 +342,7 @@ static void UI_ServerInfoMenu_Init(void)
 	s_serverinfo.arrowup.textcolor				= CT_BLACK;
 	s_serverinfo.arrowup.textcolor2				= CT_WHITE;
 
-	s_serverinfo.arrowdwn.generic.type			= MTYPE_BITMAP;      
+	s_serverinfo.arrowdwn.generic.type			= MTYPE_BITMAP;
 	s_serverinfo.arrowdwn.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_serverinfo.arrowdwn.generic.x				= 394;
 	s_serverinfo.arrowdwn.generic.y				= y+2;
@@ -374,19 +374,19 @@ static void UI_ServerInfoMenu_Init(void)
 	{
 		hold_key->generic.x				= x-8;
 		hold_key->generic.y				= y;
-		hold_key->generic.type			= MTYPE_TEXT;      
+		hold_key->generic.type			= MTYPE_TEXT;
 		hold_key->generic.flags			= UI_RIGHT|UI_SMALLFONT;
 		hold_key->color					= colorTable[CT_LTBLUE2];
-		hold_key->string				= s_serverinfo.key[i];		
-		hold_key->style					= UI_RIGHT|UI_SMALLFONT;	
+		hold_key->string				= s_serverinfo.key[i];
+		hold_key->style					= UI_RIGHT|UI_SMALLFONT;
 
 		hold_value->generic.x			= x+8;
 		hold_value->generic.y			= y;
-		hold_value->generic.type		= MTYPE_TEXT;      
+		hold_value->generic.type		= MTYPE_TEXT;
 		hold_value->generic.flags		= UI_LEFT|UI_SMALLFONT;
 		hold_value->color				= colorTable[CT_LTGOLD1];
 		hold_value->string				= s_serverinfo.value[i];
-		hold_value->style				= UI_LEFT|UI_SMALLFONT;	
+		hold_value->style				= UI_LEFT|UI_SMALLFONT;
 
 		Menu_AddItem( &s_serverinfo.menu, ( void * ) hold_key);
 		Menu_AddItem( &s_serverinfo.menu, ( void * ) hold_value);
@@ -398,7 +398,7 @@ static void UI_ServerInfoMenu_Init(void)
 	}
 
 
-	if( trap_Cvar_VariableValue( "sv_running" ) ) 
+	if( trap_Cvar_VariableValue( "sv_running" ) )
 	{
 		s_serverinfo.add.generic.flags |= QMF_GRAYED;
 	}

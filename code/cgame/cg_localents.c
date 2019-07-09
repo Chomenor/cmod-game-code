@@ -125,8 +125,8 @@ void CG_ReflectVelocity( localEntity_t *le, trace_t *trace ) {
 
 
 	// check for stop, making sure that even on low FPS systems it doesn't bobble
-	if ( trace->allsolid || 
-		( trace->plane.normal[2] > 0 && 
+	if ( trace->allsolid ||
+		( trace->plane.normal[2] > 0 &&
 		( le->pos.trDelta[2] < 40 || le->pos.trDelta[2] < -cg.frametime * le->pos.trDelta[2] ) ) ) {
 		le->pos.trType = TR_STATIONARY;
 	} else {
@@ -312,8 +312,8 @@ void CG_AddExplosion( localEntity_t *ex )
 	{
 		float frac = (float)( cg.time - ex->startTime )/(float)( ex->endTime - ex->startTime );
 
-		ent->shaderRGBA[0] = 
-		ent->shaderRGBA[1] = 
+		ent->shaderRGBA[0] =
+		ent->shaderRGBA[1] =
 		ent->shaderRGBA[2] = frac * 255;
 		ent->shaderRGBA[3] = 255;
 	}
@@ -476,7 +476,7 @@ void CG_AddQuad( localEntity_t *le )
 	re->shaderRGBA[0] = 0xff * alpha * curRGB[0];
 	re->shaderRGBA[1] = 0xff * alpha * curRGB[1];
 	re->shaderRGBA[2] = 0xff * alpha * curRGB[2];
-	re->shaderRGBA[3] = 0xff;	
+	re->shaderRGBA[3] = 0xff;
 
 	re->reType = RT_ORIENTEDSPRITE;
 
@@ -499,7 +499,7 @@ void CG_AddLine( localEntity_t *le )
 	re = &le->refEntity;
 
 	frac = (cg.time - le->startTime) / ( float ) ( le->endTime - le->startTime );
-	if ( frac > 1 ) 
+	if ( frac > 1 )
 		frac = 1.0;	// can happen during connection problems
 	else if (frac < 0)
 		frac = 0.0;
@@ -540,7 +540,7 @@ void CG_AddOLine( localEntity_t *le )
 	re = &le->refEntity;
 
 	frac = (cg.time - le->startTime) / ( float ) ( le->endTime - le->startTime );
-	if ( frac > 1 ) 
+	if ( frac > 1 )
 		frac = 1.0;	// can happen during connection problems
 	else if (frac < 0)
 		frac = 0.0;
@@ -581,7 +581,7 @@ void CG_AddLine2( localEntity_t *le )
 	re = &le->refEntity;
 
 	frac = (cg.time - le->startTime) / ( float ) ( le->endTime - le->startTime );
-	if ( frac > 1 ) 
+	if ( frac > 1 )
 		frac = 1.0;	// can happen during connection problems
 	else if (frac < 0)
 		frac = 0.0;
@@ -617,7 +617,7 @@ CG_AddTrail
 For trek, for sparks and the like.
 ===================
 */
-void CG_AddTrail( localEntity_t *le ) 
+void CG_AddTrail( localEntity_t *le )
 {
 	refEntity_t	*re;
 	float frac, length, alpha;
@@ -628,7 +628,7 @@ void CG_AddTrail( localEntity_t *le )
 	re = &le->refEntity;
 
 	frac = (cg.time - le->startTime) / ( float ) ( le->endTime - le->startTime );
-	if ( frac > 1 ) 
+	if ( frac > 1 )
 		frac = 1.0;	// can happen during connection problems
 	else if (frac < 0)
 		frac = 0.0;
@@ -658,7 +658,7 @@ void CG_AddTrail( localEntity_t *le )
 		// trace a line from previous position to new position
 		CG_Trace( &trace, re->oldorigin, NULL, NULL, re->origin, -1, CONTENTS_SOLID );
 
-		if ( trace.fraction != 1.0 ) 
+		if ( trace.fraction != 1.0 )
 		{	// Hit something.
 			// if it is in a nodrop zone, remove it
 			// this keeps gibs from waiting at the bottom of pits of death
@@ -742,7 +742,7 @@ void CG_AddViewSprite( localEntity_t *le )
 			// trace a line from previous position to new position
 			CG_Trace( &trace, re->oldorigin, NULL, NULL, re->origin, -1, CONTENTS_SOLID );
 
-			if ( trace.fraction != 1.0 ) 
+			if ( trace.fraction != 1.0 )
 			{	// Hit something.
 				// if it is in a nodrop zone, remove it
 				// this keeps gibs from waiting at the bottom of pits of death
@@ -773,7 +773,7 @@ void CG_AddViewSprite( localEntity_t *le )
 	re->shaderRGBA[0] = 0xff * alpha * curRGB[0];
 	re->shaderRGBA[1] = 0xff * alpha * curRGB[1];
 	re->shaderRGBA[2] = 0xff * alpha * curRGB[2];
-	re->shaderRGBA[3] = 0xff;	
+	re->shaderRGBA[3] = 0xff;
 
 	re->reType = RT_SPRITE;
 
@@ -799,7 +799,7 @@ void CG_AddBezier( localEntity_t *le )
 	re = &le->refEntity;
 
 	frac = (cg.time - le->startTime) / ( float ) ( le->endTime - le->startTime );
-	if ( frac > 1 ) 
+	if ( frac > 1 )
 		frac = 1.0;	// can happen during connection problems
 	else if (frac < 0)
 		frac = 0.0;
@@ -821,8 +821,8 @@ void CG_AddBezier( localEntity_t *le )
 
 	re->reType = RT_BEZIER;
 
-	// the refEntity only stores the two control points, so we need to update them here with 
-	//the control_velocity and control_acceleration, then store the results in refEntity. 
+	// the refEntity only stores the two control points, so we need to update them here with
+	//the control_velocity and control_acceleration, then store the results in refEntity.
 	//use (cg.time - le->startTime) as a value for elapsed time t, plug it into the position formula:
 	//
 	// x = x0 + (v0 * t) + (0.5 * a * t * t)
@@ -889,7 +889,7 @@ void CG_AddCylinder( localEntity_t *le )
 	re->shaderRGBA[0] = 0xff * alpha;
 	re->shaderRGBA[1] = 0xff * alpha;
 	re->shaderRGBA[2] = 0xff * alpha;
-	re->shaderRGBA[3] = 0xff;	
+	re->shaderRGBA[3] = 0xff;
 
 	re->reType = RT_CYLINDER;
 
@@ -921,13 +921,13 @@ void CG_AddElectricity( localEntity_t *le ) {
 		frac = 0.0;
 
 	re->data.electricity.width = le->data.electricity.width + (le->data.electricity.dwidth*frac);
-	
+
 	// Calculate the current alpha.
 	alpha = le->alpha + (le->dalpha * frac);
 	re->shaderRGBA[0] = 0xff * alpha;
 	re->shaderRGBA[1] = 0xff * alpha;
 	re->shaderRGBA[2] = 0xff * alpha;
-	re->shaderRGBA[3] = 0xff;	
+	re->shaderRGBA[3] = 0xff;
 
 	re->reType = RT_ELECTRICITY;
 
@@ -941,7 +941,7 @@ CG_AddParticle
 For trek, special explosion stuff sometimes wants these
 ===================
 */
-static void CG_AddParticle( localEntity_t *le ) 
+static void CG_AddParticle( localEntity_t *le )
 {
 	refEntity_t	*re;
 	float		frac, alpha;
@@ -979,7 +979,7 @@ static void CG_AddParticle( localEntity_t *le )
 			// trace a line from previous position to new position
 			CG_Trace( &trace, re->oldorigin, NULL, NULL, re->origin, -1, CONTENTS_SOLID );
 
-			if ( trace.fraction != 1.0 ) 
+			if ( trace.fraction != 1.0 )
 			{	// Hit something.
 				// if it is in a nodrop zone, remove it
 				// this keeps gibs from waiting at the bottom of pits of death
@@ -1019,14 +1019,14 @@ static void CG_AddParticle( localEntity_t *le )
 	re->shaderRGBA[0] = 0xff * alpha;
 	re->shaderRGBA[1] = 0xff * alpha;
 	re->shaderRGBA[2] = 0xff * alpha;
-	re->shaderRGBA[3] = 0xff;	
+	re->shaderRGBA[3] = 0xff;
 
 	re->reType = RT_SPRITE;
 
 	trap_R_AddRefEntityToScene( re );
 }
 
-static void CG_AddSpawner( localEntity_t *le ) 
+static void CG_AddSpawner( localEntity_t *le )
 {
 	refEntity_t	*re;
 	vec3_t		dir;
@@ -1047,7 +1047,7 @@ static void CG_AddSpawner( localEntity_t *le )
 			// trace a line from previous position to new position
 			CG_Trace( &trace, re->oldorigin, NULL, NULL, re->origin, -1, CONTENTS_SOLID );
 
-			if ( trace.fraction != 1.0 ) 
+			if ( trace.fraction != 1.0 )
 			{	// Hit something.
 				// if it is in a nodrop zone, remove it
 				// this keeps gibs from waiting at the bottom of pits of death
@@ -1071,7 +1071,7 @@ static void CG_AddSpawner( localEntity_t *le )
 	{
 		return;
 	}
-	le->data.spawner.nextthink = cg.time + (le->data.spawner.delay + 
+	le->data.spawner.nextthink = cg.time + (le->data.spawner.delay +
 		(le->data.spawner.delay*flrandom(-le->data.spawner.variance,le->data.spawner.variance)));
 
 	if (le->data.spawner.thinkFn)
@@ -1099,7 +1099,7 @@ void CG_AddFragment( localEntity_t *le ) {
 		// sink into the ground if near the removal time
 		int		t;
 		float	oldZ;
-		
+
 		t = le->endTime - cg.time;
 		if ( t < SINK_TIME ) {
 			// we must use an explicit lighting origin, otherwise the
@@ -1186,7 +1186,7 @@ void CG_AddLocalEntities( void ) {
 
 		if (le->leFlags & LEF_ONE_FRAME)
 		{	// If this flag is set, only render one single frame, no more.
-			if (le->leFlags & LEF_ONE_FRAME_DONE) 
+			if (le->leFlags & LEF_ONE_FRAME_DONE)
 			{
 				CG_FreeLocalEntity( le );
 				continue;

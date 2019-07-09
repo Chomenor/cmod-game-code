@@ -18,7 +18,7 @@ GAME OPTIONS MENU
 extern void BG_LoadItemNames(void);
 
 // Precache stuff for Game Options Menu
-static struct 
+static struct
 {
 	menuframework_s		menu;
 
@@ -111,7 +111,7 @@ static int teamoverlay_names[] =
 	0
 };
 
-static void Preferences_SetMenuItems( void ) 
+static void Preferences_SetMenuItems( void )
 {
 	char buffer[32];
 	int *language;
@@ -127,7 +127,7 @@ static void Preferences_SetMenuItems( void )
 	s_preferences.drawteamoverlay.curvalue	= Com_Clamp( 0, 3, trap_Cvar_VariableValue( "cg_drawTeamOverlay" ) );
 	s_preferences.allowdownload.curvalue	= trap_Cvar_VariableValue( "cl_allowDownload" ) != 0;
 
-	s_preferences.flares.curvalue			= Com_Clamp( 0, 1, trap_Cvar_VariableValue( "r_flares" ));	
+	s_preferences.flares.curvalue			= Com_Clamp( 0, 1, trap_Cvar_VariableValue( "r_flares" ));
 
 	trap_Cvar_VariableStringBuffer( "g_language", buffer, 32 );
 	language = s_textlanguage_Names;
@@ -173,18 +173,18 @@ static void Preferences_SetMenuItems( void )
 }
 
 
-static void Preferences_Event( void* ptr, int notification ) 
+static void Preferences_Event( void* ptr, int notification )
 {
-	if( notification != QM_ACTIVATED ) 
+	if( notification != QM_ACTIVATED )
 	{
 		return;
 	}
 
-	switch( ((menucommon_s*)ptr)->id ) 
+	switch( ((menucommon_s*)ptr)->id )
 	{
 	case ID_CROSSHAIR:
 		s_preferences.currentcrosshair++;
-		if( s_preferences.currentcrosshair == NUM_CROSSHAIRS ) 
+		if( s_preferences.currentcrosshair == NUM_CROSSHAIRS )
 		{
 			s_preferences.currentcrosshair = 0;
 		}
@@ -205,7 +205,7 @@ static void Preferences_Event( void* ptr, int notification )
 
 	case ID_DYNAMICLIGHTS:
 		trap_Cvar_SetValue( "r_dynamiclight", s_preferences.dynamiclights.curvalue );
-		break;		
+		break;
 
 	case ID_IDENTIFYTARGET:
 		trap_Cvar_SetValue( "cg_drawCrosshairNames", s_preferences.identifytarget.curvalue );
@@ -284,7 +284,7 @@ static void Crosshair_Draw( void *self ) {
 	if ( focus )
 	{
 		// draw cursor
-		UI_FillRect( s->generic.left, s->generic.top, s->generic.right-s->generic.left+1, s->generic.bottom-s->generic.top+1, listbar_color ); 
+		UI_FillRect( s->generic.left, s->generic.top, s->generic.right-s->generic.left+1, s->generic.bottom-s->generic.top+1, listbar_color );
 		UI_DrawChar( x, y, 13, UI_CENTER|UI_BLINK|UI_SMALLFONT, color);
 	}
 
@@ -317,7 +317,7 @@ static void GameOptions_MenuDraw( void )
 
 	UI_DrawHandlePic(548, 195,  64,	8,		uis.whiteShader);	// Top of right hand column
 	UI_DrawHandlePic(548, 389,  64,	7,		uis.whiteShader);	// Bottom of right hand column
-	UI_DrawHandlePic( 548, 206, 64, 180,    uis.whiteShader);	// 
+	UI_DrawHandlePic( 548, 206, 64, 180,    uis.whiteShader);	//
 
 	UI_DrawHandlePic( 104, 171, 436, 12,    uis.whiteShader);	// Top
 	UI_DrawHandlePic( 104, 182, 16,  227,    uis.whiteShader);	// Side
@@ -368,7 +368,7 @@ static sfxHandle_t GameOptions_MenuKey( int key )
 UI_GameOptionsMenu_Cache
 ===============
 */
-void UI_GameOptionsMenu_Cache( void ) 
+void UI_GameOptionsMenu_Cache( void )
 {
 	int i;
 
@@ -389,7 +389,7 @@ void UI_GameOptionsMenu_Cache( void )
 	trap_R_RegisterShaderNoMip(PIC_BUTTON2);
 
 	// Precache crosshairs
-	for( i = 0; i < NUM_CROSSHAIRS; i++ ) 
+	for( i = 0; i < NUM_CROSSHAIRS; i++ )
 	{
 		s_preferences.crosshairShader[i] = trap_R_RegisterShaderNoMip( va("gfx/2d/crosshair%c", 'a' + i ) );
 	}
@@ -579,42 +579,42 @@ static void GameOptions_MenuInit( void )
 	s_preferences.simpleitems.width					= width;
 
 	y += inc;
-	s_preferences.textlanguage.generic.type			= MTYPE_SPINCONTROL;      
+	s_preferences.textlanguage.generic.type			= MTYPE_SPINCONTROL;
 	s_preferences.textlanguage.generic.flags		= QMF_HIGHLIGHT_IF_FOCUS;
 	s_preferences.textlanguage.generic.x			= x;
 	s_preferences.textlanguage.generic.y			= y;
 	s_preferences.textlanguage.generic.name			= "menu/common/bar1.tga";
-	s_preferences.textlanguage.generic.callback		= Preferences_Event; 
-	s_preferences.textlanguage.generic.id			= ID_TEXTLANGUAGE; 
+	s_preferences.textlanguage.generic.callback		= Preferences_Event;
+	s_preferences.textlanguage.generic.id			= ID_TEXTLANGUAGE;
 	s_preferences.textlanguage.color				= CT_DKPURPLE1;
 	s_preferences.textlanguage.color2				= CT_LTPURPLE1;
 	s_preferences.textlanguage.textX				= MENU_BUTTON_TEXT_X;
 	s_preferences.textlanguage.textY				= MENU_BUTTON_TEXT_Y;
 	s_preferences.textlanguage.textEnum				= MBT_TEXTLANGUAGE;
 	s_preferences.textlanguage.textcolor			= CT_BLACK;
-	s_preferences.textlanguage.textcolor2			= CT_WHITE;	
+	s_preferences.textlanguage.textcolor2			= CT_WHITE;
 	s_preferences.textlanguage.listnames			= s_textlanguage_Names;
 	s_preferences.textlanguage.width				= width;
 
 	y += inc;
-	s_preferences.voicelanguage.generic.type					= MTYPE_SPINCONTROL;      
+	s_preferences.voicelanguage.generic.type					= MTYPE_SPINCONTROL;
 	s_preferences.voicelanguage.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
 	s_preferences.voicelanguage.generic.x					= x;
 	s_preferences.voicelanguage.generic.y					= y;
 	s_preferences.voicelanguage.generic.name					= "menu/common/bar1.tga";
-	s_preferences.voicelanguage.generic.callback				= Preferences_Event; 
-	s_preferences.voicelanguage.generic.id					= ID_VOICELANGUAGE; 
+	s_preferences.voicelanguage.generic.callback				= Preferences_Event;
+	s_preferences.voicelanguage.generic.id					= ID_VOICELANGUAGE;
 	s_preferences.voicelanguage.color						= CT_DKPURPLE1;
 	s_preferences.voicelanguage.color2						= CT_LTPURPLE1;
 	s_preferences.voicelanguage.textX						= MENU_BUTTON_TEXT_X;
 	s_preferences.voicelanguage.textY						= MENU_BUTTON_TEXT_Y;
 	s_preferences.voicelanguage.textEnum						= MBT_VOICELANGUAGE;
 	s_preferences.voicelanguage.textcolor					= CT_BLACK;
-	s_preferences.voicelanguage.textcolor2					= CT_WHITE;	
+	s_preferences.voicelanguage.textcolor2					= CT_WHITE;
 	s_preferences.voicelanguage.listnames					= s_voicelanguage_Names;
 	s_preferences.voicelanguage.width						= width;
 
-	s_preferences.crosshair.generic.type				= MTYPE_BITMAP;      
+	s_preferences.crosshair.generic.type				= MTYPE_BITMAP;
 	s_preferences.crosshair.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
 	s_preferences.crosshair.generic.x					= 404;
 	s_preferences.crosshair.generic.y					= 224;

@@ -7,7 +7,7 @@
  * desc:		Quake3 bot AI
  *
  * $Archive: /StarTrek/Code-DM/game/ai_cmd.c $
- * $Author: Dkramer $ 
+ * $Author: Dkramer $
  * $Revision: 3 $
  * $Modtime: 5/09/00 4:04p $
  * $Date: 5/09/00 4:14p $

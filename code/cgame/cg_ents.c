@@ -14,11 +14,11 @@ Modifies the entities position and axis by the given
 tag location
 ======================
 */
-void CG_PositionEntityOnTag( refEntity_t *entity, const refEntity_t *parent, 
+void CG_PositionEntityOnTag( refEntity_t *entity, const refEntity_t *parent,
 							qhandle_t parentModel, char *tagName ) {
 	int				i;
 	orientation_t	lerped;
-	
+
 	// lerp the tag
 	trap_R_LerpTag( &lerped, parentModel, parent->oldframe, parent->frame,
 		1.0 - parent->backlerp, tagName );
@@ -43,7 +43,7 @@ Modifies the entities position and axis by the given
 tag location
 ======================
 */
-void CG_PositionRotatedEntityOnTag( refEntity_t *entity, const refEntity_t *parent, 
+void CG_PositionRotatedEntityOnTag( refEntity_t *entity, const refEntity_t *parent,
 							qhandle_t parentModel, char *tagName ) {
 	int				i;
 	orientation_t	lerped;
@@ -109,7 +109,7 @@ static void CG_EntityEffects( centity_t *cent ) {
 
 	// add loop sound
 	if ( cent->currentState.loopSound ) {
-		trap_S_AddLoopingSound( cent->currentState.number, cent->lerpOrigin, vec3_origin, 
+		trap_S_AddLoopingSound( cent->currentState.number, cent->lerpOrigin, vec3_origin,
 			cgs.gameSounds[ cent->currentState.loopSound ] );
 	}
 
@@ -146,7 +146,7 @@ static void CG_Useable( centity_t *cent ) {
 		return;
 	}
 
-	if (s1->modelindex == HI_SHIELD) 
+	if (s1->modelindex == HI_SHIELD)
 	{	// The portable shield should go through a different rendering function.
 		FX_DrawPortableShield(cent);
 		return;
@@ -182,7 +182,7 @@ static void CG_Useable( centity_t *cent ) {
 	// convert angles to axis
 //	AnglesToAxis( cent->lerpAngles, ent.axis );
 	{
-		// hack to keep dropped detpacks from rotating 
+		// hack to keep dropped detpacks from rotating
 		vec3_t vecs[3];
 		AngleVectors(s1->angles, vecs[0], vecs[1], vecs[2]);
 		VectorNegate(vecs[1], vecs[1]);
@@ -281,7 +281,7 @@ static void CG_General( centity_t *cent ) {
 			ent.renderfx |= RF_FORCE_ENT_ALPHA;
 			trap_R_AddRefEntityToScene(&ent);
 			ent.renderfx &= ~RF_FORCE_ENT_ALPHA;
-		
+
 			// Now draw the static shader over it.
 			// Alpha in over half the time, out over half.
 			alpha = sin(M_PI*alpha);
@@ -358,7 +358,7 @@ static void CG_Item( centity_t *cent ) {
 		ent.reType = RT_SPRITE;
 		VectorCopy( cent->lerpOrigin, ent.origin );
 		ent.data.sprite.radius = 14;
-	
+
 		ent.customShader = cg_items[es->modelindex].icon;
 		ent.shaderRGBA[0] = 255;
 		ent.shaderRGBA[1] = 255;
@@ -386,11 +386,11 @@ static void CG_Item( centity_t *cent ) {
 	memset (&ent, 0, sizeof(ent));
 
 	// autorotate at one of two speeds
-	if ( item->giType == IT_HEALTH ) 
+	if ( item->giType == IT_HEALTH )
 	{
 		VectorCopy( cg.autoAnglesFast, cent->lerpAngles );
 		AxisCopy( cg.autoAxisFast, ent.axis );
-	} 
+	}
 	else if (item->giType != IT_TEAM)
 	{
 		VectorCopy( cg.autoAngles, cent->lerpAngles );
@@ -428,7 +428,7 @@ static void CG_Item( centity_t *cent ) {
 			ent.nonNormalizedAxes = qtrue;
 		}
 		if (item->giTag == PW_BLUEFLAG)
-		{ 
+		{
 			ent.customShader = cgs.media.blueFlagShader[3];
 		}
 		else
@@ -444,15 +444,15 @@ static void CG_Item( centity_t *cent ) {
 		weaponInfo_t	*wi;
 
 		wi = &cg_weapons[item->giTag];
-		cent->lerpOrigin[0] -= 
+		cent->lerpOrigin[0] -=
 			wi->weaponMidpoint[0] * ent.axis[0][0] +
 			wi->weaponMidpoint[1] * ent.axis[1][0] +
 			wi->weaponMidpoint[2] * ent.axis[2][0];
-		cent->lerpOrigin[1] -= 
+		cent->lerpOrigin[1] -=
 			wi->weaponMidpoint[0] * ent.axis[0][1] +
 			wi->weaponMidpoint[1] * ent.axis[1][1] +
 			wi->weaponMidpoint[2] * ent.axis[2][1];
-		cent->lerpOrigin[2] -= 
+		cent->lerpOrigin[2] -=
 			wi->weaponMidpoint[0] * ent.axis[0][2] +
 			wi->weaponMidpoint[1] * ent.axis[1][2] +
 			wi->weaponMidpoint[2] * ent.axis[2][2];
@@ -493,7 +493,7 @@ static void CG_Item( centity_t *cent ) {
 		{	// "rez" in.
 			float alpha;
 			int a;
-			
+
 			alpha = 1.0 - ((float)dtime / (float)TIME_FADE_DUR);
 			a = alpha * 255.0;
 			if (a <= 0)
@@ -502,7 +502,7 @@ static void CG_Item( centity_t *cent ) {
 			ent.renderfx |= RF_FORCE_ENT_ALPHA;
 			trap_R_AddRefEntityToScene(&ent);
 			ent.renderfx &= ~RF_FORCE_ENT_ALPHA;
-		
+
 			// Now draw the static shader over it.
 			// Alpha in over half the time, out over half.
 			alpha = sin(M_PI*alpha);
@@ -519,11 +519,11 @@ static void CG_Item( centity_t *cent ) {
 			ent.shaderRGBA[2] = 255;
 		}
 	}
-	else if (item->giType != IT_TEAM && msec >= 0 && msec < ITEM_SCALEUP_TIME && !(es->eFlags & EF_ITEMPLACEHOLDER)) 
+	else if (item->giType != IT_TEAM && msec >= 0 && msec < ITEM_SCALEUP_TIME && !(es->eFlags & EF_ITEMPLACEHOLDER))
 	{	// if just respawned, fade in, but don't do this for flags.
 		float alpha;
 		int a;
-		
+
 		alpha = (float)msec / ITEM_SCALEUP_TIME;
 		a = alpha * 255.0;
 		if (a <= 0)
@@ -532,7 +532,7 @@ static void CG_Item( centity_t *cent ) {
 		ent.renderfx |= RF_FORCE_ENT_ALPHA;
 		trap_R_AddRefEntityToScene(&ent);
 		ent.renderfx &= ~RF_FORCE_ENT_ALPHA;
-	
+
 		// Now draw the static shader over it.
 		// Alpha in over half the time, out over half.
 		alpha = sin(M_PI*alpha);
@@ -552,7 +552,7 @@ static void CG_Item( centity_t *cent ) {
 	else
 	{	// add to refresh list  -- normal item
 		trap_R_AddRefEntityToScene(&ent);
-	}	
+	}
 }
 
 //============================================================================
@@ -581,19 +581,19 @@ static void CG_Missile( centity_t *cent, qboolean altfire ) {
 	if (altfire)
 	{
 		// add trails
-		if ( weapon->alt_missileTrailFunc ) 
+		if ( weapon->alt_missileTrailFunc )
 		{
 			weapon->alt_missileTrailFunc( cent, weapon );
 		}
 
 		// add dynamic light
 		if ( weapon->alt_missileDlight ) {
-			trap_R_AddLightToScene(cent->lerpOrigin, weapon->alt_missileDlight, 
+			trap_R_AddLightToScene(cent->lerpOrigin, weapon->alt_missileDlight,
 				weapon->missileDlightColor[0], weapon->missileDlightColor[1], weapon->missileDlightColor[2] );
 		}
 
 		// add missile sound
-		if ( weapon->alt_missileSound ) 
+		if ( weapon->alt_missileSound )
 		{
 			vec3_t	velocity;
 
@@ -623,14 +623,14 @@ static void CG_Missile( centity_t *cent, qboolean altfire ) {
 			cent->thinkFlag = 1;
 		}
 		// add trails
-		if ( weapon->missileTrailFunc ) 
+		if ( weapon->missileTrailFunc )
 		{
 			weapon->missileTrailFunc( cent, weapon );
 		}
 
 		// add dynamic light
 		if ( weapon->missileDlight ) {
-			trap_R_AddLightToScene(cent->lerpOrigin, weapon->missileDlight, 
+			trap_R_AddLightToScene(cent->lerpOrigin, weapon->missileDlight,
 				weapon->missileDlightColor[0], weapon->missileDlightColor[1], weapon->missileDlightColor[2] );
 		}
 
@@ -904,7 +904,7 @@ static void CG_CalcEntityLerpPositions( centity_t *cent ) {
 		CG_InterpolateEntityPosition( cent );
 		return;
 	}
-	
+
 	// just use the current frame and evaluate as best we can
 	BG_EvaluateTrajectory( &cent->currentState.pos, cg.time, cent->lerpOrigin );
 	BG_EvaluateTrajectory( &cent->currentState.apos, cg.time, cent->lerpAngles );
@@ -912,7 +912,7 @@ static void CG_CalcEntityLerpPositions( centity_t *cent ) {
 	// adjust for riding a mover if it wasn't rolled into the predicted
 	// player state
 	if ( cent != &cg.predictedPlayerEntity ) {
-		CG_AdjustPositionForMover( cent->lerpOrigin, cent->currentState.groundEntityNum, 
+		CG_AdjustPositionForMover( cent->lerpOrigin, cent->currentState.groundEntityNum,
 		cg.snap->serverTime, cg.time, cent->lerpOrigin );
 	}
 }
@@ -998,7 +998,7 @@ void CG_AddPacketEntities( void ) {
 			cg.frameInterpolation = (float)( cg.time - cg.snap->serverTime ) / delta;
 		}
 	} else {
-		cg.frameInterpolation = 0;	// actually, it should never be used, because 
+		cg.frameInterpolation = 0;	// actually, it should never be used, because
 									// no entities should be marked as interpolating
 	}
 

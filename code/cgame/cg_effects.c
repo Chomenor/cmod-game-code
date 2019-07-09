@@ -73,13 +73,13 @@ CG_SmokePuff
 Adds a smoke puff or blood trail localEntity.
 =====================
 */
-localEntity_t *CG_SmokePuff( const vec3_t p, const vec3_t vel, 
-				   float radius,
-				   float r, float g, float b, float a,
-				   float duration,
-				   int startTime,
-				   int leFlags,
-				   qhandle_t hShader ) {
+localEntity_t *CG_SmokePuff( const vec3_t p, const vec3_t vel,
+					float radius,
+					float r, float g, float b, float a,
+					float duration,
+					int startTime,
+					int leFlags,
+					qhandle_t hShader ) {
 	static int	seed = 0x92;
 	localEntity_t	*le;
 	refEntity_t		*re;
@@ -98,7 +98,7 @@ localEntity_t *CG_SmokePuff( const vec3_t p, const vec3_t vel,
 	le->endTime = startTime + duration;
 	le->lifeRate = 1.0 / ( le->endTime - le->startTime );
 	le->color[0] = r;
-	le->color[1] = g; 
+	le->color[1] = g;
 	le->color[2] = b;
 	le->color[3] = a;
 
@@ -173,7 +173,7 @@ void CG_SpawnEffect( vec3_t org ) {
 CG_MakeExplosion
 ====================
 */
-localEntity_t *CG_MakeExplosion( vec3_t origin, vec3_t dir, 
+localEntity_t *CG_MakeExplosion( vec3_t origin, vec3_t dir,
 								qhandle_t hModel, qhandle_t shader,
 								int msec, qboolean isSprite ) {
 	float			ang;
@@ -229,7 +229,7 @@ localEntity_t *CG_MakeExplosion( vec3_t origin, vec3_t dir,
 }
 
 
-localEntity_t *CG_MakeExplosion2( vec3_t origin, vec3_t dir, 
+localEntity_t *CG_MakeExplosion2( vec3_t origin, vec3_t dir,
 								qhandle_t hModel, int numFrames, qhandle_t shader,
 								int msec, qboolean isSprite, float scale, int flags) {
 	float			ang;
@@ -317,7 +317,7 @@ void CG_Bleed( vec3_t origin, int entityNum ) {
 
 	ex->startTime = cg.time;
 	ex->endTime = ex->startTime + 500;
-	
+
 	VectorCopy ( origin, ex->refEntity.origin);
 	ex->refEntity.reType = RT_SPRITE;
 	ex->refEntity.data.sprite.rotation = rand() % 360;

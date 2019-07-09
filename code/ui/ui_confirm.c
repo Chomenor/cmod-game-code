@@ -16,7 +16,7 @@ CONFIRMATION MENU
 #define ID_CONFIRM_YES		11
 
 
-typedef struct 
+typedef struct
 {
 	menuframework_s menu;
 
@@ -38,27 +38,27 @@ static confirmMenu_t	s_confirm;
 ConfirmMenu_Event
 =================
 */
-static void ConfirmMenu_Event( void* ptr, int event ) 
+static void ConfirmMenu_Event( void* ptr, int event )
 {
 	qboolean	result;
 
-	if( event != QM_ACTIVATED ) 
+	if( event != QM_ACTIVATED )
 	{
 		return;
 	}
 
 	UI_PopMenu();
 
-	if( ((menucommon_s*)ptr)->id == ID_CONFIRM_NO ) 
+	if( ((menucommon_s*)ptr)->id == ID_CONFIRM_NO )
 	{
 		result = qfalse;
 	}
-	else 
+	else
 	{
 		result = qtrue;
 	}
 
-	if( s_confirm.action ) 
+	if( s_confirm.action )
 	{
 		s_confirm.action( result );
 	}
@@ -70,9 +70,9 @@ static void ConfirmMenu_Event( void* ptr, int event )
 ConfirmMenu_Key
 =================
 */
-static sfxHandle_t ConfirmMenu_Key( int key ) 
+static sfxHandle_t ConfirmMenu_Key( int key )
 {
-	switch ( key ) 
+	switch ( key )
 	{
 	case K_KP_LEFTARROW:
 	case K_LEFTARROW:
@@ -101,7 +101,7 @@ static sfxHandle_t ConfirmMenu_Key( int key )
 ConfirmMenu_Draw
 =================
 */
-static void ConfirmMenu_Draw( void ) 
+static void ConfirmMenu_Draw( void )
 {
 	UI_MenuFrame(&s_confirm.menu);
 
@@ -137,7 +137,7 @@ static void ConfirmMenu_Draw( void )
 	UI_DrawProportionalString( 345, 269, s_confirm.question, UI_SMALLFONT | UI_CENTER, color_red );
 	Menu_Draw( &s_confirm.menu );
 
-	if( s_confirm.draw ) 
+	if( s_confirm.draw )
 	{
 		s_confirm.draw();
 	}
@@ -149,7 +149,7 @@ static void ConfirmMenu_Draw( void )
 ConfirmMenu_Cache
 =================
 */
-void ConfirmMenu_Cache( void ) 
+void ConfirmMenu_Cache( void )
 {
 	s_confirm.cornerPic = trap_R_RegisterShaderNoMip("menu/common/corner_ll_47_18.tga");
 }
@@ -192,7 +192,7 @@ static const char* TranslateQuestion(const char *question) {
 	if (!strcmp(question, "Lost reliable commands")) {
 		return menu_normal_text[MNT_LOSTRELIABLECOMMANDS];
 	}
-	
+
 	Q_strncpyz(translatedQuestion, question, sizeof(translatedQuestion));
 	return translatedQuestion;
 }
@@ -202,7 +202,7 @@ static const char* TranslateQuestion(const char *question) {
 UI_ConfirmMenu
 =================
 */
-void UI_ConfirmMenu( const char *question, void (*draw)( void ), void (*action)( qboolean result ) ) 
+void UI_ConfirmMenu( const char *question, void (*draw)( void ), void (*action)( qboolean result ) )
 {
 //	uiClientState_t	cstate;
 
@@ -230,17 +230,17 @@ void UI_ConfirmMenu( const char *question, void (*draw)( void ), void (*action)(
 
 
 /*	trap_GetClientState( &cstate );
-	if ( cstate.connState >= CA_CONNECTED ) 
+	if ( cstate.connState >= CA_CONNECTED )
 	{
 		s_confirm.menu.fullscreen = qfalse;
 	}
-	else 
+	else
 	{
 		s_confirm.menu.fullscreen = qtrue;
 	}
 */
-	s_confirm.yes.generic.type			= MTYPE_BITMAP;      
-	s_confirm.yes.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS; 
+	s_confirm.yes.generic.type			= MTYPE_BITMAP;
+	s_confirm.yes.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_confirm.yes.generic.x				= 215;
 	s_confirm.yes.generic.y				= 365;
 	s_confirm.yes.generic.callback		= ConfirmMenu_Event;
@@ -256,8 +256,8 @@ void UI_ConfirmMenu( const char *question, void (*draw)( void ), void (*action)(
 	s_confirm.yes.textcolor				= CT_BLACK;
 	s_confirm.yes.textcolor2			= CT_WHITE;
 
-	s_confirm.no.generic.type			= MTYPE_BITMAP;      
-	s_confirm.no.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS; 
+	s_confirm.no.generic.type			= MTYPE_BITMAP;
+	s_confirm.no.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_confirm.no.generic.x				= 371;
 	s_confirm.no.generic.y				= 365;
 	s_confirm.no.generic.callback		= ConfirmMenu_Event;
@@ -273,7 +273,7 @@ void UI_ConfirmMenu( const char *question, void (*draw)( void ), void (*action)(
 	s_confirm.no.textcolor				= CT_BLACK;
 	s_confirm.no.textcolor2				= CT_WHITE;
 
-	Menu_AddItem( &s_confirm.menu,	&s_confirm.yes );             
+	Menu_AddItem( &s_confirm.menu,	&s_confirm.yes );
 	if (action) {
 		Menu_AddItem( &s_confirm.menu,	&s_confirm.no );
 	}

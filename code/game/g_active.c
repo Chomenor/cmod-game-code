@@ -35,7 +35,7 @@ void TryUse( gentity_t *ent )
 
 	//Trace ahead to find a valid target
 	trap_Trace( &trace, src, vec3_origin, vec3_origin, dest, ent->s.number, MASK_OPAQUE|CONTENTS_BODY|CONTENTS_ITEM|CONTENTS_CORPSE );
-	
+
 	if ( trace.fraction == 1.0f || trace.entityNum < 0 )
 	{
 		//FIXME: Play a failure sound
@@ -80,7 +80,7 @@ void TryUse( gentity_t *ent )
 			{
 			case PC_TECH://using tech gives you full ammo
 				G_Sound(ent, G_SoundIndex("sound/player/suitenergy.wav") );
-				for ( i = 0 ; i < MAX_WEAPONS ; i++ ) 
+				for ( i = 0 ; i < MAX_WEAPONS ; i++ )
 				{
 					ent->client->ps.ammo[i] = Max_Ammo[i];
 				}
@@ -89,7 +89,7 @@ void TryUse( gentity_t *ent )
 			}
 		}
 	}
-	else if ( target->use && Q_stricmp("func_usable", target->classname) == 0 ) 
+	else if ( target->use && Q_stricmp("func_usable", target->classname) == 0 )
 	{//usable brush
 		if ( target->team && atoi( target->team ) != 0 )
 		{//usable has a team
@@ -106,7 +106,7 @@ void TryUse( gentity_t *ent )
 		target->use( target, ent, ent );
 		return;
 	}
-	else if ( target->use && Q_stricmp("misc_ammo_station", target->classname) == 0 ) 
+	else if ( target->use && Q_stricmp("misc_ammo_station", target->classname) == 0 )
 	{//ammo station
 		if ( ent->client->sess.sessionTeam )
 		{
@@ -220,7 +220,7 @@ void P_DamageFeedback( gentity_t *player ) {
 		G_AddEvent( player, EV_PAIN, player->health );
 		client->ps.damageEvent++;
 	}
-	
+
 	client->ps.damageCount = client->damage_blood;
 	if (client->ps.damageCount > 255)
 	{
@@ -294,7 +294,7 @@ void P_WorldEffects( gentity_t *ent ) {
 				// don't play a normal pain sound
 				ent->pain_debounce_time = level.time + 200;
 
-				G_Damage (ent, NULL, NULL, NULL, NULL, 
+				G_Damage (ent, NULL, NULL, NULL, NULL,
 					ent->damage, DAMAGE_NO_ARMOR, MOD_WATER);
 			}
 		}
@@ -306,7 +306,7 @@ void P_WorldEffects( gentity_t *ent ) {
 	//
 	// check for sizzle damage (move to pmove?)
 	//
-	if (waterlevel && 
+	if (waterlevel &&
 		(ent->watertype&(CONTENTS_LAVA|CONTENTS_SLIME)) ) {
 		if (ent->health > 0
 			&& ent->pain_debounce_time < level.time	) {
@@ -315,12 +315,12 @@ void P_WorldEffects( gentity_t *ent ) {
 				G_AddEvent( ent, EV_POWERUP_BATTLESUIT, 0 );
 			} else {
 				if (ent->watertype & CONTENTS_LAVA) {
-					G_Damage (ent, NULL, NULL, NULL, NULL, 
+					G_Damage (ent, NULL, NULL, NULL, NULL,
 						30*waterlevel, 0, MOD_LAVA);
 				}
 
 				if (ent->watertype & CONTENTS_SLIME) {
-					G_Damage (ent, NULL, NULL, NULL, NULL, 
+					G_Damage (ent, NULL, NULL, NULL, NULL,
 						10*waterlevel, 0, MOD_SLIME);
 				}
 			}
@@ -335,7 +335,7 @@ void P_WorldEffects( gentity_t *ent ) {
 G_SetClientSound
 ===============
 */
-void G_SetClientSound( gentity_t *ent ) 
+void G_SetClientSound( gentity_t *ent )
 {	// 3/28/00 kef -- this is dumb.
 	if (ent->waterlevel && (ent->watertype&(CONTENTS_LAVA|CONTENTS_SLIME)) )
 		ent->s.loopSound = level.snd_fry;
@@ -526,8 +526,8 @@ qboolean ClientInactivityTimer( gclient_t *client )
 		client->inactivityTime = level.time + 60 * 1000;
 		client->inactivityWarning = qfalse;
 	}
-	else if (	client->pers.cmd.forwardmove || 
-				client->pers.cmd.rightmove || 
+	else if (	client->pers.cmd.forwardmove ||
+				client->pers.cmd.rightmove ||
 				client->pers.cmd.upmove ||
 				(client->pers.cmd.buttons & BUTTON_ATTACK) ||
 				(client->pers.cmd.buttons & BUTTON_ALT_ATTACK) )
@@ -571,7 +571,7 @@ void ClientTimerActions( gentity_t *ent, int msec ) {
 		if ( client->ps.powerups[PW_REGEN] ) {
 			if ( client->sess.sessionClass != PC_NOCLASS && client->sess.sessionClass != PC_BORG && client->sess.sessionClass != PC_ACTIONHERO )
 			{
-				if ( ent->health < client->ps.stats[STAT_MAX_HEALTH] ) 
+				if ( ent->health < client->ps.stats[STAT_MAX_HEALTH] )
 				{
 					ent->health++;
 					G_AddEvent( ent, EV_POWERUP_REGEN, 0 );
@@ -658,7 +658,7 @@ Cmd_Ready_f
 
   This function is called from the ui_sp_postgame.c as a result of clicking on the
   "next" button in non GT_TOURNAMENT games.  This replaces the old system of waiting
-  for the user to click an ATTACK or USE button to signal ready 
+  for the user to click an ATTACK or USE button to signal ready
   (see ClientIntermissionThink() above)
 
   when all clients have signaled ready, the game continues to the next match.
@@ -703,7 +703,7 @@ void detpack_shot( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, i
 	self->takedamage = 0;
 
 	G_TempEntity(self->s.origin, EV_GRENADE_EXPLODE);
-	G_RadiusDamage( self->s.origin, self->parent?self->parent:self, DETPACK_DAMAGE*0.125, DETPACK_RADIUS*0.25, 
+	G_RadiusDamage( self->s.origin, self->parent?self->parent:self, DETPACK_DAMAGE*0.125, DETPACK_RADIUS*0.25,
 		self, DAMAGE_ALL_TEAMS, MOD_DETPACK );
 	// we're blowing up cuz we've been shot, so make sure we remove ourselves
 	//from our parent's inventory (so to speak)
@@ -856,7 +856,7 @@ void DetpackBlammoThink(gentity_t *ent)
 	// only hit the ones we can see from the center of the explosion.
 	for (i=0; i<MAX_CLIENTS; i++)
 	{
-		if ( g_entities[i].client && g_entities[i].takedamage) 
+		if ( g_entities[i].client && g_entities[i].takedamage)
 		{
 			pl = &g_entities[i];
 			VectorSubtract(pl->s.pos.trBase, ent->s.origin, vTemp);
@@ -899,7 +899,7 @@ void DetpackBlammoThink(gentity_t *ent)
 				G_TempEntity(vTemp, EV_FX_STEAM);
 			}
 */
-		} 
+		}
 	}
 
 	ent->nextthink = level.time + FRAMETIME;
@@ -931,7 +931,7 @@ void DetonateDetpack(gentity_t *ent)
 			detpack->takedamage = 0;
 
 			G_AddEvent(detpack, EV_DETPACK, 0);
-			G_RadiusDamage( detpack->s.origin, detpack->parent, DETPACK_DAMAGE, DETPACK_RADIUS, 
+			G_RadiusDamage( detpack->s.origin, detpack->parent, DETPACK_DAMAGE, DETPACK_RADIUS,
 				detpack, DAMAGE_HALF_NOTLOS|DAMAGE_ALL_TEAMS, MOD_DETPACK );
 			// just turn the model invisible and let the entity think for a bit to deliver a shockwave
 			//G_FreeEntity(detpack);
@@ -957,7 +957,7 @@ void DetonateDetpack(gentity_t *ent)
 
 
 #define SHIELD_HEALTH				250
-#define SHIELD_HEALTH_DEC			10		// 25 seconds	
+#define SHIELD_HEALTH_DEC			10		// 25 seconds
 #define MAX_SHIELD_HEIGHT			254
 #define MAX_SHIELD_HALFWIDTH		255
 #define SHIELD_HALFTHICKNESS		4
@@ -1032,7 +1032,7 @@ void ShieldGoSolid(gentity_t *self)
 		ShieldRemove(self);
 		return;
 	}
-	
+
 	trap_Trace (&tr, self->r.currentOrigin, self->r.mins, self->r.maxs, self->r.currentOrigin, self->s.number, CONTENTS_BODY );
 	if(tr.startsolid)
 	{	// gah, we can't activate yet
@@ -1200,10 +1200,10 @@ void CreateShield(gentity_t *ent)
 	ent->die = ShieldDie;
 	ent->touch = ShieldTouch;
 
-	ent->r.svFlags |= SVF_SHIELD_BBOX;	
+	ent->r.svFlags |= SVF_SHIELD_BBOX;
 
 	// see if we're valid
-	trap_Trace (&tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, ent->r.currentOrigin, ent->s.number, CONTENTS_BODY ); 
+	trap_Trace (&tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, ent->r.currentOrigin, ent->s.number, CONTENTS_BODY );
 
 	if (tr.startsolid)
 	{	// Something in the way!
@@ -1329,7 +1329,7 @@ qboolean PlaceDecoy(gentity_t *ent)
 	float		detDistance = 80;	// Distance the object will be placed from player
 	trace_t		tr;
 	vec3_t		fwd, right, up, end, mins = {-16,-16,-24}, maxs = {16,16,16};
-	
+
 	if (decoyItem == NULL)
 	{
 		decoyItem = BG_FindItemForHoldable(HI_DECOY);
@@ -1660,7 +1660,7 @@ void ClientThink_real( gentity_t *ent ) {
 	if ( ucmd->serverTime < level.time - 1000 ) {
 		ucmd->serverTime = level.time - 1000;
 //		G_Printf("serverTime >>>>>\n" );
-	} 
+	}
 
 	msec = ucmd->serverTime - client->ps.commandTime;
 	// following others may result in bad times, but we still want
@@ -1724,7 +1724,7 @@ void ClientThink_real( gentity_t *ent ) {
 	// set speed
 	client->ps.speed = g_speed.value;
 
-	if ( client->ps.powerups[PW_HASTE] ) 
+	if ( client->ps.powerups[PW_HASTE] )
 	{
 		client->ps.speed *= 1.5;
 	}
@@ -1732,7 +1732,7 @@ void ClientThink_real( gentity_t *ent ) {
 	{//flying around
 		client->ps.speed *= 1.25;
 	}
-	if ( client->sess.sessionClass == PC_HEAVY || 
+	if ( client->sess.sessionClass == PC_HEAVY ||
 		(client->sess.sessionClass == PC_BORG && !BG_BorgTransporting( &client->ps )) ||
 		(client->lasthurt_mod == MOD_ASSIMILATE && ent->pain_debounce_time > level.time) )
 	{//heavy weaps guy and borg move slower, as do people being assimilated
@@ -1818,12 +1818,12 @@ void ClientThink_real( gentity_t *ent ) {
 		// wait for the attack button to be pressed
 		if ( level.time > client->respawnTime ) {
 			// forcerespawn is to prevent users from waiting out powerups
-			if ( g_forcerespawn.integer > 0 && 
+			if ( g_forcerespawn.integer > 0 &&
 				( level.time - client->respawnTime ) > g_forcerespawn.integer * 1000 ) {
 				respawn( ent );
 				return;
 			}
-		
+
 			// pressing attack or use is the normal respawn method
 			if ( ucmd->buttons & ( BUTTON_ATTACK | BUTTON_USE_HOLDABLE ) ) {
 				respawn( ent );

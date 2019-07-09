@@ -8,7 +8,7 @@
 Emits sparks at the specified point in the specified direction
 
   "target" - ( optional ) direction to aim the sparks in, otherwise, uses the angles set in the editor.
-  "wait(2000)"	- interval between events (randomly twice as long) 
+  "wait(2000)"	- interval between events (randomly twice as long)
 */
 
 //------------------------------------------
@@ -22,7 +22,7 @@ void spark_think( gentity_t *ent )
 void spark_link( gentity_t *ent )
 {
 
-	ent->think = spark_think;	
+	ent->think = spark_think;
 	ent->nextthink = level.time + 10000.0;
 
 	ent->s.time2 = ent->wait;
@@ -43,7 +43,7 @@ void spark_link( gentity_t *ent )
 
 			return;
 		}
-		
+
 		VectorSubtract( target->s.origin, ent->s.origin, dir );
 		VectorNormalize( dir );
 		vectoangles( dir, ent->r.currentAngles );
@@ -67,14 +67,14 @@ void SP_fx_spark( gentity_t	*ent )
 	VectorCopy( ent->s.origin, ent->s.pos.trBase );
 
 	// The thing that this is targetting may not be spawned in yet, so wait a bit to try and link to it
-	ent->think = spark_link; 
+	ent->think = spark_link;
 	ent->nextthink = level.time + 2000;
 
 	trap_LinkEntity( ent );
 }
 
 
-/*QUAKED fx_steam (0 0 1) (-8 -8 -8) (8 8 8) STARTOFF BURSTS 
+/*QUAKED fx_steam (0 0 1) (-8 -8 -8) (8 8 8) STARTOFF BURSTS
 Emits steam at the specified point in the specified direction. will point at a target if one is specified.
 
   right now, neither spawnflag does anything. just give it a direction.
@@ -102,7 +102,7 @@ void steam_think( gentity_t *ent )
 
 	// FIXME: This may be a bit weird for steam bursts
 	// If a fool gets in the bolt path, zap 'em
-	if ( ent->damage ) 
+	if ( ent->damage )
 	{
 		vec3_t	start, temp;
 		trace_t	trace;
@@ -140,7 +140,7 @@ void steam_use( gentity_t *self, gentity_t *other, gentity_t *activator )
 		self->think = steam_think;
 		self->nextthink = level.time + 100;
 	}
-	
+
 	self->count = !self->count;
 }
 
@@ -170,7 +170,7 @@ void steam_link( gentity_t *ent )
 	len = VectorNormalize( dir );
 	vectoangles( dir, ent->s.angles2 );
 	VectorShort(ent->s.angles2);
-	
+
 	VectorCopy( target->s.origin, ent->s.origin2 );
 	SnapVector(ent->s.origin2);
 
@@ -224,7 +224,7 @@ void bolt_think( gentity_t *ent )
 	ent->nextthink = level.time + 10000;//(ent->wait + crandom() * ent->wait * 0.25) * 1000;
 
 	// If a fool gets in the bolt path, zap 'em
-	if ( ent->damage ) 
+	if ( ent->damage )
 	{
 		VectorSubtract( ent->s.origin2, ent->r.currentOrigin, temp );
 		VectorNormalize( temp );
@@ -260,7 +260,7 @@ void bolt_use( gentity_t *self, gentity_t *other, gentity_t *activator )
 		self->think = bolt_think;
 		self->nextthink = level.time + 200;
 	}
-	
+
 	self->count = !self->count;
 }
 
@@ -289,7 +289,7 @@ void bolt_link( gentity_t *ent )
 	VectorSubtract( target->s.origin, ent->s.origin, dir );
 	len = VectorNormalize( dir );
 	vectoangles( dir, ent->s.angles );
-	
+
 	VectorCopy( target->s.origin, ent->s.origin2 );
 	SnapVector(ent->s.origin2);
 
@@ -300,7 +300,7 @@ void bolt_link( gentity_t *ent )
 
 	G_AddEvent( ent, EV_FX_BOLT, ent->spawnflags );
 	ent->s.time2 = ent->wait;
-	ent->think = bolt_think;	
+	ent->think = bolt_think;
 	ent->nextthink = level.time + 10000;
 	trap_LinkEntity( ent );
 }
@@ -334,7 +334,7 @@ void SP_fx_bolt( gentity_t *ent )
 
 //--------------------------------------------------
 /*QUAKED fx_transporter (0 0 1) (-8 -8 -8) (8 8 8)
-Emits transporter pad effect at the specified point. just rest it flush on top of the pad. 
+Emits transporter pad effect at the specified point. just rest it flush on top of the pad.
 
 */
 
@@ -349,7 +349,7 @@ void SP_fx_transporter(gentity_t *ent)
 	SnapVector(ent->s.origin);
 	VectorCopy( ent->s.origin, ent->s.pos.trBase );
 
-	ent->think = transporter_link; 
+	ent->think = transporter_link;
 	ent->nextthink = level.time + 2000;
 
 	trap_LinkEntity( ent );
@@ -373,14 +373,14 @@ void drip_think( gentity_t *ent )
 //------------------------------------------
 void SP_fx_drip( gentity_t	*ent )
 {
-	ent->s.time2 = ent->damage; 
+	ent->s.time2 = ent->damage;
 
-	ent->s.angles2[0] = ent->random; 
+	ent->s.angles2[0] = ent->random;
 
 	SnapVector(ent->s.origin);
 	VectorCopy( ent->s.origin, ent->s.pos.trBase );
 
-	ent->think = drip_think; 
+	ent->think = drip_think;
 	ent->nextthink = level.time + 1000;
 
 	trap_LinkEntity( ent );

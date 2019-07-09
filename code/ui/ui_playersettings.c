@@ -50,7 +50,7 @@ static playersettings_t	s_playersettings;
 static int gamecodetoui[] = {4,2,3,0,5,1,6};
 static int uitogamecode[] = {4,6,2,3,1,5,7};
 
-static int handicap_items[] = 
+static int handicap_items[] =
 {
 	MNT_HANDICAP_NONE,
 	MNT_HANDICAP_95,
@@ -81,7 +81,7 @@ static int handicap_items[] =
 PlayerSettings_DrawPlayer
 =================
 */
-static void PlayerSettings_DrawPlayer( void *self ) 
+static void PlayerSettings_DrawPlayer( void *self )
 {
 	menubitmap_s	*b;
 	vec3_t			viewangles;
@@ -108,7 +108,7 @@ static void PlayerSettings_DrawPlayer( void *self )
 PlayerSettings_SaveChanges
 =================
 */
-static void PlayerSettings_SaveChanges( void ) 
+static void PlayerSettings_SaveChanges( void )
 {
 	// name
 	trap_Cvar_Set( "name", s_playersettings.name.field.buffer );
@@ -126,9 +126,9 @@ static void PlayerSettings_SaveChanges( void )
 PlayerSettings_MenuKey
 =================
 */
-static sfxHandle_t PlayerSettings_MenuKey( int key ) 
+static sfxHandle_t PlayerSettings_MenuKey( int key )
 {
-	if( key == K_MOUSE2 || key == K_ESCAPE ) 
+	if( key == K_MOUSE2 || key == K_ESCAPE )
 	{
 		PlayerSettings_SaveChanges();
 	}
@@ -142,7 +142,7 @@ static sfxHandle_t PlayerSettings_MenuKey( int key )
 PlayerSettings_SetMenuItems
 =================
 */
-static void PlayerSettings_SetMenuItems( void ) 
+static void PlayerSettings_SetMenuItems( void )
 {
 	vec3_t	viewangles;
 //	int		c;
@@ -160,7 +160,7 @@ static void PlayerSettings_SetMenuItems( void )
 
 	// model/skin
 	memset( &s_playersettings.playerinfo, 0, sizeof(playerInfo_t) );
-	
+
 	viewangles[YAW]   = 180 - 30;
 	viewangles[PITCH] = 0;
 	viewangles[ROLL]  = 0;
@@ -179,14 +179,14 @@ static void PlayerSettings_SetMenuItems( void )
 PlayerSettings_MenuEvent
 =================
 */
-static void PlayerSettings_MenuEvent( void* ptr, int event ) 
+static void PlayerSettings_MenuEvent( void* ptr, int event )
 {
-	if( event != QM_ACTIVATED ) 
+	if( event != QM_ACTIVATED )
 	{
 		return;
 	}
 
-	switch( ((menucommon_s*)ptr)->id ) 
+	switch( ((menucommon_s*)ptr)->id )
 	{
 
 	case ID_HANDICAP:
@@ -256,19 +256,19 @@ void PlayerSettingsMenu_Graphics (void)
 
 	// Left rounded ends for buttons
 	trap_R_SetColor( colorTable[s_playersettings.mainmenu.color]);
-	UI_DrawHandlePic(s_playersettings.mainmenu.generic.x - 14, s_playersettings.mainmenu.generic.y, 
+	UI_DrawHandlePic(s_playersettings.mainmenu.generic.x - 14, s_playersettings.mainmenu.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
 	trap_R_SetColor( colorTable[s_playersettings.back.color]);
-	UI_DrawHandlePic(s_playersettings.back.generic.x - 14, s_playersettings.back.generic.y, 
+	UI_DrawHandlePic(s_playersettings.back.generic.x - 14, s_playersettings.back.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
 	trap_R_SetColor( colorTable[s_playersettings.data.color]);
-	UI_DrawHandlePic(s_playersettings.data.generic.x - 14, s_playersettings.data.generic.y, 
+	UI_DrawHandlePic(s_playersettings.data.generic.x - 14, s_playersettings.data.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
 	trap_R_SetColor( colorTable[s_playersettings.model.color]);
-	UI_DrawHandlePic(s_playersettings.model.generic.x - 14, s_playersettings.model.generic.y, 
+	UI_DrawHandlePic(s_playersettings.model.generic.x - 14, s_playersettings.model.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
 
@@ -296,7 +296,7 @@ static void PlayerSettings_MenuDraw (void)
 PlayerSettings_MenuInit
 =================
 */
-static void PlayerSettings_MenuInit(int menuFrom) 
+static void PlayerSettings_MenuInit(int menuFrom)
 {
 	int		y;
 	static char	playername[32];
@@ -310,7 +310,7 @@ static void PlayerSettings_MenuInit(int menuFrom)
 	s_playersettings.menu.key					= PlayerSettings_MenuKey;
 	s_playersettings.menu.wrapAround					= qtrue;
 	s_playersettings.menu.fullscreen					= qtrue;
-    s_playersettings.menu.draw							= PlayerSettings_MenuDraw;
+	s_playersettings.menu.draw							= PlayerSettings_MenuDraw;
 	s_playersettings.menu.descX							= MENU_DESC_X;
 	s_playersettings.menu.descY							= MENU_DESC_Y;
 	s_playersettings.menu.titleX						= MENU_TITLE_X;
@@ -319,7 +319,7 @@ static void PlayerSettings_MenuInit(int menuFrom)
 	s_playersettings.menu.footNoteEnum					= MNT_CHANGEPLAYER;
 
 
-	s_playersettings.mainmenu.generic.type				= MTYPE_BITMAP;      
+	s_playersettings.mainmenu.generic.type				= MTYPE_BITMAP;
 	s_playersettings.mainmenu.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
 	s_playersettings.mainmenu.generic.x					= 110;
 	s_playersettings.mainmenu.generic.y					= 391;
@@ -346,7 +346,7 @@ static void PlayerSettings_MenuInit(int menuFrom)
 	s_playersettings.mainmenu.textcolor					= CT_BLACK;
 	s_playersettings.mainmenu.textcolor2				= CT_WHITE;
 
-	s_playersettings.back.generic.type				= MTYPE_BITMAP;      
+	s_playersettings.back.generic.type				= MTYPE_BITMAP;
 	s_playersettings.back.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
 	s_playersettings.back.generic.x					= 110;
 	s_playersettings.back.generic.y					= 415;
@@ -478,7 +478,7 @@ static void PlayerSettings_MenuInit(int menuFrom)
 PlayerSettings_Cache
 =================
 */
-void PlayerSettings_Cache( void ) 
+void PlayerSettings_Cache( void )
 {
 	s_playersettings.corner_ul_4_4  = trap_R_RegisterShaderNoMip("menu/common/corner_ul_4_4");
 	s_playersettings.corner_ur_4_4  = trap_R_RegisterShaderNoMip("menu/common/corner_ur_4_4");
@@ -493,7 +493,7 @@ void PlayerSettings_Cache( void )
 UI_PlayerSettingsMenu
 =================
 */
-void UI_PlayerSettingsMenu(int menuFrom) 
+void UI_PlayerSettingsMenu(int menuFrom)
 {
 	PlayerSettings_MenuInit(menuFrom);
 	UI_PushMenu( &s_playersettings.menu );

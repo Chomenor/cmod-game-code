@@ -89,7 +89,7 @@ static const char  *s_skinsForRace[MAX_SKINS_FOR_RACE];
 
 static char skinsForRace[MAX_SKINS_FOR_RACE][128];
 
-typedef struct 
+typedef struct
 {
 	menuframework_s	menu;
 	menubitmap_s	mainmenu;
@@ -136,7 +136,7 @@ typedef struct
 
 static advancedserver_t s_advancedserver;
 
-typedef struct 
+typedef struct
 {
 	menuframework_s	menu;
 
@@ -309,7 +309,7 @@ static void StartServer_Update( void ) {
 		// set the highlight
 		s_startserver.next.generic.flags &= ~QMF_INACTIVE;
 		i = s_startserver.currentmap - top;
-		if ( i >=0 && i < MAX_MAPSPERPAGE ) 
+		if ( i >=0 && i < MAX_MAPSPERPAGE )
 		{
 			s_startserver.mappics[i].generic.flags    |= QMF_HIGHLIGHT;
 			s_startserver.mapbuttons[i].generic.flags &= ~QMF_PULSEIFFOCUS;
@@ -360,7 +360,7 @@ static void StartServer_Settings(void)
 	{
 		s_startserver.assimilation.generic.flags |= QMF_HIDDEN;
 	}
-	
+
 
 	// Set specialties button
 //	if  (gametype_remap[s_startserver.gametype.curvalue]>= GT_TEAM )
@@ -755,7 +755,7 @@ void ServerGameMods(int gametype,int *pModAssimilation,int *pModSpecialties,int 
 
 }
 
-// Calls for the StartServer screen 
+// Calls for the StartServer screen
 void StartServerSetModButtons(void)
 {
 		ServerGameMods(gametype_remap[s_startserver.gametype.curvalue],
@@ -901,7 +901,7 @@ static void StartServer_LevelshotDraw( void *self ) {
 
 	x = b->generic.x;
 	y = b->generic.y;
-	if( b->generic.flags & QMF_HIGHLIGHT ) {	
+	if( b->generic.flags & QMF_HIGHLIGHT ) {
 		UI_DrawHandlePic( x, y, b->width, b->height + 28, b->focusshader );
 	}
 }
@@ -947,25 +947,25 @@ void StartServer_Graphics (void)
 
 	// Left rounded ends for buttons
 	trap_R_SetColor( colorTable[s_startserver.mainmenu.color]);
-	UI_DrawHandlePic(s_startserver.mainmenu.generic.x - 14, s_startserver.mainmenu.generic.y, 
+	UI_DrawHandlePic(s_startserver.mainmenu.generic.x - 14, s_startserver.mainmenu.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
 	trap_R_SetColor( colorTable[s_startserver.back.color]);
-	UI_DrawHandlePic(s_startserver.back.generic.x - 14, s_startserver.back.generic.y, 
+	UI_DrawHandlePic(s_startserver.back.generic.x - 14, s_startserver.back.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
 	// Parameter frame
-	if (ui_cdkeychecked2.integer == 1) 
+	if (ui_cdkeychecked2.integer == 1)
 	{
 		trap_R_SetColor( colorTable[CT_DKBROWN1]);
 		UI_DrawHandlePic(s_startserver.assimilation.generic.x - 24, 56, 170, 18, uis.whiteShader);		// Top
-		UI_DrawHandlePic(s_startserver.assimilation.generic.x - 34, 46,32, -32,s_startserver.corner_ll); 
+		UI_DrawHandlePic(s_startserver.assimilation.generic.x - 34, 46,32, -32,s_startserver.corner_ll);
 		UI_DrawHandlePic(s_startserver.assimilation.generic.x - 34, 64, 18, 278, uis.whiteShader);		// Side
 		UI_DrawProportionalString(  s_startserver.assimilation.generic.x,  57, menu_normal_text[MNT_PARAMETERS],UI_SMALLFONT, colorTable[CT_BLACK]);
 	}
 }
 
-static void MapName_Draw( void *self ) 
+static void MapName_Draw( void *self )
 {
 	if (!Q_stricmp(s_startserver.mapname.string,menu_normal_text[MNT_NOMAPSFOUND]))
 	{
@@ -1014,7 +1014,7 @@ static void StartServer_MenuInit(int multiplayer) {
 
 	s_startserver.menu.wrapAround = qtrue;
 	s_startserver.menu.fullscreen = qtrue;
-    s_startserver.menu.draw							= StartServer_MenuDraw;
+	s_startserver.menu.draw							= StartServer_MenuDraw;
 	s_startserver.menu.descX						= MENU_DESC_X;
 	s_startserver.menu.descY						= MENU_DESC_Y;
 	s_startserver.menu.titleX						= MENU_TITLE_X;
@@ -1030,7 +1030,7 @@ static void StartServer_MenuInit(int multiplayer) {
 	}
 	s_startserver.menu.footNoteEnum					= MNT_CREATESERVER;
 
-	s_startserver.mainmenu.generic.type				= MTYPE_BITMAP;      
+	s_startserver.mainmenu.generic.type				= MTYPE_BITMAP;
 	s_startserver.mainmenu.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_startserver.mainmenu.generic.x				= 110;
 	s_startserver.mainmenu.generic.y				= 391;
@@ -1047,7 +1047,7 @@ static void StartServer_MenuInit(int multiplayer) {
 	s_startserver.mainmenu.textcolor				= CT_BLACK;
 	s_startserver.mainmenu.textcolor2				= CT_WHITE;
 
-	s_startserver.back.generic.type				= MTYPE_BITMAP;      
+	s_startserver.back.generic.type				= MTYPE_BITMAP;
 	s_startserver.back.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_startserver.back.generic.x				= 110;
 	s_startserver.back.generic.y				= 415;
@@ -1101,12 +1101,12 @@ static void StartServer_MenuInit(int multiplayer) {
 	s_startserver.assimilation.listnames				= s_OffOnNone_Names;
 
 	y += pad;
-	s_startserver.specialties.generic.type				= MTYPE_SPINCONTROL;      
+	s_startserver.specialties.generic.type				= MTYPE_SPINCONTROL;
 	s_startserver.specialties.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
 	s_startserver.specialties.generic.x					= x;
 	s_startserver.specialties.generic.y					= y;
 	s_startserver.specialties.generic.name				= "menu/common/bar1.tga";
-	s_startserver.specialties.generic.id				= ID_PMOD_SPECIALTIES; 
+	s_startserver.specialties.generic.id				= ID_PMOD_SPECIALTIES;
 	s_startserver.specialties.generic.callback			= StartServer_MenuEvent;
 	s_startserver.specialties.color						= CT_DKPURPLE1;
 	s_startserver.specialties.color2					= CT_LTPURPLE1;
@@ -1114,17 +1114,17 @@ static void StartServer_MenuInit(int multiplayer) {
 	s_startserver.specialties.textY						= MENU_BUTTON_TEXT_Y;
 	s_startserver.specialties.textEnum					= MBT_SPECIALTIES;
 	s_startserver.specialties.textcolor					= CT_BLACK;
-	s_startserver.specialties.textcolor2				= CT_WHITE;	
+	s_startserver.specialties.textcolor2				= CT_WHITE;
 	s_startserver.specialties.listnames					= s_OffOnNone_Names;
 	s_startserver.specialties.width						= 80;
 
 	y += pad;
-	s_startserver.disintegration.generic.type				= MTYPE_SPINCONTROL;      
+	s_startserver.disintegration.generic.type				= MTYPE_SPINCONTROL;
 	s_startserver.disintegration.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
 	s_startserver.disintegration.generic.x					= x;
 	s_startserver.disintegration.generic.y					= y;
 	s_startserver.disintegration.generic.name				= "menu/common/bar1.tga";
-	s_startserver.disintegration.generic.id					= ID_PMOD_DISINTEGRATION; 
+	s_startserver.disintegration.generic.id					= ID_PMOD_DISINTEGRATION;
 	s_startserver.disintegration.generic.callback			= StartServer_MenuEvent;
 	s_startserver.disintegration.color						= CT_DKPURPLE1;
 	s_startserver.disintegration.color2						= CT_LTPURPLE1;
@@ -1132,17 +1132,17 @@ static void StartServer_MenuInit(int multiplayer) {
 	s_startserver.disintegration.textY						= MENU_BUTTON_TEXT_Y;
 	s_startserver.disintegration.textEnum					= MBT_DISINTEGRATION;
 	s_startserver.disintegration.textcolor					= CT_BLACK;
-	s_startserver.disintegration.textcolor2					= CT_WHITE;	
+	s_startserver.disintegration.textcolor2					= CT_WHITE;
 	s_startserver.disintegration.listnames					= s_OffOnNone_Names;
 	s_startserver.disintegration.width						= 80;
 
 	y += pad;
-	s_startserver.elimination.generic.type					= MTYPE_SPINCONTROL;      
+	s_startserver.elimination.generic.type					= MTYPE_SPINCONTROL;
 	s_startserver.elimination.generic.flags					= QMF_HIGHLIGHT_IF_FOCUS;
 	s_startserver.elimination.generic.x						= x;
 	s_startserver.elimination.generic.y						= y;
 	s_startserver.elimination.generic.name					= "menu/common/bar1.tga";
-	s_startserver.elimination.generic.id					= ID_PMOD_ELIMINATION; 
+	s_startserver.elimination.generic.id					= ID_PMOD_ELIMINATION;
 	s_startserver.elimination.generic.callback				= StartServer_MenuEvent;
 	s_startserver.elimination.color							= CT_DKPURPLE1;
 	s_startserver.elimination.color2						= CT_LTPURPLE1;
@@ -1150,17 +1150,17 @@ static void StartServer_MenuInit(int multiplayer) {
 	s_startserver.elimination.textY							= MENU_BUTTON_TEXT_Y;
 	s_startserver.elimination.textEnum						= MBT_ELIMINATION;
 	s_startserver.elimination.textcolor						= CT_BLACK;
-	s_startserver.elimination.textcolor2					= CT_WHITE;	
+	s_startserver.elimination.textcolor2					= CT_WHITE;
 	s_startserver.elimination.listnames						= s_OffOnNone_Names;
 	s_startserver.elimination.width							= 80;
 
 	y += pad;
-	s_startserver.actionhero.generic.type				= MTYPE_SPINCONTROL;      
+	s_startserver.actionhero.generic.type				= MTYPE_SPINCONTROL;
 	s_startserver.actionhero.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
 	s_startserver.actionhero.generic.x					= x;
 	s_startserver.actionhero.generic.y					= y;
 	s_startserver.actionhero.generic.name				= "menu/common/bar1.tga";
-	s_startserver.actionhero.generic.id					= ID_PMOD_ACTIONHERO; 
+	s_startserver.actionhero.generic.id					= ID_PMOD_ACTIONHERO;
 	s_startserver.actionhero.generic.callback			= StartServer_MenuEvent;
 	s_startserver.actionhero.color						= CT_DKPURPLE1;
 	s_startserver.actionhero.color2						= CT_LTPURPLE1;
@@ -1168,7 +1168,7 @@ static void StartServer_MenuInit(int multiplayer) {
 	s_startserver.actionhero.textY						= MENU_BUTTON_TEXT_Y;
 	s_startserver.actionhero.textEnum					= MBT_ACTIONHERO;
 	s_startserver.actionhero.textcolor					= CT_BLACK;
-	s_startserver.actionhero.textcolor2					= CT_WHITE;	
+	s_startserver.actionhero.textcolor2					= CT_WHITE;
 	s_startserver.actionhero.listnames					= s_OffOnNone_Names;
 	s_startserver.actionhero.width							= 80;
 
@@ -1291,7 +1291,7 @@ static void StartServer_MenuInit(int multiplayer) {
 		Menu_AddItem( &s_startserver.menu, &s_startserver.mapbuttons[i] );
 	}
 
-	if (ui_cdkeychecked2.integer == 1) 
+	if (ui_cdkeychecked2.integer == 1)
 	{
 		Menu_AddItem( &s_startserver.menu, &s_startserver.assimilation );
 		Menu_AddItem( &s_startserver.menu, &s_startserver.specialties );
@@ -1310,7 +1310,7 @@ static void StartServer_MenuInit(int multiplayer) {
 
 	StartServer_Settings();
 
-	StartServer_GametypeEvent( NULL, QM_ACTIVATED ); 
+	StartServer_GametypeEvent( NULL, QM_ACTIVATED );
 }
 
 
@@ -1326,8 +1326,8 @@ void StartServer_Cache( void )
 	qboolean		precache;
 	char			picname[64];
 
-	trap_R_RegisterShaderNoMip( GAMESERVER_SELECT );	
-	trap_R_RegisterShaderNoMip( GAMESERVER_SELECTED );	
+	trap_R_RegisterShaderNoMip( GAMESERVER_SELECT );
+	trap_R_RegisterShaderNoMip( GAMESERVER_SELECTED );
 	trap_R_RegisterShaderNoMip( GAMESERVER_UNKNOWNMAP );
 
 	s_startserver.corner_ll = trap_R_RegisterShaderNoMip("menu/common/corner_ll_18_18.tga");
@@ -1371,7 +1371,7 @@ void StartServer_Cache( void )
 UI_StartServerMenu
 =================
 */
-void UI_StartServerMenu( qboolean multiplayer ) 
+void UI_StartServerMenu( qboolean multiplayer )
 {
 	StartServer_MenuInit(multiplayer);
 	UI_PushMenu( &s_startserver.menu );
@@ -1468,7 +1468,7 @@ static const char *dedicated_list[] = {
 };
 */
 
-static int dedicated_list[] = 
+static int dedicated_list[] =
 {
 	MNT_DEDICATED_NO,
 	MNT_DEDICATED_LAN,
@@ -1484,7 +1484,7 @@ static const char *playerType_list[] = {
 	0
 };*/
 
-static int playerType_list[] = 
+static int playerType_list[] =
 {
 	MNT_OPEN,
 	MNT_BOT,
@@ -1498,14 +1498,14 @@ static const char *playerTeam_list[] = {
 	0
 };
 */
-static int playerTeam_list[] = 
+static int playerTeam_list[] =
 {
 	MNT_TEAM_BLUE,
 	MNT_TEAM_RED,
 	0
 };
 
-static int playerClass_list[] = 
+static int playerClass_list[] =
 {
 	MNT_PC_INFILTRATOR,
 	MNT_PC_SNIPER,
@@ -1517,7 +1517,7 @@ static int playerClass_list[] =
 };
 
 /*
-static const char *botSkill_list[] = 
+static const char *botSkill_list[] =
 {
 	"I Can Win",
 	"Bring It On",
@@ -1699,7 +1699,7 @@ static void ServerOptions_InitPlayerItems( void ) {
 	else {
 		v = 1;	// bot
 	}
-	
+
 	for( n = 0; n < PLAYER_SLOTS; n++ ) {
 		s_serveroptions.playerType[n].curvalue = v;
 	}
@@ -1711,7 +1711,7 @@ static void ServerOptions_InitPlayerItems( void ) {
 	}
 
 	// if not a dedicated server, first slot is reserved for the human on the server
-	if( s_serveroptions.dedicated.curvalue == 0 ) 
+	if( s_serveroptions.dedicated.curvalue == 0 )
 	{	// human
 		char buffer[32];
 		s_serveroptions.playerType[0].generic.flags |= QMF_INACTIVE;
@@ -1722,14 +1722,14 @@ static void ServerOptions_InitPlayerItems( void ) {
 	}
 
 	// init teams
-	if( s_serveroptions.gametype >= GT_TEAM ) 
+	if( s_serveroptions.gametype >= GT_TEAM )
 	{
-		for( n = 0; n < (PLAYER_SLOTS / 2); n++ ) 
+		for( n = 0; n < (PLAYER_SLOTS / 2); n++ )
 		{
 			s_serveroptions.playerTeam[n].curvalue = 0;
 		}
 
-		for( ; n < PLAYER_SLOTS; n++ ) 
+		for( ; n < PLAYER_SLOTS; n++ )
 		{
 			s_serveroptions.playerTeam[n].curvalue = 1;
 		}
@@ -1769,13 +1769,13 @@ static int ServerOptions_SetPlayerItems( void ) {
 	holdmaxClients = Com_Clamp( 0, 64, trap_Cvar_VariableValue( "sv_maxclients" ));
 
 	// names
-	if( s_serveroptions.dedicated.curvalue == 0 ) 
+	if( s_serveroptions.dedicated.curvalue == 0 )
 	{
 		s_serveroptions.player0.string = (char*)menu_normal_text[MNT_HUMAN];
 		s_serveroptions.playerName[0].generic.flags &= ~QMF_HIDDEN;
 		start = 1;
 	}
-	else 
+	else
 	{
 		s_serveroptions.player0.string = (char*)menu_normal_text[MNT_OPEN];
 		start = 0;
@@ -1789,7 +1789,7 @@ static int ServerOptions_SetPlayerItems( void ) {
 			maxClients++;
 		}
 
-		if( s_serveroptions.playerType[n].curvalue == 1 ) 
+		if( s_serveroptions.playerType[n].curvalue == 1 )
 		{
 			s_serveroptions.playerName[n].generic.flags &= ~(QMF_INACTIVE|QMF_HIDDEN);
 		}
@@ -1836,7 +1836,7 @@ static int ServerOptions_SetPlayerItems( void ) {
 ServerOptions_Event
 =================
 */
-static void ServerOptions_Event( void* ptr, int event ) 
+static void ServerOptions_Event( void* ptr, int event )
 {
 	int maxClients;
 
@@ -1877,7 +1877,7 @@ static void ServerOptions_Event( void* ptr, int event )
 		break;
 
 	case ID_ADVANCED:
-		if( event != QM_ACTIVATED ) 
+		if( event != QM_ACTIVATED )
 		{
 			break;
 		}
@@ -1897,7 +1897,7 @@ static void ServerOptions_Event( void* ptr, int event )
 static void ServerOptions_PlayerNameEvent( void* ptr, int event ) {
 	int		n;
 
-	if( event != QM_ACTIVATED ) 
+	if( event != QM_ACTIVATED )
 	{
 		return;
 	}
@@ -1924,7 +1924,7 @@ static void ServerOptions_PlayerNameEvent( void* ptr, int event ) {
 ServerOptions_StatusBar
 =================
 */
-static void ServerOptions_StatusBar( void* ptr ) 
+static void ServerOptions_StatusBar( void* ptr )
 {
 	UI_DrawProportionalString( 320, 417, menu_normal_text[MNT_NOLIMIT], UI_CENTER|UI_SMALLFONT, colorTable[CT_WHITE]);
 }
@@ -1953,7 +1953,7 @@ static void ServerOptions_LevelshotDraw( void *self ) {
 	if (s_serveroptions.updatedPlayer)
 	{
 		s_serveroptions.updatedPlayer = qfalse;
-		trap_Cvar_VariableStringBuffer( "name", 
+		trap_Cvar_VariableStringBuffer( "name",
 			s_serveroptions.playerNameBuffers[s_serveroptions.newUpdatedPlayer], 16 );
 	}
 
@@ -1969,7 +1969,7 @@ static void ServerOptions_LevelshotDraw( void *self ) {
 	x += b->width / 2;
 	y += 4;
 
-	UI_DrawProportionalString( x, y, s_startserver.maplongname[s_startserver.currentmap], 
+	UI_DrawProportionalString( x, y, s_startserver.maplongname[s_startserver.currentmap],
 		UI_CENTER|UI_SMALLFONT, colorTable[CT_LTGOLD1] );
 
 	y += SMALLCHAR_HEIGHT;
@@ -2068,7 +2068,7 @@ static void ServerOptions_InitBotNames( void ) {
 	}
 
 	// close off the rest by default
-	for( ;count < PLAYER_SLOTS; count++ ) 
+	for( ;count < PLAYER_SLOTS; count++ )
 	{
 //		if( s_serveroptions.playerType[count].curvalue == 1 ) {
 			s_serveroptions.playerType[count].curvalue = 2;
@@ -2169,7 +2169,7 @@ static void PlayerName_Draw( void *item ) {
 	if ( focus )
 	{
 		// draw cursor
-		UI_FillRect( s->generic.left, s->generic.top, s->generic.right-s->generic.left+1, s->generic.bottom-s->generic.top+1, listbar_color ); 
+		UI_FillRect( s->generic.left, s->generic.top, s->generic.right-s->generic.left+1, s->generic.bottom-s->generic.top+1, listbar_color );
 		UI_DrawChar( x, y, 13, UI_CENTER|UI_BLINK|UI_SMALLFONT, color);
 	}
 
@@ -2210,15 +2210,15 @@ void ServerOptionsMenu_Graphics (void)
 	UI_DrawProportionalString( 396,  61, menu_normal_text[MNT_SERVERINFO], UI_SMALLFONT, colorTable[CT_BLACK] );
 
 	trap_R_SetColor( colorTable[s_serveroptions.mainmenu.color]);
-	UI_DrawHandlePic(s_serveroptions.mainmenu.generic.x - 14, s_serveroptions.mainmenu.generic.y, 
+	UI_DrawHandlePic(s_serveroptions.mainmenu.generic.x - 14, s_serveroptions.mainmenu.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
 	trap_R_SetColor( colorTable[s_serveroptions.back.color]);
-	UI_DrawHandlePic(s_serveroptions.back.generic.x - 14, s_serveroptions.back.generic.y, 
+	UI_DrawHandlePic(s_serveroptions.back.generic.x - 14, s_serveroptions.back.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
 	trap_R_SetColor( colorTable[s_serveroptions.back.color]);
-	UI_DrawHandlePic(s_serveroptions.advanced.generic.x - 14, s_serveroptions.advanced.generic.y, 
+	UI_DrawHandlePic(s_serveroptions.advanced.generic.x - 14, s_serveroptions.advanced.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
 	UI_DrawProportionalString(  74,   28, "6211",UI_RIGHT|UI_TINYFONT, colorTable[CT_BLACK]);
@@ -2246,7 +2246,7 @@ static void ServerOptions_MenuDraw (void)
 ServerOptions_MenuInit2
 =================
 */
-static void ServerOptions_MenuInit2( int specialties) 
+static void ServerOptions_MenuInit2( int specialties)
 {
 	int	assim,n;
 
@@ -2265,7 +2265,7 @@ static void ServerOptions_MenuInit2( int specialties)
 
 
 	s_serveroptions.fraglimit.generic.flags	|= (QMF_INACTIVE|QMF_HIDDEN);
-	if ( s_serveroptions.gametype != GT_CTF ) 
+	if ( s_serveroptions.gametype != GT_CTF )
 	{
 		if (!assim)	// No points in assimilation
 		{
@@ -2274,7 +2274,7 @@ static void ServerOptions_MenuInit2( int specialties)
 	}
 
 
-	for( n = 0; n < PLAYER_SLOTS; n++ ) 
+	for( n = 0; n < PLAYER_SLOTS; n++ )
 	{
 		if ( specialties && s_serveroptions.playerType[n].curvalue != 2 )
 		{
@@ -2295,7 +2295,7 @@ ServerOptions_MenuInit
 //#define OPTIONS_X	456
 #define OPTIONS_X	488
 
-static void ServerOptions_MenuInit( qboolean multiplayer ) 
+static void ServerOptions_MenuInit( qboolean multiplayer )
 {
 	int		x,y,yInc;
 	int		n,assim;
@@ -2331,7 +2331,7 @@ static void ServerOptions_MenuInit( qboolean multiplayer )
 
 	y = 248;
 	yInc = BIGCHAR_HEIGHT + 4;
-	if( s_serveroptions.gametype != GT_CTF ) 
+	if( s_serveroptions.gametype != GT_CTF )
 	{	// Frag limit (Point limit)
 		s_serveroptions.fraglimit.generic.type					= MTYPE_FIELD;
 		s_serveroptions.fraglimit.generic.flags					= QMF_NUMBERSONLY|QMF_SMALLFONT;
@@ -2346,7 +2346,7 @@ static void ServerOptions_MenuInit( qboolean multiplayer )
 		s_serveroptions.fraglimit.field.textcolor				= CT_DKGOLD1;
 		s_serveroptions.fraglimit.field.textcolor2				= CT_LTGOLD1;
 	}
-	else 
+	else
 	{
 		// Capture Limit
 		s_serveroptions.flaglimit.generic.type					= MTYPE_FIELD;
@@ -2378,7 +2378,7 @@ static void ServerOptions_MenuInit( qboolean multiplayer )
 	s_serveroptions.timelimit.field.textcolor				= CT_DKGOLD1;
 	s_serveroptions.timelimit.field.textcolor2				= CT_LTGOLD1;
 
-	if( s_serveroptions.gametype >= GT_TEAM ) 
+	if( s_serveroptions.gametype >= GT_TEAM )
 	{
 		y += BIGCHAR_HEIGHT+2;
 		// Friendly Fire
@@ -2412,7 +2412,7 @@ static void ServerOptions_MenuInit( qboolean multiplayer )
 	s_serveroptions.pure.listnames				= s_OffOnNone_Names;
 
 
-	if( s_serveroptions.multiplayer ) 
+	if( s_serveroptions.multiplayer )
 	{
 		y += yInc;
 		s_serveroptions.dedicated.generic.type		= MTYPE_SPINCONTROL;
@@ -2448,7 +2448,7 @@ static void ServerOptions_MenuInit( qboolean multiplayer )
 	s_serveroptions.botSkill.textY				= 2;
 
 
-	if( s_serveroptions.multiplayer ) 
+	if( s_serveroptions.multiplayer )
 	{
 		s_serveroptions.hostname.generic.type       = MTYPE_FIELD;
 		s_serveroptions.hostname.generic.flags      = QMF_SMALLFONT;
@@ -2462,7 +2462,7 @@ static void ServerOptions_MenuInit( qboolean multiplayer )
 		s_serveroptions.hostname.field.textcolor	= CT_DKGOLD1;
 		s_serveroptions.hostname.field.textcolor2	= CT_LTGOLD1;
 
-		s_serveroptions.hostnamebackground1.generic.type			= MTYPE_BITMAP;      
+		s_serveroptions.hostnamebackground1.generic.type			= MTYPE_BITMAP;
 		s_serveroptions.hostnamebackground1.generic.flags		= QMF_INACTIVE;
 		s_serveroptions.hostnamebackground1.generic.x			= 80;
 		s_serveroptions.hostnamebackground1.generic.y			= 60;
@@ -2472,7 +2472,7 @@ static void ServerOptions_MenuInit( qboolean multiplayer )
 		s_serveroptions.hostnamebackground1.color				= CT_DKPURPLE1;
 		s_serveroptions.hostnamebackground1.textEnum				= MBT_NONE;
 
-		s_serveroptions.hostnamebackground2.generic.type		= MTYPE_BITMAP;      
+		s_serveroptions.hostnamebackground2.generic.type		= MTYPE_BITMAP;
 		s_serveroptions.hostnamebackground2.generic.flags		= QMF_INACTIVE;
 		s_serveroptions.hostnamebackground2.generic.x			= 180;
 		s_serveroptions.hostnamebackground2.generic.y			= 63;
@@ -2494,7 +2494,7 @@ static void ServerOptions_MenuInit( qboolean multiplayer )
 	s_serveroptions.player0.style					= UI_LEFT|UI_SMALLFONT;
 
 	y = 123;
-	for( n = 0; n < PLAYER_SLOTS; n++ ) 
+	for( n = 0; n < PLAYER_SLOTS; n++ )
 	{
 		s_serveroptions.playerType[n].generic.type		= MTYPE_SPINCONTROL;
 		s_serveroptions.playerType[n].generic.flags		= QMF_SMALLFONT;
@@ -2565,7 +2565,7 @@ static void ServerOptions_MenuInit( qboolean multiplayer )
 		y += ( SMALLCHAR_HEIGHT + 4 );
 	}
 
-	s_serveroptions.mainmenu.generic.type			= MTYPE_BITMAP;      
+	s_serveroptions.mainmenu.generic.type			= MTYPE_BITMAP;
 	s_serveroptions.mainmenu.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_serveroptions.mainmenu.generic.x				= 110;
 	s_serveroptions.mainmenu.generic.y				= 391;
@@ -2637,21 +2637,21 @@ static void ServerOptions_MenuInit( qboolean multiplayer )
 	Menu_AddItem( &s_serveroptions.menu, &s_serveroptions.botSkill );
 	Menu_AddItem( &s_serveroptions.menu, &s_serveroptions.player0 );
 
-	for( n = 0; n < PLAYER_SLOTS; n++ ) 
+	for( n = 0; n < PLAYER_SLOTS; n++ )
 	{
-		if( n != 0 ) 
+		if( n != 0 )
 		{
 			Menu_AddItem( &s_serveroptions.menu, &s_serveroptions.playerType[n] );
 		}
 
 		Menu_AddItem( &s_serveroptions.menu, &s_serveroptions.playerName[n] );
 
-		if( s_serveroptions.gametype >= GT_TEAM ) 
+		if( s_serveroptions.gametype >= GT_TEAM )
 		{
 			Menu_AddItem( &s_serveroptions.menu, &s_serveroptions.playerTeam[n] );
 		}
 
-		//if( s_serveroptions.specialties ) 
+		//if( s_serveroptions.specialties )
 		{
 			Menu_AddItem( &s_serveroptions.menu, &s_serveroptions.playerClass[n] );
 		}
@@ -2659,11 +2659,11 @@ static void ServerOptions_MenuInit( qboolean multiplayer )
 
 	assim = trap_Cvar_VariableValue( "g_pModAssimilation");
 
-	if ( s_serveroptions.gametype != GT_CTF ) 
+	if ( s_serveroptions.gametype != GT_CTF )
 	{
 		Menu_AddItem( &s_serveroptions.menu, &s_serveroptions.fraglimit );
 	}
-	else 
+	else
 	{
 		Menu_AddItem( &s_serveroptions.menu, &s_serveroptions.flaglimit );
 	}
@@ -2673,19 +2673,19 @@ static void ServerOptions_MenuInit( qboolean multiplayer )
 		Menu_AddItem( &s_serveroptions.menu, &s_serveroptions.timelimit );
 //	}
 
-	if ( s_serveroptions.gametype >= GT_TEAM ) 
+	if ( s_serveroptions.gametype >= GT_TEAM )
 	{
 		Menu_AddItem( &s_serveroptions.menu, &s_serveroptions.friendlyfire );
 	}
 
 	Menu_AddItem( &s_serveroptions.menu, &s_serveroptions.pure );
 
-	if ( s_serveroptions.multiplayer ) 
+	if ( s_serveroptions.multiplayer )
 	{
 		Menu_AddItem( &s_serveroptions.menu, &s_serveroptions.dedicated );
 	}
 
-	if ( s_serveroptions.multiplayer ) 
+	if ( s_serveroptions.multiplayer )
 	{
 		Menu_AddItem( &s_serveroptions.menu, &s_serveroptions.hostnamebackground1 );
 		Menu_AddItem( &s_serveroptions.menu, &s_serveroptions.hostnamebackground2 );
@@ -2706,7 +2706,7 @@ static void ServerOptions_MenuInit( qboolean multiplayer )
 ServerOptions_Cache
 =================
 */
-void ServerOptions_Cache( void ) 
+void ServerOptions_Cache( void )
 {
 	trap_R_RegisterShaderNoMip( GAMESERVER_SELECT );
 	trap_R_RegisterShaderNoMip( GAMESERVER_UNKNOWNMAP );
@@ -2732,7 +2732,7 @@ void ServerOptions_Cache( void )
 UI_ServerOptionsMenu
 =================
 */
-static void UI_ServerOptionsMenu( qboolean multiplayer ) 
+static void UI_ServerOptionsMenu( qboolean multiplayer )
 {
 	ServerOptions_MenuInit( multiplayer );
 	UI_PushMenu( &s_serveroptions.menu );
@@ -2845,11 +2845,11 @@ UI_BotSelectMenu_UpdateGrid
 static void UI_BotSelectMenu_UpdateGrid( void ) {
 	const char	*info;
 	int			i;
-    int			j,len;
+	int			j,len;
 
 	j = botSelectInfo.modelpage * MAX_MODELSPERPAGE;
 	for( i = 0; i < (PLAYERGRID_ROWS * PLAYERGRID_COLS); i++, j++) {
-		if( j < botSelectInfo.numBots ) { 
+		if( j < botSelectInfo.numBots ) {
 			info = UI_GetBotInfoByNumber( botSelectInfo.sortedBotNums[j] );
 			PlayerIcon( Info_ValueForKey( info, "model" ), botSelectInfo.boticons[i], MAX_QPATH );
 			Q_strncpyz( botSelectInfo.botnames[i], Info_ValueForKey( info, "name" ), 16 );
@@ -2876,7 +2876,7 @@ static void UI_BotSelectMenu_UpdateGrid( void ) {
 			}
 
 
- 			botSelectInfo.pics[i].generic.name = botSelectInfo.boticons[i];
+			botSelectInfo.pics[i].generic.name = botSelectInfo.boticons[i];
 			if( BotAlreadySelected( botSelectInfo.botnames[i] ) ) {
 				botSelectInfo.picnames[i].color = colorTable[CT_LTGOLD1];
 			}
@@ -2887,14 +2887,14 @@ static void UI_BotSelectMenu_UpdateGrid( void ) {
 		}
 		else {
 			// dead slot
- 			botSelectInfo.pics[i].generic.name         = NULL;
+			botSelectInfo.pics[i].generic.name         = NULL;
 			botSelectInfo.picbuttons[i].generic.flags |= QMF_INACTIVE;
 			botSelectInfo.botnames[i][0] = 0;
 		}
 
- 		botSelectInfo.pics[i].generic.flags       &= ~QMF_HIGHLIGHT;
- 		botSelectInfo.pics[i].shader               = 0;
- 		botSelectInfo.picbuttons[i].generic.flags |= QMF_PULSEIFFOCUS;
+		botSelectInfo.pics[i].generic.flags       &= ~QMF_HIGHLIGHT;
+		botSelectInfo.pics[i].shader               = 0;
+		botSelectInfo.picbuttons[i].generic.flags |= QMF_PULSEIFFOCUS;
 	}
 
 	// set selected model
@@ -3009,8 +3009,8 @@ static void UI_BotSelectMenu_BotEvent( void* ptr, int event ) {
 	}
 
 	for( i = 0; i < (PLAYERGRID_ROWS * PLAYERGRID_COLS); i++ ) {
- 		botSelectInfo.pics[i].generic.flags &= ~QMF_HIGHLIGHT;
- 		botSelectInfo.picbuttons[i].generic.flags |= QMF_PULSEIFFOCUS;
+		botSelectInfo.pics[i].generic.flags &= ~QMF_HIGHLIGHT;
+		botSelectInfo.picbuttons[i].generic.flags |= QMF_PULSEIFFOCUS;
 	}
 
 	// set selected
@@ -3041,9 +3041,9 @@ static void UI_BotSelectMenu_BackEvent( void* ptr, int event ) {
 UI_BotSelectMenu_MainMenuEvent
 =================
 */
-static void UI_BotSelectMenu_MainMenuEvent( void* ptr, int event ) 
+static void UI_BotSelectMenu_MainMenuEvent( void* ptr, int event )
 {
-	if( event != QM_ACTIVATED ) 
+	if( event != QM_ACTIVATED )
 	{
 		return;
 	}
@@ -3056,9 +3056,9 @@ static void UI_BotSelectMenu_MainMenuEvent( void* ptr, int event )
 UI_BotSelectMenu_SelectEvent
 =================
 */
-static void UI_BotSelectMenu_SelectEvent( void* ptr, int event ) 
+static void UI_BotSelectMenu_SelectEvent( void* ptr, int event )
 {
-	if( event != QM_ACTIVATED ) 
+	if( event != QM_ACTIVATED )
 	{
 		return;
 	}
@@ -3084,10 +3084,10 @@ void M_BotSelectMenu_Graphics (void)
 	// Frame
 	trap_R_SetColor( colorTable[CT_DKPURPLE2]);
 
-	UI_DrawHandlePic( 141, 345,  32,  32, botSelectInfo.corner_ll_18_18);	// LL 
-	UI_DrawHandlePic( 530, 345, -32,  32, botSelectInfo.corner_ll_18_18);	// LR 
-	UI_DrawHandlePic( 141,  49,  32, -32, botSelectInfo.corner_ll_18_18);	// UL 
-	UI_DrawHandlePic( 530,  49, -32, -32, botSelectInfo.corner_ll_18_18);	// UR 
+	UI_DrawHandlePic( 141, 345,  32,  32, botSelectInfo.corner_ll_18_18);	// LL
+	UI_DrawHandlePic( 530, 345, -32,  32, botSelectInfo.corner_ll_18_18);	// LR
+	UI_DrawHandlePic( 141,  49,  32, -32, botSelectInfo.corner_ll_18_18);	// UL
+	UI_DrawHandlePic( 530,  49, -32, -32, botSelectInfo.corner_ll_18_18);	// UR
 
 	UI_DrawHandlePic( 158,  59, 387,  18, uis.whiteShader);	// Top
 	UI_DrawHandlePic( 141,  78,  18, 273, uis.whiteShader);	// Left side
@@ -3101,11 +3101,11 @@ void M_BotSelectMenu_Graphics (void)
 
 	// Left rounded ends for buttons
 	trap_R_SetColor( colorTable[botSelectInfo.mainmenu.color]);
-	UI_DrawHandlePic(botSelectInfo.mainmenu.generic.x - 14, botSelectInfo.mainmenu.generic.y, 
+	UI_DrawHandlePic(botSelectInfo.mainmenu.generic.x - 14, botSelectInfo.mainmenu.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
 	trap_R_SetColor( colorTable[botSelectInfo.back.color]);
-	UI_DrawHandlePic(botSelectInfo.back.generic.x - 14, botSelectInfo.back.generic.y, 
+	UI_DrawHandlePic(botSelectInfo.back.generic.x - 14, botSelectInfo.back.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
 	UI_DrawProportionalString(  74,   28, "79088",UI_RIGHT|UI_TINYFONT, colorTable[CT_BLACK]);
@@ -3133,7 +3133,7 @@ static void BotSelect_MenuDraw (void)
 UI_BotSelectMenu_Cache
 =================
 */
-void UI_BotSelectMenu_Cache( void ) 
+void UI_BotSelectMenu_Cache( void )
 {
 	trap_R_RegisterShaderNoMip( BOTSELECT_SELECT );
 	trap_R_RegisterShaderNoMip( BOTSELECT_SELECTED );
@@ -3142,7 +3142,7 @@ void UI_BotSelectMenu_Cache( void )
 }
 
 
-static void UI_BotSelectMenu_Init( char *bot ) 
+static void UI_BotSelectMenu_Init( char *bot )
 {
 	int		i, j, k;
 	int		x, y,len;
@@ -3166,16 +3166,16 @@ static void UI_BotSelectMenu_Init( char *bot )
 	UI_BotSelectMenu_Cache();
 
 	y =	84;
-	for( i = 0, k = 0; i < PLAYERGRID_ROWS; i++) 
+	for( i = 0, k = 0; i < PLAYERGRID_ROWS; i++)
 	{
 		x =	180;
-		for( j = 0; j < PLAYERGRID_COLS; j++, k++ ) 
+		for( j = 0; j < PLAYERGRID_COLS; j++, k++ )
 		{
 			botSelectInfo.pics[k].generic.type				= MTYPE_BITMAP;
 			botSelectInfo.pics[k].generic.flags				= QMF_LEFT_JUSTIFY|QMF_INACTIVE;
 			botSelectInfo.pics[k].generic.x					= x;
 			botSelectInfo.pics[k].generic.y					= y;
- 			botSelectInfo.pics[k].generic.name				= botSelectInfo.boticons[k];
+			botSelectInfo.pics[k].generic.name				= botSelectInfo.boticons[k];
 			botSelectInfo.pics[k].width						= 64;
 			botSelectInfo.pics[k].height					= 64;
 			botSelectInfo.pics[k].focuspic					= BOTSELECT_SELECTED;
@@ -3252,7 +3252,7 @@ static void UI_BotSelectMenu_Init( char *bot )
 	botSelectInfo.right.textcolor			= CT_BLACK;
 	botSelectInfo.right.textcolor2			= CT_WHITE;
 
-	botSelectInfo.mainmenu.generic.type			= MTYPE_BITMAP;      
+	botSelectInfo.mainmenu.generic.type			= MTYPE_BITMAP;
 	botSelectInfo.mainmenu.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	botSelectInfo.mainmenu.generic.x				= 110;
 	botSelectInfo.mainmenu.generic.y				= 391;
@@ -3310,7 +3310,7 @@ static void UI_BotSelectMenu_Init( char *bot )
 	botSelectInfo.chosenname.style         = UI_SMALLFONT;
 	botSelectInfo.chosenname.color         = colorTable[CT_LTBLUE2];
 
-	for( i = 0; i < MAX_MODELSPERPAGE; i++ ) 
+	for( i = 0; i < MAX_MODELSPERPAGE; i++ )
 	{
 		Menu_AddItem( &botSelectInfo.menu,	&botSelectInfo.pics[i] );
 		Menu_AddItem( &botSelectInfo.menu,	&botSelectInfo.picbuttons[i] );
@@ -3335,7 +3335,7 @@ static void UI_BotSelectMenu_Init( char *bot )
 UI_BotSelectMenu
 =================
 */
-void UI_BotSelectMenu( char *bot ) 
+void UI_BotSelectMenu( char *bot )
 {
 	UI_BotSelectMenu_Init( bot );
 	UI_PushMenu( &botSelectInfo.menu );
@@ -3361,7 +3361,7 @@ void SetPlayerMod(void)
 AdvancedServer_Update
 =================
 */
-static void AdvancedServer_Update( void) 
+static void AdvancedServer_Update( void)
 {
 	int holdInt;
 	float holdFloat;
@@ -3530,7 +3530,7 @@ static void AdvancedServer_Update( void)
 }
 
 
-// Calls for the AdvancedServer screen 
+// Calls for the AdvancedServer screen
 void AdvancedServerSetModButtons(void)
 {
 		ServerGameMods(gametype_remap[s_startserver.gametype.curvalue],
@@ -3553,16 +3553,16 @@ void AdvancedServerSetModButtons(void)
 AdvancedServer_Event
 =================
 */
-static void AdvancedServer_Event( void* ptr, int notification ) 
+static void AdvancedServer_Event( void* ptr, int notification )
 {
 	int dmflags;
 
-	if( notification != QM_ACTIVATED ) 
+	if( notification != QM_ACTIVATED )
 	{
 		return;
 	}
 
-	switch( ((menucommon_s*)ptr)->id ) 
+	switch( ((menucommon_s*)ptr)->id )
 	{
 	case ID_PMOD_ASSIMILIATION:
 		trap_Cvar_SetValue( "g_pModAssimilation", s_advancedserver.assimilation.curvalue);
@@ -3754,11 +3754,11 @@ void M_AdvancedServerMenu_Graphics(void)
 
 	// Left rounded ends for buttons
 	trap_R_SetColor( colorTable[s_advancedserver.mainmenu.color]);
-	UI_DrawHandlePic(s_advancedserver.mainmenu.generic.x - 14, s_advancedserver.mainmenu.generic.y, 
+	UI_DrawHandlePic(s_advancedserver.mainmenu.generic.x - 14, s_advancedserver.mainmenu.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
 	trap_R_SetColor( colorTable[s_advancedserver.back.color]);
-	UI_DrawHandlePic(s_advancedserver.back.generic.x - 14, s_advancedserver.back.generic.y, 
+	UI_DrawHandlePic(s_advancedserver.back.generic.x - 14, s_advancedserver.back.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
 }
@@ -3768,13 +3768,13 @@ void M_AdvancedServerMenu_Graphics(void)
 ServerAdvanced_StatusBar
 =================
 */
-static void ServerAdvanced_StatusBar( void* ptr ) 
+static void ServerAdvanced_StatusBar( void* ptr )
 {
 	int x,y;
 
 	x = 265;
 	y = 400;
-	switch( ((menucommon_s*)ptr)->id ) 
+	switch( ((menucommon_s*)ptr)->id )
 	{
 	case ID_RESPAWNTIME:
 		UI_DrawProportionalString( x, y, menu_normal_text[MNT_ADV_STATUS1_RESPAWN], UI_SMALLFONT, colorTable[CT_WHITE]);
@@ -3863,7 +3863,7 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	s_advancedserver.menu.titleI					= MNT_ANVANCEDMENU_TITLE;
 	s_advancedserver.menu.footNoteEnum				= MNT_ADVANCEDSERVER;
 
-	s_advancedserver.mainmenu.generic.type			= MTYPE_BITMAP;      
+	s_advancedserver.mainmenu.generic.type			= MTYPE_BITMAP;
 	s_advancedserver.mainmenu.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_advancedserver.mainmenu.generic.x				= 110;
 	s_advancedserver.mainmenu.generic.y				= 391;
@@ -3900,12 +3900,12 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	pad = 22;
 	x = 100;
 	y = 80;
-	s_advancedserver.autojoin.generic.type				= MTYPE_SPINCONTROL;      
+	s_advancedserver.autojoin.generic.type				= MTYPE_SPINCONTROL;
 	s_advancedserver.autojoin.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
 	s_advancedserver.autojoin.generic.x					= x;
 	s_advancedserver.autojoin.generic.y					= y;
 	s_advancedserver.autojoin.generic.name				= "menu/common/bar1.tga";
-	s_advancedserver.autojoin.generic.id				= ID_AUTOJOIN; 
+	s_advancedserver.autojoin.generic.id				= ID_AUTOJOIN;
 	s_advancedserver.autojoin.generic.callback			= AdvancedServer_Event;
 	s_advancedserver.autojoin.color						= CT_DKPURPLE1;
 	s_advancedserver.autojoin.color2					= CT_LTPURPLE1;
@@ -3913,16 +3913,16 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	s_advancedserver.autojoin.textY						= MENU_BUTTON_TEXT_Y;
 	s_advancedserver.autojoin.textEnum					= MBT_AUTOJOIN;
 	s_advancedserver.autojoin.textcolor					= CT_BLACK;
-	s_advancedserver.autojoin.textcolor2				= CT_WHITE;	
+	s_advancedserver.autojoin.textcolor2				= CT_WHITE;
 	s_advancedserver.autojoin.listnames					= s_OffOnNone_Names;
 
 	y += pad;
-	s_advancedserver.autobalance.generic.type				= MTYPE_SPINCONTROL;      
+	s_advancedserver.autobalance.generic.type				= MTYPE_SPINCONTROL;
 	s_advancedserver.autobalance.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
 	s_advancedserver.autobalance.generic.x					= x;
 	s_advancedserver.autobalance.generic.y					= y;
 	s_advancedserver.autobalance.generic.name				= "menu/common/bar1.tga";
-	s_advancedserver.autobalance.generic.id					= ID_AUTOBALANCE; 
+	s_advancedserver.autobalance.generic.id					= ID_AUTOBALANCE;
 	s_advancedserver.autobalance.generic.callback			= AdvancedServer_Event;
 	s_advancedserver.autobalance.color						= CT_DKPURPLE1;
 	s_advancedserver.autobalance.color2					= CT_LTPURPLE1;
@@ -3930,17 +3930,17 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	s_advancedserver.autobalance.textY						= MENU_BUTTON_TEXT_Y;
 	s_advancedserver.autobalance.textEnum					= MBT_AUTOBALANCE;
 	s_advancedserver.autobalance.textcolor					= CT_BLACK;
-	s_advancedserver.autobalance.textcolor2				= CT_WHITE;	
+	s_advancedserver.autobalance.textcolor2				= CT_WHITE;
 	s_advancedserver.autobalance.listnames					= s_OffOnNone_Names;
 
 	y += pad;
 	/*
-	s_advancedserver.friendlyfire.generic.type				= MTYPE_SPINCONTROL;      
+	s_advancedserver.friendlyfire.generic.type				= MTYPE_SPINCONTROL;
 	s_advancedserver.friendlyfire.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
 	s_advancedserver.friendlyfire.generic.x					= x;
 	s_advancedserver.friendlyfire.generic.y					= y;
 	s_advancedserver.friendlyfire.generic.name				= "menu/common/bar1.tga";
-	s_advancedserver.friendlyfire.generic.id				= ID_FRIENDLYFIRE; 
+	s_advancedserver.friendlyfire.generic.id				= ID_FRIENDLYFIRE;
 	s_advancedserver.friendlyfire.generic.callback			= AdvancedServer_Event;
 	s_advancedserver.friendlyfire.color						= CT_DKPURPLE1;
 	s_advancedserver.friendlyfire.color2					= CT_LTPURPLE1;
@@ -3948,16 +3948,16 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	s_advancedserver.friendlyfire.textY						= MENU_BUTTON_TEXT_Y;
 	s_advancedserver.friendlyfire.textEnum					= MBT_FRIENDLYFIRE;
 	s_advancedserver.friendlyfire.textcolor					= CT_BLACK;
-	s_advancedserver.friendlyfire.textcolor2				= CT_WHITE;	
+	s_advancedserver.friendlyfire.textcolor2				= CT_WHITE;
 	s_advancedserver.friendlyfire.listnames					= s_OffOnNone_Names;
 */
 	y += pad;
-	s_advancedserver.fallingdamage.generic.type				= MTYPE_SPINCONTROL;      
+	s_advancedserver.fallingdamage.generic.type				= MTYPE_SPINCONTROL;
 	s_advancedserver.fallingdamage.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_advancedserver.fallingdamage.generic.x				= x;
 	s_advancedserver.fallingdamage.generic.y				= y;
 	s_advancedserver.fallingdamage.generic.name				= "menu/common/bar1.tga";
-	s_advancedserver.fallingdamage.generic.id				= ID_FRIENDLYFIRE; 
+	s_advancedserver.fallingdamage.generic.id				= ID_FRIENDLYFIRE;
 	s_advancedserver.fallingdamage.generic.callback			= AdvancedServer_Event;
 	s_advancedserver.fallingdamage.color					= CT_DKPURPLE1;
 	s_advancedserver.fallingdamage.color2					= CT_LTPURPLE1;
@@ -3965,7 +3965,7 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	s_advancedserver.fallingdamage.textY					= MENU_BUTTON_TEXT_Y;
 	s_advancedserver.fallingdamage.textEnum					= MBT_FALLINGDAMAGE;
 	s_advancedserver.fallingdamage.textcolor				= CT_BLACK;
-	s_advancedserver.fallingdamage.textcolor2				= CT_WHITE;	
+	s_advancedserver.fallingdamage.textcolor2				= CT_WHITE;
 	s_advancedserver.fallingdamage.listnames				= s_OffOnNone_Names;
 
 
@@ -3975,7 +3975,7 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	s_advancedserver.repawntime.generic.flags				= QMF_NUMBERSONLY|QMF_SMALLFONT;
 	s_advancedserver.repawntime.generic.x					= x;
 	s_advancedserver.repawntime.generic.y					= y;
-	s_advancedserver.repawntime.generic.id					= ID_RESPAWNTIME; 
+	s_advancedserver.repawntime.generic.id					= ID_RESPAWNTIME;
 	s_advancedserver.repawntime.generic.callback			= AdvancedServer_Event;
 	s_advancedserver.repawntime.generic.statusbar			= ServerAdvanced_StatusBar;
 	s_advancedserver.repawntime.field.widthInChars			= 2;
@@ -3991,7 +3991,7 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	s_advancedserver.maxclients.generic.flags				= QMF_NUMBERSONLY|QMF_SMALLFONT;
 	s_advancedserver.maxclients.generic.x					= x;
 	s_advancedserver.maxclients.generic.y					= y;
-	s_advancedserver.maxclients.generic.id					= ID_ADVMAXCLIENTS; 
+	s_advancedserver.maxclients.generic.id					= ID_ADVMAXCLIENTS;
 	s_advancedserver.maxclients.generic.callback			= AdvancedServer_Event;
 	s_advancedserver.maxclients.generic.statusbar			= ServerAdvanced_StatusBar;
 	s_advancedserver.maxclients.field.widthInChars			= 2;
@@ -4007,7 +4007,7 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	s_advancedserver.runspeed.generic.flags					= QMF_NUMBERSONLY|QMF_SMALLFONT;
 	s_advancedserver.runspeed.generic.x						= x;
 	s_advancedserver.runspeed.generic.y						= y;
-	s_advancedserver.runspeed.generic.id					= ID_RUNSPEED; 
+	s_advancedserver.runspeed.generic.id					= ID_RUNSPEED;
 	s_advancedserver.runspeed.generic.callback				= AdvancedServer_Event;
 	s_advancedserver.runspeed.generic.statusbar				= ServerAdvanced_StatusBar;
 	s_advancedserver.runspeed.field.widthInChars			= 4;
@@ -4023,7 +4023,7 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	s_advancedserver.gravity.generic.flags					= QMF_NUMBERSONLY|QMF_SMALLFONT;
 	s_advancedserver.gravity.generic.x						= x;
 	s_advancedserver.gravity.generic.y						= y;
-	s_advancedserver.gravity.generic.id						= ID_GRAVITY; 
+	s_advancedserver.gravity.generic.id						= ID_GRAVITY;
 	s_advancedserver.gravity.generic.callback				= AdvancedServer_Event;
 	s_advancedserver.gravity.generic.statusbar				= ServerAdvanced_StatusBar;
 	s_advancedserver.gravity.field.widthInChars				= 4;
@@ -4039,7 +4039,7 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	s_advancedserver.knockback.generic.flags				= QMF_NUMBERSONLY|QMF_SMALLFONT;
 	s_advancedserver.knockback.generic.x					= x;
 	s_advancedserver.knockback.generic.y					= y;
-	s_advancedserver.knockback.generic.id					= ID_KNOCKBACK; 
+	s_advancedserver.knockback.generic.id					= ID_KNOCKBACK;
 	s_advancedserver.knockback.generic.callback				= AdvancedServer_Event;
 	s_advancedserver.knockback.generic.statusbar			= ServerAdvanced_StatusBar;
 	s_advancedserver.knockback.field.widthInChars			= 5;
@@ -4055,7 +4055,7 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	s_advancedserver.dmgmult.generic.flags					= QMF_NUMBERSONLY|QMF_SMALLFONT;
 	s_advancedserver.dmgmult.generic.x						= x;
 	s_advancedserver.dmgmult.generic.y						= y;
-	s_advancedserver.dmgmult.generic.id						= ID_DMGMULT; 
+	s_advancedserver.dmgmult.generic.id						= ID_DMGMULT;
 	s_advancedserver.dmgmult.generic.callback				= AdvancedServer_Event;
 	s_advancedserver.dmgmult.generic.statusbar				= ServerAdvanced_StatusBar;
 	s_advancedserver.dmgmult.field.widthInChars				= 5;
@@ -4071,7 +4071,7 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	s_advancedserver.bot_minplayers.generic.flags				= QMF_NUMBERSONLY|QMF_SMALLFONT;
 	s_advancedserver.bot_minplayers.generic.x					= x;
 	s_advancedserver.bot_minplayers.generic.y					= y;
-	s_advancedserver.bot_minplayers.generic.id					= ID_BOT_MINPLAYERS; 
+	s_advancedserver.bot_minplayers.generic.id					= ID_BOT_MINPLAYERS;
 	s_advancedserver.bot_minplayers.generic.callback			= AdvancedServer_Event;
 	s_advancedserver.bot_minplayers.generic.statusbar			= ServerAdvanced_StatusBar;
 	s_advancedserver.bot_minplayers.field.widthInChars			= 5;
@@ -4087,7 +4087,7 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	s_advancedserver.nojointimeout.generic.flags				= QMF_NUMBERSONLY|QMF_SMALLFONT;
 	s_advancedserver.nojointimeout.generic.x					= x;
 	s_advancedserver.nojointimeout.generic.y					= y;
-	s_advancedserver.nojointimeout.generic.id					= ID_NOJOINTIMEOUT; 
+	s_advancedserver.nojointimeout.generic.id					= ID_NOJOINTIMEOUT;
 	s_advancedserver.nojointimeout.generic.callback				= AdvancedServer_Event;
 	s_advancedserver.nojointimeout.generic.statusbar			= ServerAdvanced_StatusBar;
 	s_advancedserver.nojointimeout.field.widthInChars			= 4;
@@ -4103,7 +4103,7 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	s_advancedserver.classchangetimeout.generic.flags				= QMF_NUMBERSONLY|QMF_SMALLFONT;
 	s_advancedserver.classchangetimeout.generic.x					= x;
 	s_advancedserver.classchangetimeout.generic.y					= y;
-	s_advancedserver.classchangetimeout.generic.id					= ID_CLASSCHANGETIMEOUT; 
+	s_advancedserver.classchangetimeout.generic.id					= ID_CLASSCHANGETIMEOUT;
 	s_advancedserver.classchangetimeout.generic.callback				= AdvancedServer_Event;
 	s_advancedserver.classchangetimeout.generic.statusbar			= ServerAdvanced_StatusBar;
 	s_advancedserver.classchangetimeout.field.widthInChars			= 7;
@@ -4117,12 +4117,12 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	// Second column
 	x = 370;
 	y = 80;
-	s_advancedserver.adaptitemrespawn.generic.type				= MTYPE_SPINCONTROL;      
+	s_advancedserver.adaptitemrespawn.generic.type				= MTYPE_SPINCONTROL;
 	s_advancedserver.adaptitemrespawn.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
 	s_advancedserver.adaptitemrespawn.generic.x					= x;
 	s_advancedserver.adaptitemrespawn.generic.y					= y;
 	s_advancedserver.adaptitemrespawn.generic.name				= "menu/common/bar1.tga";
-	s_advancedserver.adaptitemrespawn.generic.id				= ID_ADAPTITEMRESPAWN; 
+	s_advancedserver.adaptitemrespawn.generic.id				= ID_ADAPTITEMRESPAWN;
 	s_advancedserver.adaptitemrespawn.generic.callback			= AdvancedServer_Event;
 	s_advancedserver.adaptitemrespawn.color						= CT_DKPURPLE1;
 	s_advancedserver.adaptitemrespawn.color2					= CT_LTPURPLE1;
@@ -4130,16 +4130,16 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	s_advancedserver.adaptitemrespawn.textY						= MENU_BUTTON_TEXT_Y;
 	s_advancedserver.adaptitemrespawn.textEnum					= MBT_ADAPTITEMRESPAWN;
 	s_advancedserver.adaptitemrespawn.textcolor					= CT_BLACK;
-	s_advancedserver.adaptitemrespawn.textcolor2				= CT_WHITE;	
+	s_advancedserver.adaptitemrespawn.textcolor2				= CT_WHITE;
 	s_advancedserver.adaptitemrespawn.listnames					= s_OffOnNone_Names;
 
 	y += pad;
-	s_advancedserver.holodeckintro.generic.type					= MTYPE_SPINCONTROL;      
+	s_advancedserver.holodeckintro.generic.type					= MTYPE_SPINCONTROL;
 	s_advancedserver.holodeckintro.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
 	s_advancedserver.holodeckintro.generic.x					= x;
 	s_advancedserver.holodeckintro.generic.y					= y;
 	s_advancedserver.holodeckintro.generic.name					= "menu/common/bar1.tga";
-	s_advancedserver.holodeckintro.generic.id					= ID_HOLODECKINTRO; 
+	s_advancedserver.holodeckintro.generic.id					= ID_HOLODECKINTRO;
 	s_advancedserver.holodeckintro.generic.callback				= AdvancedServer_Event;
 	s_advancedserver.holodeckintro.color						= CT_DKPURPLE1;
 	s_advancedserver.holodeckintro.color2						= CT_LTPURPLE1;
@@ -4147,7 +4147,7 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	s_advancedserver.holodeckintro.textY						= MENU_BUTTON_TEXT_Y;
 	s_advancedserver.holodeckintro.textEnum						= MBT_HOLODECKINTRO;
 	s_advancedserver.holodeckintro.textcolor					= CT_BLACK;
-	s_advancedserver.holodeckintro.textcolor2					= CT_WHITE;	
+	s_advancedserver.holodeckintro.textcolor2					= CT_WHITE;
 	s_advancedserver.holodeckintro.listnames					= s_OffOnNone_Names;
 
 	y += pad;
@@ -4156,7 +4156,7 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	s_advancedserver.forceplayerrespawn.generic.flags				= QMF_NUMBERSONLY|QMF_SMALLFONT;
 	s_advancedserver.forceplayerrespawn.generic.x					= x;
 	s_advancedserver.forceplayerrespawn.generic.y					= y;
-	s_advancedserver.forceplayerrespawn.generic.id					= ID_FORCEPLAYERRESPAWN; 
+	s_advancedserver.forceplayerrespawn.generic.id					= ID_FORCEPLAYERRESPAWN;
 	s_advancedserver.forceplayerrespawn.generic.callback			= AdvancedServer_Event;
 	s_advancedserver.forceplayerrespawn.generic.statusbar			= ServerAdvanced_StatusBar;
 	s_advancedserver.forceplayerrespawn.field.widthInChars			= 5;
@@ -4172,7 +4172,7 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	s_advancedserver.respawninvulnerability.generic.flags				= QMF_NUMBERSONLY|QMF_SMALLFONT;
 	s_advancedserver.respawninvulnerability.generic.x					= x;
 	s_advancedserver.respawninvulnerability.generic.y					= y;
-	s_advancedserver.respawninvulnerability.generic.id					= ID_RESPAWNINVULNERABILITY; 
+	s_advancedserver.respawninvulnerability.generic.id					= ID_RESPAWNINVULNERABILITY;
 	s_advancedserver.respawninvulnerability.generic.callback			= AdvancedServer_Event;
 	s_advancedserver.respawninvulnerability.generic.statusbar			= ServerAdvanced_StatusBar;
 	s_advancedserver.respawninvulnerability.field.widthInChars			= 5;
@@ -4188,7 +4188,7 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	s_advancedserver.dowarmup.generic.flags								= QMF_NUMBERSONLY|QMF_SMALLFONT;
 	s_advancedserver.dowarmup.generic.x									= x;
 	s_advancedserver.dowarmup.generic.y									= y;
-	s_advancedserver.dowarmup.generic.id								= ID_DOWARMUP; 
+	s_advancedserver.dowarmup.generic.id								= ID_DOWARMUP;
 	s_advancedserver.dowarmup.generic.callback							= AdvancedServer_Event;
 	s_advancedserver.dowarmup.generic.statusbar							= ServerAdvanced_StatusBar;
 	s_advancedserver.dowarmup.field.widthInChars						= 5;
@@ -4202,12 +4202,12 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 
 	y += pad;
 	x = 370;
-	s_advancedserver.blueteam.generic.type					= MTYPE_SPINCONTROL;      
+	s_advancedserver.blueteam.generic.type					= MTYPE_SPINCONTROL;
 	s_advancedserver.blueteam.generic.flags					= QMF_HIGHLIGHT_IF_FOCUS;
 	s_advancedserver.blueteam.generic.x						= x;
 	s_advancedserver.blueteam.generic.y						= y;
 	s_advancedserver.blueteam.generic.name					= "menu/common/bar1.tga";
-	s_advancedserver.blueteam.generic.id					= ID_BLUETEAM; 
+	s_advancedserver.blueteam.generic.id					= ID_BLUETEAM;
 	s_advancedserver.blueteam.generic.callback				= AdvancedServer_Event;
 	s_advancedserver.blueteam.color							= CT_DKPURPLE1;
 	s_advancedserver.blueteam.color2						= CT_LTPURPLE1;
@@ -4215,16 +4215,16 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	s_advancedserver.blueteam.textY							= MENU_BUTTON_TEXT_Y;
 	s_advancedserver.blueteam.textEnum						= MBT_BLUETEAMGROUP;
 	s_advancedserver.blueteam.textcolor						= CT_BLACK;
-	s_advancedserver.blueteam.textcolor2					= CT_WHITE;	
+	s_advancedserver.blueteam.textcolor2					= CT_WHITE;
 	s_advancedserver.blueteam.itemnames						= s_skinsForRace;
 
 	y += pad;
-	s_advancedserver.redteam.generic.type					= MTYPE_SPINCONTROL;      
+	s_advancedserver.redteam.generic.type					= MTYPE_SPINCONTROL;
 	s_advancedserver.redteam.generic.flags					= QMF_HIGHLIGHT_IF_FOCUS;
 	s_advancedserver.redteam.generic.x						= x;
 	s_advancedserver.redteam.generic.y						= y;
 	s_advancedserver.redteam.generic.name					= "menu/common/bar1.tga";
-	s_advancedserver.redteam.generic.id						= ID_REDTEAM; 
+	s_advancedserver.redteam.generic.id						= ID_REDTEAM;
 	s_advancedserver.redteam.generic.callback				= AdvancedServer_Event;
 	s_advancedserver.redteam.color							= CT_DKPURPLE1;
 	s_advancedserver.redteam.color2							= CT_LTPURPLE1;
@@ -4232,16 +4232,16 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	s_advancedserver.redteam.textY							= MENU_BUTTON_TEXT_Y;
 	s_advancedserver.redteam.textEnum						= MBT_REDTEAMGROUP;
 	s_advancedserver.redteam.textcolor						= CT_BLACK;
-	s_advancedserver.redteam.textcolor2						= CT_WHITE;	
+	s_advancedserver.redteam.textcolor2						= CT_WHITE;
 	s_advancedserver.redteam.itemnames						= s_skinsForRace;
 
 	y += pad;
-	s_advancedserver.assimilation.generic.type				= MTYPE_SPINCONTROL;      
+	s_advancedserver.assimilation.generic.type				= MTYPE_SPINCONTROL;
 	s_advancedserver.assimilation.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
 	s_advancedserver.assimilation.generic.x					= x;
 	s_advancedserver.assimilation.generic.y					= y;
 	s_advancedserver.assimilation.generic.name				= "menu/common/bar1.tga";
-	s_advancedserver.assimilation.generic.id				= ID_PMOD_ASSIMILIATION; 
+	s_advancedserver.assimilation.generic.id				= ID_PMOD_ASSIMILIATION;
 	s_advancedserver.assimilation.generic.callback			= AdvancedServer_Event;
 	s_advancedserver.assimilation.color						= CT_DKPURPLE1;
 	s_advancedserver.assimilation.color2					= CT_LTPURPLE1;
@@ -4249,16 +4249,16 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	s_advancedserver.assimilation.textY						= MENU_BUTTON_TEXT_Y;
 	s_advancedserver.assimilation.textEnum					= MBT_ASSIMILATION;
 	s_advancedserver.assimilation.textcolor					= CT_BLACK;
-	s_advancedserver.assimilation.textcolor2				= CT_WHITE;	
+	s_advancedserver.assimilation.textcolor2				= CT_WHITE;
 	s_advancedserver.assimilation.listnames					= s_OffOnNone_Names;
 
 	y += pad;
-	s_advancedserver.specialties.generic.type				= MTYPE_SPINCONTROL;      
+	s_advancedserver.specialties.generic.type				= MTYPE_SPINCONTROL;
 	s_advancedserver.specialties.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
 	s_advancedserver.specialties.generic.x					= x;
 	s_advancedserver.specialties.generic.y					= y;
 	s_advancedserver.specialties.generic.name				= "menu/common/bar1.tga";
-	s_advancedserver.specialties.generic.id					= ID_PMOD_SPECIALTIES; 
+	s_advancedserver.specialties.generic.id					= ID_PMOD_SPECIALTIES;
 	s_advancedserver.specialties.generic.callback			= AdvancedServer_Event;
 	s_advancedserver.specialties.color						= CT_DKPURPLE1;
 	s_advancedserver.specialties.color2						= CT_LTPURPLE1;
@@ -4266,16 +4266,16 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	s_advancedserver.specialties.textY						= MENU_BUTTON_TEXT_Y;
 	s_advancedserver.specialties.textEnum					= MBT_SPECIALTIES;
 	s_advancedserver.specialties.textcolor					= CT_BLACK;
-	s_advancedserver.specialties.textcolor2					= CT_WHITE;	
+	s_advancedserver.specialties.textcolor2					= CT_WHITE;
 	s_advancedserver.specialties.listnames					= s_OffOnNone_Names;
 
 	y += pad*2;
-	s_advancedserver.disintegration.generic.type				= MTYPE_SPINCONTROL;      
+	s_advancedserver.disintegration.generic.type				= MTYPE_SPINCONTROL;
 	s_advancedserver.disintegration.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
 	s_advancedserver.disintegration.generic.x					= x;
 	s_advancedserver.disintegration.generic.y					= y;
 	s_advancedserver.disintegration.generic.name				= "menu/common/bar1.tga";
-	s_advancedserver.disintegration.generic.id					= ID_PMOD_DISINTEGRATION; 
+	s_advancedserver.disintegration.generic.id					= ID_PMOD_DISINTEGRATION;
 	s_advancedserver.disintegration.generic.callback			= AdvancedServer_Event;
 	s_advancedserver.disintegration.color						= CT_DKPURPLE1;
 	s_advancedserver.disintegration.color2						= CT_LTPURPLE1;
@@ -4283,16 +4283,16 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	s_advancedserver.disintegration.textY						= MENU_BUTTON_TEXT_Y;
 	s_advancedserver.disintegration.textEnum					= MBT_DISINTEGRATION;
 	s_advancedserver.disintegration.textcolor					= CT_BLACK;
-	s_advancedserver.disintegration.textcolor2					= CT_WHITE;	
+	s_advancedserver.disintegration.textcolor2					= CT_WHITE;
 	s_advancedserver.disintegration.listnames					= s_OffOnNone_Names;
 
 	y += pad;
-	s_advancedserver.elimination.generic.type				= MTYPE_SPINCONTROL;      
+	s_advancedserver.elimination.generic.type				= MTYPE_SPINCONTROL;
 	s_advancedserver.elimination.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
 	s_advancedserver.elimination.generic.x					= x;
 	s_advancedserver.elimination.generic.y					= y;
 	s_advancedserver.elimination.generic.name				= "menu/common/bar1.tga";
-	s_advancedserver.elimination.generic.id					= ID_PMOD_ELIMINATION; 
+	s_advancedserver.elimination.generic.id					= ID_PMOD_ELIMINATION;
 	s_advancedserver.elimination.generic.callback			= AdvancedServer_Event;
 	s_advancedserver.elimination.color						= CT_DKPURPLE1;
 	s_advancedserver.elimination.color2						= CT_LTPURPLE1;
@@ -4300,16 +4300,16 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	s_advancedserver.elimination.textY						= MENU_BUTTON_TEXT_Y;
 	s_advancedserver.elimination.textEnum					= MBT_ELIMINATION;
 	s_advancedserver.elimination.textcolor					= CT_BLACK;
-	s_advancedserver.elimination.textcolor2					= CT_WHITE;	
+	s_advancedserver.elimination.textcolor2					= CT_WHITE;
 	s_advancedserver.elimination.listnames					= s_OffOnNone_Names;
 
 	y += pad * 2;
-	s_advancedserver.actionhero.generic.type				= MTYPE_SPINCONTROL;      
+	s_advancedserver.actionhero.generic.type				= MTYPE_SPINCONTROL;
 	s_advancedserver.actionhero.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
 	s_advancedserver.actionhero.generic.x					= x;
 	s_advancedserver.actionhero.generic.y					= y;
 	s_advancedserver.actionhero.generic.name				= "menu/common/bar1.tga";
-	s_advancedserver.actionhero.generic.id					= ID_PMOD_ACTIONHERO; 
+	s_advancedserver.actionhero.generic.id					= ID_PMOD_ACTIONHERO;
 	s_advancedserver.actionhero.generic.callback			= AdvancedServer_Event;
 	s_advancedserver.actionhero.color						= CT_DKPURPLE1;
 	s_advancedserver.actionhero.color2						= CT_LTPURPLE1;
@@ -4317,7 +4317,7 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	s_advancedserver.actionhero.textY						= MENU_BUTTON_TEXT_Y;
 	s_advancedserver.actionhero.textEnum					= MBT_ACTIONHERO;
 	s_advancedserver.actionhero.textcolor					= CT_BLACK;
-	s_advancedserver.actionhero.textcolor2					= CT_WHITE;	
+	s_advancedserver.actionhero.textcolor2					= CT_WHITE;
 	s_advancedserver.actionhero.listnames					= s_OffOnNone_Names;
 
 
@@ -4362,7 +4362,7 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	s_advancedserver.errorText.generic.flags				= QMF_HIDDEN | QMF_INACTIVE;
 	s_advancedserver.errorText.generic.x					= 400;
 	s_advancedserver.errorText.generic.y					= 380;
-	s_advancedserver.errorText.style						= UI_SMALLFONT | UI_CENTER;	
+	s_advancedserver.errorText.style						= UI_SMALLFONT | UI_CENTER;
 	s_advancedserver.errorText.color						= colorTable[CT_WHITE];
 	s_advancedserver.errorText.string 						= (char *) menu_normal_text[MNT_ADV_ERROR];
 
@@ -4406,7 +4406,7 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 		Menu_AddItem( &s_advancedserver.menu, &s_advancedserver.dowarmup);
 		Menu_AddItem( &s_advancedserver.menu, &s_advancedserver.blueteam);
 		Menu_AddItem( &s_advancedserver.menu, &s_advancedserver.redteam);
-		if (ui_cdkeychecked2.integer == 1) 
+		if (ui_cdkeychecked2.integer == 1)
 		{
 			Menu_AddItem( &s_advancedserver.menu, &s_advancedserver.assimilation);
 			Menu_AddItem( &s_advancedserver.menu, &s_advancedserver.specialties);
@@ -4425,11 +4425,11 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	dmflags	= trap_Cvar_VariableValue( "g_dmflags" );
 	if (dmflags & DF_NO_FALLING)
 	{
-		s_advancedserver.fallingdamage.curvalue	= qfalse;	
+		s_advancedserver.fallingdamage.curvalue	= qfalse;
 	}
 	else
 	{
-		s_advancedserver.fallingdamage.curvalue	= qtrue;	
+		s_advancedserver.fallingdamage.curvalue	= qtrue;
 	}
 	s_advancedserver.adaptitemrespawn.curvalue	= Com_Clamp( 0, 1, trap_Cvar_VariableValue( "g_adaptrespawn" ) );
 	s_advancedserver.holodeckintro.curvalue	= Com_Clamp( 0, 1, trap_Cvar_VariableValue( "g_holointro" ) );
@@ -4500,7 +4500,7 @@ void UI_BuildGroupTable(void)
 	for (i=0; i<numdirs && howManySkins < MAX_SKINS_FOR_RACE; i++,dirptr+=dirlen+1)
 	{
 		dirlen = strlen(dirptr);
-		
+
 		if (!dirlen) {
 			continue;
 		}
@@ -4553,7 +4553,7 @@ static int UI_SearchGroupTable(char *current_race)
 	{
 		if (!strcmp(current_race,skinsForRace[i]))
 		{
-			return i;	
+			return i;
 		}
 		i++;
 	}

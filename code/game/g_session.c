@@ -28,7 +28,7 @@ void G_WriteClientSessionData( gclient_t *client ) {
 	const char	*s;
 	const char	*var;
 
-	s = va("%i %i %i %i %i %i %i", 
+	s = va("%i %i %i %i %i %i %i",
 		client->sess.sessionTeam,
 		client->sess.sessionClass,
 		client->sess.spectatorTime,
@@ -57,7 +57,7 @@ void G_ReadSessionData( gclient_t *client ) {
 	var = va( "session%i", client - level.clients );
 	trap_Cvar_VariableStringBuffer( var, s, sizeof(s) );
 
-	sscanf( s, "%i %i %i %i %i %i %i", 
+	sscanf( s, "%i %i %i %i %i %i %i",
 		&client->sess.sessionTeam,
 		&client->sess.sessionClass,
 		&client->sess.spectatorTime,
@@ -83,16 +83,16 @@ void G_InitSessionData( gclient_t *client, char *userinfo ) {
 	sess = &client->sess;
 
 	// initial team determination
-	if ( g_gametype.integer >= GT_TEAM ) 
+	if ( g_gametype.integer >= GT_TEAM )
 	{//Team holomatch or CTF
 		if ( g_teamAutoJoin.integer && !(g_team_group_red.string[0] || g_team_group_blue.string[0]) ) {
 			if ( g_pModElimination.integer && noJoinLimit != 0 && ( level.time-level.startTime > noJoinLimit || numKilled > 0 ) )
 			{//elim game already in progress
-				sess->sessionTeam = TEAM_SPECTATOR;	
+				sess->sessionTeam = TEAM_SPECTATOR;
 			}
 			else if ( g_pModAssimilation.integer && borgQueenClientNum != -1 && noJoinLimit != 0 && ( level.time-level.startTime > noJoinLimit || numKilled > 0 ) )
 			{//assim game already in progress
-				sess->sessionTeam = TEAM_SPECTATOR;	
+				sess->sessionTeam = TEAM_SPECTATOR;
 			}
 			else
 			{
@@ -101,10 +101,10 @@ void G_InitSessionData( gclient_t *client, char *userinfo ) {
 			}
 		} else {
 			// always spawn as spectator in team games
-			sess->sessionTeam = TEAM_SPECTATOR;	
+			sess->sessionTeam = TEAM_SPECTATOR;
 		}
-	} 
-	else 
+	}
+	else
 	{//FFA, tournament or sp
 		value = Info_ValueForKey( userinfo, "team" );
 		if ( value[0] == 's' ) {
@@ -115,7 +115,7 @@ void G_InitSessionData( gclient_t *client, char *userinfo ) {
 			default:
 			case GT_FFA:
 			case GT_SINGLE_PLAYER:
-				if ( g_maxGameClients.integer > 0 && 
+				if ( g_maxGameClients.integer > 0 &&
 					level.numNonSpectatorClients >= g_maxGameClients.integer ) {
 					sess->sessionTeam = TEAM_SPECTATOR;
 				} else {
@@ -161,7 +161,7 @@ void G_InitWorldSession( void ) {
 
 	trap_Cvar_VariableStringBuffer( "session", s, sizeof(s) );
 	gt = atoi( s );
-	
+
 	// if the gametype changed since the last session, don't use any
 	// client sessions
 	if ( g_gametype.integer != gt ) {

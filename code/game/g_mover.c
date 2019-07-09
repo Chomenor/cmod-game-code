@@ -44,10 +44,10 @@ gentity_t	*G_TestEntityPosition( gentity_t *ent ) {
 	} else {
 		trap_Trace( &tr, ent->s.pos.trBase, ent->r.mins, ent->r.maxs, ent->s.pos.trBase, ent->s.number, mask );
 	}
-	
+
 	if (tr.startsolid)
 		return &g_entities[ tr.entityNum ];
-		
+
 	return NULL;
 }
 
@@ -66,7 +66,7 @@ qboolean	G_TryPushingEntity( gentity_t *check, gentity_t *pusher, vec3_t move, v
 
 	// EF_MOVER_STOP will just stop when contacting another entity
 	// instead of pushing it, but entities can still ride on top of it
-	if ( ( pusher->s.eFlags & EF_MOVER_STOP ) && 
+	if ( ( pusher->s.eFlags & EF_MOVER_STOP ) &&
 		check->s.groundEntityNum != pusher->s.number ) {
 		return qfalse;
 	}
@@ -88,7 +88,7 @@ qboolean	G_TryPushingEntity( gentity_t *check, gentity_t *pusher, vec3_t move, v
 	VectorSubtract (vec3_origin, amove, org);
 	AngleVectors (org, forward, right, up);
 
-	// try moving the contacted entity 
+	// try moving the contacted entity
 	VectorAdd (check->s.pos.trBase, move, check->s.pos.trBase);
 	if (check->client) {
 		// make sure the client's view rotates when on a rotating mover
@@ -259,7 +259,7 @@ qboolean G_MoverPush( gentity_t *pusher, vec3_t move, vec3_t amove, gentity_t **
 			continue;
 		}
 
-		
+
 		// save off the obstacle so we can call the block function (crush, etc)
 		*obstacle = check;
 
@@ -375,7 +375,7 @@ Pos1 is "at rest", pos2 is "activated"
 ROT_SetMoverState
 ===============
 */
-void ROT_SetMoverState( gentity_t *ent, moverState_t moverState, int time ) 
+void ROT_SetMoverState( gentity_t *ent, moverState_t moverState, int time )
 {
 	vec3_t			delta;
 	float			f;
@@ -405,7 +405,7 @@ void ROT_SetMoverState( gentity_t *ent, moverState_t moverState, int time )
 		ent->s.apos.trType = TR_LINEAR_STOP;
 		break;
 	}
-	BG_EvaluateTrajectory( &ent->s.apos, level.time, ent->r.currentAngles );	
+	BG_EvaluateTrajectory( &ent->s.apos, level.time, ent->r.currentAngles );
 }
 
 /*
@@ -451,7 +451,7 @@ void SetMoverState( gentity_t *ent, moverState_t moverState, int time ) {
 		ent->s.pos.trType = TR_LINEAR_STOP;
 		break;
 	}
-	BG_EvaluateTrajectory( &ent->s.pos, level.time, ent->r.currentOrigin );	
+	BG_EvaluateTrajectory( &ent->s.pos, level.time, ent->r.currentOrigin );
 	trap_LinkEntity( ent );
 }
 
@@ -774,7 +774,7 @@ static void Touch_DoorTriggerSpectator( gentity_t *ent, gentity_t *other, trace_
 	TeleportPlayer(other, origin, angles, TP_NORMAL );
 }
 
-void CalcTeamDoorCenter ( gentity_t *ent, vec3_t center ) 
+void CalcTeamDoorCenter ( gentity_t *ent, vec3_t center )
 {
 	vec3_t		slavecenter;
 	gentity_t	*slave;
@@ -782,7 +782,7 @@ void CalcTeamDoorCenter ( gentity_t *ent, vec3_t center )
 	//Start with our center
 	VectorAdd(ent->r.mins, ent->r.maxs, center);
 	VectorScale(center, 0.5, center);
-	for ( slave = ent->teamchain ; slave ; slave = slave->teamchain ) 
+	for ( slave = ent->teamchain ; slave ; slave = slave->teamchain )
 	{
 		//Find slave's center
 		VectorAdd(slave->r.mins, slave->r.maxs, slavecenter);
@@ -805,14 +805,14 @@ void Touch_DoorTrigger( gentity_t *ent, gentity_t *other, trace_t *trace ) {
 	float	dot, dist ;
 
 	// fuck this code - it will never work. Let this be a lesson to you from expecting code from single
-	// player to work in multiplayer. 
+	// player to work in multiplayer.
 	// should we do a face only door?
 	if (ent->parent->spawnflags & 16)
 	{
 		//Dir from activator to door center
 		VectorSubtract(ent->r.absmax , ent->r.absmin , vec );
 		VectorMA(ent->r.absmin, 0.5, vec, doorcenter);
-		
+
 		VectorSubtract( doorcenter, other->client->ps.origin, vec );
 		dist = VectorNormalize ( vec );
 		//Activator's facing dir
@@ -1056,7 +1056,7 @@ void SpawnPlatTrigger( gentity_t *ent ) {
 	trigger->touch = Touch_PlatCenterTrigger;
 	trigger->r.contents = CONTENTS_TRIGGER;
 	trigger->parent = ent;
-	
+
 	tmin[0] = ent->pos1[0] + ent->r.mins[0] + 33;
 	tmin[1] = ent->pos1[1] + ent->r.mins[1] + 33;
 	tmin[2] = ent->pos1[2] + ent->r.mins[2];
@@ -1073,7 +1073,7 @@ void SpawnPlatTrigger( gentity_t *ent ) {
 		tmin[1] = ent->pos1[1] + (ent->r.mins[1] + ent->r.maxs[1]) *0.5;
 		tmax[1] = tmin[1] + 1;
 	}
-	
+
 	VectorCopy (tmin, trigger->r.mins);
 	VectorCopy (tmax, trigger->r.maxs);
 
@@ -1186,7 +1186,7 @@ void SP_func_button( gentity_t *ent ) {
 	float		lip;
 
 	ent->sound1to2 = G_SoundIndex("sound/movers/switches/butn2.wav");
-	
+
 	if ( !ent->speed ) {
 		ent->speed = 40;
 	}
@@ -1551,7 +1551,7 @@ check either the X_AXIS or Y_AXIS box to change that.
 "color"		constantLight color
 "light"		constantLight radius
 
-"pos1"		Angles to end up at in addition to current angles- pitch yaw and roll.  Eg: 0 90 45 
+"pos1"		Angles to end up at in addition to current angles- pitch yaw and roll.  Eg: 0 90 45
 */
 void SP_func_rotating (gentity_t *ent) {
 	if ( !ent->speed ) {
@@ -1605,7 +1605,7 @@ FACE		if set, this door requires you to be facing it before the trigger will fir
 "light"		constantLight radius
 "health"	if set, the door must be shot open
 
-"apos2"		Angles to end up at in addition to current angles- pitch yaw and roll.  Eg: 0 90 45 
+"apos2"		Angles to end up at in addition to current angles- pitch yaw and roll.  Eg: 0 90 45
 */
 void SP_func_door_rotating (gentity_t *ent) {
 	int	i;

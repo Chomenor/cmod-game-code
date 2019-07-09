@@ -72,7 +72,7 @@ void tripwireThink ( gentity_t *ent )
 	// Find the main impact point
 	VectorMA ( ent->s.pos.trBase, 1024, ent->movedir, end );
 	trap_Trace ( &tr, ent->s.pos.trBase, NULL, NULL, end, ent->s.number, MASK_SHOT );
-	
+
 	traceEnt = &g_entities[ tr.entityNum ];
 
 	if ( traceEnt->client || tr.startsolid )
@@ -213,7 +213,7 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace ) {
 	}
 
 	// check for sticking
-	if ( ( ent->s.eFlags & EF_MISSILE_STICK ) ) 
+	if ( ( ent->s.eFlags & EF_MISSILE_STICK ) )
 	{
 		// kinda cheap, but if a sticky grenade hits a forcefield or a moving, explode
 		if ( other && ( (other->classname && !Q_stricmp(other->classname, "holdable_shield")) || (!VectorCompare( vec3_origin, other->s.pos.trDelta ) && other->s.pos.trType!=TR_STATIONARY) || (!VectorCompare( vec3_origin, other->s.apos.trDelta ) && other->s.apos.trType!=TR_STATIONARY) ) )
@@ -251,7 +251,7 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace ) {
 				flags |= DAMAGE_ARMOR_PIERCING;
 			}
 			G_Damage (other, ent, &g_entities[ent->r.ownerNum], velocity,
-				ent->s.origin, ent->damage, 
+				ent->s.origin, ent->damage,
 				flags, ent->methodOfDeath);
 		}
 	}
@@ -280,7 +280,7 @@ void G_MissileImpact( gentity_t *ent, trace_t *trace ) {
 
 	// splash damage (doesn't apply to person directly hit)
 	if ( ent->splashDamage ) {
-		if( G_RadiusDamage( trace->endpos, ent->parent, ent->splashDamage, ent->splashRadius, 
+		if( G_RadiusDamage( trace->endpos, ent->parent, ent->splashDamage, ent->splashRadius,
 			other, 0, ent->splashMethodOfDeath ) ) {
 			if( !hitClient ) {
 				g_entities[ent->r.ownerNum].client->ps.persistant[PERS_ACCURACY_HITS]++;
@@ -334,7 +334,7 @@ void G_RunStuckMissile( gentity_t *ent )
 		{
 			gentity_t *other = &g_entities[ent->s.groundEntityNum];
 
-			if ( (!VectorCompare( vec3_origin, other->s.pos.trDelta ) && other->s.pos.trType != TR_STATIONARY) || 
+			if ( (!VectorCompare( vec3_origin, other->s.pos.trDelta ) && other->s.pos.trType != TR_STATIONARY) ||
 				(!VectorCompare( vec3_origin, other->s.apos.trDelta ) && other->s.apos.trType != TR_STATIONARY) )
 			{//thing I stuck to is moving or rotating now, kill me
 				G_Damage( ent, other, other, NULL, NULL, 99999, 0, MOD_CRUSH );
@@ -361,7 +361,7 @@ void G_RunMissile( gentity_t *ent ) {
 
 	// trace a line from the previous position to the current position,
 	// ignoring interactions with the missile owner
-	trap_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin, 
+	trap_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin,
 		ent->r.ownerNum, ent->clipmask );
 
 	VectorCopy( tr.endpos, ent->r.currentOrigin );
@@ -434,7 +434,7 @@ gentity_t *fire_plasma (gentity_t *self, vec3_t start, vec3_t dir) {
 	VectorCopy (start, bolt->r.currentOrigin);
 
 	return bolt;
-}	
+}
 
 //=============================================================================
 
@@ -476,7 +476,7 @@ gentity_t *fire_quantum (gentity_t *self, vec3_t start, vec3_t dir) {
 	VectorCopy (start, bolt->r.currentOrigin);
 
 	return bolt;
-}	
+}
 
 //=============================================================================
 

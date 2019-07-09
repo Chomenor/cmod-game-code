@@ -32,7 +32,7 @@ int		ingameFlag = qfalse;	// true when in game menu is in use
 #define ID_INGAME_QUIT_YES		131
 #define ID_INGAME_QUIT_NO		132
 
-typedef struct 
+typedef struct
 {
 	menuframework_s	menu;
 
@@ -66,7 +66,7 @@ static int ingame_buttons[10][2] =
 };
 
 
-typedef struct 
+typedef struct
 {
 	menuframework_s	menu;
 
@@ -82,9 +82,9 @@ static ingamequitmenu_t	s_ingamequit;
 InGame_RestartAction
 =================
 */
-static void InGame_RestartAction( qboolean result ) 
+static void InGame_RestartAction( qboolean result )
 {
-	if( !result ) 
+	if( !result )
 	{
 		return;
 	}
@@ -99,9 +99,9 @@ static void InGame_RestartAction( qboolean result )
 InGame_LeaveAction
 =================
 */
-static void InGame_LeaveAction( qboolean result ) 
+static void InGame_LeaveAction( qboolean result )
 {
-	if( !result ) 
+	if( !result )
 	{
 		return;
 	}
@@ -116,14 +116,14 @@ static void InGame_LeaveAction( qboolean result )
 InGame_Event
 =================
 */
-void InGame_Event( void *ptr, int notification ) 
+void InGame_Event( void *ptr, int notification )
 {
-	if( notification != QM_ACTIVATED ) 
+	if( notification != QM_ACTIVATED )
 	{
 		return;
 	}
 
-	switch( ((menucommon_s*)ptr)->id ) 
+	switch( ((menucommon_s*)ptr)->id )
 	{
 	case ID_TEAM:
 		UI_TeamMainMenu();
@@ -179,7 +179,7 @@ void InGame_Event( void *ptr, int notification )
 UI_InGameMenu_Draw
 =================
 */
-static void UI_InGameMenu_Draw( void ) 
+static void UI_InGameMenu_Draw( void )
 {
 
 	UI_MenuFrame(&s_ingame.menu);
@@ -195,31 +195,31 @@ static void UI_InGameMenu_Draw( void )
 	// Left rounded ends for buttons
 	trap_R_SetColor( colorTable[CT_DKPURPLE1]);
 
-	UI_DrawHandlePic(s_ingame.team.generic.x - 14, s_ingame.team.generic.y, 
+	UI_DrawHandlePic(s_ingame.team.generic.x - 14, s_ingame.team.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
-	UI_DrawHandlePic(s_ingame.addbots.generic.x - 14, s_ingame.addbots.generic.y, 
+	UI_DrawHandlePic(s_ingame.addbots.generic.x - 14, s_ingame.addbots.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
-	UI_DrawHandlePic(s_ingame.removebots.generic.x - 14, s_ingame.removebots.generic.y, 
+	UI_DrawHandlePic(s_ingame.removebots.generic.x - 14, s_ingame.removebots.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
-	UI_DrawHandlePic(s_ingame.teamorders.generic.x - 14, s_ingame.teamorders.generic.y, 
+	UI_DrawHandlePic(s_ingame.teamorders.generic.x - 14, s_ingame.teamorders.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
-	UI_DrawHandlePic(s_ingame.setup.generic.x - 14, s_ingame.setup.generic.y, 
+	UI_DrawHandlePic(s_ingame.setup.generic.x - 14, s_ingame.setup.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
-	UI_DrawHandlePic(s_ingame.server.generic.x - 14, s_ingame.server.generic.y, 
+	UI_DrawHandlePic(s_ingame.server.generic.x - 14, s_ingame.server.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
-	UI_DrawHandlePic(s_ingame.restart.generic.x - 14, s_ingame.restart.generic.y, 
+	UI_DrawHandlePic(s_ingame.restart.generic.x - 14, s_ingame.restart.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT + 6, uis.graphicButtonLeftEnd);
 
-	UI_DrawHandlePic(s_ingame.resume.generic.x - 14, s_ingame.resume.generic.y, 
+	UI_DrawHandlePic(s_ingame.resume.generic.x - 14, s_ingame.resume.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT + 6, uis.graphicButtonLeftEnd);
 
-	UI_DrawHandlePic(s_ingame.leave.generic.x - 14, s_ingame.leave.generic.y, 
+	UI_DrawHandlePic(s_ingame.leave.generic.x - 14, s_ingame.leave.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT + 6, uis.graphicButtonLeftEnd);
 
 	UI_DrawProportionalString(  74,  66, "15567",UI_RIGHT|UI_TINYFONT, colorTable[CT_BLACK]);
@@ -240,7 +240,7 @@ static void UI_InGameMenu_Draw( void )
 InGame_MenuInit
 =================
 */
-void InGame_MenuInit( void ) 
+void InGame_MenuInit( void )
 {
 	int		y,x;
 	uiClientState_t	cs;
@@ -269,7 +269,7 @@ void InGame_MenuInit( void )
 	s_ingame.team.generic.y				= y;
 	s_ingame.team.generic.id			= ID_TEAM;
 	s_ingame.team.generic.name			= BUTTON_GRAPHIC_LONGRIGHT;
-	s_ingame.team.generic.callback		= InGame_Event; 
+	s_ingame.team.generic.callback		= InGame_Event;
 	s_ingame.team.width					= MENU_BUTTON_MED_WIDTH;
 	s_ingame.team.height				= MENU_BUTTON_MED_HEIGHT;
 	s_ingame.team.color					= CT_DKPURPLE1;
@@ -288,7 +288,7 @@ void InGame_MenuInit( void )
 	s_ingame.addbots.generic.y			= y;
 	s_ingame.addbots.generic.id			= ID_ADDBOTS;
 	s_ingame.addbots.generic.name		= BUTTON_GRAPHIC_LONGRIGHT;
-	s_ingame.addbots.generic.callback	= InGame_Event; 
+	s_ingame.addbots.generic.callback	= InGame_Event;
 	s_ingame.addbots.width				= MENU_BUTTON_MED_WIDTH;
 	s_ingame.addbots.height				= MENU_BUTTON_MED_HEIGHT;
 	s_ingame.addbots.color				= CT_DKPURPLE1;
@@ -298,7 +298,7 @@ void InGame_MenuInit( void )
 	s_ingame.addbots.textEnum			= MBT_INGAMEADDSIMULANTS;
 	s_ingame.addbots.textcolor			= CT_BLACK;
 	s_ingame.addbots.textcolor2			= CT_WHITE;
-	if( !trap_Cvar_VariableValue( "sv_running" ) || !trap_Cvar_VariableValue( "bot_enable" ) || (trap_Cvar_VariableValue( "g_gametype" ) == GT_SINGLE_PLAYER)) 
+	if( !trap_Cvar_VariableValue( "sv_running" ) || !trap_Cvar_VariableValue( "bot_enable" ) || (trap_Cvar_VariableValue( "g_gametype" ) == GT_SINGLE_PLAYER))
 	{
 		s_ingame.addbots.generic.flags |= QMF_GRAYED;
 	}
@@ -310,7 +310,7 @@ void InGame_MenuInit( void )
 	s_ingame.removebots.generic.y			= y;
 	s_ingame.removebots.generic.id			= ID_REMOVEBOTS;
 	s_ingame.removebots.generic.name		= BUTTON_GRAPHIC_LONGRIGHT;
-	s_ingame.removebots.generic.callback	= InGame_Event; 
+	s_ingame.removebots.generic.callback	= InGame_Event;
 	s_ingame.removebots.width				= MENU_BUTTON_MED_WIDTH;
 	s_ingame.removebots.height				= MENU_BUTTON_MED_HEIGHT;
 	s_ingame.removebots.color				= CT_DKPURPLE1;
@@ -331,7 +331,7 @@ void InGame_MenuInit( void )
 	s_ingame.teamorders.generic.y			= y;
 	s_ingame.teamorders.generic.id			= ID_TEAMORDERS;
 	s_ingame.teamorders.generic.name		= BUTTON_GRAPHIC_LONGRIGHT;
-	s_ingame.teamorders.generic.callback	= InGame_Event; 
+	s_ingame.teamorders.generic.callback	= InGame_Event;
 	s_ingame.teamorders.width				= MENU_BUTTON_MED_WIDTH;
 	s_ingame.teamorders.height				= MENU_BUTTON_MED_HEIGHT;
 	s_ingame.teamorders.color				= CT_DKPURPLE1;
@@ -348,12 +348,12 @@ void InGame_MenuInit( void )
 	{
 		s_ingame.teamorders.generic.flags |= QMF_GRAYED;
 	}
-	else 
+	else
 	{
 		trap_GetClientState( &cs );
 		trap_GetConfigString( CS_PLAYERS + cs.clientNum, info, MAX_INFO_STRING );
 		team = atoi( Info_ValueForKey( info, "t" ) );
-		if( team == TEAM_SPECTATOR ) 
+		if( team == TEAM_SPECTATOR )
 		{
 			s_ingame.teamorders.generic.flags |= QMF_GRAYED;
 		}
@@ -366,7 +366,7 @@ void InGame_MenuInit( void )
 	s_ingame.setup.generic.y			= y;
 	s_ingame.setup.generic.id			= ID_SETUP;
 	s_ingame.setup.generic.name			= BUTTON_GRAPHIC_LONGRIGHT;
-	s_ingame.setup.generic.callback		= InGame_Event; 
+	s_ingame.setup.generic.callback		= InGame_Event;
 	s_ingame.setup.width				= MENU_BUTTON_MED_WIDTH;
 	s_ingame.setup.height				= MENU_BUTTON_MED_HEIGHT;
 	s_ingame.setup.color				= CT_DKPURPLE1;
@@ -384,7 +384,7 @@ void InGame_MenuInit( void )
 	s_ingame.server.generic.y			= y;
 	s_ingame.server.generic.id			= ID_SERVERINFO;
 	s_ingame.server.generic.name		= BUTTON_GRAPHIC_LONGRIGHT;
-	s_ingame.server.generic.callback	= InGame_Event; 
+	s_ingame.server.generic.callback	= InGame_Event;
 	s_ingame.server.width				= MENU_BUTTON_MED_WIDTH;
 	s_ingame.server.height				= MENU_BUTTON_MED_HEIGHT;
 	s_ingame.server.color				= CT_DKPURPLE1;
@@ -403,7 +403,7 @@ void InGame_MenuInit( void )
 	s_ingame.leave.generic.y				= y;
 	s_ingame.leave.generic.id				= ID_LEAVEARENA;
 	s_ingame.leave.generic.name				= BUTTON_GRAPHIC_LONGRIGHT;
-	s_ingame.leave.generic.callback			= InGame_Event; 
+	s_ingame.leave.generic.callback			= InGame_Event;
 	s_ingame.leave.width					= MENU_BUTTON_MED_WIDTH;
 	s_ingame.leave.height					= MENU_BUTTON_MED_HEIGHT + 6;
 	s_ingame.leave.color					= CT_DKPURPLE1;
@@ -420,7 +420,7 @@ void InGame_MenuInit( void )
 	s_ingame.restart.generic.y			= y;
 	s_ingame.restart.generic.id			= ID_RESTART;
 	s_ingame.restart.generic.name		= BUTTON_GRAPHIC_LONGRIGHT;
-	s_ingame.restart.generic.callback	= InGame_Event; 
+	s_ingame.restart.generic.callback	= InGame_Event;
 	s_ingame.restart.width				= MENU_BUTTON_MED_WIDTH;
 	s_ingame.restart.height				= MENU_BUTTON_MED_HEIGHT + 6;
 	s_ingame.restart.color				= CT_DKPURPLE1;
@@ -430,7 +430,7 @@ void InGame_MenuInit( void )
 	s_ingame.restart.textEnum			= MBT_INGAMERESTART;
 	s_ingame.restart.textcolor			= CT_BLACK;
 	s_ingame.restart.textcolor2			= CT_WHITE;
-	if( !trap_Cvar_VariableValue( "sv_running" ) ) 
+	if( !trap_Cvar_VariableValue( "sv_running" ) )
 	{
 		s_ingame.restart.generic.flags |= QMF_GRAYED;
 	}
@@ -441,7 +441,7 @@ void InGame_MenuInit( void )
 	s_ingame.resume.generic.y				= y;
 	s_ingame.resume.generic.id				= ID_RESUME;
 	s_ingame.resume.generic.name			= BUTTON_GRAPHIC_LONGRIGHT;
-	s_ingame.resume.generic.callback		= InGame_Event; 
+	s_ingame.resume.generic.callback		= InGame_Event;
 	s_ingame.resume.width					= MENU_BUTTON_MED_WIDTH;
 	s_ingame.resume.height					= MENU_BUTTON_MED_HEIGHT + 6;
 	s_ingame.resume.color					= CT_DKPURPLE1;
@@ -452,13 +452,13 @@ void InGame_MenuInit( void )
 	s_ingame.resume.textcolor				= CT_BLACK;
 	s_ingame.resume.textcolor2				= CT_WHITE;
 
-	s_ingame.screenshot.generic.type				= MTYPE_BITMAP;      
+	s_ingame.screenshot.generic.type				= MTYPE_BITMAP;
 	s_ingame.screenshot.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
 	s_ingame.screenshot.generic.x					= 477;
 	s_ingame.screenshot.generic.y					= 82;
 	s_ingame.screenshot.generic.name				= GRAPHIC_SQUARE;
 	s_ingame.screenshot.generic.id					= ID_SCREENSHOT;
-	s_ingame.screenshot.generic.callback			= InGame_Event; 
+	s_ingame.screenshot.generic.callback			= InGame_Event;
 	s_ingame.screenshot.width						= MENU_BUTTON_MED_WIDTH;
 	s_ingame.screenshot.height						= 36;
 	s_ingame.screenshot.color						= CT_DKPURPLE1;
@@ -488,7 +488,7 @@ void InGame_MenuInit( void )
 InGameQuit_Cache
 =================
 */
-void InGame_Cache( void ) 
+void InGame_Cache( void )
 {
 
 }
@@ -498,10 +498,10 @@ void InGame_Cache( void )
 UI_InGameMenu
 =================
 */
-void UI_InGameMenu( void ) 
+void UI_InGameMenu( void )
 {
 	// force as top level menu
-	uis.menusp = 0;  
+	uis.menusp = 0;
 
 	// set menu cursor to a nice location
 	uis.cursorx = 319;
@@ -521,14 +521,14 @@ void UI_InGameMenu( void )
 InGameQuitMenu_Event
 =================
 */
-void InGameQuitMenu_Event( void *ptr, int notification ) 
+void InGameQuitMenu_Event( void *ptr, int notification )
 {
-	if( notification != QM_ACTIVATED ) 
+	if( notification != QM_ACTIVATED )
 	{
 		return;
 	}
 
-	switch( ((menucommon_s*)ptr)->id ) 
+	switch( ((menucommon_s*)ptr)->id )
 	{
 	case ID_INGAME_QUIT_NO:
 	case ID_INGAMEMENU:
@@ -546,7 +546,7 @@ void InGameQuitMenu_Event( void *ptr, int notification )
 UI_InGameQuitMenu_Draw
 =================
 */
-static void UI_InGameQuitMenu_Draw( void ) 
+static void UI_InGameQuitMenu_Draw( void )
 {
 	UI_MenuFrame(&s_ingamequit.menu);
 
@@ -568,7 +568,7 @@ static void UI_InGameQuitMenu_Draw( void )
 InGameQuitMenu_Init
 =================
 */
-void InGameQuitMenu_Init( void ) 
+void InGameQuitMenu_Init( void )
 {
 
 	memset( &s_ingame, 0 ,sizeof(ingamemenu_t) );
@@ -591,7 +591,7 @@ void InGameQuitMenu_Init( void )
 	s_ingamequit.ingamemenu.generic.y			= 136;
 	s_ingamequit.ingamemenu.generic.id			= ID_INGAMEMENU;
 	s_ingamequit.ingamemenu.generic.name		= GRAPHIC_SQUARE;
-	s_ingamequit.ingamemenu.generic.callback	= InGameQuitMenu_Event; 
+	s_ingamequit.ingamemenu.generic.callback	= InGameQuitMenu_Event;
 	s_ingamequit.ingamemenu.width				= MENU_BUTTON_MED_WIDTH;
 	s_ingamequit.ingamemenu.height				= MENU_BUTTON_MED_HEIGHT;
 	s_ingamequit.ingamemenu.color				= CT_DKPURPLE1;
@@ -608,7 +608,7 @@ void InGameQuitMenu_Init( void )
 	s_ingamequit.no.generic.y					= 180;
 	s_ingamequit.no.generic.id					= ID_INGAME_QUIT_NO;
 	s_ingamequit.no.generic.name				= GRAPHIC_SQUARE;
-	s_ingamequit.no.generic.callback			= InGameQuitMenu_Event; 
+	s_ingamequit.no.generic.callback			= InGameQuitMenu_Event;
 	s_ingamequit.no.width						= MENU_BUTTON_MED_WIDTH;
 	s_ingamequit.no.height						= MENU_BUTTON_MED_HEIGHT;
 	s_ingamequit.no.color						= CT_DKPURPLE1;
@@ -617,7 +617,7 @@ void InGameQuitMenu_Init( void )
 	s_ingamequit.no.textY						= MENU_BUTTON_TEXT_Y;
 	s_ingamequit.no.textEnum					= MBT_QUIT_NO;
 	s_ingamequit.no.textcolor					= CT_BLACK;
-	s_ingamequit.no.textcolor2					= CT_WHITE;	
+	s_ingamequit.no.textcolor2					= CT_WHITE;
 
 	s_ingamequit.yes.generic.type				= MTYPE_BITMAP;
 	s_ingamequit.yes.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
@@ -625,7 +625,7 @@ void InGameQuitMenu_Init( void )
 	s_ingamequit.yes.generic.y					= 180;
 	s_ingamequit.yes.generic.id					= ID_INGAME_QUIT_YES;
 	s_ingamequit.yes.generic.name				= GRAPHIC_SQUARE;
-	s_ingamequit.yes.generic.callback			= InGameQuitMenu_Event; 
+	s_ingamequit.yes.generic.callback			= InGameQuitMenu_Event;
 	s_ingamequit.yes.width						= MENU_BUTTON_MED_WIDTH;
 	s_ingamequit.yes.height						= MENU_BUTTON_MED_HEIGHT;
 	s_ingamequit.yes.color						= CT_DKPURPLE1;
@@ -646,7 +646,7 @@ void InGameQuitMenu_Init( void )
 UI_InGameQuitMenu
 =================
 */
-void UI_InGameQuitMenu( void ) 
+void UI_InGameQuitMenu( void )
 {
 	InGameQuitMenu_Init();
 

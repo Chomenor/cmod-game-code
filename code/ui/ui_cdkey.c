@@ -36,12 +36,12 @@ static cdkeyMenuInfo_t	cdkeyMenuInfo;
 UI_CDKeyMenu_PreValidateKey
 =================
 */
-static int UI_CDKeyMenu_PreValidateKey( const char *key ) 
+static int UI_CDKeyMenu_PreValidateKey( const char *key )
 {
 	int		cnt, i;
 
 	// With dashes can't be more than 21 long
-	if( strlen( key ) > 22 ) 
+	if( strlen( key ) > 22 )
 	{
 		return -1;
 	}
@@ -73,14 +73,14 @@ static int UI_CDKeyMenu_PreValidateKey( const char *key )
 UI_CDKeyMenu_Event
 ===============
 */
-static void UI_CDKeyMenu_Event( void *ptr, int event ) 
+static void UI_CDKeyMenu_Event( void *ptr, int event )
 {
-	if( event != QM_ACTIVATED ) 
+	if( event != QM_ACTIVATED )
 	{
 		return;
 	}
 
-	switch( ((menucommon_s*)ptr)->id ) 
+	switch( ((menucommon_s*)ptr)->id )
 	{
 	case ID_ACCEPT:
 
@@ -124,7 +124,7 @@ static void UI_CDKeyMenu_Event( void *ptr, int event )
 UI_CDKeyMenu_DrawKey
 =================
 */
-static void UI_CDKeyMenu_DrawKey( void *self ) 
+static void UI_CDKeyMenu_DrawKey( void *self )
 {
 	menufield_s		*f;
 	qboolean		focus;
@@ -138,11 +138,11 @@ static void UI_CDKeyMenu_DrawKey( void *self )
 	focus = (f->generic.parent->cursor == f->generic.menuPosition);
 
 	style = UI_LEFT;
-	if( focus ) 
+	if( focus )
 	{
 		color = colorTable[CT_LTGOLD1];
 	}
-	else 
+	else
 	{
 		color = colorTable[CT_DKGOLD1];
 	}
@@ -155,13 +155,13 @@ static void UI_CDKeyMenu_DrawKey( void *self )
 	UI_DrawString( x, y, f->field.buffer, style, color );
 
 	// draw cursor if we have focus
-	if( focus ) 
+	if( focus )
 	{
-		if ( trap_Key_GetOverstrikeMode() ) 
+		if ( trap_Key_GetOverstrikeMode() )
 		{
 			c = 11;
-		} 
-		else 
+		}
+		else
 		{
 			c = 10;
 		}
@@ -190,7 +190,7 @@ void CDKeyMenu_Graphics (void)
 	UI_DrawHandlePic(30,203, 47, 186, uis.whiteShader);	// Middle left line of frame
 
 	trap_R_SetColor( colorTable[CT_DKPURPLE1]);
-	UI_DrawHandlePic( 246, 238, 197,  24, uis.whiteShader);	
+	UI_DrawHandlePic( 246, 238, 197,  24, uis.whiteShader);
 	UI_DrawHandlePic( 227, 238, -16,  32, cdkeyMenuInfo.halfround);	// Left round
 	UI_DrawHandlePic( 446, 238,  16,  32, cdkeyMenuInfo.halfround);	// Right round
 
@@ -202,15 +202,15 @@ void CDKeyMenu_Graphics (void)
 
 	x = 344;
 	y = 279;
-	if ( cdkeyMenuInfo.keyResult == 0 ) 
+	if ( cdkeyMenuInfo.keyResult == 0 )
 	{
 		UI_DrawProportionalString( x, y, menu_normal_text[MNT_VALID_CDKEY], UI_CENTER|UI_SMALLFONT, colorTable[CT_WHITE]  );
 	}
-	else if( cdkeyMenuInfo.keyResult == 1 ) 
+	else if( cdkeyMenuInfo.keyResult == 1 )
 	{
 		UI_DrawProportionalString( x, y, menu_normal_text[MNT_ENTER_CDKEY], UI_CENTER|UI_SMALLFONT, colorTable[CT_LTGOLD1] );
 	}
-	else 
+	else
 	{
 		UI_DrawProportionalString( x, y, menu_normal_text[MNT_CDKEY_INVALID], UI_CENTER|UI_SMALLFONT, colorTable[CT_RED]  );
 	}
@@ -235,7 +235,7 @@ static void CDKey_MenuDraw (void)
 UI_CDKeyMenu_Init
 ===============
 */
-static void UI_CDKeyMenu_Init( void ) 
+static void UI_CDKeyMenu_Init( void )
 {
 	memset( &cdkeyMenuInfo, 0, sizeof(cdkeyMenuInfo) );
 
@@ -243,7 +243,7 @@ static void UI_CDKeyMenu_Init( void )
 
 	cdkeyMenuInfo.menu.wrapAround					= qtrue;
 	cdkeyMenuInfo.menu.fullscreen					= qtrue;
-    cdkeyMenuInfo.menu.draw							= CDKey_MenuDraw;
+	cdkeyMenuInfo.menu.draw							= CDKey_MenuDraw;
 	cdkeyMenuInfo.menu.descX						= MENU_DESC_X;
 	cdkeyMenuInfo.menu.descY						= MENU_DESC_Y;
 	cdkeyMenuInfo.menu.titleX						= MENU_TITLE_X;
@@ -301,7 +301,7 @@ static void UI_CDKeyMenu_Init( void )
 UI_CDKeyMenu_Cache
 =================
 */
-void UI_CDKeyMenu_Cache( void ) 
+void UI_CDKeyMenu_Cache( void )
 {
 	cdkeyMenuInfo.halfround = trap_R_RegisterShaderNoMip( "menu/common/halfround_r_24.tga" );
 }
@@ -312,7 +312,7 @@ void UI_CDKeyMenu_Cache( void )
 UI_CDKeyMenu
 ===============
 */
-void UI_CDKeyMenu( void ) 
+void UI_CDKeyMenu( void )
 {
 	UI_CDKeyMenu_Init();
 	UI_PushMenu( &cdkeyMenuInfo.menu );
@@ -351,11 +351,11 @@ void CDKeyMenu2_Graphics (void)
 
 	// Background for CD Key data
 	trap_R_SetColor( colorTable[CT_DKPURPLE1]);
-	UI_DrawHandlePic( 246, 168, 197,  24, uis.whiteShader);	
+	UI_DrawHandlePic( 246, 168, 197,  24, uis.whiteShader);
 	UI_DrawHandlePic( 227, 168, -16,  32, cdkeyMenuInfo.halfround);	// Left round
 	UI_DrawHandlePic( 446, 168,  16,  32, cdkeyMenuInfo.halfround);	// Right round
 
-	
+
 	UI_DrawProportionalString(  74,  36, "755",UI_RIGHT|UI_TINYFONT, colorTable[CT_BLACK]);
 	UI_DrawProportionalString(  74,  132, "4423",UI_RIGHT|UI_TINYFONT, colorTable[CT_BLACK]);
 	UI_DrawProportionalString(  74,  188, "35-89",UI_RIGHT|UI_TINYFONT, colorTable[CT_BLACK]);
@@ -364,15 +364,15 @@ void CDKeyMenu2_Graphics (void)
 
 	x = 344;
 	y = 228;
-	if ( cdkeyMenuInfo.keyResult == 0 ) 
+	if ( cdkeyMenuInfo.keyResult == 0 )
 	{
 		UI_DrawProportionalString( x, y, menu_normal_text[MNT_VALID_CDKEY], UI_CENTER|UI_SMALLFONT, colorTable[CT_WHITE]  );
 	}
-	else if( cdkeyMenuInfo.keyResult == 1 ) 
+	else if( cdkeyMenuInfo.keyResult == 1 )
 	{
 		UI_DrawProportionalString( x, y, menu_normal_text[MNT_ENTER_CDKEY], UI_CENTER|UI_SMALLFONT, colorTable[CT_LTGOLD1] );
 	}
-	else 
+	else
 	{
 		UI_DrawProportionalString( x, y, menu_normal_text[MNT_CDKEY_INVALID], UI_CENTER|UI_SMALLFONT, colorTable[CT_RED]  );
 	}
@@ -395,7 +395,7 @@ static void CDKey2_MenuDraw (void)
 UI_CDKeyMenu2_Init
 ===============
 */
-static void UI_CDKeyMenu2_Init( void ) 
+static void UI_CDKeyMenu2_Init( void )
 {//initial first time menu
 	memset( &cdkeyMenuInfo, 0, sizeof(cdkeyMenuInfo) );
 
@@ -405,8 +405,8 @@ static void UI_CDKeyMenu2_Init( void )
 
 	cdkeyMenuInfo.menu.wrapAround					= qtrue;
 	cdkeyMenuInfo.menu.fullscreen					= qtrue;
-    cdkeyMenuInfo.menu.draw							= CDKey2_MenuDraw;
-    cdkeyMenuInfo.menu.key							= M_CDKey2Menu_Key;
+	cdkeyMenuInfo.menu.draw							= CDKey2_MenuDraw;
+	cdkeyMenuInfo.menu.key							= M_CDKey2Menu_Key;
 	cdkeyMenuInfo.menu.descX						= MENU_DESC_X;
 	cdkeyMenuInfo.menu.descY						= MENU_DESC_Y;
 	cdkeyMenuInfo.menu.titleX						= MENU_TITLE_X;
@@ -477,7 +477,7 @@ static void UI_CDKeyMenu2_Init( void )
 UI_CDKeyMenu
 ===============
 */
-void UI_CDKeyMenu2( void ) 
+void UI_CDKeyMenu2( void )
 {
 	UI_CDKeyMenu2_Init();
 	UI_PushMenu( &cdkeyMenuInfo.menu );
@@ -488,7 +488,7 @@ void UI_CDKeyMenu2( void )
 UI_CDKeyMenu_f
 ===============
 */
-void UI_CDKeyMenu_f( void ) 
+void UI_CDKeyMenu_f( void )
 {
 	UI_CDKeyMenu2();
 }

@@ -41,7 +41,7 @@ void QDECL Com_Printf( const char *msg, ... ) {
 #endif
 
 
-typedef struct 
+typedef struct
 {
 	int				initialized;	// Has this structure been initialized
 	qhandle_t		cornerUpper;
@@ -238,7 +238,7 @@ static void UI_DrawBannerString2( int x, int y, const char* str, vec4_t color )
 
 	// draw the colored text
 	trap_R_SetColor( color );
-	
+
 //	ax = x * uis.scale + uis.bias;
 	ax = x * uis.scalex;
 	ay = y * uis.scaley;
@@ -361,7 +361,7 @@ int UI_ProportionalStringWidth( const char* str,int style ) {
 
 		width -= PROP_GAP_BIG_WIDTH;
 	}
-	else 
+	else
 	{
 		s = str;
 		width = 0;
@@ -408,7 +408,7 @@ static int specialTinyPropChars[CHARMAX][2] = {
 {2, 0},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{0, 0},	// 240
 {2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{0, 0},{0,-1},{2,-3},{2,-3},	// 250
 {2,-3},{2,-3},{2,-3},{0,-1},{2,-3}										// 255
-}; 
+};
 
 
 static int specialPropChars[CHARMAX][2] = {
@@ -439,7 +439,7 @@ static int specialPropChars[CHARMAX][2] = {
 {0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 240
 {0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 250
 {0, 0},{0, 0},{0, 0},{0, 0},{0, 0}										// 255
-}; 
+};
 
 
 static int specialBigPropChars[CHARMAX][2] = {
@@ -470,7 +470,7 @@ static int specialBigPropChars[CHARMAX][2] = {
 {3, 1},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{0, 0},	// 240
 {3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{0, 0},{0, 0},{3,-3},{3,-3},	// 250
 {3,-3},{3,-3},{3,-3},{0, 0},{3,-3}										// 255
-}; 
+};
 
 
 /*
@@ -496,7 +496,7 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 
 	// draw the colored text
 	trap_R_SetColor( color );
-	
+
 //	ax = x * uis.scale + uis.bias;
 	ax = x * uis.scalex;
 	ay = y * uis.scaley;
@@ -510,7 +510,7 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 		while ( *s )
 		{
 			// Is this a color????
-			if ( Q_IsColorString( s ) ) 
+			if ( Q_IsColorString( s ) )
 			{
 				colorI = ColorIndex( *(s+1) );
 				trap_R_SetColor( g_color_table[colorI] );
@@ -552,7 +552,7 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 		while ( *s )
 		{
 			// Is this a color????
-			if ( Q_IsColorString( s ) ) 
+			if ( Q_IsColorString( s ) )
 			{
 				colorI = ColorIndex( *(s+1) );
 				trap_R_SetColor( g_color_table[colorI] );
@@ -586,14 +586,14 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 			ax += (aw + (float)PROP_GAP_BIG_WIDTH * uis.scalex * sizeScale);
 			s++;
 		}
-	} 
+	}
 	else
 	{
 		s = str;
 		while ( *s )
 		{
 			// Is this a color????
-			if ( Q_IsColorString( s ) ) 
+			if ( Q_IsColorString( s ) )
 			{
 				colorI = ColorIndex( *(s+1) );
 				trap_R_SetColor( g_color_table[colorI] );
@@ -772,7 +772,7 @@ static void UI_DrawString2( int x, int y, const char* str, vec4_t color, int cha
 
 	// draw the colored text
 	trap_R_SetColor( color );
-	
+
 //	ax = x * uis.scale + uis.bias;
 	ax = x * uis.scalex;
 	ay = y * uis.scaley;
@@ -865,13 +865,13 @@ void UI_DrawString( int x, int y, const char* str, int style, vec4_t color )
 
 	if (style & UI_PULSE)
 	{
-		lowlight[0] = 0.8*color[0]; 
+		lowlight[0] = 0.8*color[0];
 		lowlight[1] = 0.8*color[1];
 		lowlight[2] = 0.8*color[2];
 		lowlight[3] = 0.8*color[3];
 		UI_LerpColor(color,lowlight,newcolor,0.5+0.5*sin(uis.realtime/PULSE_DIVISOR));
 		drawcolor = newcolor;
-	}	
+	}
 	else
 		drawcolor = color;
 
@@ -1041,7 +1041,7 @@ void UI_MouseEvent( int dx, int dy )
 
 		((menucommon_s*)(uis.activemenu->items[uis.activemenu->cursor]))->flags |= QMF_HASMOUSEFOCUS;
 		return;
-	}  
+	}
 
 	if (uis.activemenu->nitems > 0) {
 		// out of any region
@@ -1100,7 +1100,7 @@ static void UI_Cache_f( void ) {
 	UI_BotSelectMenu_Cache();
 	UI_CDKeyMenu_Cache();
 	UI_ModsMenu_Cache();
-	UI_SoundMenu_Cache(); 
+	UI_SoundMenu_Cache();
 	UI_QuitMenu_Cache();
 	UI_DemosMenu_Cache();
 	UI_VideoDataMenu_Cache();
@@ -1175,19 +1175,19 @@ static char *UI_ParseFontParms(char *buffer,int	propArray[CHARMAX][3])
 {
 	char	*token;
 	int		i,i2;
-	
-	while ( buffer ) 
+
+	while ( buffer )
 	{
 		token = COM_ParseExt( &buffer, qtrue );
 
 		// Start with open braket
-		if ( !Q_stricmp( token, "{" ) ) 
+		if ( !Q_stricmp( token, "{" ) )
 		{
 			for (i=0;i<CHARMAX;++i)
 			{
 				// Brackets for the numbers
 				token = COM_ParseExt( &buffer, qtrue );
-				if ( !Q_stricmp( token, "{" ) ) 
+				if ( !Q_stricmp( token, "{" ) )
 				{
 					;
 				}
@@ -1198,13 +1198,13 @@ static char *UI_ParseFontParms(char *buffer,int	propArray[CHARMAX][3])
 				}
 
 				for (i2=0;i2<3;++i2)
-				{	
+				{
 					token = COM_ParseExt( &buffer, qtrue );
 					propArray[i][i2] = atoi(token);
 				}
 
 				token = COM_ParseExt( &buffer, qtrue );
-				if ( !Q_stricmp( token, "}" ) ) 
+				if ( !Q_stricmp( token, "}" ) )
 				{
 					;
 				}
@@ -1217,7 +1217,7 @@ static char *UI_ParseFontParms(char *buffer,int	propArray[CHARMAX][3])
 		}
 
 		token = COM_ParseExt( &buffer, qtrue );	// Grab closing bracket
-		if ( !Q_stricmp( token, "}" ) ) 
+		if ( !Q_stricmp( token, "}" ) )
 		{
 			break;
 		}
@@ -1233,7 +1233,7 @@ static char *UI_ParseFontParms(char *buffer,int	propArray[CHARMAX][3])
 UI_LoadFonts
 =================
 */
-void UI_LoadFonts( void ) 
+void UI_LoadFonts( void )
 {
 	char buffer[FONT_BUFF_LENGTH];
 	int len;
@@ -1242,7 +1242,7 @@ void UI_LoadFonts( void )
 
 	len = trap_FS_FOpenFile( "ext_data/fonts.dat", &f, FS_READ );
 
-	if ( !f ) 
+	if ( !f )
 	{
 		trap_Print( va( S_COLOR_RED "UI_LoadFonts : FONTS.DAT file not found!\n"));
 		return;
@@ -1255,7 +1255,7 @@ void UI_LoadFonts( void )
 	}
 
 	// initialise the data area
-	memset(buffer, 0, sizeof(buffer));	
+	memset(buffer, 0, sizeof(buffer));
 
 	trap_FS_Read( buffer, len, f );
 
@@ -1361,7 +1361,7 @@ void UI_DrawHandlePic( float x, float y, float w, float h, qhandle_t hShader ) {
 		t0 = 0;
 		t1 = 1;
 	}
-	
+
 	UI_AdjustFrom640( &x, &y, &w, &h );
 	trap_R_DrawStretchPic( x, y, w, h, s0, t0, s1, t1, hShader );
 }
@@ -1570,9 +1570,9 @@ void UI_PrintMenuGraphics(menugraphics_s *menuGraphics,int maxI)
 	for (i=0;i<maxI;++i)
 	{
 		if (menuGraphics[i].type == MG_GRAPHIC)
-		{	
+		{
 			trap_R_SetColor( colorTable[menuGraphics[i].color]);
-			UI_DrawHandlePic( menuGraphics[i].x, 
+			UI_DrawHandlePic( menuGraphics[i].x,
 				menuGraphics[i].y,
 				menuGraphics[i].width,
 				menuGraphics[i].height,
@@ -1594,8 +1594,8 @@ void UI_PrintMenuGraphics(menugraphics_s *menuGraphics,int maxI)
 				return;
 			}
 
-			UI_DrawProportionalString( menuGraphics[i].x, 
-				menuGraphics[i].y, 
+			UI_DrawProportionalString( menuGraphics[i].x,
+				menuGraphics[i].y,
 				text,
 				menuGraphics[i].style,
 				colorTable[menuGraphics[i].color]);
@@ -1604,10 +1604,10 @@ void UI_PrintMenuGraphics(menugraphics_s *menuGraphics,int maxI)
 		{
 			trap_R_SetColor( colorTable[menuGraphics[i].color]);
 			UI_DrawNumField (menuGraphics[i].x,
-				menuGraphics[i].y, 
-				menuGraphics[i].max, 
+				menuGraphics[i].y,
+				menuGraphics[i].max,
 				menuGraphics[i].target,
-				menuGraphics[i].width,	
+				menuGraphics[i].width,
 				menuGraphics[i].height);
 			trap_R_SetColor( colorTable[CT_NONE]);
 		}
@@ -1680,7 +1680,7 @@ static void UI_FrameTop_Graphics(menuframework_s *menu)
 	if (menu->titleI)
 	{
 		UI_DrawProportionalString( menu->titleX, menu->titleY ,menu_normal_text[menu->titleI],
-			 UI_RIGHT|UI_BIGFONT, colorTable[CT_LTORANGE]);
+			UI_RIGHT|UI_BIGFONT, colorTable[CT_LTORANGE]);
 	}
 }
 
@@ -1792,7 +1792,7 @@ void UI_MenuFrame2(menuframework_s *menu)
 	if (menu->titleI)
 	{
 		UI_DrawProportionalString( menu->titleX, menu->titleY ,menu_normal_text[menu->titleI],
-			 UI_RIGHT|UI_BIGFONT, colorTable[CT_LTORANGE]);
+			UI_RIGHT|UI_BIGFONT, colorTable[CT_LTORANGE]);
 	}
 
 	trap_R_SetColor( colorTable[CT_DKBROWN1]);
@@ -1837,14 +1837,14 @@ static void UI_ParseMenuText()
 
 	buffer = MenuText;
 	i = 1;	// Zero is null string
-	while ( buffer ) 
+	while ( buffer )
 	{
 		token = COM_ParseExt( &buffer, qtrue );
 
 		len = strlen(token);
 		if (len)
 		{
-			menu_normal_text[i] = (buffer - (len + 1));	
+			menu_normal_text[i] = (buffer - (len + 1));
 			*(buffer - 1) = '\0';		//	Place an string end where is belongs.
 			i++;
 		}
@@ -1879,20 +1879,20 @@ void UI_LoadMenuText()
 
 	len = trap_FS_FOpenFile( filename, &f, FS_READ );
 
-	if ( !f ) 
+	if ( !f )
 	{
 		Com_Error( ERR_FATAL, "UI_LoadMenuText : MP_NORMALTEXT.DAT file not found!\n");
 		return;
 	}
 
-	if ( len > MAXMENUTEXT ) 
+	if ( len > MAXMENUTEXT )
 	{
 		Com_Error( ERR_FATAL, "UI_LoadMenuText : MP_NORMALTEXT.DAT size (%d) > max (%d)!\n", len, MAXMENUTEXT );
 		return;
 	}
 
 	// initialise the data area
-	memset(MenuText, 0, sizeof(MenuText));	
+	memset(MenuText, 0, sizeof(MenuText));
 
 	trap_FS_Read( MenuText, len, f );
 
@@ -1921,7 +1921,7 @@ static void UI_ParseButtonText()
 
 	buffer = ButtonText;
 	i = 1;	// Zero is null string
-	while ( buffer ) 
+	while ( buffer )
 	{
 //		G_ParseString( &buffer, &token);
 		token = COM_ParseExt( &buffer, qtrue );
@@ -1983,13 +1983,13 @@ void UI_LoadButtonText()
 
 	len = trap_FS_FOpenFile( filename, &f, FS_READ );
 
-	if ( !f ) 
+	if ( !f )
 	{
 		Com_Printf( S_COLOR_RED "UI_LoadButtonText : MP_BUTTONTEXT.DAT file not found!\n");
 		return;
 	}
 
-	if ( len > MAXBUTTONTEXT ) 
+	if ( len > MAXBUTTONTEXT )
 	{
 		Com_Printf( S_COLOR_RED "UI_LoadButtonText : MP_BUTTONTEXT.DAT too big!\n");
 		return;
@@ -2002,7 +2002,7 @@ void UI_LoadButtonText()
 	}
 
 	// initialise the data area
-	memset(ButtonText, 0, sizeof(ButtonText));	
+	memset(ButtonText, 0, sizeof(ButtonText));
 
 	trap_FS_Read( ButtonText, len, f );
 

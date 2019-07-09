@@ -35,22 +35,22 @@
 
 #define SB_SCORELINE_X		(SCOREBOARD_X + 76)
 #define	SB_CHAR_WIDTH		8
-#define SB_NAME_X			(SB_SCORELINE_X + 12) 
-#define SB_SCORE_X			(SB_SCORELINE_X + 112) 
-#define SB_KILLEDCNT_X		(SB_SCORELINE_X + 155) 
-#define SB_TIME_X			(SB_SCORELINE_X + 212) 
-#define SB_PING_X			(SB_SCORELINE_X + 251) 
-#define SB_WORSTENEMY_X		(SB_SCORELINE_X + 294) 
-#define SB_FAVEWEAPON_X		(SB_SCORELINE_X + 398) 
+#define SB_NAME_X			(SB_SCORELINE_X + 12)
+#define SB_SCORE_X			(SB_SCORELINE_X + 112)
+#define SB_KILLEDCNT_X		(SB_SCORELINE_X + 155)
+#define SB_TIME_X			(SB_SCORELINE_X + 212)
+#define SB_PING_X			(SB_SCORELINE_X + 251)
+#define SB_WORSTENEMY_X		(SB_SCORELINE_X + 294)
+#define SB_FAVEWEAPON_X		(SB_SCORELINE_X + 398)
 
-#define SB_FAVETARGET_X		(SB_SCORELINE_X + 182) 
+#define SB_FAVETARGET_X		(SB_SCORELINE_X + 182)
 
 
 #define SB_SCORELINE_X_BIG	(SCOREBOARD_X		+ 125)
-#define SB_NAME_X_BIG		(SB_SCORELINE_X_BIG + 12) 
-#define SB_SCORE_X_BIG		(SB_SCORELINE_X_BIG + 200) 
-#define SB_TIME_X_BIG		(SB_SCORELINE_X_BIG + 300) 
-#define SB_PING_X_BIG		(SB_SCORELINE_X_BIG + 400) 
+#define SB_NAME_X_BIG		(SB_SCORELINE_X_BIG + 12)
+#define SB_SCORE_X_BIG		(SB_SCORELINE_X_BIG + 200)
+#define SB_TIME_X_BIG		(SB_SCORELINE_X_BIG + 300)
+#define SB_PING_X_BIG		(SB_SCORELINE_X_BIG + 400)
 
 #define AWARD_Y						50			// height of awards medals on screen
 
@@ -62,7 +62,7 @@
 //
 //	0   32   80  112  144   240  320  400   <-- pixel position
 //  bot head bot head score ping time name
-//  
+//
 //  wins/losses are drawn on bot icon now
 
 static qboolean localClient; // true if local client has been displayed
@@ -91,17 +91,17 @@ static void CG_NamePrep(char *buffer,char *name,int pixelCnt,int font)
 
 		if (length > pixelCnt)
 		{
-			*buffer = '\0';	
+			*buffer = '\0';
 			return;
 		}
 		else
 		{
-			*buffer = *name;	
+			*buffer = *name;
 		}
 		name++;
 		buffer++;
 	}
-	*buffer = '\0';	
+	*buffer = '\0';
 }
 
 static qboolean AW_Draw( void );
@@ -139,19 +139,19 @@ static void CG_DrawClientScore_Big( int y, score_t *score, float *color, float f
 
 	picSize = (SB_NORMAL_HEIGHT_BIG * .75);
 	// draw the handicap or bot skill marker (unless player has flag)
-	if ( ci->powerups & ( 1 << PW_REDFLAG ) ) 
+	if ( ci->powerups & ( 1 << PW_REDFLAG ) )
 	{
 		CG_DrawFlagModel( SB_BOTICON_X, y, picSize, picSize, TEAM_RED );
-	} 
-	else if ( ci->powerups & ( 1 << PW_BLUEFLAG ) ) 
+	}
+	else if ( ci->powerups & ( 1 << PW_BLUEFLAG ) )
 	{
 		CG_DrawFlagModel( SB_BOTICON_X, y, picSize, picSize, TEAM_BLUE );
-	} 
-	else 
+	}
+	else
 	{
 		if ( ci->pClass > PC_NOCLASS )
 		{
-			if ( cg_drawIcons.integer ) 
+			if ( cg_drawIcons.integer )
 			{
 				qhandle_t	icon;
 				//Special hack: if it's Borg who has regen going, must be Borg queen
@@ -166,14 +166,14 @@ static void CG_DrawClientScore_Big( int y, score_t *score, float *color, float f
 				CG_DrawPic( SB_BOTICON_X, y, picSize, picSize, icon );
 			}
 		}
-		else if ( ci->botSkill > 0 && ci->botSkill <= 5 ) 
+		else if ( ci->botSkill > 0 && ci->botSkill <= 5 )
 		{
-			if ( cg_drawIcons.integer ) 
+			if ( cg_drawIcons.integer )
 			{
 				CG_DrawPic( SB_BOTICON_X, y, picSize, picSize, cgs.media.botSkillShaders[ ci->botSkill - 1 ] );
 			}
-		} 
-		else if ( ci->handicap < 100 ) 
+		}
+		else if ( ci->handicap < 100 )
 		{
 			Com_sprintf( string, sizeof( string ), "%i", ci->handicap );
 			if ( cgs.gametype == GT_TOURNAMENT )
@@ -191,12 +191,12 @@ static void CG_DrawClientScore_Big( int y, score_t *score, float *color, float f
 		// draw the wins / losses
 		if ( cgs.gametype == GT_TOURNAMENT ) {
 			Com_sprintf( string, sizeof( string ), "%i/%i", ci->wins, ci->losses );
-			if( ci->handicap < 100 && !ci->botSkill ) 
+			if( ci->handicap < 100 && !ci->botSkill )
 			{
 //				CG_DrawSmallStringColor( iconx, y + SMALLCHAR_HEIGHT/2, string, color );
 				UI_DrawProportionalString( SB_BOTICON_X,  y + SMALLCHAR_HEIGHT/2 , string, UI_SMALLFONT, color);
 			}
-			else 
+			else
 			{
 //				CG_DrawSmallStringColor( iconx, y, string, color );
 				UI_DrawProportionalString( SB_BOTICON_X,  y , string, UI_SMALLFONT, color);
@@ -210,40 +210,40 @@ static void CG_DrawClientScore_Big( int y, score_t *score, float *color, float f
 	CG_DrawHead( SB_HEAD_X, y, picSize, picSize, score->client, headAngles );
 
 	// highlight your position
-	if ( score->client == cg.snap->ps.clientNum ) 
+	if ( score->client == cg.snap->ps.clientNum )
 	{
 		int		rank;
 
 		localClient = qtrue;
 
-		if ( cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR 
-			|| cgs.gametype >= GT_TEAM ) 
+		if ( cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR
+			|| cgs.gametype >= GT_TEAM )
 		{
 			rank = -1;
-		} 
-		else 
+		}
+		else
 		{
 			rank = cg.snap->ps.persistant[PERS_RANK] & ~RANK_TIED_FLAG;
 		}
-		if ( rank == 0 ) 
+		if ( rank == 0 )
 		{
 			hcolor[0] = 0;
 			hcolor[1] = 0;
 			hcolor[2] = 0.7;
-		} 
-		else if ( rank == 1 ) 
+		}
+		else if ( rank == 1 )
 		{
 			hcolor[0] = 0.7;
 			hcolor[1] = 0;
 			hcolor[2] = 0;
-		} 
-		else if ( rank == 2 ) 
+		}
+		else if ( rank == 2 )
 		{
 			hcolor[0] = 0.7;
 			hcolor[1] = 0.7;
 			hcolor[2] = 0;
-		} 
-		else 
+		}
+		else
 		{
 			hcolor[0] = 0.7;
 			hcolor[1] = 0.7;
@@ -251,7 +251,7 @@ static void CG_DrawClientScore_Big( int y, score_t *score, float *color, float f
 		}
 
 		hcolor[3] = fade * 0.7;
-		CG_FillRect( SB_SCORELINE_X_BIG - SMALLCHAR_WIDTH, y, 
+		CG_FillRect( SB_SCORELINE_X_BIG - SMALLCHAR_WIDTH, y,
 		SB_TOPLINE_LENGTH - ((SB_SCORELINE_X_BIG - SMALLCHAR_WIDTH) - SCOREBOARD_X), BIGCHAR_HEIGHT+1, hcolor );
 	}
 
@@ -259,8 +259,8 @@ static void CG_DrawClientScore_Big( int y, score_t *score, float *color, float f
 	if ( score->ping == -1 ) {
 		Com_sprintf(string,sizeof(string),"(%s)%s",ingame_text[IGT_CONNECTING],ci->name);
 		UI_DrawProportionalString( SB_NAME_X_BIG, y , string, UI_SMALLFONT, colorTable[CT_WHITE]);
-	} 
-	else if ( ci->team == TEAM_SPECTATOR ) 
+	}
+	else if ( ci->team == TEAM_SPECTATOR )
 	{
 		Com_sprintf(string,sizeof(string),"(%s)%s",ingame_text[IGT_SPECTABBREV],ci->name);
 		CG_NamePrep(string2,string,184,UI_SMALLFONT); //184 pixels in the name column
@@ -274,8 +274,8 @@ static void CG_DrawClientScore_Big( int y, score_t *score, float *color, float f
 
 		Com_sprintf(string,sizeof(string),"%5i",score->ping);
 		UI_DrawProportionalString( SB_PING_X_BIG, y,  string, UI_SMALLFONT, colorTable[CT_LTGOLD1]);
-	} 
-	else 
+	}
+	else
 	{
 		CG_NamePrep(string,ci->name,184,UI_SMALLFONT); //184 pixels in the name column
 
@@ -308,17 +308,17 @@ static void CG_DrawClientScore( int y, score_t *score, float *color, float fade,
 	int		inIntermission,length;
 
 	inIntermission = (
-		   (cg.snap->ps.pm_type==PM_INTERMISSION) 
+			(cg.snap->ps.pm_type==PM_INTERMISSION)
 		|| (cg.intermissionStarted)
 		|| (cg.predictedPlayerState.pm_type==PM_INTERMISSION)   );
 
 
-	if ( score->client < 0 || score->client >= cgs.maxclients ) 
+	if ( score->client < 0 || score->client >= cgs.maxclients )
 	{
 		Com_Printf( "Bad score->client: %i\n", score->client );
 		return;
 	}
-	
+
 
 	ci = &cgs.clientinfo[score->client];
 	if (!ci->infoValid)
@@ -327,7 +327,7 @@ static void CG_DrawClientScore( int y, score_t *score, float *color, float fade,
 		return;
 	}
 
-	if ( !inIntermission ) 
+	if ( !inIntermission )
 	{
 		CG_DrawClientScore_Big(y, score, color, fade, largeFormat );
 		return;
@@ -350,24 +350,24 @@ static void CG_DrawClientScore( int y, score_t *score, float *color, float fade,
 
 	picSize = 20;
 	// draw the handicap or bot skill marker (unless player has flag)
-	if ( ci->powerups & ( 1 << PW_REDFLAG ) ) 
+	if ( ci->powerups & ( 1 << PW_REDFLAG ) )
 	{
 		CG_DrawFlagModel( SB_BOTICON_X, y, picSize, picSize, TEAM_RED );
-	} 
-	else if ( ci->powerups & ( 1 << PW_BLUEFLAG ) ) 
+	}
+	else if ( ci->powerups & ( 1 << PW_BLUEFLAG ) )
 	{
 		CG_DrawFlagModel( SB_BOTICON_X, y, picSize, picSize, TEAM_BLUE );
-	} 
-	else 
+	}
+	else
 	{
-		if ( ci->botSkill > 0 && ci->botSkill <= 5 ) 
+		if ( ci->botSkill > 0 && ci->botSkill <= 5 )
 		{
-			if ( cg_drawIcons.integer ) 
+			if ( cg_drawIcons.integer )
 			{
 				CG_DrawPic( SB_BOTICON_X, y+2, picSize, picSize, cgs.media.botSkillShaders[ ci->botSkill - 1 ] );
 			}
-		} 
-		else if ( ci->handicap < 100 ) 
+		}
+		else if ( ci->handicap < 100 )
 		{
 			Com_sprintf( string, sizeof( string ), "%i", ci->handicap );
 			if ( cgs.gametype == GT_TOURNAMENT )
@@ -385,12 +385,12 @@ static void CG_DrawClientScore( int y, score_t *score, float *color, float fade,
 		// draw the wins / losses
 		if ( cgs.gametype == GT_TOURNAMENT ) {
 			Com_sprintf( string, sizeof( string ), "%i/%i", ci->wins, ci->losses );
-			if( ci->handicap < 100 && !ci->botSkill ) 
+			if( ci->handicap < 100 && !ci->botSkill )
 			{
 //				CG_DrawSmallStringColor( iconx, y + SMALLCHAR_HEIGHT/2, string, color );
 				UI_DrawProportionalString( SB_BOTICON_X,  y + SMALLCHAR_HEIGHT/2 , string, UI_SMALLFONT, color);
 			}
-			else 
+			else
 			{
 //				CG_DrawSmallStringColor( iconx, y, string, color );
 				UI_DrawProportionalString( SB_BOTICON_X,  y , string, UI_SMALLFONT, color);
@@ -404,40 +404,40 @@ static void CG_DrawClientScore( int y, score_t *score, float *color, float fade,
 	CG_DrawHead( SB_HEAD_X+14, y, picSize, picSize, score->client, headAngles );
 
 	// highlight your position
-	if ( score->client == cg.snap->ps.clientNum ) 
+	if ( score->client == cg.snap->ps.clientNum )
 	{
 		int		rank;
 
 		localClient = qtrue;
 
-		if ( cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR 
-			|| cgs.gametype >= GT_TEAM ) 
+		if ( cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR
+			|| cgs.gametype >= GT_TEAM )
 		{
 			rank = -1;
-		} 
-		else 
+		}
+		else
 		{
 			rank = cg.snap->ps.persistant[PERS_RANK] & ~RANK_TIED_FLAG;
 		}
-		if ( rank == 0 ) 
+		if ( rank == 0 )
 		{
 			hcolor[0] = 0;
 			hcolor[1] = 0;
 			hcolor[2] = 0.7;
-		} 
-		else if ( rank == 1 ) 
+		}
+		else if ( rank == 1 )
 		{
 			hcolor[0] = 0.7;
 			hcolor[1] = 0;
 			hcolor[2] = 0;
-		} 
-		else if ( rank == 2 ) 
+		}
+		else if ( rank == 2 )
 		{
 			hcolor[0] = 0.7;
 			hcolor[1] = 0.7;
 			hcolor[2] = 0;
-		} 
-		else 
+		}
+		else
 		{
 			hcolor[0] = 0.7;
 			hcolor[1] = 0.7;
@@ -445,7 +445,7 @@ static void CG_DrawClientScore( int y, score_t *score, float *color, float fade,
 		}
 
 		hcolor[3] = fade * 0.7;
-		CG_FillRect( SB_SCORELINE_X - TINYCHAR_WIDTH, y, 
+		CG_FillRect( SB_SCORELINE_X - TINYCHAR_WIDTH, y,
 		SB_TOPLINE_LENGTH - ((SB_SCORELINE_X - TINYCHAR_WIDTH) - SCOREBOARD_X), BIGCHAR_HEIGHT+1, hcolor );
 	}
 
@@ -454,8 +454,8 @@ static void CG_DrawClientScore( int y, score_t *score, float *color, float fade,
 		Com_sprintf(string, sizeof(string),
 			" connecting    %s", ci->name);
 		UI_DrawProportionalString( SB_SCORELINE_X, y, string, UI_TINYFONT, colorTable[CT_LTGOLD1]);
-	} 
-	else if ( ci->team == TEAM_SPECTATOR ) 
+	}
+	else if ( ci->team == TEAM_SPECTATOR )
 	{
 		CG_NamePrep(string,ci->name,100,UI_TINYFONT); //100 pixels in the name column
 
@@ -474,8 +474,8 @@ static void CG_DrawClientScore( int y, score_t *score, float *color, float fade,
 
 //		Com_sprintf(string,sizeof(string),"%5i",score->killedCnt);
 //		UI_DrawProportionalString( SB_KILLEDCNT_X, y + (TINYCHAR_HEIGHT/2),  string, UI_TINYFONT, colorTable[CT_RED]);
-	} 
-	else 
+	}
+	else
 	{
 		/*
 		if (score->faveTarget >= 0)
@@ -500,7 +500,7 @@ static void CG_DrawClientScore( int y, score_t *score, float *color, float fade,
 		{
 			faveWeapon = ingame_text[IGT_NONE];
 			// Find weapon
-			for ( item = bg_itemlist + 1 ; item->classname ; item++ ) 
+			for ( item = bg_itemlist + 1 ; item->classname ; item++ )
 			{
 				if ( item->giType != IT_WEAPON ) {
 					continue;
@@ -514,7 +514,7 @@ static void CG_DrawClientScore( int y, score_t *score, float *color, float fade,
 		}
 
 //		Com_sprintf(string, sizeof(string),
-//			"%-20s  %5i     %5i     %-20s (%5i)   %-20s  (%5i)",ci->name, score->score, score->time, 
+//			"%-20s  %5i     %5i     %-20s (%5i)   %-20s  (%5i)",ci->name, score->score, score->time,
 //			faveTarget, score->faveTargetKills,
 //			worstEnemy, score->worstEnemyKills);
 
@@ -556,7 +556,7 @@ static void CG_DrawClientScore( int y, score_t *score, float *color, float fade,
 	if ( inIntermission )
 	{
 		qhandle_t h = trap_R_RegisterShader("icons/icon_ready_on"),
-			 h2 = trap_R_RegisterShader("icons/icon_ready_off");
+			h2 = trap_R_RegisterShader("icons/icon_ready_off");
 		if ( ci->botSkill > 0 && ci->botSkill <= 5 )
 		{
 			// i'm a bot. i'm always ready.
@@ -565,7 +565,7 @@ static void CG_DrawClientScore( int y, score_t *score, float *color, float fade,
 		}
 		else
 		{
-			if ( cg.snap->ps.stats[ STAT_CLIENTS_READY ] & ( 1 << score->client ) ) 
+			if ( cg.snap->ps.stats[ STAT_CLIENTS_READY ] & ( 1 << score->client ) )
 			{
 				trap_R_SetColor( colorTable[CT_VLTGOLD1]);
 				CG_DrawPic( SB_BOTICON_X+26,y+2, 16,  16,h);
@@ -677,7 +677,7 @@ CG_DrawScoreboard
 Draw the normal in-game scoreboard
 =================
 */
-qboolean CG_DrawScoreboard( void ) 
+qboolean CG_DrawScoreboard( void )
 {
 	int		y, i, n1 = 0, n2 = 0, n3 = 0;
 	float	fade;
@@ -694,39 +694,39 @@ qboolean CG_DrawScoreboard( void )
 	char	gamename[1024];
 
 	inIntermission = (
-		   (cg.snap->ps.pm_type==PM_INTERMISSION) 
+			(cg.snap->ps.pm_type==PM_INTERMISSION)
 		|| (cg.intermissionStarted)
 		|| (cg.predictedPlayerState.pm_type==PM_INTERMISSION)   );
 
 	// DO NOT SHOW THE SCOREBOARD IF:
 	////////////////////////////////////////////////////////////////
 	// 1) Menu or Console is Up
-	if ( cg_paused.integer ) 
+	if ( cg_paused.integer )
 	{	cg.deferredPlayerLoading = 0;
 		return qfalse;	}
 	//
 	// 2) Awards Ceremony is not finished during Intermisison
-	if (inIntermission && !AW_Draw()) 
+	if (inIntermission && !AW_Draw())
 	{	return qfalse;	}
 	//
 	// 3) If we are doing a warmup
-	if (cg.warmup && !cg.showScores) 
+	if (cg.warmup && !cg.showScores)
 		return qfalse;
-	
+
 
 	tTeam = TEAM_RED;  // Compiler needed initialization here for some reason...
 
-	// FADE SETUP... ??  
+	// FADE SETUP... ??
 	if ( cg.showScores || cg.predictedPlayerState.pm_type == PM_DEAD ||
-		 inIntermission ) 
+		inIntermission )
 	{
 		fade = 1.0;
 		fadeColor = colorWhite;
-	} else 
+	} else
 	{
 		fadeColor = CG_FadeColor( cg.scoreFadeTime, FADE_TIME );
-		
-		if ( !fadeColor ) 
+
+		if ( !fadeColor )
 		{
 			// next time scoreboard comes up, don't print killer
 			cg.deferredPlayerLoading = 0;
@@ -741,9 +741,9 @@ qboolean CG_DrawScoreboard( void )
 	//---------------------------------
 	rankOfClient = cg.snap->ps.persistant[PERS_RANK];
 
-	if ( !inIntermission && cg.snap->ps.persistant[PERS_TEAM]!=TEAM_SPECTATOR) 
+	if ( !inIntermission && cg.snap->ps.persistant[PERS_TEAM]!=TEAM_SPECTATOR)
 	{
-		//  Display Your Rank / Your Team 
+		//  Display Your Rank / Your Team
 		//-----------------------------------------------
 		if (cgs.gametype<=GT_SINGLE_PLAYER)
 		{
@@ -755,18 +755,18 @@ qboolean CG_DrawScoreboard( void )
 		}
 		if (cgs.gametype>GT_SINGLE_PLAYER)
 		{
-			if ( cg.teamScores[0] == cg.teamScores[1] ) 
+			if ( cg.teamScores[0] == cg.teamScores[1] )
 				s = va("%s %i", ingame_text[IGT_TEAMSARETIED],cg.teamScores[0] );
-			else if ( cg.teamScores[0] >= cg.teamScores[1] ) 
+			else if ( cg.teamScores[0] >= cg.teamScores[1] )
 				s = va("%s %i %s %i",ingame_text[IGT_REDTEAMLEADS],cg.teamScores[0],ingame_text[IGT_TO], cg.teamScores[1] );
-			else 
+			else
 				s = va("%s %i %s %i",ingame_text[IGT_BLUETEAMLEADS],cg.teamScores[1],ingame_text[IGT_TO], cg.teamScores[0] );
 
 			UI_DrawProportionalString(14, AWARD_Y, s, UI_BIGFONT|UI_LEFT, colorTable[CT_LTGOLD1]);
 		}
 		//  Display Who Killed You
 		//-----------------------------------------------
-		if ( cg.killerName[0] ) 
+		if ( cg.killerName[0] )
 		{
 			if ( cg.mod == MOD_ASSIMILATE )
 			{
@@ -788,7 +788,7 @@ qboolean CG_DrawScoreboard( void )
 //	CG_DrawPic( SCOREBOARD_X, y, 16, 32, cgs.media.corner_12_24 );	// Corner
 	CG_FillRect( SCOREBOARD_X, y, SB_TOPLINE_LENGTH, 24, colorTable[CT_DKORANGE]);
 
-	if ( inIntermission ) 
+	if ( inIntermission )
 	{
 		UI_DrawProportionalString( SB_BOTICON_X+26,	SB_HEADERTEXT, ingame_text[IGT_READY],UI_TINYFONT, colorTable[CT_BLACK] );
 		UI_DrawProportionalString( SB_NAME_X,	SB_HEADERTEXT, ingame_text[IGT_SB_NAME],UI_TINYFONT, colorTable[CT_BLACK] );
@@ -827,7 +827,7 @@ qboolean CG_DrawScoreboard( void )
 	// SET UP SIZES
 	//--------------
 	if ( (inIntermission) ||
-		 (cg.numScores>SB_MAXCLIENTS_BIG)  )
+		(cg.numScores>SB_MAXCLIENTS_BIG)  )
 	{// POSTGAME
 		maxClients = SB_MAXCLIENTS_NORMAL;
 		lineHeight = SB_NORMAL_HEIGHT;
@@ -843,13 +843,13 @@ qboolean CG_DrawScoreboard( void )
 	}
 
 	localClient = qfalse;
-	
-	if ( cgs.gametype >= GT_TEAM ) 
+
+	if ( cgs.gametype >= GT_TEAM )
 	{
 		y-=6;
 		// TEAM PLAY
 		//----------
-		if ( cg.teamScores[0] >= cg.teamScores[1] ) 
+		if ( cg.teamScores[0] >= cg.teamScores[1] )
 		{
 			tTeam = TEAM_RED;
 			bTeam = TEAM_BLUE;
@@ -888,8 +888,8 @@ qboolean CG_DrawScoreboard( void )
 		n3 = CG_TeamScoreboard( y, TEAM_SPECTATOR, fade, maxClients, lineHeight );
 		y += (n3 * lineHeight);
 		maxClients -= n3;
-	} 
-	else 
+	}
+	else
 	{
 		// FREE FOR ALL
 		//-------------
@@ -919,7 +919,7 @@ qboolean CG_DrawScoreboard( void )
 		if ( cg.scores[i].client==cg.snap->ps.clientNum )		// it's me!!
 		{
 			CG_DrawClientScore( y, &cg.scores[i], colorYellow, 0.0, lineHeight==SB_NORMAL_HEIGHT );
-			y += lineHeight;									
+			y += lineHeight;
 			localClient = qtrue;
 		}
 		i++;
@@ -932,7 +932,7 @@ qboolean CG_DrawScoreboard( void )
 	trap_R_SetColor( colorTable[CT_DKORANGE] );
 	CG_DrawPic( 605, y,  16, 32, cgs.media.scoreboardEndcap );
 
-	if ( inIntermission ) 
+	if ( inIntermission )
 	{
 		if ( cgs.gametype != GT_SINGLE_PLAYER)
 		{
@@ -943,7 +943,7 @@ qboolean CG_DrawScoreboard( void )
 				flashTime = cg.time;
 				if ( flashColor == CT_RED )
 				{
-					flashColor = CT_BLACK; 
+					flashColor = CT_BLACK;
 				}
 				else
 				{
@@ -972,7 +972,7 @@ qboolean CG_DrawScoreboard( void )
 
 		s = va("%s: ^1%i ^4%i ^0%i", ingame_text[IGT_PLAYERS], n1, n2, n3);
 	}
-	
+
 	Q_strncpyz( gamename, s, sizeof(gamename) );
 
 	strcat( gamename, "      "S_COLOR_YELLOW );
@@ -1004,9 +1004,9 @@ qboolean CG_DrawScoreboard( void )
 	UI_DrawProportionalString( SCOREBOARD_X+10, y+6, gamename, 0, colorTable[CT_BLACK]);
 
 	// load any models that have been deferred
-	if ( inIntermission || (++cg.deferredPlayerLoading > 10) ) 
+	if ( inIntermission || (++cg.deferredPlayerLoading > 10) )
 		CG_LoadDeferredPlayers();
-	
+
 	return qtrue;
 }
 
@@ -1098,7 +1098,7 @@ void CG_DrawTourneyScoreboard( void ) {
 //		CG_DrawStringExt( 632 - GIANT_WIDTH * strlen(s), y, s, color, qtrue, qtrue, GIANT_WIDTH, GIANT_HEIGHT, 0 );
 		w = UI_ProportionalStringWidth(s,UI_BIGFONT);
 		UI_DrawProportionalString(632 - w, y, s, UI_BIGFONT|UI_DROPSHADOW, color);
-		
+
 		y += 64;
 
 //		CG_DrawStringExt( 8, y, ingame_text[IGT_BLUETEAM], color, qtrue, qtrue, GIANT_WIDTH, GIANT_HEIGHT, 0 );
@@ -1151,23 +1151,23 @@ AWARDS PRESENTATION
 
 FROM ????Server????
   AW_SPPostgameMenu_f()
-      -Parse award information and store in struct
+	-Parse award information and store in struct
 
 
 FROM DrawScoreboard()
   AW_Draw()
-	  -PHASE I
+	-PHASE I
 		Play Sounds
 
-	  -PHASE II
+	-PHASE II
 		AW_DrawAwardsPresentation(timer)
 			AW_DrawAwards(max)
 
-	  -PHASE III
+	-PHASE III
 		AW_DrawAwards(ALL)
 
-	  -PHASE IV 
-	    Draw the New Scoreboard
+	-PHASE IV
+		Draw the New Scoreboard
 
 
 =============================================================================
@@ -1228,9 +1228,9 @@ void InitPostGameMenuStruct()
 }
 
 /*
-char	*cg_medalNames[AWARD_MAX] = 
+char	*cg_medalNames[AWARD_MAX] =
 {
-	"Efficiency",		// AWARD_EFFICIENCY,		Accuracy	
+	"Efficiency",		// AWARD_EFFICIENCY,		Accuracy
 	"Sharpshooter",		// AWARD_SHARPSHOOTER,		Most compression rifle frags
 	"Untouchable",		// AWARD_UNTOUCHABLE,		Perfect (no deaths)
 	"Logistics",		// AWARD_LOGISTICS,			Most pickups
@@ -1242,9 +1242,9 @@ char	*cg_medalNames[AWARD_MAX] =
 };
 */
 
-int	cg_medalNames[AWARD_MAX] = 
+int	cg_medalNames[AWARD_MAX] =
 {
-	IGT_EFFICIENCY,	// AWARD_EFFICIENCY,		Accuracy	
+	IGT_EFFICIENCY,	// AWARD_EFFICIENCY,		Accuracy
 	IGT_SHARPSHOOTER,	// AWARD_SHARPSHOOTER,		Most compression rifle frags
 	IGT_UNTOUCHABLE,	// AWARD_UNTOUCHABLE,		Perfect (no deaths)
 	IGT_LOGISTICS,		// AWARD_LOGISTICS,			Most pickups
@@ -1257,89 +1257,89 @@ int	cg_medalNames[AWARD_MAX] =
 
 
 char	*cg_medalPicNames[AWARD_MAX] = {
-	"menu/medals/medal_efficiency",		// AWARD_EFFICIENCY,		
-	"menu/medals/medal_sharpshooter",	// AWARD_SHARPSHOOTER,		
-	"menu/medals/medal_untouchable",	// AWARD_UNTOUCHABLE,		
-	"menu/medals/medal_logistics",		// AWARD_LOGISTICS,			
-	"menu/medals/medal_tactician",		// AWARD_TACTICIAN,			
-	"menu/medals/medal_demolitionist",	// AWARD_DEMOLITIONIST,		
-	"menu/medals/medal_ace",			// AWARD_STREAK,			
-	"menu/medals/medal_teammvp",		// AWARD_TEAM,				
-	"menu/medals/medal_section31"		// AWARD_SECTION31			
+	"menu/medals/medal_efficiency",		// AWARD_EFFICIENCY,
+	"menu/medals/medal_sharpshooter",	// AWARD_SHARPSHOOTER,
+	"menu/medals/medal_untouchable",	// AWARD_UNTOUCHABLE,
+	"menu/medals/medal_logistics",		// AWARD_LOGISTICS,
+	"menu/medals/medal_tactician",		// AWARD_TACTICIAN,
+	"menu/medals/medal_demolitionist",	// AWARD_DEMOLITIONIST,
+	"menu/medals/medal_ace",			// AWARD_STREAK,
+	"menu/medals/medal_teammvp",		// AWARD_TEAM,
+	"menu/medals/medal_section31"		// AWARD_SECTION31
 };
 
 char	*cg_medalSounds[AWARD_MAX] = {
-	"sound/voice/computer/misc/effic.wav",		// AWARD_EFFICIENCY,		
-	"sound/voice/computer/misc/sharp.wav",		// AWARD_SHARPSHOOTER,		
-	"sound/voice/computer/misc/untouch.wav",	// AWARD_UNTOUCHABLE,		
-	"sound/voice/computer/misc/log.wav",		// AWARD_LOGISTICS,			
-	"sound/voice/computer/misc/tact.wav",		// AWARD_TACTICIAN,			
-	"sound/voice/computer/misc/demo.wav",		// AWARD_DEMOLITIONIST,		
-	"sound/voice/computer/misc/ace.wav",		// AWARD_STREAK,			
-	"",/*shouldn't use. use cg_medalTeamSounds instead*/			// AWARD_TEAM,				
-	"sound/voice/computer/misc/sec31.wav"		// AWARD_SECTION31			
+	"sound/voice/computer/misc/effic.wav",		// AWARD_EFFICIENCY,
+	"sound/voice/computer/misc/sharp.wav",		// AWARD_SHARPSHOOTER,
+	"sound/voice/computer/misc/untouch.wav",	// AWARD_UNTOUCHABLE,
+	"sound/voice/computer/misc/log.wav",		// AWARD_LOGISTICS,
+	"sound/voice/computer/misc/tact.wav",		// AWARD_TACTICIAN,
+	"sound/voice/computer/misc/demo.wav",		// AWARD_DEMOLITIONIST,
+	"sound/voice/computer/misc/ace.wav",		// AWARD_STREAK,
+	"",/*shouldn't use. use cg_medalTeamSounds instead*/			// AWARD_TEAM,
+	"sound/voice/computer/misc/sec31.wav"		// AWARD_SECTION31
 };
 
 char	*cg_medalTeamPicNames[TEAM_MAX] = {
 	"",									// TEAM_NONE
-	"menu/medals/medal_teammvp",		// TEAM_MVP,		
-	"menu/medals/medal_teamdefender",	// TEAM_DEFENDER,		
-	"menu/medals/medal_teamwarrior",	// TEAM_WARRIOR,		
-	"menu/medals/medal_teamcarrier",	// TEAM_CARRIER,			
-	"menu/medals/medal_teaminterceptor",// TEAM_INTERCEPTOR,			
-	"menu/medals/medal_teambravery"		// TEAM_BRAVERY,			
+	"menu/medals/medal_teammvp",		// TEAM_MVP,
+	"menu/medals/medal_teamdefender",	// TEAM_DEFENDER,
+	"menu/medals/medal_teamwarrior",	// TEAM_WARRIOR,
+	"menu/medals/medal_teamcarrier",	// TEAM_CARRIER,
+	"menu/medals/medal_teaminterceptor",// TEAM_INTERCEPTOR,
+	"menu/medals/medal_teambravery"		// TEAM_BRAVERY,
 };
 
 char	*cg_medalTeamSounds[TEAM_MAX] = {
 	"",									// TEAM_NONE
-	"sound/voice/computer/misc/mvp.wav",			// TEAM_MVP,		
-	"sound/voice/computer/misc/defender.wav",		// TEAM_DEFENDER,		
-	"sound/voice/computer/misc/warrior.wav",		// TEAM_WARRIOR,		
-	"sound/voice/computer/misc/carrier.wav",		// TEAM_CARRIER,			
-	"sound/voice/computer/misc/intercept.wav",		// TEAM_INTERCEPTOR,			
-	"sound/voice/computer/misc/bravery.wav"		// TEAM_BRAVERY,			
+	"sound/voice/computer/misc/mvp.wav",			// TEAM_MVP,
+	"sound/voice/computer/misc/defender.wav",		// TEAM_DEFENDER,
+	"sound/voice/computer/misc/warrior.wav",		// TEAM_WARRIOR,
+	"sound/voice/computer/misc/carrier.wav",		// TEAM_CARRIER,
+	"sound/voice/computer/misc/intercept.wav",		// TEAM_INTERCEPTOR,
+	"sound/voice/computer/misc/bravery.wav"		// TEAM_BRAVERY,
 };
 
 
 char	*cg_medalStreakPicNames[AWARD_STREAK_MAX] = {
 	"",									// AWARD_NONE
-	"menu/medals/medal_ace",			// AWARD_STREAK_ACE,		
-	"menu/medals/medal_expert",			// AWARD_STREAK_EXPERT,		
-	"menu/medals/medal_master",			// AWARD_STREAK_MASTER,		
-	"menu/medals/medal_champion"		// AWARD_STREAK_CHAMPION,			
+	"menu/medals/medal_ace",			// AWARD_STREAK_ACE,
+	"menu/medals/medal_expert",			// AWARD_STREAK_EXPERT,
+	"menu/medals/medal_master",			// AWARD_STREAK_MASTER,
+	"menu/medals/medal_champion"		// AWARD_STREAK_CHAMPION,
 };
 
 char	*cg_medalStreakSounds[AWARD_STREAK_MAX] = {
 	"",									// AWARD_NONE
-	"sound/voice/computer/misc/ace.wav",			// AWARD_STREAK_ACE,		
-	"sound/voice/computer/misc/expert.wav",		// AWARD_STREAK_EXPERT,		
-	"sound/voice/computer/misc/master.wav",		// AWARD_STREAK_MASTER,		
-	"sound/voice/computer/misc/champion.wav"		// AWARD_STREAK_CHAMPION,			
+	"sound/voice/computer/misc/ace.wav",			// AWARD_STREAK_ACE,
+	"sound/voice/computer/misc/expert.wav",		// AWARD_STREAK_EXPERT,
+	"sound/voice/computer/misc/master.wav",		// AWARD_STREAK_MASTER,
+	"sound/voice/computer/misc/champion.wav"		// AWARD_STREAK_CHAMPION,
 };
 /*
 char	*cg_medalStreakNames[AWARD_STREAK_MAX] = {
 	"",									// AWARD_NONE
-	"Ace",			// AWARD_STREAK_ACE,		
-	"Expert",		// AWARD_STREAK_EXPERT,		
-	"Master",		// AWARD_STREAK_MASTER,		
-	"Champion"		// AWARD_STREAK_CHAMPION,			
+	"Ace",			// AWARD_STREAK_ACE,
+	"Expert",		// AWARD_STREAK_EXPERT,
+	"Master",		// AWARD_STREAK_MASTER,
+	"Champion"		// AWARD_STREAK_CHAMPION,
 };
 */
 
 int cg_medalStreakNames[AWARD_STREAK_MAX] = {
 	IGT_NONE,		// AWARD_NONE
-	IGT_ACE,		// AWARD_STREAK_ACE,		
-	IGT_EXPERT,		// AWARD_STREAK_EXPERT,		
-	IGT_MASTER,		// AWARD_STREAK_MASTER,		
-	IGT_CHAMPION	// AWARD_STREAK_CHAMPION,			
+	IGT_ACE,		// AWARD_STREAK_ACE,
+	IGT_EXPERT,		// AWARD_STREAK_EXPERT,
+	IGT_MASTER,		// AWARD_STREAK_MASTER,
+	IGT_CHAMPION	// AWARD_STREAK_CHAMPION,
 };
 
 int cg_medalTeamNames[TEAM_MAX] = {
 	IGT_NONE,			// AWARD_NONE
-	IGT_MVP,			// TEAM_MVP,		
-	IGT_DEFENDER,		// TEAM_DEFENDER,		
-	IGT_WARRIOR,		// TEAM_WARRIOR,		
-	IGT_CARRIER,		// TEAM_CARRIER,			
+	IGT_MVP,			// TEAM_MVP,
+	IGT_DEFENDER,		// TEAM_DEFENDER,
+	IGT_WARRIOR,		// TEAM_WARRIOR,
+	IGT_CARRIER,		// TEAM_CARRIER,
 	IGT_INTERCEPTOR,	// TEAM_INTERCEPTOR
 	IGT_BRAVERY			// TEAM_BRAVERY
 };
@@ -1406,7 +1406,7 @@ static void AW_DrawTheMedals( int max ) {
 		medal = postgameMenuInfo.awardsEarned[n];
 		amount = postgameMenuInfo.awardsLevels[n];
 
-		if (medal == AWARD_TEAM)	
+		if (medal == AWARD_TEAM)
 		{//amount is going to be a bitflag field...
 			for( i = TEAM_MVP; i < TEAM_MAX; i++ )
 			{
@@ -1507,7 +1507,7 @@ static void AW_DrawAwardsPresentation( int timer ) {
 	medal = postgameMenuInfo.awardsEarned[awardNum];
 	amount = postgameMenuInfo.awardsLevels[awardNum];
 
-	if ( medal == AWARD_TEAM )	
+	if ( medal == AWARD_TEAM )
 	{//amount is going to be a bitflag field...
 		if ( !allTeamAwardsAnnounced )
 		{
@@ -1612,7 +1612,7 @@ static qboolean AW_Draw( void )
 
 
 
-	// ALL PHASES 
+	// ALL PHASES
 	//  Display Your Rank / Your Team Wins
 	//-----------------------------------------------
 	if (cg.snap->ps.persistant[PERS_TEAM]!=TEAM_SPECTATOR)
@@ -1643,7 +1643,7 @@ static qboolean AW_Draw( void )
 				teamName = ingame_text[IGT_YOUR_TEAM];
 			}
 
-			if (postgameMenuInfo.playersTeamWon) 
+			if (postgameMenuInfo.playersTeamWon)
 				Com_sprintf( buf, sizeof(buf), "%s %s", teamName, ingame_text[IGT_WON]);
 			else
 				Com_sprintf( buf, sizeof(buf), "%s %s", teamName, ingame_text[IGT_LOST]);
@@ -1662,7 +1662,7 @@ static qboolean AW_Draw( void )
 		if (cgs.gametype <= GT_SINGLE_PLAYER )
 		{
 			// NON TEAM GAMES
-			//   We want the top three player's names and their ranks below the podium 
+			//   We want the top three player's names and their ranks below the podium
 			if ( postgameMenuInfo.numClients > 2 )
 			{
 			UI_DrawProportionalString( 510, 480 - 64 - PROP_HEIGHT, postgameMenuInfo.placeNames[2], UI_CENTER, white );
@@ -1722,12 +1722,12 @@ static qboolean AW_Draw( void )
 				UI_DrawProportionalString( 640-34, y, buf, UI_RIGHT, white );
 				y+=20;
 			}
-			
+
 			// AND THE POINTS???
 			Com_sprintf( buf, sizeof(buf), "%s %i", ingame_text[IGT_POINTS], postgameMenuInfo.totalPoints);
 			UI_DrawProportionalString( 640-34, y, buf, UI_RIGHT, white );
 			y+=30;
-			
+
 			// THE SIDE BAR
 			CG_FillRect( 640-16-12, yfrom, 8, y-yfrom, colorTable[CT_DKORANGE]);
 
@@ -1768,12 +1768,12 @@ static qboolean AW_Draw( void )
 				UI_DrawProportionalString( 640-34, y, buf, UI_RIGHT, white );
 				y+=20;
 			}
-			
+
 			// AND THE POINTS???
 			Com_sprintf( buf, sizeof(buf), "%s %i", ingame_text[IGT_POINTS], postgameMenuInfo.losPoints);
 			UI_DrawProportionalString( 640-34, y, buf, UI_RIGHT, white );
 			y+=20;
-			
+
 			// THE SIDE BAR
 			CG_FillRect( 640-16-12, yfrom, 8, y-yfrom, colorTable[CT_DKORANGE]);
 
@@ -1793,7 +1793,7 @@ static qboolean AW_Draw( void )
 	// will get the awards string that sets the whole thing up...)
 //	if (cg.snap->ps.persistant[PERS_TEAM]==TEAM_SPECTATOR)
 //		return qtrue;
-	
+
 
 	// PHASE I
 	//  Play Winner sound
@@ -1815,7 +1815,7 @@ static qboolean AW_Draw( void )
 		{
 			return qfalse;
 		}
-		 
+
 		if (cg.snap->ps.persistant[PERS_TEAM]!=TEAM_SPECTATOR)
 		{
 			if (postgameMenuInfo.youPlacedSound)
@@ -1827,13 +1827,13 @@ static qboolean AW_Draw( void )
 				timer = 0;
 			}
 		}
-		
+
 		// if we didn't play a youPlaced sound, this won't slow us up at all
 		if( timer < 2000 )
 		{
 			return qfalse;
 		}
-												
+
 		// play "commendations" sound
 		if (postgameMenuInfo.commendationsSound)
 		{
@@ -1856,7 +1856,7 @@ static qboolean AW_Draw( void )
 		awardNextDebounceTime = 0;
 		awardNum = 0;
 		nextTeamAward = 0;
-		
+
 		return qfalse;
 	}
 
@@ -1869,21 +1869,21 @@ static qboolean AW_Draw( void )
 		timer = cg.time - postgameMenuInfo.starttime - extraAwardTime;	// Setup Timer
 		if( timer >= ( postgameMenuInfo.numAwards * AWARD_PRESENTATION_TIME ) )
 		{
-			postgameMenuInfo.phase = 3;	
+			postgameMenuInfo.phase = 3;
 			AW_DrawTheMedals( postgameMenuInfo.numAwards );	// Draw All Medals for this frame
 		}
 		else
 		{
 			AW_DrawAwardsPresentation( timer );				// Draw Some Medals
 		}
-				
+
 		return qfalse;
 	}
 
 	// PHASE III
 	//  Just draw all the awards medals
 	//-----------------------------------------------
-	if( postgameMenuInfo.phase == 3 ) 
+	if( postgameMenuInfo.phase == 3 )
 	{
 		AW_DrawTheMedals( postgameMenuInfo.numAwards );
 		timer = cg.time - postgameMenuInfo.starttime;	// Setup Timer
@@ -1990,7 +1990,7 @@ static void AW_Prepname( int index)
 AW_SPPostgameMenu_f
 
   This function essentially initializes the SPPostgameMenu_t structure
-  
+
   Is called by the server command "awards ..."
 =================
 */
@@ -2043,7 +2043,7 @@ void AW_SPPostgameMenu_f( void ) {
 		if (awardFlags & 1)
 		{
 			//Log the type of Award
-			postgameMenuInfo.awardsEarned[postgameMenuInfo.numAwards] = n;				
+			postgameMenuInfo.awardsEarned[postgameMenuInfo.numAwards] = n;
 			//Log the amount
 			postgameMenuInfo.awardsLevels[postgameMenuInfo.numAwards] = atoi( CG_Argv(numNames + postgameMenuInfo.numAwards + 3));
 			//Increment Away
@@ -2070,15 +2070,15 @@ void AW_SPPostgameMenu_f( void ) {
 	postgameMenuInfo.losCaptures = atoi( CG_Argv(numNames + postgameMenuInfo.numAwards + 9));
 	postgameMenuInfo.losPoints   = atoi( CG_Argv(numNames + postgameMenuInfo.numAwards + 10));
 	postgameMenuInfo.secondPlaceTied = atoi( CG_Argv(numNames + postgameMenuInfo.numAwards + 11));
-	VectorSet(postgameMenuInfo.intermission_origin, 
+	VectorSet(postgameMenuInfo.intermission_origin,
 		atoi( CG_Argv(numNames + postgameMenuInfo.numAwards + 12)),
 		atoi( CG_Argv(numNames + postgameMenuInfo.numAwards + 13)),
 		atoi( CG_Argv(numNames + postgameMenuInfo.numAwards + 14)));
-	VectorSet(postgameMenuInfo.intermission_angle, 
+	VectorSet(postgameMenuInfo.intermission_angle,
 		atoi( CG_Argv(numNames + postgameMenuInfo.numAwards + 15)),
 		atoi( CG_Argv(numNames + postgameMenuInfo.numAwards + 16)),
 		atoi( CG_Argv(numNames + postgameMenuInfo.numAwards + 17)));
-	
+
 	cg.predictedPlayerState.pm_type = PM_INTERMISSION;
 	VectorCopy(postgameMenuInfo.intermission_origin, cg.predictedPlayerState.origin);
 	VectorCopy(postgameMenuInfo.intermission_angle, cg.predictedPlayerState.viewangles);
@@ -2138,7 +2138,7 @@ void AW_SPPostgameMenu_f( void ) {
 			// SOOOOOO for consistency's sake, you will always hear the "loss" track when you don't win.  --Pat
 			trap_S_StartBackgroundTrack( "music/loss", "music/loss" );
 		}
-		else 
+		else
 		{	// You win
 			postgameMenuInfo.winnerSound = trap_S_RegisterSound( "sound/voice/computer/misc/youwin.wav" );
 			postgameMenuInfo.youPlacedSound = 0;
@@ -2202,7 +2202,7 @@ void AW_SPPostgameMenu_f( void ) {
 			postgameMenuInfo.winnerDelay = 1000;
 		}
 
-		// THE MUSIC   
+		// THE MUSIC
 		//__________________________________________________
 		if (postgameMenuInfo.playersTeamWon) {
 			trap_S_StartBackgroundTrack( "music/win", "music/win" );

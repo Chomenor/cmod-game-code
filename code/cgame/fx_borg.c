@@ -10,19 +10,19 @@ void FX_BorgProjectileThink( centity_t *cent, const struct weaponInfo_s *weapon 
 	float	len;
 	vec3_t	dir, end;
 
-	FX_AddSprite( cent->lerpOrigin, NULL, qfalse, 
-					8.0f + ( random() * 24.0f ), 0.0f, 
-					1.0f, 1.0f, 
-					random() * 360, 0.0f, 
-					1, 
+	FX_AddSprite( cent->lerpOrigin, NULL, qfalse,
+					8.0f + ( random() * 24.0f ), 0.0f,
+					1.0f, 1.0f,
+					random() * 360, 0.0f,
+					1,
 					cgs.media.borgFlareShader);
 
 	// Energy glow
-	FX_AddSprite( cent->lerpOrigin, NULL, qfalse, 
-					18.0f + ( random() * 24.0f ), 0.0f, 
-					0.2f, 0.1f, 
-					random() * 360, 0.0f, 
-					1, 
+	FX_AddSprite( cent->lerpOrigin, NULL, qfalse,
+					18.0f + ( random() * 24.0f ), 0.0f,
+					0.2f, 0.1f,
+					random() * 360, 0.0f,
+					1,
 					cgs.media.borgFlareShader);
 
 	VectorSet( dir, crandom(), crandom(), crandom() );
@@ -42,24 +42,24 @@ void FX_BorgWeaponHitWall( vec3_t origin, vec3_t normal )
 	weaponInfo_t	*weaponInfo = &cg_weapons[WP_BORG_WEAPON];
 
 	// Expanding shock ring
-	FX_AddQuad( origin, normal, 
-					0.5f, 6.4f, 
-					0.8, 0.0, 
-					random() * 360.0f, 
-					200, 
+	FX_AddQuad( origin, normal,
+					0.5f, 6.4f,
+					0.8, 0.0,
+					random() * 360.0f,
+					200,
 					cgs.media.borgLightningShaders[0] );
 
 	// Impact core
-	FX_AddQuad( origin, normal, 
-					16.0f + ( random() * 8.0f ), 3.2f, 
-					0.6f, 0.0f, 
-					cg.time * BORG_SPIN, 
-					100, 
+	FX_AddQuad( origin, normal,
+					16.0f + ( random() * 8.0f ), 3.2f,
+					0.6f, 0.0f,
+					cg.time * BORG_SPIN,
+					100,
 					cgs.media.borgLightningShaders[0] );
 
 	//Sound
 	trap_S_StartSound( origin, ENTITYNUM_WORLD, CHAN_AUTO, weaponInfo->mainHitSound);
-	
+
 	CG_ImpactMark( cgs.media.scavMarkShader, origin, normal, random()*360, 1,1,1,0.2, qfalse, random() + 5.5f, qfalse );
 }
 
@@ -108,23 +108,23 @@ void FX_BorgEyeBeam( vec3_t start, vec3_t end, vec3_t normal, qboolean large )
 
 	alpha = 0.4f + ( random() * 0.25 );
 
-	FX_AddLine2( start, end, 1.0f, 
-				width, 0.0f, width, 0.0f, 
-				alpha, alpha, 
-				rgb, rgb, 
-				1.0f, 
+	FX_AddLine2( start, end, 1.0f,
+				width, 0.0f, width, 0.0f,
+				alpha, alpha,
+				rgb, rgb,
+				1.0f,
 				cgs.media.whiteLaserShader );
 
-	FX_AddSprite( start, NULL, qfalse, 
-				1.0f + (random() * 2.0f), 0.0f, 
-				0.6f, 0.6f, 
-				0.0f, 0.0f, 1.0f, 
+	FX_AddSprite( start, NULL, qfalse,
+				1.0f + (random() * 2.0f), 0.0f,
+				0.6f, 0.6f,
+				0.0f, 0.0f, 1.0f,
 				cgs.media.borgEyeFlareShader );
 
-	FX_AddQuad( end, normal, 
-				2.0f + (crandom() * 1.0f), 0.0f, 
-				1.0f, 1.0f, 
-				0.0f, 1.0f, 
+	FX_AddQuad( end, normal,
+				2.0f + (crandom() * 1.0f), 0.0f,
+				1.0f, 1.0f,
+				0.0f, 1.0f,
 				cgs.media.borgEyeFlareShader );
 }
 
@@ -137,9 +137,9 @@ void FX_BorgTeleportParticles( vec3_t origin, vec3_t dir )
 
 	for ( i = 0; i < 26; i++ )
 	{
-		VectorSet( neworg, 
-				origin[0] + ( crandom() * ( BORG_PARTICLE_RADIUS * 0.5 ) ), 
-				origin[1] + ( crandom() * ( BORG_PARTICLE_RADIUS * 0.5 ) ), 
+		VectorSet( neworg,
+				origin[0] + ( crandom() * ( BORG_PARTICLE_RADIUS * 0.5 ) ),
+				origin[1] + ( crandom() * ( BORG_PARTICLE_RADIUS * 0.5 ) ),
 				origin[2] + ( crandom() * 4.0f ) );
 		VectorScale( dir, 32 + ( random() * 96 ), vel );
 

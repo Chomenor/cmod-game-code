@@ -7,7 +7,7 @@
  * desc:		Area Awareness System, stuff exported to the AI
  *
  * $Archive: /StarTrek/Code-DM/game/be_aas.h $
- * $Author: Jmonroe $ 
+ * $Author: Jmonroe $
  * $Revision: 1 $
  * $Modtime: 1/21/00 10:12p $
  * $Date: 1/25/00 6:26p $

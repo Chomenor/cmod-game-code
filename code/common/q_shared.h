@@ -6,9 +6,9 @@
 // q_shared.h -- included first by ALL program modules.
 // A user mod should never modify this file
 
-#if defined(ppc) || defined(__ppc) || defined(__ppc__) 
-#define idppc 
-#endif 
+#if defined(ppc) || defined(__ppc) || defined(__ppc__)
+#define idppc
+#endif
 
 //#define MISSION_PACK
 
@@ -918,7 +918,7 @@ typedef struct {
 #define	MAX_STATS				16
 #define	MAX_PERSISTANT			16
 #define	MAX_POWERUPS			16
-#define	MAX_WEAPONS				16		
+#define	MAX_WEAPONS				16
 
 #define	MAX_PS_EVENTS			4
 
@@ -1118,7 +1118,7 @@ typedef struct entityState_s {
 typedef enum {
 	CA_UNINITIALIZED,
 	CA_DISCONNECTED, 	// not talking to a server
-	CA_AUTHORIZING,		// not used any more, was checking cd key 
+	CA_AUTHORIZING,		// not used any more, was checking cd key
 	CA_CONNECTING,		// sending request packets to the server
 	CA_CHALLENGING,		// sending challenge packets to the server
 	CA_CONNECTED,		// netchan_t established, getting gamestate

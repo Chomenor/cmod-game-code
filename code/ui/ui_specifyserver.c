@@ -116,11 +116,11 @@ void SpecifyServer_Graphics (void)
 
 	// Left rounded ends for buttons
 	trap_R_SetColor( colorTable[s_specifyserver.mainmenu.color]);
-	UI_DrawHandlePic(s_specifyserver.mainmenu.generic.x - 14, s_specifyserver.mainmenu.generic.y, 
+	UI_DrawHandlePic(s_specifyserver.mainmenu.generic.x - 14, s_specifyserver.mainmenu.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
 	trap_R_SetColor( colorTable[s_specifyserver.back.color]);
-	UI_DrawHandlePic(s_specifyserver.back.generic.x - 14, s_specifyserver.back.generic.y, 
+	UI_DrawHandlePic(s_specifyserver.back.generic.x - 14, s_specifyserver.back.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 }
 
@@ -150,7 +150,7 @@ void SpecifyServer_MenuInit( void )
 
 	s_specifyserver.menu.wrapAround					= qtrue;
 	s_specifyserver.menu.fullscreen					= qtrue;
-    s_specifyserver.menu.draw						= SpecifyServer_MenuDraw;
+	s_specifyserver.menu.draw						= SpecifyServer_MenuDraw;
 	s_specifyserver.menu.descX						= MENU_DESC_X;
 	s_specifyserver.menu.descY						= MENU_DESC_Y;
 	s_specifyserver.menu.titleX						= MENU_TITLE_X;
@@ -158,7 +158,7 @@ void SpecifyServer_MenuInit( void )
 	s_specifyserver.menu.titleI						= MNT_MULTIPLAYER_TITLE;
 	s_specifyserver.menu.footNoteEnum				= MNT_SPECIFYSERVER;
 
-	s_specifyserver.mainmenu.generic.type			= MTYPE_BITMAP;      
+	s_specifyserver.mainmenu.generic.type			= MTYPE_BITMAP;
 	s_specifyserver.mainmenu.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_specifyserver.mainmenu.generic.x				= 110;
 	s_specifyserver.mainmenu.generic.y				= 391;
@@ -175,7 +175,7 @@ void SpecifyServer_MenuInit( void )
 	s_specifyserver.mainmenu.textcolor				= CT_BLACK;
 	s_specifyserver.mainmenu.textcolor2				= CT_WHITE;
 
-	s_specifyserver.back.generic.type				= MTYPE_BITMAP;      
+	s_specifyserver.back.generic.type				= MTYPE_BITMAP;
 	s_specifyserver.back.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
 	s_specifyserver.back.generic.x					= 110;
 	s_specifyserver.back.generic.y					= 415;
@@ -234,7 +234,7 @@ void SpecifyServer_MenuInit( void )
 	s_specifyserver.go.textcolor2					= CT_WHITE;
 
 	Menu_AddItem( &s_specifyserver.menu, &s_specifyserver.mainmenu );
-	
+
 	Menu_AddItem( &s_specifyserver.menu, &s_specifyserver.domain );
 	Menu_AddItem( &s_specifyserver.menu, &s_specifyserver.port );
 	Menu_AddItem( &s_specifyserver.menu, &s_specifyserver.go );

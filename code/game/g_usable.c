@@ -56,12 +56,12 @@ void func_usable_use (gentity_t *self, gentity_t *other, gentity_t *activator)
 		//self->r.svFlags &= ~SVF_PLAYER_USABLE;
 		//also remove ability to call any use func at all!
 		self->use = 0/*NULL*/;
-		
+
 		if(self->target && self->target[0])
 		{
 			G_UseTargets(self, activator);
 		}
-		
+
 		if ( self->wait )
 		{
 			self->think = func_usable_think;
@@ -127,7 +127,7 @@ A bmodel that can be used directly by the player's "activate" button
 "team" - This can only be used by this team (2 = blue, 1 = red)
 */
 
-void SP_func_usable( gentity_t *self ) 
+void SP_func_usable( gentity_t *self )
 {
 	trap_SetBrushModel( self, self->model );
 	InitMover( self );

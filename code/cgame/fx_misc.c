@@ -115,7 +115,7 @@ void FX_EnergyGibs(vec3_t origin )
 		re->renderfx |= RF_CAP_FRAMES;
 		re->customShader = cgs.media.quantumDisruptorShader;
 		re->shaderTime = cg.time/1000.0f;
-		
+
 		le->pos.trType = TR_GRAVITY;
 		le->pos.trTime = cg.time;
 		le->angles.trType = TR_INTERPOLATE;
@@ -150,7 +150,7 @@ void FX_ExplodeBits( vec3_t org)
 		pos[2] += flrandom(-8, 8);
 		length = flrandom(10,20);
 		width = flrandom(2.0,4.0);
-		FX_AddTrail( pos, vel, qtrue, length, -length, width, -width, 
+		FX_AddTrail( pos, vel, qtrue, length, -length, width, -width,
 						1.0f, 1.0f, 0.5f, 1000.0f,  cgs.media.orangeTrailShader);
 	}
 }

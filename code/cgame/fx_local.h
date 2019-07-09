@@ -6,32 +6,32 @@
 //
 
 void FXE_Spray (vec3_t direction, float speed, float variation, float cone, vec3_t velocity);
-localEntity_t *FX_AddLine(vec3_t start, vec3_t end, float stScale, float scale, float dscale, 
+localEntity_t *FX_AddLine(vec3_t start, vec3_t end, float stScale, float scale, float dscale,
 							float startalpha, float endalpha, float killTime, qhandle_t shader);
-localEntity_t *FX_AddLine2(vec3_t start, vec3_t end, float stScale, float width1, float dwidth1, float width2, float dwidth2, 
+localEntity_t *FX_AddLine2(vec3_t start, vec3_t end, float stScale, float width1, float dwidth1, float width2, float dwidth2,
 							float startalpha, float endalpha, vec3_t startRGB, vec3_t endRGB, float killTime, qhandle_t shader);
 localEntity_t *FX_AddOrientedLine(vec3_t start, vec3_t end, vec3_t normal, float stScale, float scale,
-								  float dscale, float startalpha, float endalpha, float killTime, qhandle_t shader);
-localEntity_t *FX_AddTrail( vec3_t origin, vec3_t velocity, qboolean gravity, float length, float dlength, 
-							float scale, float dscale, float startalpha, float endalpha, 
+								float dscale, float startalpha, float endalpha, float killTime, qhandle_t shader);
+localEntity_t *FX_AddTrail( vec3_t origin, vec3_t velocity, qboolean gravity, float length, float dlength,
+							float scale, float dscale, float startalpha, float endalpha,
 							float elasticity, float killTime, qhandle_t shader);
-localEntity_t *FX_AddTrail2( vec3_t origin, vec3_t velocity, qboolean gravity, float length, float dlength, 
+localEntity_t *FX_AddTrail2( vec3_t origin, vec3_t velocity, qboolean gravity, float length, float dlength,
 							float scale, float dscale, float startalpha, float endalpha, vec3_t startRGB, vec3_t endRGB,
 							float elasticity, float killTime, qhandle_t shader);
-localEntity_t *FX_AddSprite(vec3_t origin, vec3_t velocity, qboolean gravity, float scale, float dscale, 
-							float startalpha, float endalpha, float roll, float elasticity, 
+localEntity_t *FX_AddSprite(vec3_t origin, vec3_t velocity, qboolean gravity, float scale, float dscale,
+							float startalpha, float endalpha, float roll, float elasticity,
 							float killTime, qhandle_t shader);
-localEntity_t *FX_AddSprite2(vec3_t origin, vec3_t velocity, qboolean gravity, float scale, float dscale, 
-							float startalpha, float endalpha, vec3_t startRGB, vec3_t endRGB, float roll, float elasticity, 
+localEntity_t *FX_AddSprite2(vec3_t origin, vec3_t velocity, qboolean gravity, float scale, float dscale,
+							float startalpha, float endalpha, vec3_t startRGB, vec3_t endRGB, float roll, float elasticity,
 							float killTime, qhandle_t shader);
 localEntity_t *FX_AddBezier(vec3_t start, vec3_t end, vec3_t cpoint1, vec3_t cpoint2, vec3_t cpointvel1,
 							vec3_t cpointvel2,vec3_t cpointacc1, vec3_t cpointacc2, float width,
 							float killTime, qhandle_t shader);
 localEntity_t *FX_AddQuad( vec3_t origin, vec3_t normal, float scale, float dscale,
-						   float startalpha, float endalpha, float roll, float killTime, qhandle_t shader );
-localEntity_t *FX_AddQuad2( vec3_t origin, vec3_t normal, float scale, float dscale, float startalpha, float endalpha, 
-						   vec3_t startRGB, vec3_t endRGB, float roll, float killTime, qhandle_t shader );
-localEntity_t *FX_AddCylinder(	vec3_t start, 
+							float startalpha, float endalpha, float roll, float killTime, qhandle_t shader );
+localEntity_t *FX_AddQuad2( vec3_t origin, vec3_t normal, float scale, float dscale, float startalpha, float endalpha,
+							vec3_t startRGB, vec3_t endRGB, float roll, float killTime, qhandle_t shader );
+localEntity_t *FX_AddCylinder(	vec3_t start,
 									vec3_t normal,
 									float height,
 									float dheight,
@@ -39,19 +39,19 @@ localEntity_t *FX_AddCylinder(	vec3_t start,
 									float dscale,
 									float scale2,
 									float dscale2,
-									float startalpha, 
-									float endalpha, 
-									float killTime, 
+									float startalpha,
+									float endalpha,
+									float killTime,
 									qhandle_t shader,
 									float bias );
-localEntity_t *FX_AddElectricity( vec3_t origin, vec3_t origin2, float stScale, float scale, float dscale, 
+localEntity_t *FX_AddElectricity( vec3_t origin, vec3_t origin2, float stScale, float scale, float dscale,
 									float startalpha, float endalpha, float killTime, qhandle_t shader, float deviation );
-localEntity_t *FX_AddParticle(	vec3_t origin, vec3_t velocity, qboolean gravity, float scale, float dscale, 
-								float startalpha, float endalpha, float roll, float elasticity, 
+localEntity_t *FX_AddParticle(	vec3_t origin, vec3_t velocity, qboolean gravity, float scale, float dscale,
+								float startalpha, float endalpha, float roll, float elasticity,
 								float killTime, qhandle_t shader, qboolean (*thinkFn)(localEntity_t *le));
 
 localEntity_t *FX_AddSpawner( vec3_t origin, vec3_t dir, vec3_t velocity, vec3_t user, qboolean gravity, int delay,
-							 float variance, float killTime, qboolean (*thinkFn)(localEntity_t *le), int radius );
+							float variance, float killTime, qboolean (*thinkFn)(localEntity_t *le), int radius );
 
 //
 // phaser

@@ -29,7 +29,7 @@ void trap_Error( const char *string ) {
 }
 
 int trap_Milliseconds( void ) {
-	return syscall( UI_MILLISECONDS ); 
+	return syscall( UI_MILLISECONDS );
 }
 
 void trap_Cvar_Register( vmCvar_t *cvar, const char *var_name, const char *value, int flags ) {
@@ -59,7 +59,7 @@ void trap_Cvar_SetValue( const char *var_name, float value ) {
 }
 
 void trap_Cvar_Reset( const char *name ) {
-	syscall( UI_CVAR_RESET, name ); 
+	syscall( UI_CVAR_RESET, name );
 }
 
 void trap_Cvar_Create( const char *var_name, const char *var_value, int flags ) {

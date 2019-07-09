@@ -37,7 +37,7 @@ static teamOrdersMenuInfo_t	teamOrdersMenuInfo;
 
 //you can translate this list
 /*
-static const char *ctfOrders[] = 
+static const char *ctfOrders[] =
 {
 "I Am the Leader",
 "Defend the Base",
@@ -50,7 +50,7 @@ static const char *ctfOrders[] =
 */
 
 //you can translate this list
-static int ctfOrders[] = 
+static int ctfOrders[] =
 {
 	MNT_ORDER_IMLEADER,
 	MNT_ORDER_DEFEND,
@@ -63,7 +63,7 @@ static int ctfOrders[] =
 };
 
 //!! Cannot translate these !!
-static const char *ctfMessages[] = 
+static const char *ctfMessages[] =
 {
 	"i am the leader",
 	"%s defend the base",
@@ -78,7 +78,7 @@ static const char *ctfMessages[] =
 #define NUM_TEAM_ORDERS		6
 //you can translate this list
 /*
-static const char *teamOrders[] = 
+static const char *teamOrders[] =
 {
 "I Am the Leader",
 "Follow Me",
@@ -89,7 +89,7 @@ static const char *teamOrders[] =
 };
 */
 
-int teamOrders[] = 
+int teamOrders[] =
 {
 	MNT_ORDER_IMLEADER,
 	MNT_ORDER_FOLLOW,
@@ -101,7 +101,7 @@ int teamOrders[] =
 };
 
 //!! Cannot translate these !!
-static const char *teamMessages[] = 
+static const char *teamMessages[] =
 {
 	"i am the leader",
 	"%s follow me",
@@ -139,7 +139,7 @@ static void UI_TeamOrdersMenu_SetList( int id ) {
 		teamOrdersMenuInfo.list.numitems = teamOrdersMenuInfo.numBots;
 		teamOrdersMenuInfo.list.itemnames = (const char **)teamOrdersMenuInfo.bots;
 		teamOrdersMenuInfo.list.listnames = NULL;
-		 break;
+		break;
 
 	case ID_LIST_CTF_ORDERS:
 		teamOrdersMenuInfo.list.generic.id = id;
@@ -241,18 +241,18 @@ static void UI_TeamOrdersMenu_ListDraw( void *self ) {
 
 	x =	320;//l->generic.x;
 	y =	l->generic.y;
-	for( i = 0; i < l->numitems; i++ ) 
+	for( i = 0; i < l->numitems; i++ )
 	{
 		style = UI_LEFT|UI_SMALLFONT|UI_CENTER;
-		if( i == l->curvalue ) 
+		if( i == l->curvalue )
 		{
 			color = colorTable[CT_DKGOLD1];
-			if( hasfocus ) 
+			if( hasfocus )
 			{
 				color = colorTable[CT_LTGOLD1];
 			}
 		}
-		else 
+		else
 		{
 			color = colorTable[CT_DKGOLD1];
 		}
@@ -287,25 +287,25 @@ static void UI_TeamOrdersMenu_ListEvent( void *ptr, int event ) {
 	id = ((menulist_s *)ptr)->generic.id;
 	selection = ((menulist_s *)ptr)->curvalue;
 
-	if( id == ID_LIST_BOTS ) 
+	if( id == ID_LIST_BOTS )
 	{
 		teamOrdersMenuInfo.selectedBot = selection;
-		if( teamOrdersMenuInfo.gametype == GT_CTF ) 
+		if( teamOrdersMenuInfo.gametype == GT_CTF )
 		{
 			UI_TeamOrdersMenu_SetList( ID_LIST_CTF_ORDERS );
 		}
-		else 
+		else
 		{
 			UI_TeamOrdersMenu_SetList( ID_LIST_TEAM_ORDERS );
 		}
 		return;
 	}
 
-	if( id == ID_LIST_CTF_ORDERS ) 
+	if( id == ID_LIST_CTF_ORDERS )
 	{
 		Com_sprintf( message, sizeof(message), ctfMessages[selection], teamOrdersMenuInfo.botNames[teamOrdersMenuInfo.selectedBot] );
 	}
-	else 
+	else
 	{
 		Com_sprintf( message, sizeof(message), teamMessages[selection], teamOrdersMenuInfo.botNames[teamOrdersMenuInfo.selectedBot] );
 	}
@@ -372,7 +372,7 @@ static void UI_TeamOrdersMenu_BuildBotList( void ) {
 UI_TeamOrdersMenu_Draw
 =================
 */
-static void UI_TeamOrdersMenu_Draw( void ) 
+static void UI_TeamOrdersMenu_Draw( void )
 {
 	UI_MenuFrame(&teamOrdersMenuInfo.menu);
 
@@ -388,7 +388,7 @@ static void UI_TeamOrdersMenu_Draw( void )
 UI_TeamOrdersMenu_Init
 ===============
 */
-static void UI_TeamOrdersMenu_Init(int fromMenu ) 
+static void UI_TeamOrdersMenu_Init(int fromMenu )
 {
 	UI_TeamOrdersMenu_Cache();
 
@@ -455,7 +455,7 @@ static void UI_TeamOrdersMenu_Init(int fromMenu )
 UI_TeamOrdersMenu_Cache
 =================
 */
-void UI_TeamOrdersMenu_Cache( void ) 
+void UI_TeamOrdersMenu_Cache( void )
 {
 }
 
@@ -465,7 +465,7 @@ void UI_TeamOrdersMenu_Cache( void )
 UI_TeamOrdersMenu
 ===============
 */
-void UI_TeamOrdersMenu(int fromMenu ) 
+void UI_TeamOrdersMenu(int fromMenu )
 {
 	UI_TeamOrdersMenu_Init(fromMenu);
 	UI_PushMenu( &teamOrdersMenuInfo.menu );
@@ -477,7 +477,7 @@ void UI_TeamOrdersMenu(int fromMenu )
 UI_TeamOrdersMenu_f
 ===============
 */
-void UI_TeamOrdersMenu_f( void ) 
+void UI_TeamOrdersMenu_f( void )
 {
 	uiClientState_t	cs;
 	char	info[MAX_INFO_STRING];
@@ -486,7 +486,7 @@ void UI_TeamOrdersMenu_f( void )
 	// make sure it's a team game
 	trap_GetConfigString( CS_SERVERINFO, info, sizeof(info) );
 	teamOrdersMenuInfo.gametype = atoi( Info_ValueForKey( info, "g_gametype" ) );
-	if( teamOrdersMenuInfo.gametype < GT_TEAM ) 
+	if( teamOrdersMenuInfo.gametype < GT_TEAM )
 	{
 		return;
 	}
@@ -495,7 +495,7 @@ void UI_TeamOrdersMenu_f( void )
 	trap_GetClientState( &cs );
 	trap_GetConfigString( CS_PLAYERS + cs.clientNum, info, MAX_INFO_STRING );
 	team = atoi( Info_ValueForKey( info, "t" ) );
-	if( team == TEAM_SPECTATOR ) 
+	if( team == TEAM_SPECTATOR )
 	{
 		return;
 	}

@@ -34,7 +34,7 @@ static const char *s_keyboardlanguage_Names[] =
 	0
 };
 
-static struct 
+static struct
 {
 	menuframework_s		menu;
 
@@ -92,11 +92,11 @@ static struct
 #define WEAPON_WAIT 10000
 
 
-typedef struct 
+typedef struct
 {
 	menuframework_s	menu;
 
-	qboolean		initialized;				
+	qboolean		initialized;
 
 	menubitmap_s	singleplayer;
 	menubitmap_s	demo;
@@ -140,7 +140,7 @@ static void* g_weapons[] =
 };
 
 
-static const char *weaponnamefiles [UI_NUM_WEAPONS] = 
+static const char *weaponnamefiles [UI_NUM_WEAPONS] =
 {
 	"sound/voice/computer/misc/phaser.wav",
 	"sound/voice/computer/misc/comprifle.wav",
@@ -154,7 +154,7 @@ static const char *weaponnamefiles [UI_NUM_WEAPONS] =
 };
 
 // Data for LCARS out Menu
-static struct 
+static struct
 {
 	menuframework_s	menu;
 	qhandle_t	logo;
@@ -167,7 +167,7 @@ static struct
 #define ID_MAINMENU				121
 
 
-typedef struct 
+typedef struct
 {
 	menuframework_s	menu;
 	qhandle_t	swoop1;
@@ -206,7 +206,7 @@ static quitmenu_t s_quit;
 #define SYSTEM_MAXDESC 5
 char systemDesc[SYSTEM_MAXDESC][512];
 
-typedef enum 
+typedef enum
 {
 	QMG_NUMBERS,
 	QMG_COL1_NUM1,
@@ -287,7 +287,7 @@ typedef enum
 	QMG_MAX
 } quitmenu_graphics_t;
 
-menugraphics_s quitmenu_graphics[QMG_MAX] = 
+menugraphics_s quitmenu_graphics[QMG_MAX] =
 {
 //	type		timer	x		y		width	height	file/text		graphic,	min		max		target	inc		style						color
 
@@ -376,7 +376,7 @@ menugraphics_s quitmenu_graphics[QMG_MAX] =
 };
 
 
-static float mm_buttons[6][2] = 
+static float mm_buttons[6][2] =
 {
 {129,62},
 {129,86},
@@ -389,7 +389,7 @@ static float mm_buttons[6][2] =
 static float federationTimer;
 
 // Data for Welcome In Menu
-static struct 
+static struct
 {
 	menuframework_s	menu;
 	sfxHandle_t		inSound;
@@ -432,7 +432,7 @@ static void InitialSetup_Event( void* ptr, int notification )
 
 /*
 =================
-InitialSetupApplyChanges - 
+InitialSetupApplyChanges -
 =================
 */
 static void InitialSetupApplyChanges( void *unused, int notification )
@@ -485,7 +485,7 @@ static void M_InitialSetupMenu_Graphics (void)
 	if (uis.glconfig.deviceSupportsGamma)
 	{
 		trap_R_SetColor( colorTable[CT_DKGREY]);
-		UI_DrawHandlePic(  178, y, 68, 68, uis.whiteShader);	// 
+		UI_DrawHandlePic(  178, y, 68, 68, uis.whiteShader);	//
 		trap_R_SetColor( colorTable[CT_WHITE]);
 		UI_DrawHandlePic(  180, y+2, 64, 64, s_initialsetup.test);	// Starfleet graphic
 
@@ -507,7 +507,7 @@ M_InitialSetupMenu_Draw
 =================
 */
 static void M_InitialSetupMenu_Draw (void)
-{	
+{
 	// Draw graphics particular to Main Menu
 	M_InitialSetupMenu_Graphics();
 
@@ -526,9 +526,9 @@ static void InitialSetup_SetValues(void)
 
 	trap_Cvar_VariableStringBuffer( "g_language", buffer, 32 );
 	language = s_textlanguage_Names;
-	
+
 	s_initialsetup.textlanguage.curvalue=0;
-	if (buffer[0]) 
+	if (buffer[0])
 	{
 		while (*language)
 		{
@@ -549,7 +549,7 @@ static void InitialSetup_SetValues(void)
 	trap_Cvar_VariableStringBuffer( "s_language", buffer, 32 );
 	language = s_voicelanguage_Names;
 	s_initialsetup.voicelanguage.curvalue=0;
-	if (buffer[0]) 
+	if (buffer[0])
 	{
 		while (*language)
 		{
@@ -570,7 +570,7 @@ static void InitialSetup_SetValues(void)
 	trap_Cvar_VariableStringBuffer( "k_language", buffer, 32 );
 
 	s_initialsetup.keyboardlanguage.curvalue=0;
-	if (buffer[0]) 
+	if (buffer[0])
 	{
 		while (s_keyboardlanguage_Names[s_initialsetup.keyboardlanguage.curvalue])
 		{
@@ -595,7 +595,7 @@ static void InitialSetup_SetValues(void)
 InitialSetupMenu_Cache
 ===============
 */
-static void InitialSetupMenu_Cache( void ) 
+static void InitialSetupMenu_Cache( void )
 {
 
 	s_initialsetup.test = trap_R_RegisterShaderNoMip("menu/special/gamma_test.tga");
@@ -607,7 +607,7 @@ static void InitialSetupMenu_Cache( void )
 InitialSetupMenu_Init
 ===============
 */
-static void InitialSetupMenu_Init( void ) 
+static void InitialSetupMenu_Init( void )
 {
 	int x = 179;
 	int y = 260;
@@ -627,13 +627,13 @@ static void InitialSetupMenu_Init( void )
 	s_initialsetup.menu.footNoteEnum			= MNT_INITIALSETUP;
 
 
-	s_initialsetup.textlanguage.generic.type		= MTYPE_SPINCONTROL;      
+	s_initialsetup.textlanguage.generic.type		= MTYPE_SPINCONTROL;
 	s_initialsetup.textlanguage.generic.flags		= QMF_HIGHLIGHT_IF_FOCUS;
 	s_initialsetup.textlanguage.generic.x			= x;
 	s_initialsetup.textlanguage.generic.y			= y;
 	s_initialsetup.textlanguage.generic.name		= GRAPHIC_BUTTONRIGHT;
-	s_initialsetup.textlanguage.generic.callback	= InitialSetup_Event; 
-	s_initialsetup.textlanguage.generic.id			= ID_TEXTLANGUAGE; 
+	s_initialsetup.textlanguage.generic.callback	= InitialSetup_Event;
+	s_initialsetup.textlanguage.generic.id			= ID_TEXTLANGUAGE;
 	s_initialsetup.textlanguage.color				= CT_DKPURPLE1;
 	s_initialsetup.textlanguage.color2				= CT_LTPURPLE1;
 	s_initialsetup.textlanguage.textX				= MENU_BUTTON_TEXT_X;
@@ -641,17 +641,17 @@ static void InitialSetupMenu_Init( void )
 	s_initialsetup.textlanguage.width				= 80;
 	s_initialsetup.textlanguage.textEnum			= MBT_TEXTLANGUAGE;
 	s_initialsetup.textlanguage.textcolor			= CT_BLACK;
-	s_initialsetup.textlanguage.textcolor2			= CT_WHITE;	
+	s_initialsetup.textlanguage.textcolor2			= CT_WHITE;
 	s_initialsetup.textlanguage.listnames			= s_textlanguage_Names;
 	y += 32;
 
-	s_initialsetup.voicelanguage.generic.type		= MTYPE_SPINCONTROL;      
+	s_initialsetup.voicelanguage.generic.type		= MTYPE_SPINCONTROL;
 	s_initialsetup.voicelanguage.generic.flags		= QMF_HIGHLIGHT_IF_FOCUS;
 	s_initialsetup.voicelanguage.generic.x			= x;
 	s_initialsetup.voicelanguage.generic.y			= y;
 	s_initialsetup.voicelanguage.generic.name		= GRAPHIC_BUTTONRIGHT;
-	s_initialsetup.voicelanguage.generic.callback	= InitialSetup_Event; 
-	s_initialsetup.voicelanguage.generic.id			= ID_VOICELANGUAGE; 
+	s_initialsetup.voicelanguage.generic.callback	= InitialSetup_Event;
+	s_initialsetup.voicelanguage.generic.id			= ID_VOICELANGUAGE;
 	s_initialsetup.voicelanguage.color				= CT_DKPURPLE1;
 	s_initialsetup.voicelanguage.color2				= CT_LTPURPLE1;
 	s_initialsetup.voicelanguage.textX				= MENU_BUTTON_TEXT_X;
@@ -659,17 +659,17 @@ static void InitialSetupMenu_Init( void )
 	s_initialsetup.voicelanguage.width				= 80;
 	s_initialsetup.voicelanguage.textEnum			= MBT_VOICELANGUAGE;
 	s_initialsetup.voicelanguage.textcolor			= CT_BLACK;
-	s_initialsetup.voicelanguage.textcolor2			= CT_WHITE;	
+	s_initialsetup.voicelanguage.textcolor2			= CT_WHITE;
 	s_initialsetup.voicelanguage.listnames			= s_voicelanguage_Names;
 	y += 32;
 
-	s_initialsetup.keyboardlanguage.generic.type		= MTYPE_SPINCONTROL;      
+	s_initialsetup.keyboardlanguage.generic.type		= MTYPE_SPINCONTROL;
 	s_initialsetup.keyboardlanguage.generic.flags		= QMF_HIGHLIGHT_IF_FOCUS;
 	s_initialsetup.keyboardlanguage.generic.x			= x;
 	s_initialsetup.keyboardlanguage.generic.y			= y;
 	s_initialsetup.keyboardlanguage.generic.name		= GRAPHIC_BUTTONRIGHT;
-	s_initialsetup.keyboardlanguage.generic.callback	= InitialSetup_Event; 
-	s_initialsetup.keyboardlanguage.generic.id			= ID_KEYBOARDLANGUAGE; 
+	s_initialsetup.keyboardlanguage.generic.callback	= InitialSetup_Event;
+	s_initialsetup.keyboardlanguage.generic.id			= ID_KEYBOARDLANGUAGE;
 	s_initialsetup.keyboardlanguage.color				= CT_DKPURPLE1;
 	s_initialsetup.keyboardlanguage.color2				= CT_LTPURPLE1;
 	s_initialsetup.keyboardlanguage.textX				= MENU_BUTTON_TEXT_X;
@@ -677,7 +677,7 @@ static void InitialSetupMenu_Init( void )
 	s_initialsetup.keyboardlanguage.width				= 80;
 	s_initialsetup.keyboardlanguage.textEnum			= MBT_KEYBOARDLANGUAGE;
 	s_initialsetup.keyboardlanguage.textcolor			= CT_BLACK;
-	s_initialsetup.keyboardlanguage.textcolor2			= CT_WHITE;	
+	s_initialsetup.keyboardlanguage.textcolor2			= CT_WHITE;
 	s_initialsetup.keyboardlanguage.itemnames			= s_keyboardlanguage_Names;
 
 	x = 180;
@@ -743,7 +743,7 @@ static void InitialSetupMenu_Init( void )
 
 static void UI_InitialSetupMenu(void)
 {
-	InitialSetupMenu_Init(); 
+	InitialSetupMenu_Init();
 
 	UI_PushMenu ( &s_initialsetup.menu );
 
@@ -757,16 +757,16 @@ static void UI_InitialSetupMenu(void)
 Main_MenuEvent
 =================
 */
-static void Main_MenuEvent (void* ptr, int event) 
+static void Main_MenuEvent (void* ptr, int event)
 {
 	void**		weaponptr;
 
-	if( event != QM_ACTIVATED ) 
+	if( event != QM_ACTIVATED )
 	{
 		return;
 	}
 
-	switch( ((menucommon_s*)ptr)->id ) 
+	switch( ((menucommon_s*)ptr)->id )
 	{
 	case ID_SINGLEPLAYER:
 		UI_SPLevelMenu();
@@ -824,13 +824,13 @@ static void Main_MenuEvent (void* ptr, int event)
 
 			trap_S_StartLocalSound( uis.menu_choice1_snd, CHAN_LOCAL_SOUND );
 
-			weaponptr = g_weapons[s_main.currentWeapon];	
+			weaponptr = g_weapons[s_main.currentWeapon];
 			((menubitmap_s*)weaponptr)->textcolor = CT_BLACK;
 
 			s_main.timer = uis.realtime + (WEAPON_WAIT * 2);
 			s_main.currentWeapon = (((menucommon_s*)ptr)->id - ID_WEAPON1);
 
-			weaponptr = g_weapons[s_main.currentWeapon];	
+			weaponptr = g_weapons[s_main.currentWeapon];
 			((menubitmap_s*)weaponptr)->textcolor = CT_LTGOLD1;
 
 			break;
@@ -893,19 +893,19 @@ static void UI_Draw3DModel( float x, float y, float w, float h, qhandle_t model,
 	memset( &ent, 0, sizeof( ent ) );
 	AnglesToAxis( angles, ent.axis );
 
-	origin[0] -= 
+	origin[0] -=
 		weaponMidpoint[0] * ent.axis[0][0] +
 		weaponMidpoint[1] * ent.axis[1][0] +
 		weaponMidpoint[2] * ent.axis[2][0];
-	origin[1] -= 
+	origin[1] -=
 		weaponMidpoint[0] * ent.axis[0][1] +
 		weaponMidpoint[1] * ent.axis[1][1] +
 		weaponMidpoint[2] * ent.axis[2][1];
-	origin[2] -= 
+	origin[2] -=
 		weaponMidpoint[0] * ent.axis[0][2] +
 		weaponMidpoint[1] * ent.axis[1][2] +
 		weaponMidpoint[2] * ent.axis[2][2];
-	
+
 	VectorCopy( origin, ent.origin );
 	ent.hModel = model;
 	if (trap_Cvar_VariableValue("r_dynamiclight") ) {
@@ -958,7 +958,7 @@ static void UI_DrawWeapon(void)
 	angles[YAW]   = 20.0/300.0 * uis.realtime;
 	angles[ROLL]  = weapon_graphics[s_main.currentWeapon].roll;
 
-	if (!weapon_graphics[s_main.currentWeapon].modelhandle) 
+	if (!weapon_graphics[s_main.currentWeapon].modelhandle)
 	{
 		CacheWeaponModel(s_main.currentWeapon);
 	}
@@ -1054,7 +1054,7 @@ static void M_MainMenu_Graphics (void)
 
 	if (s_main.timer < uis.realtime)
 	{
-		weaponptr = g_weapons[s_main.currentWeapon];	
+		weaponptr = g_weapons[s_main.currentWeapon];
 		((menubitmap_s*)weaponptr)->textcolor = CT_BLACK;
 
 		s_main.timer = uis.realtime + WEAPON_WAIT;
@@ -1065,7 +1065,7 @@ static void M_MainMenu_Graphics (void)
 		}
 
 		trap_S_StartLocalSound( uis.menu_choice1_snd, CHAN_LOCAL_SOUND );
-		weaponptr = g_weapons[s_main.currentWeapon];	
+		weaponptr = g_weapons[s_main.currentWeapon];
 		((menubitmap_s*)weaponptr)->textcolor = CT_LTGOLD1;
 	}
 
@@ -1151,7 +1151,7 @@ Main_MenuDraw
 */
 static void Main_MenuDraw (void)
 {
-	
+
 	// Draw graphics particular to Main Menu
 	M_MainMenu_Graphics();
 
@@ -1162,7 +1162,7 @@ static void CacheWeaponModel(int i)
 {
 	vec3_t			mins, maxs;
 	weapon_graphics[i].modelhandle = trap_R_RegisterModel( weapon_graphics[i].modelname);
-	
+
 	// offset the origin y and z to center the model
 	trap_R_ModelBounds( weapon_graphics[i].modelhandle, mins, maxs );
 	weapon_graphics[i].mid[0] = mins[0] + 0.5 * ( maxs[0] - mins[0]);
@@ -1175,21 +1175,21 @@ MainMenu_Cache
 ===============
 */
 extern vmCvar_t	ui_precacheweapons;
-void MainMenu_Cache( void ) 
+void MainMenu_Cache( void )
 {
 	int i;
 	gitem_t *	item;
 
 	i = 0;
-	for ( item = bg_itemlist + 1 ; item->classname && (i < UI_NUM_WEAPONS) ; item++ ) 
+	for ( item = bg_itemlist + 1 ; item->classname && (i < UI_NUM_WEAPONS) ; item++ )
 	{
-		if ( item->giType != IT_WEAPON ) 
+		if ( item->giType != IT_WEAPON )
 		{
 			continue;
 		}
 
 		weapon_graphics[i].modelname = item->world_model;
-		if (ui_precacheweapons.integer) 
+		if (ui_precacheweapons.integer)
 		{
 			CacheWeaponModel(i);
 		}
@@ -1221,7 +1221,7 @@ static void UI_MainMenu_Init(void)
 	s_main.menu.fullscreen				= qtrue;
 	s_main.menu.wrapAround				= qtrue;
 	s_main.menu.descX					= MENU_DESC_X;
-	s_main.menu.descY					= MENU_DESC_Y;	
+	s_main.menu.descY					= MENU_DESC_Y;
 	s_main.menu.titleX					= MENU_TITLE_X;
 	s_main.menu.titleY					= MENU_TITLE_Y;
 	s_main.menu.titleI					= MNT_MAINMENU_TITLE;
@@ -1229,13 +1229,13 @@ static void UI_MainMenu_Init(void)
 
 
 	y = 134;
-	s_main.singleplayer.generic.type	= MTYPE_BITMAP;      
+	s_main.singleplayer.generic.type	= MTYPE_BITMAP;
 	s_main.singleplayer.generic.flags	= QMF_HIGHLIGHT_IF_FOCUS;
 	s_main.singleplayer.generic.x		= mm_buttons[0][0];
 	s_main.singleplayer.generic.y		= mm_buttons[0][1];
 	s_main.singleplayer.generic.name	= BUTTON_GRAPHIC_LONGRIGHT;
 	s_main.singleplayer.generic.id		= ID_SINGLEPLAYER;
-	s_main.singleplayer.generic.callback= Main_MenuEvent; 
+	s_main.singleplayer.generic.callback= Main_MenuEvent;
 	s_main.singleplayer.width			= MENU_BUTTON_MED_WIDTH;
 	s_main.singleplayer.height			= MENU_BUTTON_MED_HEIGHT;
 	s_main.singleplayer.color			= CT_DKPURPLE1;
@@ -1246,13 +1246,13 @@ static void UI_MainMenu_Init(void)
 	s_main.singleplayer.textcolor		= CT_BLACK;
 	s_main.singleplayer.textcolor2		= CT_WHITE;
 
-	s_main.multiplayer.generic.type		= MTYPE_BITMAP;      
+	s_main.multiplayer.generic.type		= MTYPE_BITMAP;
 	s_main.multiplayer.generic.flags	= QMF_HIGHLIGHT_IF_FOCUS;
 	s_main.multiplayer.generic.x		= mm_buttons[1][0];
 	s_main.multiplayer.generic.y		= mm_buttons[1][1];
 	s_main.multiplayer.generic.name		= BUTTON_GRAPHIC_LONGRIGHT;
 	s_main.multiplayer.generic.id		= ID_MULTIPLAYER;
-	s_main.multiplayer.generic.callback	= Main_MenuEvent; 
+	s_main.multiplayer.generic.callback	= Main_MenuEvent;
 	s_main.multiplayer.width			= MENU_BUTTON_MED_WIDTH;
 	s_main.multiplayer.height			= MENU_BUTTON_MED_HEIGHT;
 	s_main.multiplayer.color			= CT_DKPURPLE1;
@@ -1263,13 +1263,13 @@ static void UI_MainMenu_Init(void)
 	s_main.multiplayer.textcolor		= CT_BLACK;
 	s_main.multiplayer.textcolor2		= CT_WHITE;
 
-	s_main.setup.generic.type			= MTYPE_BITMAP;      
+	s_main.setup.generic.type			= MTYPE_BITMAP;
 	s_main.setup.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_main.setup.generic.x				= mm_buttons[2][0];
 	s_main.setup.generic.y				= mm_buttons[2][1];
 	s_main.setup.generic.name			= BUTTON_GRAPHIC_LONGRIGHT;
 	s_main.setup.generic.id				= ID_SETUP;
-	s_main.setup.generic.callback		= Main_MenuEvent; 
+	s_main.setup.generic.callback		= Main_MenuEvent;
 	s_main.setup.width					= MENU_BUTTON_MED_WIDTH;
 	s_main.setup.height					= MENU_BUTTON_MED_HEIGHT;
 	s_main.setup.color					= CT_DKPURPLE1;
@@ -1280,13 +1280,13 @@ static void UI_MainMenu_Init(void)
 	s_main.setup.textcolor				= CT_BLACK;
 	s_main.setup.textcolor2				= CT_WHITE;
 
-	s_main.demo.generic.type			= MTYPE_BITMAP;      
+	s_main.demo.generic.type			= MTYPE_BITMAP;
 	s_main.demo.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_main.demo.generic.x				= mm_buttons[3][0];
 	s_main.demo.generic.y				= mm_buttons[3][1];
 	s_main.demo.generic.name			= BUTTON_GRAPHIC_LONGRIGHT;
 	s_main.demo.generic.id				= ID_DEMOS;
-	s_main.demo.generic.callback		= Main_MenuEvent; 
+	s_main.demo.generic.callback		= Main_MenuEvent;
 	s_main.demo.width					= MENU_BUTTON_MED_WIDTH;
 	s_main.demo.height					= MENU_BUTTON_MED_HEIGHT;
 	s_main.demo.color					= CT_DKPURPLE1;
@@ -1307,7 +1307,7 @@ static void UI_MainMenu_Init(void)
 	s_main.mods.generic.y				= mm_buttons[4][1];
 	s_main.mods.generic.name			= BUTTON_GRAPHIC_LONGRIGHT;
 	s_main.mods.generic.id				= ID_MODS;
-	s_main.mods.generic.callback		= Main_MenuEvent; 
+	s_main.mods.generic.callback		= Main_MenuEvent;
 	s_main.mods.width					= MENU_BUTTON_MED_WIDTH;
 	s_main.mods.height					= MENU_BUTTON_MED_HEIGHT;
 	s_main.mods.color					= CT_DKPURPLE1;
@@ -1322,13 +1322,13 @@ static void UI_MainMenu_Init(void)
 		s_main.mods.generic.flags			|= QMF_GRAYED;
 	}
 
-	s_main.quit.generic.type			= MTYPE_BITMAP;      
+	s_main.quit.generic.type			= MTYPE_BITMAP;
 	s_main.quit.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_main.quit.generic.x				= mm_buttons[5][0];
 	s_main.quit.generic.y				= mm_buttons[5][1];
 	s_main.quit.generic.name			= BUTTON_GRAPHIC_LONGRIGHT;
 	s_main.quit.generic.id				= ID_QUIT;
-	s_main.quit.generic.callback		= Main_MenuEvent; 
+	s_main.quit.generic.callback		= Main_MenuEvent;
 	s_main.quit.width					= MENU_BUTTON_MED_WIDTH;
 	s_main.quit.height					= MENU_BUTTON_MED_HEIGHT;
 	s_main.quit.color					= CT_DKPURPLE1;
@@ -1339,13 +1339,13 @@ static void UI_MainMenu_Init(void)
 	s_main.quit.textcolor				= CT_BLACK;
 	s_main.quit.textcolor2				= CT_WHITE;
 
-	s_main.mission.generic.type			= MTYPE_BITMAP;      
+	s_main.mission.generic.type			= MTYPE_BITMAP;
 	s_main.mission.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_main.mission.generic.x				= 30;
 	s_main.mission.generic.y				= 161;
 	s_main.mission.generic.name			= BUTTON_GRAPHIC_LONGRIGHT;
 	s_main.mission.generic.id				= ID_DEMOS;
-	s_main.mission.generic.callback		= Main_MenuEvent; 
+	s_main.mission.generic.callback		= Main_MenuEvent;
 	s_main.mission.width					= MENU_BUTTON_MED_WIDTH;
 	s_main.mission.height					= MENU_BUTTON_MED_HEIGHT;
 	s_main.mission.color					= CT_DKPURPLE1;
@@ -1362,21 +1362,21 @@ static void UI_MainMenu_Init(void)
 	Menu_AddItem( &s_main.menu,	&s_main.multiplayer );
 	Menu_AddItem( &s_main.menu,	&s_main.setup );
 	Menu_AddItem( &s_main.menu,	&s_main.demo );
-	Menu_AddItem( &s_main.menu,	&s_main.mods );             
-	Menu_AddItem( &s_main.menu,	&s_main.quit );             
-//	Menu_AddItem( &s_main.menu,	&s_main.mission );             
+	Menu_AddItem( &s_main.menu,	&s_main.mods );
+	Menu_AddItem( &s_main.menu,	&s_main.quit );
+//	Menu_AddItem( &s_main.menu,	&s_main.mission );
 	s_main.currentWeapon = 0;
 
 	pad = 26;
 	y = 189;
 	x = 482;
-	s_main.weapon1.generic.type				= MTYPE_BITMAP;      
+	s_main.weapon1.generic.type				= MTYPE_BITMAP;
 	s_main.weapon1.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_main.weapon1.generic.x				= x;
 	s_main.weapon1.generic.y				= y;
 	s_main.weapon1.generic.name				= GRAPHIC_SQUARE;
 	s_main.weapon1.generic.id				= ID_WEAPON1;
-	s_main.weapon1.generic.callback			= Main_MenuEvent; 
+	s_main.weapon1.generic.callback			= Main_MenuEvent;
 	s_main.weapon1.width					= MENU_BUTTON_MED_WIDTH;
 	s_main.weapon1.height					= MENU_BUTTON_MED_HEIGHT;
 	s_main.weapon1.color					= CT_DKPURPLE1;
@@ -1388,13 +1388,13 @@ static void UI_MainMenu_Init(void)
 	s_main.weapon1.textcolor2				= CT_WHITE;
 
 	y = y + pad;
-	s_main.weapon2.generic.type				= MTYPE_BITMAP;      
+	s_main.weapon2.generic.type				= MTYPE_BITMAP;
 	s_main.weapon2.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_main.weapon2.generic.x				= x;
 	s_main.weapon2.generic.y				= y;
 	s_main.weapon2.generic.name				= GRAPHIC_SQUARE;
 	s_main.weapon2.generic.id				= ID_WEAPON2;
-	s_main.weapon2.generic.callback			= Main_MenuEvent; 
+	s_main.weapon2.generic.callback			= Main_MenuEvent;
 	s_main.weapon2.width					= MENU_BUTTON_MED_WIDTH;
 	s_main.weapon2.height					= MENU_BUTTON_MED_HEIGHT;
 	s_main.weapon2.color					= CT_DKPURPLE1;
@@ -1406,13 +1406,13 @@ static void UI_MainMenu_Init(void)
 	s_main.weapon2.textcolor2				= CT_WHITE;
 
 	y = y + pad;
-	s_main.weapon3.generic.type				= MTYPE_BITMAP;      
+	s_main.weapon3.generic.type				= MTYPE_BITMAP;
 	s_main.weapon3.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_main.weapon3.generic.x				= x;
 	s_main.weapon3.generic.y				= y;
 	s_main.weapon3.generic.name				= GRAPHIC_SQUARE;
 	s_main.weapon3.generic.id				= ID_WEAPON3;
-	s_main.weapon3.generic.callback			= Main_MenuEvent; 
+	s_main.weapon3.generic.callback			= Main_MenuEvent;
 	s_main.weapon3.width					= MENU_BUTTON_MED_WIDTH;
 	s_main.weapon3.height					= MENU_BUTTON_MED_HEIGHT;
 	s_main.weapon3.color					= CT_DKPURPLE1;
@@ -1424,13 +1424,13 @@ static void UI_MainMenu_Init(void)
 	s_main.weapon3.textcolor2				= CT_WHITE;
 
 	y = y + pad;
-	s_main.weapon4.generic.type				= MTYPE_BITMAP;      
+	s_main.weapon4.generic.type				= MTYPE_BITMAP;
 	s_main.weapon4.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_main.weapon4.generic.x				= x;
 	s_main.weapon4.generic.y				= y;
 	s_main.weapon4.generic.name				= GRAPHIC_SQUARE;
 	s_main.weapon4.generic.id				= ID_WEAPON4;
-	s_main.weapon4.generic.callback			= Main_MenuEvent; 
+	s_main.weapon4.generic.callback			= Main_MenuEvent;
 	s_main.weapon4.width					= MENU_BUTTON_MED_WIDTH;
 	s_main.weapon4.height					= MENU_BUTTON_MED_HEIGHT;
 	s_main.weapon4.color					= CT_DKPURPLE1;
@@ -1442,13 +1442,13 @@ static void UI_MainMenu_Init(void)
 	s_main.weapon4.textcolor2				= CT_WHITE;
 
 	y = y + pad;
-	s_main.weapon5.generic.type				= MTYPE_BITMAP;      
+	s_main.weapon5.generic.type				= MTYPE_BITMAP;
 	s_main.weapon5.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_main.weapon5.generic.x				= x;
 	s_main.weapon5.generic.y				= y;
 	s_main.weapon5.generic.name				= GRAPHIC_SQUARE;
 	s_main.weapon5.generic.id				= ID_WEAPON5;
-	s_main.weapon5.generic.callback			= Main_MenuEvent; 
+	s_main.weapon5.generic.callback			= Main_MenuEvent;
 	s_main.weapon5.width					= MENU_BUTTON_MED_WIDTH;
 	s_main.weapon5.height					= MENU_BUTTON_MED_HEIGHT;
 	s_main.weapon5.color					= CT_DKPURPLE1;
@@ -1460,13 +1460,13 @@ static void UI_MainMenu_Init(void)
 	s_main.weapon5.textcolor2				= CT_WHITE;
 
 	y = y + pad;
-	s_main.weapon6.generic.type				= MTYPE_BITMAP;      
+	s_main.weapon6.generic.type				= MTYPE_BITMAP;
 	s_main.weapon6.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_main.weapon6.generic.x				= x;
 	s_main.weapon6.generic.y				= y;
 	s_main.weapon6.generic.name				= GRAPHIC_SQUARE;
 	s_main.weapon6.generic.id				= ID_WEAPON6;
-	s_main.weapon6.generic.callback			= Main_MenuEvent; 
+	s_main.weapon6.generic.callback			= Main_MenuEvent;
 	s_main.weapon6.width					= MENU_BUTTON_MED_WIDTH;
 	s_main.weapon6.height					= MENU_BUTTON_MED_HEIGHT;
 	s_main.weapon6.color					= CT_DKPURPLE1;
@@ -1478,13 +1478,13 @@ static void UI_MainMenu_Init(void)
 	s_main.weapon6.textcolor2				= CT_WHITE;
 
 	y = y + pad;
-	s_main.weapon7.generic.type				= MTYPE_BITMAP;      
+	s_main.weapon7.generic.type				= MTYPE_BITMAP;
 	s_main.weapon7.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_main.weapon7.generic.x				= x;
 	s_main.weapon7.generic.y				= y;
 	s_main.weapon7.generic.name				= GRAPHIC_SQUARE;
 	s_main.weapon7.generic.id				= ID_WEAPON7;
-	s_main.weapon7.generic.callback			= Main_MenuEvent; 
+	s_main.weapon7.generic.callback			= Main_MenuEvent;
 	s_main.weapon7.width					= MENU_BUTTON_MED_WIDTH;
 	s_main.weapon7.height					= MENU_BUTTON_MED_HEIGHT;
 	s_main.weapon7.color					= CT_DKPURPLE1;
@@ -1496,13 +1496,13 @@ static void UI_MainMenu_Init(void)
 	s_main.weapon7.textcolor2				= CT_WHITE;
 
 	y = y + pad;
-	s_main.weapon8.generic.type				= MTYPE_BITMAP;      
+	s_main.weapon8.generic.type				= MTYPE_BITMAP;
 	s_main.weapon8.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_main.weapon8.generic.x				= x;
 	s_main.weapon8.generic.y				= y;
 	s_main.weapon8.generic.name				= GRAPHIC_SQUARE;
 	s_main.weapon8.generic.id				= ID_WEAPON8;
-	s_main.weapon8.generic.callback			= Main_MenuEvent; 
+	s_main.weapon8.generic.callback			= Main_MenuEvent;
 	s_main.weapon8.width					= MENU_BUTTON_MED_WIDTH;
 	s_main.weapon8.height					= MENU_BUTTON_MED_HEIGHT;
 	s_main.weapon8.color					= CT_DKPURPLE1;
@@ -1514,13 +1514,13 @@ static void UI_MainMenu_Init(void)
 	s_main.weapon8.textcolor2				= CT_WHITE;
 
 	y = y + pad;
-	s_main.weapon9.generic.type				= MTYPE_BITMAP;      
+	s_main.weapon9.generic.type				= MTYPE_BITMAP;
 	s_main.weapon9.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_main.weapon9.generic.x				= x;
 	s_main.weapon9.generic.y				= y;
 	s_main.weapon9.generic.name				= GRAPHIC_SQUARE;
 	s_main.weapon9.generic.id				= ID_WEAPON9;
-	s_main.weapon9.generic.callback			= Main_MenuEvent; 
+	s_main.weapon9.generic.callback			= Main_MenuEvent;
 	s_main.weapon9.width					= MENU_BUTTON_MED_WIDTH;
 	s_main.weapon9.height					= MENU_BUTTON_MED_HEIGHT;
 	s_main.weapon9.color					= CT_DKPURPLE1;
@@ -1547,7 +1547,7 @@ static void UI_MainMenu_Init(void)
 
 	s_main.timer = uis.realtime + WEAPON_WAIT;
 	s_main.currentWeapon = 0;
-	weaponptr = g_weapons[s_main.currentWeapon];	
+	weaponptr = g_weapons[s_main.currentWeapon];
 	((menubitmap_s*)weaponptr)->textcolor = CT_LTGOLD1;
 
 }
@@ -1562,7 +1562,7 @@ so make sure that the attract loop server is down
 and that local cinematics are killed
 ===============
 */
-void UI_MainMenu( void ) 
+void UI_MainMenu( void )
 {
 
 	trap_Cvar_Set( "sv_killserver", "1" );
@@ -1683,7 +1683,7 @@ void UI_HolomatchInMenu_Cache (void)
 HolomatchInMenu_Init
 ===============
 */
-static void HolomatchInMenu_Init(void) 
+static void HolomatchInMenu_Init(void)
 {
 	UI_HolomatchInMenu_Cache();
 
@@ -1715,7 +1715,7 @@ static void UI_HolomatchIn_Menu(void)
 
 	Mouse_Hide();
 
-	HolomatchInMenu_Init(); 
+	HolomatchInMenu_Init();
 
 	UI_PushMenu ( &s_HolomatchInmenu.menu );
 
@@ -1781,7 +1781,7 @@ static void LeavingMenu_Draw(void)
 	UI_DrawProportionalString(320, 450, menu_normal_text[MNT_PARAMOUNT_LEGAL], UI_TINYFONT | UI_CENTER, colorTable[CT_MDGREY]);
 	UI_DrawProportionalString(320, 465, menu_normal_text[MNT_ID_LEGAL], UI_TINYFONT | UI_CENTER, colorTable[CT_MDGREY]);
 
-	// Leave game 
+	// Leave game
 	if (federationTimer < uis.realtime)
 	{
 		trap_Cmd_ExecuteText( EXEC_NOW, "quit\n" );
@@ -1795,7 +1795,7 @@ LeavingMenu_Cache
 */
 void LeavingMenu_Cache (void)
 {
-	s_leaving_menu.logo = trap_R_RegisterShaderNoMip("menu/special/haz_logo.tga"); 
+	s_leaving_menu.logo = trap_R_RegisterShaderNoMip("menu/special/haz_logo.tga");
 	s_leaving_menu.halfround = trap_R_RegisterShaderNoMip( "menu/common/halfroundr_22.tga" );
 	s_leaving_menu.logoutsnd = trap_S_RegisterSound( "sound/voice/computer/menu/logout.wav" );
 
@@ -1806,7 +1806,7 @@ void LeavingMenu_Cache (void)
 LCARSOutMenu_Init
 ===============
 */
-static void LeavingMenu_Init(void) 
+static void LeavingMenu_Init(void)
 {
 	LeavingMenu_Cache();
 
@@ -1833,7 +1833,7 @@ UI_Leaving_Menu
 static void UI_Leaving_Menu(void)
 {
 
-	LeavingMenu_Init(); 
+	LeavingMenu_Init();
 
 	UI_PushMenu ( &s_leaving_menu.menu );
 
@@ -1885,7 +1885,7 @@ static void M_Quit_SplitDesc(int descI)
 	charCnt= 0;
 	currentLineI = 0;
 
-	while( *s ) 
+	while( *s )
 	{
 		charCnt++;
 		holdChar[0] = *s;
@@ -1919,7 +1919,7 @@ static void M_Quit_SplitDesc(int descI)
 				currentLineI = (SYSTEM_MAXDESC -1);
 				break;
 			}
-		}	
+		}
 		++s;
 	}
 
@@ -2079,11 +2079,11 @@ static void QuitMenu_ChangeAreaFocus(int newSystem)
 
 		if (oldSystem == QMG_VOYAGER_LABEL)	//Voyager graphic can't be hidden
 		{
-			bitmap->color = CT_LTBLUE1;	
+			bitmap->color = CT_LTBLUE1;
 		}
 		else
 		{
-			bitmap->generic.flags |= QMF_HIDDEN;	
+			bitmap->generic.flags |= QMF_HIDDEN;
 		}
 	}
 
@@ -2105,11 +2105,11 @@ static void QuitMenu_ChangeAreaFocus(int newSystem)
 	if (quitmenu_graphics[newSystem].pointer)
 	{
 		bitmap = (menubitmap_s *) quitmenu_graphics[newSystem].pointer;
-		bitmap->generic.flags &= ~QMF_HIDDEN;	
+		bitmap->generic.flags &= ~QMF_HIDDEN;
 
 		if (newSystem == QMG_VOYAGER_LABEL)	//Voyager graphic can't be hidden
 		{
-			bitmap->color = CT_LTGOLD1;	
+			bitmap->color = CT_LTGOLD1;
 		}
 	}
 
@@ -2204,7 +2204,7 @@ static void Quit_MenuBlinkies( void )
 		}
 
 		// Middle ping?
-		if ((quitmenu_graphics[QMG_BOTTOM_BLIP].x > 304) && 
+		if ((quitmenu_graphics[QMG_BOTTOM_BLIP].x > 304) &&
 			(quitmenu_graphics[QMG_BOTTOM_BLIP].x < 314))
 		{
 			trap_S_StartLocalSound(s_quit.pingsound, CHAN_LOCAL);
@@ -2272,7 +2272,7 @@ static void Quit_MenuBlinkies( void )
 	// Activate the next row of numbers.  When at the last row wait and then generate new numbers
 	else if ((quitmenu_graphics[QMG_NUMBERS].timer < uis.realtime) && (quitmenu_graphics[QMG_NUMBERS].target<5))
 	{
-		trap_S_StartLocalSound( uis.menu_datadisp1_snd, CHAN_LOCAL );	// 
+		trap_S_StartLocalSound( uis.menu_datadisp1_snd, CHAN_LOCAL );	//
 
 		quitmenu_graphics[QMG_NUMBERS].timer = uis.realtime + 50;
 
@@ -2313,13 +2313,13 @@ static void Quit_MenuDraw( void )
 	UI_DrawHandlePic(30,364,  47, 25, uis.whiteShader);	// Left hand column
 	UI_DrawHandlePic(80,364, 247, 7, uis.whiteShader);	// Top line above CONFIDENTIAL
 	UI_DrawHandlePic(334,386, 30, 50, uis.whiteShader);	// LH Middle column
-	UI_DrawHandlePic(327,364,  64, 64, s_quit.swoop1);	// 
+	UI_DrawHandlePic(327,364,  64, 64, s_quit.swoop1);	//
 
 	UI_DrawHandlePic(334,386, 30, 50, uis.whiteShader);	// LH Middle column
 
 	UI_DrawHandlePic(367,379, 15, 57, uis.whiteShader);	// RH Middle column
 	UI_DrawHandlePic(387,364, 225, 7, uis.whiteShader);	// Top line above systems description
-	UI_DrawHandlePic(367,364,  32, 32, s_quit.swoop2);	// 
+	UI_DrawHandlePic(367,364,  32, 32, s_quit.swoop2);	//
 
 	UI_DrawProportionalString(  74,  368, "2166",UI_RIGHT|UI_TINYFONT, colorTable[CT_BLACK]);
 
@@ -2376,7 +2376,7 @@ static void Quit_MenuDraw( void )
 UI_QuitMenu_Cache
 ===============
 */
-void UI_QuitMenu_Cache( void ) 
+void UI_QuitMenu_Cache( void )
 {
 	s_quit.corner_ur	= trap_R_RegisterShaderNoMip("menu/common/corner_ur_18_60.tga");
 	s_quit.swoop1		= trap_R_RegisterShaderNoMip("menu/common/corner_ur_7_30.tga");
@@ -2410,7 +2410,7 @@ static void Quit_MenuInit(void)
 	float	*highlightColor;
 
 
-	UI_QuitMenu_Cache(); 
+	UI_QuitMenu_Cache();
 
 	s_quit.menu.nitems					= 0;
 	s_quit.menu.draw					= Quit_MenuDraw;
@@ -2434,7 +2434,7 @@ static void Quit_MenuInit(void)
 		s_quit.menu.fullscreen = qtrue;
 //	}
 
-	s_quit.mainmenu.generic.type		= MTYPE_BITMAP;      
+	s_quit.mainmenu.generic.type		= MTYPE_BITMAP;
 	s_quit.mainmenu.generic.flags		= QMF_HIGHLIGHT_IF_FOCUS;
 	s_quit.mainmenu.generic.x			= 482;
 	s_quit.mainmenu.generic.y			= 136;
@@ -2450,13 +2450,13 @@ static void Quit_MenuInit(void)
 	s_quit.mainmenu.textEnum			= MBT_MAINMENU;
 	s_quit.mainmenu.textcolor			= CT_BLACK;
 	s_quit.mainmenu.textcolor2			= CT_WHITE;
-	
+
 
 	y = 81;
 	x = 152;
-	s_quit.yes.generic.type				= MTYPE_BITMAP;      
-	s_quit.yes.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS; 
-	s_quit.yes.generic.x				= x;                 
+	s_quit.yes.generic.type				= MTYPE_BITMAP;
+	s_quit.yes.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
+	s_quit.yes.generic.x				= x;
 	s_quit.yes.generic.y				= y;
 	s_quit.yes.generic.name				= BUTTON_GRAPHIC_LONGRIGHT;
 	s_quit.yes.generic.id				= ID_YES;
@@ -2471,13 +2471,13 @@ static void Quit_MenuInit(void)
 	s_quit.yes.textcolor				= CT_BLACK;
 	s_quit.yes.textcolor2				= CT_WHITE;
 
-	s_quit.no.generic.type				= MTYPE_BITMAP;      
+	s_quit.no.generic.type				= MTYPE_BITMAP;
 	s_quit.no.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
 	s_quit.no.generic.x					= x;
 	s_quit.no.generic.y					= y + MENU_BUTTON_MED_HEIGHT + 6;
 	s_quit.no.generic.name				= BUTTON_GRAPHIC_LONGRIGHT;
 	s_quit.no.generic.id				= ID_NO;
-	s_quit.no.generic.callback			= M_Quit_Event; 
+	s_quit.no.generic.callback			= M_Quit_Event;
 	s_quit.no.width						= MENU_BUTTON_MED_WIDTH;
 	s_quit.no.height					= MENU_BUTTON_MED_HEIGHT;
 	s_quit.no.color						= CT_DKPURPLE1;
@@ -2493,18 +2493,18 @@ static void Quit_MenuInit(void)
 	highlightColor= colorTable[CT_WHITE];
 	picColor	= CT_LTGOLD1;
 
-	s_quit.phaser_label.generic.type				= MTYPE_TEXT;      
+	s_quit.phaser_label.generic.type				= MTYPE_TEXT;
 	s_quit.phaser_label.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS | QMF_RIGHT_JUSTIFY;
 	s_quit.phaser_label.generic.x					= 152;
 	s_quit.phaser_label.generic.y					= 290;
 	s_quit.phaser_label.generic.id					= ID_PHASER_LABEL;
-	s_quit.phaser_label.generic.callback			= Main_MenuEvent; 
+	s_quit.phaser_label.generic.callback			= Main_MenuEvent;
 	s_quit.phaser_label.buttontextEnum				= MBT_V_PHASER_LABEL;
-	s_quit.phaser_label.style						= UI_TINYFONT | UI_RIGHT;	
+	s_quit.phaser_label.style						= UI_TINYFONT | UI_RIGHT;
 	s_quit.phaser_label.color						= normalColor;
 	s_quit.phaser_label.color2						= highlightColor;
 
-	s_quit.phaser_pic.generic.type					= MTYPE_BITMAP;      
+	s_quit.phaser_pic.generic.type					= MTYPE_BITMAP;
 	s_quit.phaser_pic.generic.flags					= QMF_HIDDEN | QMF_INACTIVE;
 	s_quit.phaser_pic.generic.x						= 99;
 	s_quit.phaser_pic.generic.y						= 225;
@@ -2513,20 +2513,20 @@ static void Quit_MenuInit(void)
 	s_quit.phaser_pic.height						= 16;
 	s_quit.phaser_pic.color							= picColor;
 
-	s_quit.torpedo_label.generic.type				= MTYPE_TEXT;      
+	s_quit.torpedo_label.generic.type				= MTYPE_TEXT;
 	s_quit.torpedo_label.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS | QMF_RIGHT_JUSTIFY;
 	s_quit.torpedo_label.generic.x					= 250;
 	s_quit.torpedo_label.generic.y					= 278;
 	s_quit.torpedo_label.generic.id					= ID_TORPEDO_LABEL;
-	s_quit.torpedo_label.generic.callback			= Main_MenuEvent; 
+	s_quit.torpedo_label.generic.callback			= Main_MenuEvent;
 	s_quit.torpedo_label.buttontextEnum				= MBT_V_TORPEDOS_LABEL;
 	s_quit.torpedo_label.buttontextEnum2			= MBT_V_TORPEDOS_LABEL2;
 	s_quit.torpedo_label.buttontextEnum3			= MBT_V_TORPEDOS_LABEL3;
-	s_quit.torpedo_label.style						= UI_TINYFONT | UI_RIGHT;	
+	s_quit.torpedo_label.style						= UI_TINYFONT | UI_RIGHT;
 	s_quit.torpedo_label.color						= normalColor;
 	s_quit.torpedo_label.color2						= highlightColor;
 
-	s_quit.torpedo_pic.generic.type					= MTYPE_BITMAP;      
+	s_quit.torpedo_pic.generic.type					= MTYPE_BITMAP;
 	s_quit.torpedo_pic.generic.flags				= QMF_HIDDEN | QMF_INACTIVE;
 	s_quit.torpedo_pic.generic.x					= 273;
 	s_quit.torpedo_pic.generic.y					= 265;
@@ -2535,18 +2535,18 @@ static void Quit_MenuInit(void)
 	s_quit.torpedo_pic.height						= 16;
 	s_quit.torpedo_pic.color						= picColor;
 
-	s_quit.ventral_label.generic.type				= MTYPE_TEXT;      
+	s_quit.ventral_label.generic.type				= MTYPE_TEXT;
 	s_quit.ventral_label.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS | QMF_RIGHT_JUSTIFY;
 	s_quit.ventral_label.generic.x					= 316;
 	s_quit.ventral_label.generic.y					= 322;
 	s_quit.ventral_label.generic.id					= ID_VENTRAL_LABEL;
-	s_quit.ventral_label.generic.callback			= Main_MenuEvent; 
+	s_quit.ventral_label.generic.callback			= Main_MenuEvent;
 	s_quit.ventral_label.buttontextEnum				= MBT_V_VENTRAL_LABEL;
-	s_quit.ventral_label.style						= UI_TINYFONT | UI_RIGHT;	
+	s_quit.ventral_label.style						= UI_TINYFONT | UI_RIGHT;
 	s_quit.ventral_label.color						= normalColor;
 	s_quit.ventral_label.color2						= highlightColor;
 
-	s_quit.ventral_pic.generic.type					= MTYPE_BITMAP;      
+	s_quit.ventral_pic.generic.type					= MTYPE_BITMAP;
 	s_quit.ventral_pic.generic.flags				= QMF_HIDDEN | QMF_INACTIVE;
 	s_quit.ventral_pic.generic.x					= 330;
 	s_quit.ventral_pic.generic.y					= 296;
@@ -2555,19 +2555,19 @@ static void Quit_MenuInit(void)
 	s_quit.ventral_pic.height						= 16;
 	s_quit.ventral_pic.color						= picColor;
 
-	s_quit.midhull_label.generic.type				= MTYPE_TEXT;      
+	s_quit.midhull_label.generic.type				= MTYPE_TEXT;
 	s_quit.midhull_label.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
 	s_quit.midhull_label.generic.x					= 381;
 	s_quit.midhull_label.generic.y					= 322;
 	s_quit.midhull_label.generic.id					= ID_MIDHULL_LABEL;
-	s_quit.midhull_label.generic.callback			= Main_MenuEvent; 
+	s_quit.midhull_label.generic.callback			= Main_MenuEvent;
 	s_quit.midhull_label.buttontextEnum				= MBT_V_MIDHULL_LABEL;
 	s_quit.midhull_label.buttontextEnum2			= MBT_V_MIDHULL_LABEL2;
-	s_quit.midhull_label.style						= UI_TINYFONT;	
+	s_quit.midhull_label.style						= UI_TINYFONT;
 	s_quit.midhull_label.color						= normalColor;
 	s_quit.midhull_label.color2						= highlightColor;
 
-	s_quit.midhull_pic.generic.type					= MTYPE_BITMAP;      
+	s_quit.midhull_pic.generic.type					= MTYPE_BITMAP;
 	s_quit.midhull_pic.generic.flags				= QMF_HIDDEN | QMF_INACTIVE;
 	s_quit.midhull_pic.generic.x					= 357;
 	s_quit.midhull_pic.generic.y					= 244;
@@ -2576,18 +2576,18 @@ static void Quit_MenuInit(void)
 	s_quit.midhull_pic.height						= 8;
 	s_quit.midhull_pic.color						= picColor;
 
-	s_quit.nacelles_label.generic.type				= MTYPE_TEXT;      
+	s_quit.nacelles_label.generic.type				= MTYPE_TEXT;
 	s_quit.nacelles_label.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS | QMF_RIGHT_JUSTIFY;
 	s_quit.nacelles_label.generic.x					= 560;
 	s_quit.nacelles_label.generic.y					= 180;
 	s_quit.nacelles_label.generic.id				= ID_NACELLES_LABEL;
-	s_quit.nacelles_label.generic.callback			= Main_MenuEvent; 
+	s_quit.nacelles_label.generic.callback			= Main_MenuEvent;
 	s_quit.nacelles_label.buttontextEnum			= MBT_V_NACELLES_LABEL;
-	s_quit.nacelles_label.style						= UI_TINYFONT | UI_RIGHT;	
+	s_quit.nacelles_label.style						= UI_TINYFONT | UI_RIGHT;
 	s_quit.nacelles_label.color						= normalColor;
 	s_quit.nacelles_label.color2					= highlightColor;
 
-	s_quit.nacelles_pic.generic.type				= MTYPE_BITMAP;      
+	s_quit.nacelles_pic.generic.type				= MTYPE_BITMAP;
 	s_quit.nacelles_pic.generic.flags				= QMF_HIDDEN | QMF_INACTIVE;
 	s_quit.nacelles_pic.generic.x					= 470;
 	s_quit.nacelles_pic.generic.y					= 265;
@@ -2596,18 +2596,18 @@ static void Quit_MenuInit(void)
 	s_quit.nacelles_pic.height						= 32;
 	s_quit.nacelles_pic.color						= picColor;
 
-	s_quit.bussard_label.generic.type				= MTYPE_TEXT;      
+	s_quit.bussard_label.generic.type				= MTYPE_TEXT;
 	s_quit.bussard_label.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
 	s_quit.bussard_label.generic.x					= 489;
 	s_quit.bussard_label.generic.y					= 322;
 	s_quit.bussard_label.generic.id					= ID_BUSSARD_LABEL;
-	s_quit.bussard_label.generic.callback			= Main_MenuEvent; 
+	s_quit.bussard_label.generic.callback			= Main_MenuEvent;
 	s_quit.bussard_label.buttontextEnum				= MBT_V_BUSSARD_LABEL;
-	s_quit.bussard_label.style						= UI_TINYFONT;	
+	s_quit.bussard_label.style						= UI_TINYFONT;
 	s_quit.bussard_label.color						= normalColor;
 	s_quit.bussard_label.color2						= highlightColor;
 
-	s_quit.bussard_pic.generic.type					= MTYPE_BITMAP;      
+	s_quit.bussard_pic.generic.type					= MTYPE_BITMAP;
 	s_quit.bussard_pic.generic.flags				= QMF_HIDDEN | QMF_INACTIVE;
 	s_quit.bussard_pic.generic.x					= 439;
 	s_quit.bussard_pic.generic.y					= 269;
@@ -2621,9 +2621,9 @@ static void Quit_MenuInit(void)
 	s_quit.thrusters_label.generic.x				= 283;
 	s_quit.thrusters_label.generic.y				= 180;
 	s_quit.thrusters_label.generic.id				= ID_THRUSTERS_LABEL;
-	s_quit.thrusters_label.generic.callback			= Main_MenuEvent; 
+	s_quit.thrusters_label.generic.callback			= Main_MenuEvent;
 	s_quit.thrusters_label.buttontextEnum			= MBT_V_THRUSTERS_LABEL;
-	s_quit.thrusters_label.style					= UI_TINYFONT | UI_RIGHT;	
+	s_quit.thrusters_label.style					= UI_TINYFONT | UI_RIGHT;
 	s_quit.thrusters_label.color					= normalColor;
 	s_quit.thrusters_label.color2					= highlightColor;
 
@@ -2641,9 +2641,9 @@ static void Quit_MenuInit(void)
 	s_quit.bridge_label.generic.x					= 152;
 	s_quit.bridge_label.generic.y					= 195;
 	s_quit.bridge_label.generic.id					= ID_BRIDGE_LABEL;
-	s_quit.bridge_label.generic.callback			= Main_MenuEvent; 
+	s_quit.bridge_label.generic.callback			= Main_MenuEvent;
 	s_quit.bridge_label.buttontextEnum				= MBT_V_BRIDGE_LABEL;
-	s_quit.bridge_label.style						= UI_TINYFONT | UI_RIGHT;	
+	s_quit.bridge_label.style						= UI_TINYFONT | UI_RIGHT;
 	s_quit.bridge_label.color						= normalColor;
 	s_quit.bridge_label.color2						= highlightColor;
 
@@ -2661,9 +2661,9 @@ static void Quit_MenuInit(void)
 	s_quit.voyager_label.generic.x					= 30;
 	s_quit.voyager_label.generic.y					= 325;
 	s_quit.voyager_label.generic.id					= ID_Q_VOYAGER_LABEL;
-	s_quit.voyager_label.generic.callback			= Main_MenuEvent; 
+	s_quit.voyager_label.generic.callback			= Main_MenuEvent;
 	s_quit.voyager_label.buttontextEnum				= MBT_V_VOYAGER_LABEL;
-	s_quit.voyager_label.style						= UI_BIGFONT;	
+	s_quit.voyager_label.style						= UI_BIGFONT;
 	s_quit.voyager_label.color						= normalColor;
 	s_quit.voyager_label.color2						= highlightColor;
 
@@ -2678,26 +2678,26 @@ static void Quit_MenuInit(void)
 
 	Menu_AddItem( &s_quit.menu,	&s_quit.mainmenu );
 	Menu_AddItem( &s_quit.menu,	&s_quit.no );
-	Menu_AddItem( &s_quit.menu,	&s_quit.yes );             
+	Menu_AddItem( &s_quit.menu,	&s_quit.yes );
 
 	Menu_AddItem( &s_quit.menu,	&s_quit.voyager_pic );     // This has to be first
-	Menu_AddItem( &s_quit.menu,	&s_quit.voyager_label );     
-	Menu_AddItem( &s_quit.menu,	&s_quit.bridge_pic );     
-	Menu_AddItem( &s_quit.menu,	&s_quit.bridge_label ); 
-	Menu_AddItem( &s_quit.menu,	&s_quit.thrusters_pic );    
-	Menu_AddItem( &s_quit.menu,	&s_quit.thrusters_label );  
-	Menu_AddItem( &s_quit.menu,	&s_quit.nacelles_pic );     
-	Menu_AddItem( &s_quit.menu,	&s_quit.nacelles_label );   
+	Menu_AddItem( &s_quit.menu,	&s_quit.voyager_label );
+	Menu_AddItem( &s_quit.menu,	&s_quit.bridge_pic );
+	Menu_AddItem( &s_quit.menu,	&s_quit.bridge_label );
+	Menu_AddItem( &s_quit.menu,	&s_quit.thrusters_pic );
+	Menu_AddItem( &s_quit.menu,	&s_quit.thrusters_label );
+	Menu_AddItem( &s_quit.menu,	&s_quit.nacelles_pic );
+	Menu_AddItem( &s_quit.menu,	&s_quit.nacelles_label );
 	Menu_AddItem( &s_quit.menu,	&s_quit.bussard_pic );
-	Menu_AddItem( &s_quit.menu,	&s_quit.bussard_label ); 
-	Menu_AddItem( &s_quit.menu,	&s_quit.midhull_pic );     
-	Menu_AddItem( &s_quit.menu,	&s_quit.midhull_label );     
-	Menu_AddItem( &s_quit.menu,	&s_quit.ventral_pic );     
-	Menu_AddItem( &s_quit.menu,	&s_quit.ventral_label ); 
-	Menu_AddItem( &s_quit.menu,	&s_quit.torpedo_pic );     
-	Menu_AddItem( &s_quit.menu,	&s_quit.torpedo_label ); 
-	Menu_AddItem( &s_quit.menu,	&s_quit.phaser_pic );     
-	Menu_AddItem( &s_quit.menu,	&s_quit.phaser_label ); 
+	Menu_AddItem( &s_quit.menu,	&s_quit.bussard_label );
+	Menu_AddItem( &s_quit.menu,	&s_quit.midhull_pic );
+	Menu_AddItem( &s_quit.menu,	&s_quit.midhull_label );
+	Menu_AddItem( &s_quit.menu,	&s_quit.ventral_pic );
+	Menu_AddItem( &s_quit.menu,	&s_quit.ventral_label );
+	Menu_AddItem( &s_quit.menu,	&s_quit.torpedo_pic );
+	Menu_AddItem( &s_quit.menu,	&s_quit.torpedo_label );
+	Menu_AddItem( &s_quit.menu,	&s_quit.phaser_pic );
+	Menu_AddItem( &s_quit.menu,	&s_quit.phaser_label );
 
 	s_quit.menu.initialized = qtrue;
 
@@ -2705,20 +2705,20 @@ static void Quit_MenuInit(void)
 	quitmenu_graphics[QMG_BOTTOM_BLIP2].x = quitmenu_graphics[QMG_BOTTOM_BLIP].x;
 	quitmenu_graphics[QMG_BOTTOM_BLIP].timer = uis.realtime + 50;
 
-    // Turn off swoops
+	// Turn off swoops
 	for (i=QMG_SWOOP_START+1;i<QMG_SWOOP_END;++i)
 	{
 		quitmenu_graphics[i].type = CT_LTGREY;
 	}
 
-    // Turn off descriptions
+	// Turn off descriptions
 	for (i=QMG_DESC_START+1;i<QMG_DESC_END;++i)
 	{
 		quitmenu_graphics[i].type = MG_OFF;
 	}
 
 	// Set labels to brown
-	for (i=(QMG_LABEL_START+1);i<QMG_LABEL_END;++i)	
+	for (i=(QMG_LABEL_START+1);i<QMG_LABEL_END;++i)
 	{
 		quitmenu_graphics[i].color = CT_DKBROWN1;
 	}

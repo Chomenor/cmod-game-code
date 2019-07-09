@@ -315,7 +315,7 @@ void trigger_teleporter_touch (gentity_t *self, gentity_t *other, trace_t *trace
 		return;
 	}
 	// Spectators only?
-	if ( ( self->spawnflags & SF_SPECTATOR ) && 
+	if ( ( self->spawnflags & SF_SPECTATOR ) &&
 		other->client->sess.sessionTeam != TEAM_SPECTATOR && !(other->client->ps.eFlags&EF_ELIMINATED) )
 	{
 		return;
@@ -338,7 +338,7 @@ void trigger_teleporter_touch (gentity_t *self, gentity_t *other, trace_t *trace
 	}
 	// put the bottom of the player's bbox at the bottom of the target's bbox
 	VectorCopy(dest->s.origin, destPoint);
-	destPoint[2] += dest->r.mins[2]; 
+	destPoint[2] += dest->r.mins[2];
 	destPoint[2] -= other->r.mins[2];
 	// fudge it upwards just a bit
 	destPoint[2] += 1;

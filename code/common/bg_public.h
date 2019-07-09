@@ -100,7 +100,7 @@ typedef enum {
 } pmtype_t;
 
 typedef enum {
-	WEAPON_READY, 
+	WEAPON_READY,
 	WEAPON_RAISING,
 	WEAPON_DROPPING,
 	WEAPON_FIRING
@@ -167,7 +167,7 @@ typedef enum {
 	STAT_HEALTH,
 	STAT_HOLDABLE_ITEM,
 	STAT_WEAPONS,					// 16 bit fields
-	STAT_ARMOR,				
+	STAT_ARMOR,
 	STAT_DEAD_YAW,					// look this direction when dead (FIXME: get rid of?)
 	STAT_CLIENTS_READY,				// bit mask of clients wishing to exit the intermission (FIXME: configstring?)
 	STAT_MAX_HEALTH,				// health / armor limit, changable by handicap
@@ -181,8 +181,8 @@ typedef enum {
 	PERS_SCORE,						// !!! MUST NOT CHANGE, SERVER AND GAME BOTH REFERENCE !!!
 	PERS_HITS,						// total points damage inflicted so damage beeps can sound on change
 	PERS_SHIELDS,					// total shield points damage inflicted so damage beeps can sound on change
-	PERS_RANK,				
-	PERS_TEAM,				
+	PERS_RANK,
+	PERS_TEAM,
 	PERS_SPAWN_COUNT,				// incremented every respawn
 	PERS_REWARD_COUNT,				// incremented for each reward sound
 	PERS_REWARD,					// a reward_t
@@ -243,16 +243,16 @@ typedef enum {
 	PW_INVIS,
 	PW_REGEN,
 	PW_FLIGHT,
-	PW_SEEKER, 
+	PW_SEEKER,
 
 	PW_REDFLAG,
- 	PW_BLUEFLAG,
+	PW_BLUEFLAG,
 	PW_OUCH,
 
 	PW_DISINTEGRATE,
 	PW_GHOST,
 
-	PW_EXPLODE,		
+	PW_EXPLODE,
 	PW_ARCWELD_DISINT,
 	PW_BORG_ADAPT,
 
@@ -266,7 +266,7 @@ typedef enum {
 	HI_MEDKIT,
 	HI_DETPACK,
 	HI_SHIELD,
-	HI_DECOY,		// cdr 
+	HI_DECOY,		// cdr
 
 	HI_NUM_HOLDABLE
 } holdable_t;
@@ -286,7 +286,7 @@ typedef enum {
 	WP_VOYAGER_HYPO,		// 10/6/00 mcg -- added for MP patch/gold
 	WP_BORG_ASSIMILATOR,	// 10/12/00 jtd -- added for MP patch/gold
 	WP_BORG_WEAPON,			// 10/12/00 jtd -- added for MP patch/gold - merges single player projectile and taser
-	//WP_TRICORDER,			// 
+	//WP_TRICORDER,			//
 
 	WP_NUM_WEAPONS
 } weapon_t;
@@ -406,7 +406,7 @@ typedef enum {
 	//
 	// kef -- begin Trek stuff
 	//
-	
+
 	// kef -- taken directly from Trek code
 	EV_COMPRESSION_RIFLE,
 	EV_COMPRESSION_RIFLE_ALT,

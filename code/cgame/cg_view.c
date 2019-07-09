@@ -19,7 +19,7 @@ enhanced into a single model testing facility.
 
 Model viewing can begin with either "testmodel <modelname>" or "testgun <modelname>".
 
-The names must be the full pathname after the basedir, like 
+The names must be the full pathname after the basedir, like
 "models/weapons/v_launch/tris.md3" or "players/male/tris.md3"
 
 Testmodel will create a fake entity 100 units in front of the current view
@@ -275,11 +275,11 @@ static void CG_OffsetThirdPersonView( void ) {
 // this causes a compiler bug on mac MrC compiler
 static void CG_StepOffset( void ) {
 	int		timeDelta;
-	
+
 	// smooth out stair climbing
 	timeDelta = cg.time - cg.stepTime;
 	if ( timeDelta < STEP_TIME ) {
-		cg.refdef.vieworg[2] -= cg.stepChange 
+		cg.refdef.vieworg[2] -= cg.stepChange
 			* (STEP_TIME - timeDelta) / STEP_TIME;
 	}
 }
@@ -300,7 +300,7 @@ static void CG_OffsetFirstPersonView( void ) {
 	float			f;
 	vec3_t			predictedVelocity;
 	int				timeDelta;
-	
+
 	if ( cg.snap->ps.pm_type == PM_INTERMISSION ) {
 		return;
 	}
@@ -349,7 +349,7 @@ static void CG_OffsetFirstPersonView( void ) {
 
 	delta = DotProduct ( predictedVelocity, cg.refdef.viewaxis[0]);
 	angles[PITCH] += delta * cg_runpitch.value;
-	
+
 	delta = DotProduct ( predictedVelocity, cg.refdef.viewaxis[1]);
 	angles[ROLL] -= delta * cg_runroll.value;
 
@@ -377,7 +377,7 @@ static void CG_OffsetFirstPersonView( void ) {
 	// smooth out duck height changes
 	timeDelta = cg.time - cg.duckTime;
 	if ( timeDelta < DUCK_TIME) {
-		cg.refdef.vieworg[2] -= cg.duckChange 
+		cg.refdef.vieworg[2] -= cg.duckChange
 			* (DUCK_TIME - timeDelta) / DUCK_TIME;
 	}
 
@@ -413,7 +413,7 @@ static void CG_OffsetFirstPersonView( void ) {
 	{
 #define	NECK_LENGTH		8
 	vec3_t			forward, up;
- 
+
 	cg.refdef.vieworg[2] -= NECK_LENGTH;
 	AngleVectors( cg.refdefViewAngles, forward, NULL, up );
 	VectorMA( cg.refdef.vieworg, 3, forward, cg.refdef.vieworg );
@@ -493,10 +493,10 @@ void CG_UpdateCameraShake( vec3_t origin, vec3_t angles )
 //======================================================================
 
 void CG_ZoomDown_f( void )
-{ 
-	if (	cg.snap->ps.persistant[PERS_CLASS] != PC_NOCLASS 
-		&&	cg.snap->ps.persistant[PERS_CLASS] != PC_ACTIONHERO 
-		&&	cg.snap->ps.persistant[PERS_CLASS] != PC_SNIPER 
+{
+	if (	cg.snap->ps.persistant[PERS_CLASS] != PC_NOCLASS
+		&&	cg.snap->ps.persistant[PERS_CLASS] != PC_ACTIONHERO
+		&&	cg.snap->ps.persistant[PERS_CLASS] != PC_SNIPER
 		&&	cg.snap->ps.persistant[PERS_CLASS] != PC_BORG )
 	{//in a class-based game, only these can zoom
 		cg.zoomed = qfalse;
@@ -524,9 +524,9 @@ void CG_ZoomDown_f( void )
 		trap_S_StartSound( cg.refdef.vieworg, ENTITYNUM_WORLD, CHAN_AUTO, cgs.media.zoomEnd );
 	}
 }
- 
+
 void CG_ZoomUp_f( void )
-{ 
+{
 
 	if ( cg.zoomed ) {
 		// Freeze the zoom mode
@@ -587,7 +587,7 @@ static int CG_CalcFov( void ) {
 			if ( !cg.zoomLocked )
 			{
 				// Interpolate current zoom level
-				cg_zoomFov.value = cg_fov.value - ((float)( cg.time - cg.zoomTime ) / ZOOM_IN_TIME + ZOOM_START_PERCENT) 
+				cg_zoomFov.value = cg_fov.value - ((float)( cg.time - cg.zoomTime ) / ZOOM_IN_TIME + ZOOM_START_PERCENT)
 									* ( cg_fov.value - MAX_ZOOM_FOV );
 
 				// Clamp zoomFov
@@ -777,7 +777,7 @@ CG_IntroModel
 This is when the player is starting the level.
 =============
 */
-void CG_AddIntroModel(playerState_t *ps, int time) 
+void CG_AddIntroModel(playerState_t *ps, int time)
 {
 	static int soundpoint=0, lasttime=999999;
 	refEntity_t	doorbox;
@@ -940,7 +940,7 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 	inwater = CG_CalcViewValues();
 
 	// first person blend blobs, done after AnglesToAxis
-	if ( !cg.renderingThirdPerson ) 
+	if ( !cg.renderingThirdPerson )
 	{
 		CG_DrawFullScreenFX();
 	}

@@ -27,7 +27,7 @@ void FX_DreadnoughtHitWall( vec3_t origin, vec3_t normal, qboolean spark )
 		le->leFlags |= LEF_ONE_FRAME;
 	}
 
-	CG_ImpactMark( cgs.media.scavMarkShader, origin, normal, random()*360, 1,1,1,0.2, qfalse, 
+	CG_ImpactMark( cgs.media.scavMarkShader, origin, normal, random()*360, 1,1,1,0.2, qfalse,
 					random() * 4 + 8, qfalse );
 
 	if ( spark )
@@ -126,7 +126,7 @@ void FX_DreadnoughtFire( vec3_t origin, vec3_t end, vec3_t normal, qboolean spar
 	beam.data.electricity.width = scale*0.75;
 	beam.data.electricity.deviation = 0.12;
 	trap_R_AddRefEntityToScene( &beam );
-	
+
 /*
 
 	le = FX_AddLine( origin, end, 2.0f, scale * 6, 0.0f, 0.2f, 0.2f, 100, cgs.media.dnBoltShader );
@@ -140,7 +140,7 @@ void FX_DreadnoughtFire( vec3_t origin, vec3_t end, vec3_t normal, qboolean spar
 	{
 		le->leFlags |= LEF_ONE_FRAME;
 	}
-	
+
 	if ( spark )
 	{
 		le = FX_AddElectricity( origin, end, 1.0f, scale * 0.5, 0, 0.8, 0.8, 100, cgs.media.dnBoltShader, 0.2 );
@@ -154,7 +154,7 @@ void FX_DreadnoughtFire( vec3_t origin, vec3_t end, vec3_t normal, qboolean spar
 	{
 		le->leFlags |= LEF_ONE_FRAME;
 	}
-*/	
+*/
 	// Add a subtle screen shake
 	CG_ExplosionEffects( origin, 1.0f, 15 );
 
@@ -177,7 +177,7 @@ void FX_DreadnoughtProjectileThink( centity_t *cent, const struct weaponInfo_s *
 {
 //	refEntity_t		beam;
 	float scale;
-	
+
 	scale = flrandom(10.0, 15.0);
 
 	// If this is a new thinking time, draw some starting stuff...
@@ -193,15 +193,15 @@ void FX_DreadnoughtProjectileThink( centity_t *cent, const struct weaponInfo_s *
 
 		VectorSubtract(cent->currentState.origin, cent->currentState.origin2, fwd);
 
-		// Throw a sprite from the start to the end over the next 
+		// Throw a sprite from the start to the end over the next
 		VectorScale(fwd, 1000.0*(1.0/FX_DN_ALT_THINK_TIME), boltdir);
 		le = FX_AddSprite(cent->currentState.origin2, boltdir, qfalse, scale*8, -scale*2, 1.0, 1.0, 0, 0, FX_DN_ALT_THINK_TIME, cgs.media.blueParticleShader);
 		le->light = 200;
 		le->refEntity.renderfx |= RF_NOSHADOW;
 		VectorSet( le->lightColor, 0.5f, 0.8f, 1.0f );
-		
+
 		len = VectorNormalize(fwd);
-		
+
 		// Illegal if org and org2 are the same.
 		if (len<=0)
 			return;
@@ -233,7 +233,7 @@ void FX_DreadnoughtProjectileThink( centity_t *cent, const struct weaponInfo_s *
 		// Shoot a vector off to the side and trace till we hit a wall.
 		VectorMA(cent->currentState.origin, 256, boltdir, boltend);
 		CG_Trace( &trace, cent->currentState.origin, mins, maxs, boltend, cent->currentState.number, MASK_SOLID );
-	
+
 		if (trace.fraction < 1.0)
 		{
 			VectorCopy(trace.endpos, boltend);
@@ -260,7 +260,7 @@ void FX_DreadnoughtProjectileThink( centity_t *cent, const struct weaponInfo_s *
 		// Shoot a vector off to the side and trace till we hit a wall.
 		VectorMA(cent->currentState.origin, 256, boltdir, boltend);
 		CG_Trace( &trace, cent->currentState.origin, mins, maxs, boltend, cent->currentState.number, MASK_SOLID );
-	
+
 		if (trace.fraction < 1.0)
 		{
 			VectorCopy(trace.endpos, boltend);
@@ -301,7 +301,7 @@ void FX_DreadnoughtShotMiss( vec3_t end, vec3_t dir )
 	FX_AddQuad( org, dir, 7, 35, 1.0, 0.0, random() * 360, 500, cgs.media.blueParticleShader );
 	FX_AddQuad( org, dir, 5, 25, 1.0, 0.0, random() * 360, 420, cgs.media.ltblueParticleShader );
 
-	CG_ImpactMark( cgs.media.scavMarkShader, org, dir, random()*360, 1,1,1,0.6, qfalse, 
+	CG_ImpactMark( cgs.media.scavMarkShader, org, dir, random()*360, 1,1,1,0.6, qfalse,
 				8 + random() * 2, qfalse );
 
 	FX_AddSprite( end, NULL, qfalse, flrandom(40,60), -50, 1.0, 0.0, random() * 360, 0, 500, cgs.media.blueParticleShader );

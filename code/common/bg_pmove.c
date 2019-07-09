@@ -56,7 +56,7 @@ Generates a use event
 */
 #define USE_DELAY 2000
 
-void PM_Use( void ) 
+void PM_Use( void )
 {
 	if ( pm->ps->useTime > 0 )
 		pm->ps->useTime -= 100;//pm->cmd.msec;
@@ -163,9 +163,9 @@ void PM_ClipVelocity( vec3_t in, vec3_t normal, vec3_t out, float overbounce ) {
 	float	backoff;
 	float	change;
 	int		i;
-	
+
 	backoff = DotProduct (in, normal);
-	
+
 	if ( backoff < 0 ) {
 		backoff *= overbounce;
 	} else {
@@ -191,9 +191,9 @@ static void PM_Friction( void ) {
 	float	*vel;
 	float	speed, newspeed, control;
 	float	drop;
-	
+
 	vel = pm->ps->velocity;
-	
+
 	VectorCopy( vel, vec );
 	if ( pml.walking ) {
 		vec[2] = 0;	// ignore slope movement
@@ -226,7 +226,7 @@ static void PM_Friction( void ) {
 	}
 
 	// apply flying friction
-	if ( pm->ps->powerups[PW_FLIGHT] || pm->ps->pm_type == PM_SPECTATOR || BG_BorgTransporting( pm->ps ) || (pm->ps->eFlags&EF_ELIMINATED) ) 
+	if ( pm->ps->powerups[PW_FLIGHT] || pm->ps->pm_type == PM_SPECTATOR || BG_BorgTransporting( pm->ps ) || (pm->ps->eFlags&EF_ELIMINATED) )
 	{
 		drop += speed*pm_flightfriction*pml.frametime;
 	}
@@ -266,9 +266,9 @@ static void PM_Accelerate( vec3_t wishdir, float wishspeed, float accel ) {
 	if (accelspeed > addspeed) {
 		accelspeed = addspeed;
 	}
-	
+
 	for (i=0 ; i<3 ; i++) {
-		pm->ps->velocity[i] += accelspeed*wishdir[i];	
+		pm->ps->velocity[i] += accelspeed*wishdir[i];
 	}
 #else
 	// proper way (avoids strafe jump maxspeed bug), but feels bad
@@ -360,7 +360,7 @@ static void PM_SetMovementDir( void ) {
 			pm->ps->movementDir = 1;
 		} else if ( pm->ps->movementDir == 6 ) {
 			pm->ps->movementDir = 7;
-		} 
+		}
 	}
 }
 
@@ -561,7 +561,7 @@ static void PM_WaterMove( void ) {
 	if ( pml.groundPlane && DotProduct( pm->ps->velocity, pml.groundTrace.plane.normal ) < 0 ) {
 		vel = VectorLength(pm->ps->velocity);
 		// slide along the ground plane
-		PM_ClipVelocity (pm->ps->velocity, pml.groundTrace.plane.normal, 
+		PM_ClipVelocity (pm->ps->velocity, pml.groundTrace.plane.normal,
 			pm->ps->velocity, OVERCLIP );
 
 		VectorNormalize(pm->ps->velocity);
@@ -670,7 +670,7 @@ static void PM_AirMove( void ) {
 	// though we don't have a groundentity
 	// slide along the steep plane
 	if ( pml.groundPlane ) {
-		PM_ClipVelocity (pm->ps->velocity, pml.groundTrace.plane.normal, 
+		PM_ClipVelocity (pm->ps->velocity, pml.groundTrace.plane.normal,
 			pm->ps->velocity, OVERCLIP );
 	}
 
@@ -784,7 +784,7 @@ static void PM_WalkMove( void ) {
 	vel = VectorLength(pm->ps->velocity);
 
 	// slide along the ground plane
-	PM_ClipVelocity (pm->ps->velocity, pml.groundTrace.plane.normal, 
+	PM_ClipVelocity (pm->ps->velocity, pml.groundTrace.plane.normal,
 		pm->ps->velocity, OVERCLIP );
 
 	// don't decrease velocity when going up or down a slope
@@ -873,7 +873,7 @@ static void PM_NoclipMove( void ) {
 
 	fmove = pm->cmd.forwardmove;
 	smove = pm->cmd.rightmove;
-	
+
 	for (i=0 ; i<3 ; i++)
 		wishvel[i] = pml.forward[i]*fmove + pml.right[i]*smove;
 	wishvel[2] += pm->cmd.upmove;
@@ -896,7 +896,7 @@ PM_FreezeMove
 ===================
 */
 
-static void PM_FreezeMove( void ) 
+static void PM_FreezeMove( void )
 {
 	trace_t		trace;
 	short		temp, i;
@@ -951,7 +951,7 @@ static void PM_FreezeMove( void )
 
 	// test the player position if they were a stepheight higher
 	pm->trace (&trace, pm->ps->origin, pm->mins, pm->maxs, moveto, pm->ps->clientNum, pm->tracemask);
-	if ( trace.fraction < 1.0) 
+	if ( trace.fraction < 1.0)
 	{	// Something just below, snap to it, to prevent a little "hop" after the holodeck fades in.
 		VectorCopy (trace.endpos, pm->ps->origin);
 		pm->ps->groundEntityNum = trace.entityNum;
@@ -1180,7 +1180,7 @@ static void PM_GroundTrace( void ) {
 		pml.walking = qfalse;
 		return;
 	}
-	
+
 	// slopes that are too steep will not be considered onground
 	if ( trace.plane.normal[2] < MIN_WALK_NORMAL ) {
 		if ( pm->debugLevel ) {
@@ -1209,7 +1209,7 @@ static void PM_GroundTrace( void ) {
 		if ( pm->debugLevel ) {
 			Com_Printf("%i:Land\n", c_pmove);
 		}
-		
+
 		PM_CrashLand();
 
 		// don't do landing time if we were just going down a slope
@@ -1248,7 +1248,7 @@ static void PM_SetWaterLevel( void ) {
 
 	point[0] = pm->ps->origin[0];
 	point[1] = pm->ps->origin[1];
-	point[2] = pm->ps->origin[2] + MINS_Z + 1;	
+	point[2] = pm->ps->origin[2] + MINS_Z + 1;
 	cont = pm->pointcontents( point, pm->ps->clientNum );
 
 	if ( cont & (MASK_WATER|CONTENTS_LADDER) ) {
@@ -1375,7 +1375,7 @@ static void PM_Footsteps( void ) {
 		}
 		return;
 	}
-	
+
 
 	footstep = qfalse;
 
@@ -1485,7 +1485,7 @@ static void PM_BeginWeaponChange( int weapon ) {
 	if ( !( pm->ps->stats[STAT_WEAPONS] & ( 1 << weapon ) ) ) {
 		return;
 	}
-	
+
 	if ( pm->ps->weaponstate == WEAPON_DROPPING ) {
 		return;
 	}
@@ -1527,15 +1527,15 @@ PM_TorsoAnimation
 
 ==============
 */
-static void PM_TorsoAnimation( void ) 
+static void PM_TorsoAnimation( void )
 {
 	if ( pm->ps->weaponstate == WEAPON_READY )
 	{
-		if ( pm->ps->weapon == WP_PHASER ) 
+		if ( pm->ps->weapon == WP_PHASER )
 		{
 			PM_ContinueTorsoAnim( TORSO_STAND2 );
-		} 
-		else 
+		}
+		else
 		{
 			PM_ContinueTorsoAnim( TORSO_STAND );
 		}
@@ -1551,15 +1551,15 @@ static void PM_TorsoAnimation( void )
 int		altAmmoUsage[WP_NUM_WEAPONS] =
 {
 	0,				//WP_NONE,
-	1,				//WP_PHASER,				
-	8,				//WP_COMPRESSION_RIFLE,	
-	3,				//WP_IMOD,				
-	5,				//WP_SCAVENGER_RIFLE,		
-	1,				//WP_STASIS,				
-	1,				//WP_GRENADE_LAUNCHER,	
-	2,				//WP_TETRION_DISRUPTOR,	
-	2,				//WP_QUANTUM_BURST,		
-	5,				//WP_DREADNOUGHT,			
+	1,				//WP_PHASER,
+	8,				//WP_COMPRESSION_RIFLE,
+	3,				//WP_IMOD,
+	5,				//WP_SCAVENGER_RIFLE,
+	1,				//WP_STASIS,
+	1,				//WP_GRENADE_LAUNCHER,
+	2,				//WP_TETRION_DISRUPTOR,
+	2,				//WP_QUANTUM_BURST,
+	5,				//WP_DREADNOUGHT,
 	20,				//WP_VOYAGER_HYPO,
 	1,				//WP_BORG_ASSIMILATOR,
 	1				//WP_BORG_WEAPON
@@ -1589,7 +1589,7 @@ static void PM_Weapon( void ) {
 
 	if ( pm->ps->persistant[PERS_CLASS] == PC_BORG )
 	{//Borg weapons recharge
-		if ( pm->ps->rechargeTime <= 0 && ( pm->ps->ammo[WP_BORG_ASSIMILATOR] < Max_Ammo[WP_BORG_ASSIMILATOR] || pm->ps->ammo[WP_BORG_WEAPON] < Max_Ammo[WP_BORG_WEAPON] ) ) 
+		if ( pm->ps->rechargeTime <= 0 && ( pm->ps->ammo[WP_BORG_ASSIMILATOR] < Max_Ammo[WP_BORG_ASSIMILATOR] || pm->ps->ammo[WP_BORG_WEAPON] < Max_Ammo[WP_BORG_WEAPON] ) )
 		{
 			pm->ps->rechargeTime = PHASER_RECHARGE_TIME*4;//recharges slower than phaser
 			if ( pm->ps->ammo[WP_BORG_ASSIMILATOR] < Max_Ammo[WP_BORG_ASSIMILATOR] )
@@ -1601,21 +1601,21 @@ static void PM_Weapon( void ) {
 				pm->ps->ammo[WP_BORG_WEAPON]++;
 			}
 		}
-		else 
+		else
 		{
 			pm->ps->rechargeTime -= pml.msec;
 		}
 	}
-	else 
+	else
 	{//Check for phaser ammo recharge
-		if ( pm->ps->rechargeTime <= 0 && pm->ps->ammo[WP_PHASER] < PHASER_AMMO_MAX ) 
+		if ( pm->ps->rechargeTime <= 0 && pm->ps->ammo[WP_PHASER] < PHASER_AMMO_MAX )
 		{//phaser recharges
 			pm->ps->rechargeTime = PHASER_RECHARGE_TIME;
 			pm->ps->ammo[WP_PHASER]++;
 			//FIXME: recharge all ammo in specialty mode?
 			//do it slower for more powerful weapons
-		} 
-		else 
+		}
+		else
 		{
 			pm->ps->rechargeTime -= pml.msec;
 		}
@@ -1649,7 +1649,7 @@ static void PM_Weapon( void ) {
 				// if we're placing the detpack, don't remove it from our "inventory"
 				// if we're a Borg, the transporter has a two-step item usage as well
 				if ( ((HI_DETPACK == tag) || (HI_TRANSPORTER == tag && pm->ps->persistant[PERS_CLASS] == PC_BORG ) )  &&
-					 (IT_HOLDABLE == bg_itemlist[pm->ps->stats[STAT_HOLDABLE_ITEM]].giType) )
+					(IT_HOLDABLE == bg_itemlist[pm->ps->stats[STAT_HOLDABLE_ITEM]].giType) )
 				{
 					// are we placing it?
 					if ( pm->ps->stats[STAT_USEABLE_PLACED] == 2 )
@@ -1677,7 +1677,7 @@ static void PM_Weapon( void ) {
 
 	if ( BG_BorgTransporting( pm->ps ) )
 	{//in borg teleport dest picking-mode
-		return; 
+		return;
 	}
 
 	// make weapon function
@@ -1704,14 +1704,14 @@ static void PM_Weapon( void ) {
 		return;
 	}
 
-	if ( pm->ps->weaponstate == WEAPON_RAISING ) 
+	if ( pm->ps->weaponstate == WEAPON_RAISING )
 	{
 		pm->ps->weaponstate = WEAPON_READY;
-		if ( pm->ps->weapon == WP_PHASER ) 
+		if ( pm->ps->weapon == WP_PHASER )
 		{
 			PM_StartTorsoAnim( TORSO_STAND2 );
-		} 
-		else 
+		}
+		else
 		{
 			PM_StartTorsoAnim( TORSO_STAND );
 		}
@@ -1729,7 +1729,7 @@ static void PM_Weapon( void ) {
 
 	//hypo ammo uses same as phaser, for now
 	pm->ps->ammo[WP_VOYAGER_HYPO] = pm->ps->ammo[WP_PHASER];
-	
+
 	// take an ammo away if not infinite
 	if ( pm->ps->ammo[ pm->ps->weapon ] != -1 )
 	{
@@ -1754,8 +1754,8 @@ static void PM_Weapon( void ) {
 				{
 					PM_AddEvent( EV_NOAMMO_ALT );		// Just try to switch weapons like any other.
 
-	// check out the EV_NOAMMO_ALT event				
-					
+	// check out the EV_NOAMMO_ALT event
+
 					pm->ps->weaponTime += 500;
 					return;
 				}
@@ -1769,14 +1769,14 @@ static void PM_Weapon( void ) {
 		else
 		{
 			// check for out of ammo
-			 if ( ! pm->ps->ammo[ pm->ps->weapon ] ) 
+			if ( ! pm->ps->ammo[ pm->ps->weapon ] )
 			{
 				if ( pm->ps->weapon == WP_PHASER ) // phaser out of ammo is special case
 				{
 					pm->ps->ammo[pm->ps->weapon] = 0;
 				}
 				else
-				{	
+				{
 					PM_AddEvent( EV_NOAMMO );
 					pm->ps->weaponTime += 500;
 					return;
@@ -1791,11 +1791,11 @@ static void PM_Weapon( void ) {
 	}
 
 	// *don't* start the animation if out of ammo
-	if ( pm->ps->weapon == WP_PHASER ) 
+	if ( pm->ps->weapon == WP_PHASER )
 	{
 		PM_StartTorsoAnim( TORSO_ATTACK2 );
-	} 
-	else 
+	}
+	else
 	{
 		PM_StartTorsoAnim( TORSO_ATTACK );
 	}
@@ -1838,10 +1838,10 @@ static void PM_Weapon( void ) {
 		case WP_IMOD:
 			addTime = 700;
 			break;
-		case WP_COMPRESSION_RIFLE: 
+		case WP_COMPRESSION_RIFLE:
 			addTime = 1200;
 			break;
-		case WP_TETRION_DISRUPTOR: 
+		case WP_TETRION_DISRUPTOR:
 			addTime = 200;
 			break;
 		case WP_VOYAGER_HYPO:
@@ -1894,10 +1894,10 @@ static void PM_Weapon( void ) {
 		case WP_IMOD:
 			addTime = 350;
 			break;
-		case WP_COMPRESSION_RIFLE: 
+		case WP_COMPRESSION_RIFLE:
 			addTime = 250;
 			break;
-		case WP_TETRION_DISRUPTOR: 
+		case WP_TETRION_DISRUPTOR:
 			addTime = 100;
 			break;
 		case WP_VOYAGER_HYPO:
@@ -2047,8 +2047,8 @@ void PmoveSingle (pmove_t *pmove) {
 	}
 
 	// set the firing flag for continuous beam weapons
-	if (	!(pm->ps->pm_flags & PMF_RESPAWNED) && 
-			pm->ps->pm_type != PM_INTERMISSION && 
+	if (	!(pm->ps->pm_flags & PMF_RESPAWNED) &&
+			pm->ps->pm_type != PM_INTERMISSION &&
 			( (pm->cmd.buttons & BUTTON_ATTACK) || (pm->cmd.buttons & BUTTON_ALT_ATTACK) ) &&
 			(pm->ps->ammo[ pm->ps->weapon ] || pm->ps->weapon == WP_PHASER))
 	{
@@ -2081,7 +2081,7 @@ void PmoveSingle (pmove_t *pmove) {
 	}
 
 	// clear the respawned flag if attack and use are cleared
-	if ( pm->ps->stats[STAT_HEALTH] > 0 && 
+	if ( pm->ps->stats[STAT_HEALTH] > 0 &&
 		!( pm->cmd.buttons & (BUTTON_ATTACK | BUTTON_USE_HOLDABLE) ) ) {
 		pm->ps->pm_flags &= ~PMF_RESPAWNED;
 	}
@@ -2089,18 +2089,18 @@ void PmoveSingle (pmove_t *pmove) {
 	// if talk button is down, dissallow all other input
 	// this is to prevent any possible intercept proxy from
 	// adding fake talk balloons
-	if ( pmove->cmd.buttons & BUTTON_TALK ) 
+	if ( pmove->cmd.buttons & BUTTON_TALK )
 	{
 		pmove->cmd.buttons = 0;
 		pmove->cmd.forwardmove = 0;
 		pmove->cmd.rightmove = 0;
 		if (pmove->cmd.upmove)
 		{
-			if (pmove->cmd.upmove > 0) 
+			if (pmove->cmd.upmove > 0)
 			{
 				pmove->cmd.upmove = 1;
-			} 
-			else 
+			}
+			else
 			{
 				pmove->cmd.upmove = -1;//allow a tiny bit to keep the duck anim
 			}
@@ -2127,7 +2127,7 @@ void PmoveSingle (pmove_t *pmove) {
 
 	pml.frametime = pml.msec * 0.001;
 
-	if (pm->ps->pm_type == PM_FREEZE || pm->ps->introTime > pm->cmd.serverTime) 
+	if (pm->ps->pm_type == PM_FREEZE || pm->ps->introTime > pm->cmd.serverTime)
 	{
 		PM_FreezeMove();
 		return;		// no movement at all

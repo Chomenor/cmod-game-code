@@ -152,7 +152,7 @@ void LookAtKiller( gentity_t *self, gentity_t *inflictor, gentity_t *attacker ) 
 	self->client->ps.stats[STAT_DEAD_YAW] = vectoyaw ( dir );
 
 	angles[YAW] = vectoyaw ( dir );
-	angles[PITCH] = 0; 
+	angles[PITCH] = 0;
 	angles[ROLL] = 0;
 }
 
@@ -270,8 +270,8 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	self->client->ps.stats[STAT_HEALTH] = self->health;
 
 	// check if we are in a NODROP Zone and died from a TRIGGER HURT
-	//  if so, we assume that this resulted from a fall to a "bottomless pit" and 
-	//  treat it differently...  
+	//  if so, we assume that this resulted from a fall to a "bottomless pit" and
+	//  treat it differently...
 	//
 	//  Any problems with other places in the code?
 	//
@@ -301,7 +301,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 			}
 		}
 	}
-*/	
+*/
 	// similarly, if El Corpso here has already dropped a detpack, blow it up
 	classname = BG_FindClassnameForHoldable(HI_DETPACK);
 	if (classname)
@@ -339,8 +339,8 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		obit = modNames[ meansOfDeath ];
 	}
 
-	G_LogPrintf("Kill: %i %i %i: %s killed %s by %s\n", 
-		killer, self->s.number, meansOfDeath, killerName, 
+	G_LogPrintf("Kill: %i %i %i: %s killed %s by %s\n",
+		killer, self->s.number, meansOfDeath, killerName,
 		self->client->pers.netname, obit );
 
 	G_LogWeaponKill(killer, meansOfDeath);
@@ -368,9 +368,9 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		self->client->pers.teamState.suicides++;
 	}
 
-	if (attacker && attacker->client) 
+	if (attacker && attacker->client)
 	{
-		if ( attacker == self || OnSameTeam (self, attacker ) ) 
+		if ( attacker == self || OnSameTeam (self, attacker ) )
 		{
 			if ( meansOfDeath != MOD_RESPAWN )
 			{//just changing class
@@ -384,8 +384,8 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 					AddScore( attacker, -1 );
 				}
 			}
-		} 
-		else 
+		}
+		else
 		{
 			attacker->client->pers.teamState.frags++;
 			if ( self->s.number == borgQueenClientNum && attacker )
@@ -423,7 +423,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 			// Check to see if the player is on a streak.
 			attacker->client->streakCount++;
 			// Only send awards on exact streak counts.
-			switch(attacker->client->streakCount) 
+			switch(attacker->client->streakCount)
 			{
 			case STREAK_ACE:
 				attacker->client->ps.persistant[PERS_REWARD_COUNT]++;
@@ -481,8 +481,8 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
 			attacker->client->lastKillTime = level.time;
 		}
-	} 
-	else 
+	}
+	else
 	{
 		if ( meansOfDeath != MOD_RESPAWN )
 		{//not just changing class
@@ -502,18 +502,18 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	Team_FragBonuses(self, inflictor, attacker);
 
 	// if client is in a nodrop area, don't drop anything (but return CTF flags!)
-	if ( !( contents & CONTENTS_NODROP ) && self->client->sess.sessionClass != PC_ACTIONHERO && meansOfDeath != MOD_SUICIDE && meansOfDeath != MOD_RESPAWN ) 
+	if ( !( contents & CONTENTS_NODROP ) && self->client->sess.sessionClass != PC_ACTIONHERO && meansOfDeath != MOD_SUICIDE && meansOfDeath != MOD_RESPAWN )
 	{//action hero doesn't drop stuff
 		//don't drop stuff in specialty mode
 		TossClientItems( self );
 	}
-	else 
+	else
 	{//suiciding and respawning returns the flag
-		if ( self->client->ps.powerups[PW_REDFLAG] ) 
+		if ( self->client->ps.powerups[PW_REDFLAG] )
 		{
 			Team_ReturnFlag(TEAM_RED);
 		}
-		else if ( self->client->ps.powerups[PW_BLUEFLAG] ) 
+		else if ( self->client->ps.powerups[PW_BLUEFLAG] )
 		{
 			Team_ReturnFlag(TEAM_BLUE);
 		}
@@ -564,13 +564,13 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 /*	if ( self->health <= GIB_HEALTH && !(contents & CONTENTS_NODROP) ) {
 		// gib death
 		GibEntity( self, killer );
-	} else 
+	} else
 */
 
 	// We always want to see the body for special animations, so make sure not to gib right away:
-	if (meansOfDeath==MOD_CRIFLE_ALT || 
-		meansOfDeath==MOD_DETPACK || 
-		meansOfDeath==MOD_QUANTUM_ALT || 
+	if (meansOfDeath==MOD_CRIFLE_ALT ||
+		meansOfDeath==MOD_DETPACK ||
+		meansOfDeath==MOD_QUANTUM_ALT ||
 		meansOfDeath==MOD_DREADNOUGHT_ALT)
 	{	self->health=0;}
 
@@ -586,13 +586,13 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		anim = BOTH_DEATH3;
 		break;
 	}
-	self->client->ps.legsAnim = 
+	self->client->ps.legsAnim =
 		( ( self->client->ps.legsAnim & ANIM_TOGGLEBIT ) ^ ANIM_TOGGLEBIT ) | anim;
-	self->client->ps.torsoAnim = 
+	self->client->ps.torsoAnim =
 		( ( self->client->ps.torsoAnim & ANIM_TOGGLEBIT ) ^ ANIM_TOGGLEBIT ) | anim;
 	if ( (BottomlessPitDeath==1) && (killer == ENTITYNUM_WORLD))
 	{
-		//G_AddEvent( self, EV_FALL_FAR, killer ); ?? Need to play falling SF now, or 
+		//G_AddEvent( self, EV_FALL_FAR, killer ); ?? Need to play falling SF now, or
 		// use designer trigger??
 		//FIXME: need *some* kind of death anim!
 	}
@@ -897,7 +897,7 @@ dflags		these flags are used to control how T_Damage works
 */
 
 void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
-			   vec3_t dir, vec3_t point, int damage, int dflags, int mod ) {
+				vec3_t dir, vec3_t point, int damage, int dflags, int mod ) {
 	gclient_t	*client;
 	int			take;
 	int			save;
@@ -924,9 +924,9 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	}
 
 	// shootable doors / buttons don't actually have any health
-	if ( targ->s.eType == ET_MOVER && Q_stricmp("func_breakable", targ->classname) != 0 && Q_stricmp("misc_model_breakable", targ->classname) != 0) 
+	if ( targ->s.eType == ET_MOVER && Q_stricmp("func_breakable", targ->classname) != 0 && Q_stricmp("misc_model_breakable", targ->classname) != 0)
 	{
-		if ( targ->use && targ->moverState == MOVER_POS1 ) 
+		if ( targ->use && targ->moverState == MOVER_POS1 )
 		{
 			targ->use( targ, inflictor, attacker );
 		}
@@ -953,7 +953,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 
 	client = targ->client;
 
-	if ( client ) 
+	if ( client )
 	{
 		if ( client->noclip ) {
 			return;
@@ -994,10 +994,10 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	knockback = floor( knockback*g_dmgmult.value ) ;
 
 	// figure momentum add, even if the damage won't be taken
-	if ( knockback && targ->client ) 
+	if ( knockback && targ->client )
 	{
 		//if it's non-radius damage knockback from a teammate, don't do it if the damage won't be taken
-		if ( (dflags&DAMAGE_ALL_TEAMS) || (dflags&DAMAGE_RADIUS) || g_friendlyFire.integer || !attacker->client || !OnSameTeam (targ, attacker) ) 
+		if ( (dflags&DAMAGE_ALL_TEAMS) || (dflags&DAMAGE_RADIUS) || g_friendlyFire.integer || !attacker->client || !OnSameTeam (targ, attacker) )
 		{
 			vec3_t	kvel;
 			float	mass;
@@ -1046,11 +1046,11 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	// if the attacker was on the same team
 	// check for completely getting out of the damage
 	if ( !(dflags & DAMAGE_NO_PROTECTION) ) {
-		if ( !(dflags&DAMAGE_ALL_TEAMS) && mod != MOD_TELEFRAG && mod != MOD_DETPACK && targ != attacker && OnSameTeam (targ, attacker)  ) 
+		if ( !(dflags&DAMAGE_ALL_TEAMS) && mod != MOD_TELEFRAG && mod != MOD_DETPACK && targ != attacker && OnSameTeam (targ, attacker)  )
 		{
 			if ( attacker->client && targ->client )
 			{//this only matters between clients
-				if ( !g_friendlyFire.integer ) 
+				if ( !g_friendlyFire.integer )
 				{//friendly fire is not allowed
 					return;
 				}
@@ -1070,7 +1070,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	// kef -- still need to telefrag invulnerable people
 	if ( MOD_TELEFRAG != mod )
 	{
-		// battlesuit protects from all damage...  
+		// battlesuit protects from all damage...
 		if ( client && ( client->ps.powerups[PW_BATTLESUIT] || client->ps.powerups[PW_BORG_ADAPT] ))
 		{	// EXCEPT DAMAGE_NO_INVULNERABILITY, like the IMOD
 			if ( dflags & DAMAGE_NO_INVULNERABILITY )
@@ -1181,7 +1181,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 				//display the full screen "ouch" effect to the player
 			}
 		}
-			
+
 		if ( targ->health <= 0 ) {
 			if ( client )
 				targ->flags |= FL_NO_KNOCKBACK;
@@ -1225,7 +1225,7 @@ qboolean CanDamage (gentity_t *targ, vec3_t origin) {
 	if (tr.fraction == 1.0)
 		return qtrue;
 
-	// this should probably check in the plane of projection, 
+	// this should probably check in the plane of projection,
 	// rather than in world coordinate, and also include Z
 	VectorCopy (midpoint, dest);
 	dest[0] += 15.0;
@@ -1267,7 +1267,7 @@ G_RadiusDamage
 */
 extern void tripwireThink ( gentity_t *ent );
 qboolean G_RadiusDamage ( vec3_t origin, gentity_t *attacker, float damage, float radius,
-					 gentity_t *ignore, int dflags, int mod) {
+					gentity_t *ignore, int dflags, int mod) {
 	float		points, dist;
 	gentity_t	*ent;
 	int			entityList[MAX_GENTITIES];

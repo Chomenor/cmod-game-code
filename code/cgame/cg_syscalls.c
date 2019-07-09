@@ -30,7 +30,7 @@ void	trap_Error( const char *fmt ) {
 }
 
 int		trap_Milliseconds( void ) {
-	return syscall( CG_MILLISECONDS ); 
+	return syscall( CG_MILLISECONDS );
 }
 
 void	trap_Cvar_Register( vmCvar_t *vmCvar, const char *varName, const char *defaultValue, int flags ) {
@@ -122,19 +122,19 @@ int		trap_CM_TransformedPointContents( const vec3_t p, clipHandle_t model, const
 }
 
 void	trap_CM_BoxTrace( trace_t *results, const vec3_t start, const vec3_t end,
-						  const vec3_t mins, const vec3_t maxs,
-						  clipHandle_t model, int brushmask ) {
+						const vec3_t mins, const vec3_t maxs,
+						clipHandle_t model, int brushmask ) {
 	syscall( CG_CM_BOXTRACE, results, start, end, mins, maxs, model, brushmask );
 }
 
 void	trap_CM_TransformedBoxTrace( trace_t *results, const vec3_t start, const vec3_t end,
-						  const vec3_t mins, const vec3_t maxs,
-						  clipHandle_t model, int brushmask,
-						  const vec3_t origin, const vec3_t angles ) {
+						const vec3_t mins, const vec3_t maxs,
+						clipHandle_t model, int brushmask,
+						const vec3_t origin, const vec3_t angles ) {
 	syscall( CG_CM_TRANSFORMEDBOXTRACE, results, start, end, mins, maxs, model, brushmask, origin, angles );
 }
 
-int		trap_CM_MarkFragments( int numPoints, const vec3_t *points, 
+int		trap_CM_MarkFragments( int numPoints, const vec3_t *points,
 				const vec3_t projection,
 				int maxPoints, vec3_t pointBuffer,
 				int maxFragments, markFragment_t *fragmentBuffer ) {
@@ -221,8 +221,8 @@ void	trap_R_SetColor( const float *rgba ) {
 	syscall( CG_R_SETCOLOR, rgba );
 }
 
-void	trap_R_DrawStretchPic( float x, float y, float w, float h, 
-							   float s1, float t1, float s2, float t2, qhandle_t hShader ) {
+void	trap_R_DrawStretchPic( float x, float y, float w, float h,
+								float s1, float t1, float s2, float t2, qhandle_t hShader ) {
 	syscall( CG_R_DRAWSTRETCHPIC, PASSFLOAT(x), PASSFLOAT(y), PASSFLOAT(w), PASSFLOAT(h), PASSFLOAT(s1), PASSFLOAT(t1), PASSFLOAT(s2), PASSFLOAT(t2), hShader );
 }
 
@@ -230,8 +230,8 @@ void	trap_R_ModelBounds( clipHandle_t model, vec3_t mins, vec3_t maxs ) {
 	syscall( CG_R_MODELBOUNDS, model, mins, maxs );
 }
 
-void	trap_R_LerpTag( orientation_t *tag, clipHandle_t mod, int startFrame, int endFrame, 
-					   float frac, const char *tagName ) {
+void	trap_R_LerpTag( orientation_t *tag, clipHandle_t mod, int startFrame, int endFrame,
+						float frac, const char *tagName ) {
 	syscall( CG_R_LERPTAG, tag, mod, startFrame, endFrame, PASSFLOAT(frac), tagName );
 }
 

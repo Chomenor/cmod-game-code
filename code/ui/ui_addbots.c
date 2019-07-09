@@ -89,7 +89,7 @@ static void UI_AddBotsMenu_SetBotNames( void ) {
 	int			n;
 	const char	*info;
 
-	for ( n = 0; n < BOTS_VIEWABLE; n++ ) 
+	for ( n = 0; n < BOTS_VIEWABLE; n++ )
 	{
 		info = UI_GetBotInfoByNumber( addBotsMenuInfo.sortedBotNums[addBotsMenuInfo.baseBotNum + n] );
 		Q_strncpyz( addBotsMenuInfo.botnames[n], Info_ValueForKey( info, "name" ), sizeof(addBotsMenuInfo.botnames[n]) );
@@ -171,7 +171,7 @@ static void UI_AddBotsMenu_GetSortedBotNums( void ) {
 UI_AddBotsMenu_Draw
 =================
 */
-static void UI_AddBotsMenu_Draw( void ) 
+static void UI_AddBotsMenu_Draw( void )
 {
 	UI_MenuFrame(&addBotsMenuInfo.menu);
 
@@ -196,7 +196,7 @@ static void UI_AddBotsMenu_Draw( void )
 	Menu_Draw( &addBotsMenuInfo.menu );
 }
 
-	
+
 /*
 =================
 UI_AddBotsMenu_Init
@@ -212,31 +212,31 @@ MNT_NIGHTMARELEVEL,
 0
 };
 
-static int teamNames1[] = 
+static int teamNames1[] =
 {
 	MNT_FREE,
 	0
 };
 
-static int teamNames2[] = 
+static int teamNames2[] =
 {
 	MNT_TEAM_RED,
 	MNT_TEAM_BLUE,
 	0
 };
 
-static char* Game_teamNames1[] = 
+static char* Game_teamNames1[] =
 {
 	"free",
 };
 
-static char* Game_teamNames2[] = 
+static char* Game_teamNames2[] =
 {
 	"red",
 	"blue",
 };
 
-static int pClassNames[] = 
+static int pClassNames[] =
 {
 	MNT_PC_INFILTRATOR,
 	MNT_PC_SNIPER,
@@ -247,13 +247,13 @@ static int pClassNames[] =
 	0
 };
 
-static int pClassNames2[] = 
+static int pClassNames2[] =
 {
 	MNT_PC_NOCLASS,
 	0
 };
 
-static char* Game_pClassNames[] = 
+static char* Game_pClassNames[] =
 {
 	"infiltrator",
 	"sniper",
@@ -263,7 +263,7 @@ static char* Game_pClassNames[] =
 	"tech",
 };
 
-static char* Game_pClassNames2[] = 
+static char* Game_pClassNames2[] =
 {
 	"noclass"
 };
@@ -305,7 +305,7 @@ static void UI_AddBotsMenu_FightEvent( void* ptr, int event ) {
 }
 
 
-static void UI_AddBotsMenu_Init( void ) 
+static void UI_AddBotsMenu_Init( void )
 {
 	int		n;
 	int		y,x;
@@ -313,7 +313,7 @@ static void UI_AddBotsMenu_Init( void )
 	int		count;
 	char	info[MAX_INFO_STRING];
 
-	trap_GetConfigString(CS_SERVERINFO, info, MAX_INFO_STRING);   
+	trap_GetConfigString(CS_SERVERINFO, info, MAX_INFO_STRING);
 	gametype = atoi( Info_ValueForKey( info,"g_gametype" ) );
 	specialties = atoi( Info_ValueForKey( info,"g_pModSpecialties" ) );
 
@@ -359,7 +359,7 @@ static void UI_AddBotsMenu_Init( void )
 	addBotsMenuInfo.down.color2  					= CT_LTGOLD1;
 	addBotsMenuInfo.down.generic.name				= "menu/common/arrow_dn_16.tga";
 
-	for( n = 0, y = 194; n < count; n++, y += 20 ) 
+	for( n = 0, y = 194; n < count; n++, y += 20 )
 	{
 		addBotsMenuInfo.bots[n].generic.type		= MTYPE_PTEXT;
 		addBotsMenuInfo.bots[n].generic.flags		= QMF_HIGHLIGHT_IF_FOCUS;
@@ -382,11 +382,11 @@ static void UI_AddBotsMenu_Init( void )
 	addBotsMenuInfo.team.generic.y					= y;
 	addBotsMenuInfo.team.textEnum					= MBT_TEAM;
 	addBotsMenuInfo.team.generic.id					= ID_TEAM;
-	if( gametype >= GT_TEAM ) 
+	if( gametype >= GT_TEAM )
 	{
 		addBotsMenuInfo.team.listnames			= teamNames2;
 	}
-	else 
+	else
 	{
 		addBotsMenuInfo.team.listnames			= teamNames1;
 		addBotsMenuInfo.team.generic.flags		= QMF_GRAYED;
@@ -466,7 +466,7 @@ static void UI_AddBotsMenu_Init( void )
 
 	Menu_AddItem( &addBotsMenuInfo.menu, &addBotsMenuInfo.up );
 	Menu_AddItem( &addBotsMenuInfo.menu, &addBotsMenuInfo.down );
-	for( n = 0; n < count; n++ ) 
+	for( n = 0; n < count; n++ )
 	{
 		Menu_AddItem( &addBotsMenuInfo.menu, &addBotsMenuInfo.bots[n] );
 	}
@@ -483,7 +483,7 @@ static void UI_AddBotsMenu_Init( void )
 UI_AddBots_Cache
 =================
 */
-void UI_AddBots_Cache( void ) 
+void UI_AddBots_Cache( void )
 {
 	trap_R_RegisterShaderNoMip( "menu/common/arrow_up_16.tga" );
 	trap_R_RegisterShaderNoMip( "menu/common/arrow_dn_16.tga" );
@@ -495,7 +495,7 @@ void UI_AddBots_Cache( void )
 UI_AddBotsMenu
 =================
 */
-void UI_AddBotsMenu( void ) 
+void UI_AddBotsMenu( void )
 {
 	UI_AddBotsMenu_Init();
 	UI_PushMenu( &addBotsMenuInfo.menu );

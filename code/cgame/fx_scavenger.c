@@ -17,61 +17,61 @@ void FX_ScavengerProjectileThink( centity_t *cent, const struct weaponInfo_s *we
 	if ( fired_from_NPC )
 	{
 		// Energy glow
-		FX_AddSprite( cent->lerpOrigin, 
-						NULL, qfalse, 
-						8.0f + random() * 8.0f, 0.0f, 
-						0.7f, 0.0f, 
-						random()*360, 0.0f, 
-						1.0f, 
+		FX_AddSprite( cent->lerpOrigin,
+						NULL, qfalse,
+						8.0f + random() * 8.0f, 0.0f,
+						0.7f, 0.0f,
+						random()*360, 0.0f,
+						1.0f,
 						cgs.media.tetrionFlareShader );
 
 		// Spinning projectile core
-		FX_AddSprite( cent->lerpOrigin, 
-						NULL, qfalse, 
-						8.0f + random() * 10.0f, 0.0f, 
-						1.0f, 0.0f, 
-						cg.time * SCAV_SPIN, 0.0f, 
-						1.0f, 
+		FX_AddSprite( cent->lerpOrigin,
+						NULL, qfalse,
+						8.0f + random() * 10.0f, 0.0f,
+						1.0f, 0.0f,
+						cg.time * SCAV_SPIN, 0.0f,
+						1.0f,
 						cgs.media.redFlareShader );
 
 		// leave a cool tail
-		FX_AddTrail( cent->lerpOrigin, 
-						forward, qfalse, 
-						16, 0, 
-						1.0f, 0.0f, 
-						0.8f, 0.0f, 
-						0, 
-						1, 
+		FX_AddTrail( cent->lerpOrigin,
+						forward, qfalse,
+						16, 0,
+						1.0f, 0.0f,
+						0.8f, 0.0f,
+						0,
+						1,
 						cgs.media.tetrionTrail2Shader );
 	}
 	else
 	{
 		// Energy glow
-		FX_AddSprite( cent->lerpOrigin, 
-						NULL, qfalse, 
-						16.0f + random() * 16.0f, 0.0f, 
-						0.5f, 0.0f, 
-						random()*360, 0.0f, 
-						1.0f, 
+		FX_AddSprite( cent->lerpOrigin,
+						NULL, qfalse,
+						16.0f + random() * 16.0f, 0.0f,
+						0.5f, 0.0f,
+						random()*360, 0.0f,
+						1.0f,
 						cgs.media.tetrionFlareShader );
 
 		// Spinning projectile
-		FX_AddSprite( cent->lerpOrigin, 
-						NULL, qfalse, 
-						4.0f + random() * 10.0f, 0.0f, 
-						0.6f, 0.0f, 
-						cg.time * SCAV_SPIN, 0.0f, 
-						1.0f, 
+		FX_AddSprite( cent->lerpOrigin,
+						NULL, qfalse,
+						4.0f + random() * 10.0f, 0.0f,
+						0.6f, 0.0f,
+						cg.time * SCAV_SPIN, 0.0f,
+						1.0f,
 						cgs.media.redFlareShader );
 
 		// leave a cool tail
-		FX_AddTrail( cent->lerpOrigin, 
-						forward, qfalse, 
-						64, 0, 
-						1.4f, 0.0f, 
-						0.6f, 0.0f, 
-						0, 
-						1, 
+		FX_AddTrail( cent->lerpOrigin,
+						forward, qfalse,
+						64, 0,
+						1.4f, 0.0f,
+						0.6f, 0.0f,
+						0,
+						1,
 						cgs.media.tetrionTrail2Shader );
 	}
 }
@@ -112,12 +112,12 @@ void FX_ScavengerAltFireThink( centity_t *cent, const struct weaponInfo_s *weapo
 			// Calc the right spot along the trail
 			VectorMA( cent->lerpOrigin, -i, diff, origin );
 			scale = 18.0f + (random()*5.0f);
-			FX_AddSprite( origin, 
-								NULL, qfalse, 
-								scale, -8.75, 
-								0.4f, 0.0f, 
-								random() * 360, 0.0f, 
-								250.0f, 
+			FX_AddSprite( origin,
+								NULL, qfalse,
+								scale, -8.75,
+								0.4f, 0.0f,
+								random() * 360, 0.0f,
+								250.0f,
 								cgs.media.scavengerAltShader );
 		}
 
@@ -127,12 +127,12 @@ void FX_ScavengerAltFireThink( centity_t *cent, const struct weaponInfo_s *weapo
 	}
 
 	// Glowing bit
-	FX_AddSprite( cent->lerpOrigin, 
-					NULL, qfalse, 
-					24.0f + ( random() * 16.0f ), 0.0f, 
-					1.0f, 0.0f, 
-					0, 0.0f, 
-					1.0f, 
+	FX_AddSprite( cent->lerpOrigin,
+					NULL, qfalse,
+					24.0f + ( random() * 16.0f ), 0.0f,
+					1.0f, 0.0f,
+					0, 0.0f,
+					1.0f,
 					cgs.media.tetrionFlareShader );
 }
 
@@ -151,43 +151,43 @@ void FX_ScavengerWeaponHitWall( vec3_t origin, vec3_t normal, qboolean fired_by_
 	if ( fired_by_NPC )
 	{
 		// Expanding shock ring
-		FX_AddQuad( origin, normal, 
-						0.5f, 6.4f, 
-						0.8, 0.0, 
-						random() * 360.0f, 
-						200, 
+		FX_AddQuad( origin, normal,
+						0.5f, 6.4f,
+						0.8, 0.0,
+						random() * 360.0f,
+						200,
 						cgs.media.redRingShader );
 
 		// Impact core
-		FX_AddQuad( origin, normal, 
-						12.0f + ( random() * 8.0f ), 3.2f, 
-						0.6f, 0.0f, 
-						cg.time * SCAV_SPIN, 
-						100, 
+		FX_AddQuad( origin, normal,
+						12.0f + ( random() * 8.0f ), 3.2f,
+						0.6f, 0.0f,
+						cg.time * SCAV_SPIN,
+						100,
 						cgs.media.redFlareShader );
 	}
 	else
 	{
 		// Expanding shock ring
-		FX_AddQuad( origin, normal, 
-						8.0f, 12.8f, 
-						1.0, 0.0, 
-						random() * 360.0f, 
-						200, 
+		FX_AddQuad( origin, normal,
+						8.0f, 12.8f,
+						1.0, 0.0,
+						random() * 360.0f,
+						200,
 						cgs.media.redRingShader );
 
 		// Impact core
-		FX_AddQuad( origin, normal, 
-						24.0f + ( random() * 16.0f ), 6.4f, 
-						0.8f, 0.0f, 
-						cg.time * SCAV_SPIN, 
-						100, 
+		FX_AddQuad( origin, normal,
+						24.0f + ( random() * 16.0f ), 6.4f,
+						0.8f, 0.0f,
+						cg.time * SCAV_SPIN,
+						100,
 						cgs.media.redFlareShader );
 	}
 
 	//Sound
 	trap_S_StartSound( origin, ENTITYNUM_WORLD, CHAN_AUTO, weaponInfo->mainHitSound);
-	
+
 	CG_ImpactMark( cgs.media.scavMarkShader, origin, normal, random()*360, 1,1,1,0.2, qfalse, random() + 5.5f, qfalse );
 }
 
@@ -202,21 +202,21 @@ void FX_ScavengerWeaponHitPlayer( vec3_t origin, vec3_t normal, qboolean fired_b
 	if ( fired_by_NPC )
 	{
 		// Smaller expanding shock ring
-		FX_AddQuad( origin, normal, 
-						0.5f, 32.0f, 
-						0.8, 0.0, 
+		FX_AddQuad( origin, normal,
+						0.5f, 32.0f,
+						0.8, 0.0,
 						random() * 360.0f,
-						125, 
+						125,
 						cgs.media.redRingShader );
 	}
 	else
 	{
 		// Expanding shock ring
-		FX_AddQuad( origin, normal, 
-						1.0f, 64.0f, 
-						0.8, 0.0, 
-						random() * 360.0f, 
-						125, 
+		FX_AddQuad( origin, normal,
+						1.0f, 64.0f,
+						0.8, 0.0,
+						random() * 360.0f,
+						125,
 						cgs.media.redRingShader );
 	}
 
@@ -229,7 +229,7 @@ void FX_ScavengerWeaponHitPlayer( vec3_t origin, vec3_t normal, qboolean fired_b
 /*
 -------------------------
 FX_Scavenger_Alt_Explode
-------------------------- 
+-------------------------
 */
 void FX_ScavengerAltExplode( vec3_t origin, vec3_t dir )
 {
@@ -238,7 +238,7 @@ void FX_ScavengerAltExplode( vec3_t origin, vec3_t dir )
 	vec3_t			direction, org;
 	int i;
 	weaponInfo_t	*weaponInfo = &cg_weapons[WP_SCAVENGER_RIFLE];
-	
+
 	//Orient the explosions to face the camera
 	VectorSubtract( cg.refdef.vieworg, origin, direction );
 	VectorNormalize( direction );
@@ -254,9 +254,9 @@ void FX_ScavengerAltExplode( vec3_t origin, vec3_t dir )
 	CG_MakeExplosion2( org, direction, cgs.media.explosionModel, 5, cgs.media.scavExplosionFastShader, 375, qfalse, 0.7f + (random()*0.5f), LEF_NONE);
 
 	//Sound
-	trap_S_StartSound( origin, ENTITYNUM_WORLD, CHAN_AUTO, weaponInfo->altHitSound );	
+	trap_S_StartSound( origin, ENTITYNUM_WORLD, CHAN_AUTO, weaponInfo->altHitSound );
 
-	CG_ImpactMark( cgs.media.compressionMarkShader, origin, dir, random()*360, 1,1,1,0.2, qfalse, 
+	CG_ImpactMark( cgs.media.compressionMarkShader, origin, dir, random()*360, 1,1,1,0.2, qfalse,
 					random() * 6 + 20, qfalse );
 
 	// Always orient horizontally

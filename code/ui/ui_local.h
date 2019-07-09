@@ -38,7 +38,7 @@ typedef enum
 	MNT_CURRENTDEMOSAVAILABLE,
 
 	// Main Menu
-	MNT_ALPHA,	
+	MNT_ALPHA,
 	MNT_STELLAR_CARTOGRAPHY,
 	MNT_FEDERATION_TXT,
 	MNT_CARDASSIA_TXT,
@@ -175,7 +175,7 @@ typedef enum
 	MNT_AVAILABLEMODS,
 
 	// Single Player Menu
-	MNT_SINGLEPLAYER,			
+	MNT_SINGLEPLAYER,
 	MNT_TIER,
 	MNT_ACCESSDENIED,
 	MNT_OPPONENTS,
@@ -235,7 +235,7 @@ typedef enum
 	MNT_LOADING,
 	MNT_CONNECTINGTO,
 	MNT_PRESSESCAPETOABORT,
-	
+
 	MNT_WAITINGFORNEWKEY,
 	MNT_CLICKTOCHANGE,
 	MNT_BACKSPACETOCLEAR,
@@ -760,7 +760,7 @@ typedef enum
 	MBT_PREVMAPS,
 	MBT_NEXTMAPS,
 	MBT_SETPARAMETERS,
- 
+
 	MBT_POINTLIMIT,
 	MBT_CAPTURELIMIT,
 	MBT_TIMELIMIT,
@@ -901,7 +901,7 @@ typedef enum
 	MBT_MAX
 } menuButtonTextType_t;
 
-  
+
 #define GRAPHIC_BUTTONRIGHT "menu/new/bar1.tga"
 #define GRAPHIC_BUTTONSLIDER "menu/common/slider.tga"
 
@@ -1015,12 +1015,12 @@ extern vmCvar_t	ui_playerclass;
 #define MAX_MENUITEMS			64
 
 #define MTYPE_NULL				0
-#define MTYPE_SLIDER			1	
+#define MTYPE_SLIDER			1
 #define MTYPE_ACTION			2
 #define MTYPE_SPINCONTROL		3
 #define MTYPE_FIELD				4
 #define MTYPE_RADIOBUTTON		5
-#define MTYPE_BITMAP			6	
+#define MTYPE_BITMAP			6
 #define MTYPE_TEXT				7
 #define MTYPE_SCROLLLIST		8
 #define MTYPE_PTEXT				9
@@ -1116,7 +1116,7 @@ typedef struct
 	mfield_t		field;
 } menufield_s;
 
-typedef struct 
+typedef struct
 {
 	menucommon_s generic;
 
@@ -1161,7 +1161,7 @@ typedef struct
 	int curvalue;
 	int	numitems;
 	int	top;
-		
+
 	const char		**itemnames;
 	int				*listnames;
 	int				*listshaders;
@@ -1178,8 +1178,8 @@ typedef struct
 	int				textcolor;		// Normal color
 	int				textcolor2;		// Highlight color
 	byte			updated;		// 1 if changed
-	int				focusWidth;		// 
-	int				focusHeight;	// 
+	int				focusWidth;		//
+	int				focusHeight;	//
 	int				listX;
 	int				listY;
 	int				listcolor;
@@ -1213,7 +1213,7 @@ typedef struct
 typedef struct
 {
 	menucommon_s	generic;
-	char*			focuspic;	
+	char*			focuspic;
 	char*			errorpic;
 	qhandle_t		shader;
 	qhandle_t		focusshader;
@@ -1271,7 +1271,7 @@ typedef struct
 	const char		*file;		// File name of graphic/ text if STRING
 	int				normaltextEnum;	//	Text comes from Menu_Normal_text
 	qhandle_t		graphic;	// Handle of graphic if GRAPHIC
-	int				min;		// 
+	int				min;		//
 	int				max;
 	int				target;		// Final value
 	int				inc;
@@ -1319,7 +1319,7 @@ extern vec4_t		color_dim;
 extern vec4_t		name_color;
 extern vec4_t		list_color;
 extern vec4_t		listbar_color;
-extern vec4_t		text_color_disabled; 
+extern vec4_t		text_color_disabled;
 extern vec4_t		text_color_normal;
 extern vec4_t		text_color_highlight;
 
@@ -1347,8 +1347,8 @@ extern void UI_RegisterCvars( void );
 extern void UI_UpdateCvars( void );
 extern void UI_Setup_MenuButtons(void);
 extern void UI_QuitMenu( void );
-extern void UI_ChooseServerTypeMenu( void ); 
-extern void UI_QuitMenu_Cache(void); 
+extern void UI_ChooseServerTypeMenu( void );
+extern void UI_QuitMenu_Cache(void);
 
 //
 // ui_demo2.c
@@ -1632,7 +1632,7 @@ extern void			UI_Refresh( int realtime );
 extern qboolean		UI_ConsoleCommand( void );
 extern float		UI_ClampCvar( float min, float max, float value );
 extern void			UI_DrawNamedPic( float x, float y, float width, float height, const char *picname );
-extern void			UI_DrawHandlePic( float x, float y, float w, float h, qhandle_t hShader ); 
+extern void			UI_DrawHandlePic( float x, float y, float w, float h, qhandle_t hShader );
 extern void			UI_FillRect( float x, float y, float width, float height, const float *color );
 extern void			UI_DrawRect( float x, float y, float width, float height, const float *color );
 //extern void			UI_LerpColor(vec4_t a, vec4_t b, vec4_t c, float t);
@@ -1782,12 +1782,12 @@ void UI_DisplayOptionsMenu( void );
 //void UI_SoundOptionsMenu( void );
 extern float setup_menubuttons[8][2];
 void UI_SoundMenu( void);
-void UI_SoundMenu_Cache(void); 
+void UI_SoundMenu_Cache(void);
 
 //
 // ui_fonts.c
 //
-void UI_FontsMenu( void); 
+void UI_FontsMenu( void);
 
 //
 // ui_cvars.c

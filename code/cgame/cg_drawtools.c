@@ -93,9 +93,9 @@ void CG_DrawChar( int x, int y, int width, int height, int ch ) {
 	size2 = 0.0625;
 
 	trap_R_DrawStretchPic( ax, ay, aw, ah,
-					   fcol, frow, 
-					   fcol + size, frow + size2, 
-					   cgs.media.charsetShader );
+						fcol, frow,
+						fcol + size, frow + size2,
+						cgs.media.charsetShader );
 
 }
 
@@ -110,7 +110,7 @@ to a fixed color.
 Coordinates are at 640 by 480 virtual resolution
 ==================
 */
-void CG_DrawStringExt( int x, int y, const char *string, const float *setColor, 
+void CG_DrawStringExt( int x, int y, const char *string, const float *setColor,
 		qboolean forceColor, qboolean shadow, int charWidth, int charHeight, int maxChars ) {
 	vec4_t		color;
 	const char	*s;
@@ -244,7 +244,7 @@ void CG_TileClear( void ) {
 	w = cgs.glconfig.vidWidth;
 	h = cgs.glconfig.vidHeight;
 
-	if ( cg.refdef.x == 0 && cg.refdef.y == 0 && 
+	if ( cg.refdef.x == 0 && cg.refdef.y == 0 &&
 		cg.refdef.width == w && cg.refdef.height == h ) {
 		return;		// full screen rendering
 	}
@@ -376,7 +376,7 @@ CG_ColorForHealth
 */
 void CG_ColorForHealth( vec4_t hcolor ) {
 
-	CG_GetColorForHealth( cg.snap->ps.stats[STAT_HEALTH], 
+	CG_GetColorForHealth( cg.snap->ps.stats[STAT_HEALTH],
 		cg.snap->ps.stats[STAT_ARMOR], hcolor );
 }
 
@@ -441,7 +441,7 @@ static void UI_DrawBannerString2( int x, int y, const char* str, vec4_t color )
 
 	// draw the colored text
 	trap_R_SetColor( color );
-	
+
 //	ax = x * cgs.screenXScale + cgs.screenXBias;
 	ax = x * cgs.screenXScale;
 	ay = y * cgs.screenYScale;
@@ -537,11 +537,11 @@ int UI_ProportionalStringWidth( const char* str,int style )
 	{
 		s = holdStr;
 		width = 0;
-		while ( *s ) 
+		while ( *s )
 		{
 			ch = *s & 255;
 			charWidth = propMapTiny[ch][2];
-			if ( charWidth != -1 ) 
+			if ( charWidth != -1 )
 			{
 				width += charWidth;
 				width += PROP_GAP_TINY_WIDTH;
@@ -555,11 +555,11 @@ int UI_ProportionalStringWidth( const char* str,int style )
 	{
 		s = holdStr;
 		width = 0;
-		while ( *s ) 
+		while ( *s )
 		{
 			ch = *s & 255;
 			charWidth = propMapBig[ch][2];
-			if ( charWidth != -1 ) 
+			if ( charWidth != -1 )
 			{
 				width += charWidth;
 				width += PROP_GAP_BIG_WIDTH;
@@ -573,11 +573,11 @@ int UI_ProportionalStringWidth( const char* str,int style )
 	{
 		s = holdStr;
 		width = 0;
-		while ( *s ) 
+		while ( *s )
 		{
 			ch = *s & 255;
 			charWidth = propMap[ch][2];
-			if ( charWidth != -1 ) 
+			if ( charWidth != -1 )
 			{
 				width += charWidth;
 				width += PROP_GAP_WIDTH;
@@ -619,7 +619,7 @@ static int specialTinyPropChars[CHARMAX][2] = {
 {2, 0},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{0, 0},	// 240
 {2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{2,-3},{0, 0},{0,-1},{2,-3},{2,-3},	// 250
 {2,-3},{2,-3},{2,-3},{0,-1},{2,-3}										// 255
-}; 
+};
 
 
 static int specialPropChars[CHARMAX][2] = {
@@ -650,7 +650,7 @@ static int specialPropChars[CHARMAX][2] = {
 {0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 240
 {0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},{0, 0},	// 250
 {0, 0},{0, 0},{0, 0},{0, 0},{0, 0}										// 255
-}; 
+};
 
 
 static int specialBigPropChars[CHARMAX][2] = {
@@ -681,7 +681,7 @@ static int specialBigPropChars[CHARMAX][2] = {
 {3, 1},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{0, 0},	// 240
 {3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{3,-3},{0, 0},{0, 0},{3,-3},{3,-3},	// 250
 {3,-3},{3,-3},{3,-3},{0, 0},{3,-3}										// 255
-}; 
+};
 
 /*
 =================
@@ -711,7 +711,7 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 
 	// draw the colored text
 	trap_R_SetColor( color );
-	
+
 //	ax = x * cgs.screenXScale + cgs.screenXBias;
 	ax = x * cgs.screenXScale;
 	ay = y * cgs.screenYScale;
@@ -723,7 +723,7 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 		while ( *s )
 		{
 			// Is there a color character
-			if ( Q_IsColorString( s ) ) 
+			if ( Q_IsColorString( s ) )
 			{
 				if (!forceColor)
 				{
@@ -735,11 +735,11 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 			}
 
 			ch = *s & 255;
-			if ( ch == ' ' ) 
+			if ( ch == ' ' )
 			{
 				aw = (float)PROP_SPACE_TINY_WIDTH;
 			}
-			else if ( propMapTiny[ch][2] != -1 ) 
+			else if ( propMapTiny[ch][2] != -1 )
 			{
 				// Because some foreign characters were a little different
 				special = specialTinyPropChars[ch][0];
@@ -766,7 +766,7 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 		while ( *s )
 		{
 			// Is there a color character
-			if ( Q_IsColorString( s ) ) 
+			if ( Q_IsColorString( s ) )
 			{
 				if (!forceColor)
 				{
@@ -778,11 +778,11 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 			}
 
 			ch = *s & 255;
-			if ( ch == ' ' ) 
+			if ( ch == ' ' )
 			{
 				aw = (float)PROP_SPACE_BIG_WIDTH* cgs.screenXScale * sizeScale;
 			}
-			else if ( propMap[ch][2] != -1 ) 
+			else if ( propMap[ch][2] != -1 )
 			{
 				// Because some foreign characters were a little different
 				special = specialBigPropChars[ch][0];
@@ -795,7 +795,7 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 				aw = (float)propMapBig[ch][2] * cgs.screenXScale * sizeScale;
 				ah = (float)(PROP_BIG_HEIGHT+ special) * cgs.screenYScale * sizeScale;
 
-				trap_R_DrawStretchPic( ax, ay, aw, ah, fcol, frow, fcol + fwidth, frow + fheight, 
+				trap_R_DrawStretchPic( ax, ay, aw, ah, fcol, frow, fcol + fwidth, frow + fheight,
 					charset );
 
 			}
@@ -807,14 +807,14 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 			ax += (aw + (float)PROP_GAP_BIG_WIDTH * cgs.screenXScale * sizeScale);
 			s++;
 		}
-	} 
+	}
 	else
 	{
 		s = str;
 		while ( *s )
 		{
 			// Is there a color character
-			if ( Q_IsColorString( s ) ) 
+			if ( Q_IsColorString( s ) )
 			{
 				if (!forceColor)
 				{
@@ -826,11 +826,11 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 			}
 
 			ch = *s & 255;
-			if ( ch == ' ' ) 
+			if ( ch == ' ' )
 			{
 				aw = (float)PROP_SPACE_WIDTH * cgs.screenXScale * sizeScale;
-			} 
-			else if ( propMap[ch][2] != -1 ) 
+			}
+			else if ( propMap[ch][2] != -1 )
 			{
 				// Because some foreign characters were a little different
 				special = specialPropChars[ch][0];
@@ -843,8 +843,8 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 				aw = (float)propMap[ch][2] * cgs.screenXScale * sizeScale;
 				ah = (float)(PROP_HEIGHT+ special) * cgs.screenYScale * sizeScale;
 				trap_R_DrawStretchPic( ax, ay, aw, ah, fcol, frow, fcol+fwidth, frow+fheight, charset );
-			} 
-			else 
+			}
+			else
 			{
 				aw = 0;
 			}
@@ -861,9 +861,9 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 UI_ProportionalSizeScale
 =================
 */
-float UI_ProportionalSizeScale( int style ) 
+float UI_ProportionalSizeScale( int style )
 {
-	if(  style & UI_SMALLFONT ) 
+	if(  style & UI_SMALLFONT )
 	{
 		return 1;
 	}
@@ -877,7 +877,7 @@ float UI_ProportionalSizeScale( int style )
 UI_DrawProportionalString
 =================
 */
-void UI_DrawProportionalString( int x, int y, const char* str, int style, vec4_t color ) 
+void UI_DrawProportionalString( int x, int y, const char* str, int style, vec4_t color )
 {
 	vec4_t		drawcolor;
 	int			width;
@@ -886,7 +886,7 @@ void UI_DrawProportionalString( int x, int y, const char* str, int style, vec4_t
 
 	sizeScale = UI_ProportionalSizeScale( style );
 
-	switch( style & UI_FORMATMASK ) 
+	switch( style & UI_FORMATMASK )
 	{
 		case UI_CENTER:
 			width = UI_ProportionalStringWidth( str, style ) * sizeScale;
@@ -918,7 +918,7 @@ void UI_DrawProportionalString( int x, int y, const char* str, int style, vec4_t
 		sizeScale = 1;
 	}
 
-	if ( style & UI_DROPSHADOW ) 
+	if ( style & UI_DROPSHADOW )
 	{
 		drawcolor[0] = drawcolor[1] = drawcolor[2] = 0;
 		drawcolor[3] = color[3];
@@ -926,7 +926,7 @@ void UI_DrawProportionalString( int x, int y, const char* str, int style, vec4_t
 		UI_DrawProportionalString2( x+2, y+2, str, drawcolor, sizeScale,style, charset,qtrue );
 	}
 
-	if ( style & UI_INVERSE ) 
+	if ( style & UI_INVERSE )
 	{
 		drawcolor[0] = color[0] * 0.8;
 		drawcolor[1] = color[1] * 0.8;
@@ -936,7 +936,7 @@ void UI_DrawProportionalString( int x, int y, const char* str, int style, vec4_t
 		return;
 	}
 
-	if ( style & UI_PULSE ) 
+	if ( style & UI_PULSE )
 	{
 		drawcolor[0] = color[0] * 0.8;
 		drawcolor[1] = color[1] * 0.8;
@@ -952,8 +952,8 @@ void UI_DrawProportionalString( int x, int y, const char* str, int style, vec4_t
 		return;
 	}
 
-	if ( style & UI_FORCECOLOR ) 
-	{	
+	if ( style & UI_FORCECOLOR )
+	{
 		UI_DrawProportionalString2( x, y, str, color, sizeScale,style, charset,qtrue);
 		return;
 	}
@@ -969,7 +969,7 @@ Take x,y positions as if 640 x 480 and scales them to the proper resolution
 
 ==============
 */
-void CG_DrawNumField (int x, int y, int width, int value,int charWidth,int charHeight,int style) 
+void CG_DrawNumField (int x, int y, int width, int value,int charWidth,int charHeight,int style)
 {
 	char	num[16], *ptr;
 	int		l;
@@ -1061,28 +1061,28 @@ void CG_PrintInterfaceGraphics(int min,int max)
 		drawcolor[1] = colorTable[interface_graphics[i].color][1];
 		drawcolor[2] = colorTable[interface_graphics[i].color][2];
 		drawcolor[3] = colorTable[interface_graphics[i].color][3];
-		
-		if ( cg.snap->ps.persistant[PERS_CLASS] == PC_BORG ) 
+
+		if ( cg.snap->ps.persistant[PERS_CLASS] == PC_BORG )
 		{
 			drawcolor[1] = 1;
-		} 
-		else if ( cg.snap->ps.persistant[PERS_TEAM] == TEAM_RED ) 
+		}
+		else if ( cg.snap->ps.persistant[PERS_TEAM] == TEAM_RED )
 		{
 			drawcolor[0] = 1;
-		} 
-		else if ( cg.snap->ps.persistant[PERS_TEAM] == TEAM_BLUE ) 
+		}
+		else if ( cg.snap->ps.persistant[PERS_TEAM] == TEAM_BLUE )
 		{
 			drawcolor[2] = 1;
-		} 
+		}
 
 		if (interface_graphics[i].type == SG_GRAPHIC)
 		{
 			trap_R_SetColor(drawcolor);
 
-			CG_DrawPic( interface_graphics[i].x, 
-			interface_graphics[i].y,	
-			interface_graphics[i].width, 
-			interface_graphics[i].height,	
+			CG_DrawPic( interface_graphics[i].x,
+			interface_graphics[i].y,
+			interface_graphics[i].width,
+			interface_graphics[i].height,
 			interface_graphics[i].graphic);
 		}
 		else if (interface_graphics[i].type == SG_NUMBER)
@@ -1094,10 +1094,10 @@ void CG_PrintInterfaceGraphics(int min,int max)
 			trap_R_SetColor( drawcolor);
 
 			CG_DrawNumField (
-				interface_graphics[i].x, 
-				interface_graphics[i].y, 3, 
-				interface_graphics[i].max, 
-				interface_graphics[i].width, 
+				interface_graphics[i].x,
+				interface_graphics[i].y, 3,
+				interface_graphics[i].max,
+				interface_graphics[i].width,
 				interface_graphics[i].height,interface_graphics[i].style);
 		}
 	}
@@ -1114,19 +1114,19 @@ static char *CG_ParseFontParms(char *buffer,int	propArray[CHARMAX][3])
 {
 	char	*token;
 	int		i,i2;
-	
-	while ( buffer ) 
+
+	while ( buffer )
 	{
 		token = COM_ParseExt( &buffer, qtrue );
 
 		// Start with open braket
-		if ( !Q_stricmp( token, "{" ) ) 
+		if ( !Q_stricmp( token, "{" ) )
 		{
 			for (i=0;i<CHARMAX;++i)
 			{
 				// Brackets for the numbers
 				token = COM_ParseExt( &buffer, qtrue );
-				if ( !Q_stricmp( token, "{" ) ) 
+				if ( !Q_stricmp( token, "{" ) )
 				{
 					;
 				}
@@ -1137,13 +1137,13 @@ static char *CG_ParseFontParms(char *buffer,int	propArray[CHARMAX][3])
 				}
 
 				for (i2=0;i2<3;++i2)
-				{	
+				{
 					token = COM_ParseExt( &buffer, qtrue );
 					propArray[i][i2] = atoi(token);
 				}
 
 				token = COM_ParseExt( &buffer, qtrue );
-				if ( !Q_stricmp( token, "}" ) ) 
+				if ( !Q_stricmp( token, "}" ) )
 				{
 					;
 				}
@@ -1156,7 +1156,7 @@ static char *CG_ParseFontParms(char *buffer,int	propArray[CHARMAX][3])
 		}
 
 		token = COM_ParseExt( &buffer, qtrue );	// Grab closing bracket
-		if ( !Q_stricmp( token, "}" ) ) 
+		if ( !Q_stricmp( token, "}" ) )
 		{
 			break;
 		}
@@ -1180,7 +1180,7 @@ void CG_LoadFonts(void)
 
 	len = trap_FS_FOpenFile( "ext_data/fonts.dat", &f, FS_READ );
 
-	if ( !f ) 
+	if ( !f )
 	{
 		trap_Print( va( S_COLOR_RED "CG_LoadFonts : FONTS.DAT file not found!\n"));
 		return;
@@ -1193,7 +1193,7 @@ void CG_LoadFonts(void)
 	}
 
 	// initialise the data area
-	memset(buffer, 0, sizeof(buffer));	
+	memset(buffer, 0, sizeof(buffer));
 
 	trap_FS_Read( buffer, len, f );
 

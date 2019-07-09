@@ -7,7 +7,7 @@
  * desc:		Quake3 bot AI
  *
  * $Archive: /StarTrek/Code-DM/game/ai_chat.c $
- * $Author: Mgummelt $ 
+ * $Author: Mgummelt $
  * $Revision: 7 $
  * $Modtime: 3/09/01 11:52a $
  * $Date: 3/09/01 12:02p $
@@ -601,9 +601,9 @@ int BotChat_Death(bot_state_t *bs) {
 							NULL);
 			}
 			//choose between insult and praise
-			else 
+			else
 #endif //0
-				
+
 			if (random() < trap_Characteristic_BFloat(bs->character, CHARACTERISTIC_CHAT_INSULT, 0, 1)) {
 				BotAI_BotInitialChat(bs, "death_insult",
 							name,												// 0

@@ -27,7 +27,7 @@ SINGLE PLAYER SKILL MENU
 #define ID_MAINMENU					17
 
 
-typedef struct 
+typedef struct
 {
 	menuframework_s	menu;
 
@@ -53,7 +53,7 @@ typedef struct
 
 static skillMenuInfo_t	skillMenuInfo;
 
-int skillButtonY[5] = 
+int skillButtonY[5] =
 {
 	131,
 	161,
@@ -67,9 +67,9 @@ int skillButtonY[5] =
 SetSkillColor
 =================
 */
-static void SetSkillColor( int skill, int color ) 
+static void SetSkillColor( int skill, int color )
 {
-	switch( skill ) 
+	switch( skill )
 	{
 	case 1:
 		skillMenuInfo.item_baby.color = color;
@@ -98,7 +98,7 @@ static void SetSkillColor( int skill, int color )
 UI_SPSkillMenu_SkillEvent
 =================
 */
-static void UI_SPSkillMenu_SkillEvent( void *ptr, int notification ) 
+static void UI_SPSkillMenu_SkillEvent( void *ptr, int notification )
 {
 	int		id;
 	int		skill;
@@ -119,11 +119,11 @@ static void UI_SPSkillMenu_SkillEvent( void *ptr, int notification )
 
 	skillMenuInfo.art_skillPic.shader = skillMenuInfo.skillpics[skill - 1];
 
-//	if( id == ID_NIGHTMARE ) 
+//	if( id == ID_NIGHTMARE )
 //	{
 //		trap_S_StartLocalSound( skillMenuInfo.nightmareSound, CHAN_ANNOUNCER );
 //	}
-//	else 
+//	else
 //	{
 		trap_S_StartLocalSound( skillMenuInfo.silenceSound, CHAN_ANNOUNCER );
 //	}
@@ -135,7 +135,7 @@ static void UI_SPSkillMenu_SkillEvent( void *ptr, int notification )
 UI_SPSkillMenu_FightEvent
 =================
 */
-static void UI_SPSkillMenu_FightEvent( void *ptr, int notification ) 
+static void UI_SPSkillMenu_FightEvent( void *ptr, int notification )
 {
 	if (notification != QM_ACTIVATED)
 	{
@@ -151,9 +151,9 @@ static void UI_SPSkillMenu_FightEvent( void *ptr, int notification )
 UI_SPSkillMenu_BackEvent
 =================
 */
-static void UI_SPSkillMenu_BackEvent( void* ptr, int notification ) 
+static void UI_SPSkillMenu_BackEvent( void* ptr, int notification )
 {
-	if (notification != QM_ACTIVATED) 
+	if (notification != QM_ACTIVATED)
 	{
 		return;
 	}
@@ -168,9 +168,9 @@ static void UI_SPSkillMenu_BackEvent( void* ptr, int notification )
 UI_SPSkillMenu_MainEvent
 =================
 */
-static void UI_SPSkillMenu_MainEvent( void* ptr, int notification ) 
+static void UI_SPSkillMenu_MainEvent( void* ptr, int notification )
 {
-	if (notification != QM_ACTIVATED) 
+	if (notification != QM_ACTIVATED)
 	{
 		return;
 	}
@@ -184,9 +184,9 @@ static void UI_SPSkillMenu_MainEvent( void* ptr, int notification )
 UI_SPSkillMenu_Key
 =================
 */
-static sfxHandle_t UI_SPSkillMenu_Key( int key ) 
+static sfxHandle_t UI_SPSkillMenu_Key( int key )
 {
-	if( key == K_MOUSE2 || key == K_ESCAPE ) 
+	if( key == K_MOUSE2 || key == K_ESCAPE )
 	{
 		trap_S_StartLocalSound( skillMenuInfo.silenceSound, CHAN_ANNOUNCER );
 	}
@@ -198,7 +198,7 @@ static sfxHandle_t UI_SPSkillMenu_Key( int key )
 UI_SPSkillMenu_MenuDraw
 =================
 */
-static void UI_SPSkillMenu_MenuDraw( void ) 
+static void UI_SPSkillMenu_MenuDraw( void )
 {
 	UI_MenuFrame2(&skillMenuInfo.menu);
 
@@ -240,11 +240,11 @@ static void UI_SPSkillMenu_MenuDraw( void )
 
 	// Left rounded ends for mainmenu and back buttons
 	trap_R_SetColor( colorTable[skillMenuInfo.mainmenu.color]);
-	UI_DrawHandlePic(110 - 14, skillMenuInfo.mainmenu.generic.y, 
+	UI_DrawHandlePic(110 - 14, skillMenuInfo.mainmenu.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
 	trap_R_SetColor( colorTable[ skillMenuInfo.item_back.color]);
-	UI_DrawHandlePic(110 - 14, skillMenuInfo.item_back.generic.y, 
+	UI_DrawHandlePic(110 - 14, skillMenuInfo.item_back.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
 	// standard menu drawing
@@ -257,7 +257,7 @@ static void UI_SPSkillMenu_MenuDraw( void )
 UI_SPSkillMenu_Cache
 =================
 */
-void UI_SPSkillMenu_Cache( void ) 
+void UI_SPSkillMenu_Cache( void )
 {
 	skillMenuInfo.skillpics[0] = trap_R_RegisterShaderNoMip( ART_MAP_COMPLETE1 );
 	skillMenuInfo.skillpics[1] = trap_R_RegisterShaderNoMip( ART_MAP_COMPLETE2 );
@@ -277,7 +277,7 @@ void UI_SPSkillMenu_Cache( void )
 UI_SPSkillMenu_Init
 =================
 */
-static void UI_SPSkillMenu_Init( void ) 
+static void UI_SPSkillMenu_Init( void )
 {
 	int		skill,x;
 
@@ -396,7 +396,7 @@ static void UI_SPSkillMenu_Init( void )
 	skillMenuInfo.item_nightmare.textcolor			= CT_BLACK;
 	skillMenuInfo.item_nightmare.textcolor2			= CT_WHITE;
 
-	skillMenuInfo.mainmenu.generic.type				= MTYPE_BITMAP;      
+	skillMenuInfo.mainmenu.generic.type				= MTYPE_BITMAP;
 	skillMenuInfo.mainmenu.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	skillMenuInfo.mainmenu.generic.x				= 110;
 	skillMenuInfo.mainmenu.generic.y				= 391;
@@ -452,7 +452,7 @@ static void UI_SPSkillMenu_Init( void )
 	skillMenuInfo.art_skillPic.generic.x		= 354;
 	skillMenuInfo.art_skillPic.generic.y		= 324;
 	skillMenuInfo.art_skillPic.width			= 128;
-	skillMenuInfo.art_skillPic.height			= 96; 
+	skillMenuInfo.art_skillPic.height			= 96;
 
 	Menu_AddItem( &skillMenuInfo.menu, ( void * )&skillMenuInfo.item_dotl );
 	Menu_AddItem( &skillMenuInfo.menu, ( void * )&skillMenuInfo.item_dotr );
@@ -479,7 +479,7 @@ static void UI_SPSkillMenu_Init( void )
 UI_SPSkillMenu
 =================
 */
-void UI_SPSkillMenu( const char *arenaInfo ) 
+void UI_SPSkillMenu( const char *arenaInfo )
 {
 	UI_SPSkillMenu_Init();
 	skillMenuInfo.arenaInfo = arenaInfo;

@@ -11,7 +11,7 @@ static void CG_ObjectivesDown_f( void ) {
 	cg.showObjectives = qtrue;
 }
 
-static void CG_ObjectivesUp_f( void ) 
+static void CG_ObjectivesUp_f( void )
 {
 	cg.showObjectives = qfalse;
 }
@@ -64,7 +64,7 @@ Debugging command to print the current position
 */
 static void CG_Viewpos_f (void) {
 	CG_Printf ("%s (%i %i %i) : %i\n", cgs.mapname, (int)cg.refdef.vieworg[0],
-		(int)cg.refdef.vieworg[1], (int)cg.refdef.vieworg[2], 
+		(int)cg.refdef.vieworg[1], (int)cg.refdef.vieworg[2],
 		(int)cg.refdefViewAngles[YAW]);
 }
 

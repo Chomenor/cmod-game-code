@@ -22,16 +22,16 @@ void MField_Draw( mfield_t *edit, int x, int y, int style, vec4_t color,int curs
 	len     = strlen( edit->buffer ) + 1;
 
 	// guarantee that cursor will be visible
-	if ( len <= drawLen ) 
+	if ( len <= drawLen )
 	{
 		prestep = 0;
-	} 
-	else 
+	}
+	else
 	{
-		if ( edit->scroll + drawLen > len ) 
+		if ( edit->scroll + drawLen > len )
 		{
 			edit->scroll = len - drawLen;
-			if ( edit->scroll < 0 ) 
+			if ( edit->scroll < 0 )
 			{
 				edit->scroll = 0;
 			}
@@ -39,13 +39,13 @@ void MField_Draw( mfield_t *edit, int x, int y, int style, vec4_t color,int curs
 		prestep = edit->scroll;
 	}
 
-	if ( prestep + drawLen > len ) 
+	if ( prestep + drawLen > len )
 	{
 		drawLen = len - prestep;
 	}
 
 	// extract <drawLen> characters from the field at <prestep>
-	if ( drawLen >= MAX_STRING_CHARS ) 
+	if ( drawLen >= MAX_STRING_CHARS )
 	{
 		trap_Error( "drawLen >= MAX_STRING_CHARS" );
 	}
@@ -55,16 +55,16 @@ void MField_Draw( mfield_t *edit, int x, int y, int style, vec4_t color,int curs
 	UI_DrawString( x, y, str, style, color );
 
 	// draw the cursor
-	if (!cursor) 
+	if (!cursor)
 	{
 		return;
 	}
 
-	if ( trap_Key_GetOverstrikeMode() ) 
+	if ( trap_Key_GetOverstrikeMode() )
 	{
 		cursorChar = 11;
-	} 
-	else 
+	}
+	else
 	{
 		cursorChar = 10;
 	}
@@ -95,7 +95,7 @@ void MField_Draw( mfield_t *edit, int x, int y, int style, vec4_t color,int curs
 		len = strlen(str);
 		x = x - len*charw;
 	}
-	
+
 	if(!((uis.realtime/BLINK_DIVISOR) & 1))
 	{
 		UI_DrawChar( x + ( edit->cursor - prestep ) * charw, y, cursorChar, style & ~(UI_CENTER|UI_RIGHT), color );
@@ -143,13 +143,13 @@ void MField_KeyDownEvent( mfield_t *edit, int key ) {
 
 	if ( key == K_DEL || key == K_KP_DEL ) {
 		if ( edit->cursor < len ) {
-			memmove( edit->buffer + edit->cursor, 
+			memmove( edit->buffer + edit->cursor,
 				edit->buffer + edit->cursor + 1, len - edit->cursor );
 		}
 		return;
 	}
 
-	if ( key == K_RIGHTARROW || key == K_KP_RIGHTARROW ) 
+	if ( key == K_RIGHTARROW || key == K_KP_RIGHTARROW )
 	{
 		if ( edit->cursor < len ) {
 			edit->cursor++;
@@ -161,7 +161,7 @@ void MField_KeyDownEvent( mfield_t *edit, int key ) {
 		return;
 	}
 
-	if ( key == K_LEFTARROW || key == K_KP_LEFTARROW ) 
+	if ( key == K_LEFTARROW || key == K_KP_LEFTARROW )
 	{
 		if ( edit->cursor > 0 ) {
 			edit->cursor--;
@@ -215,7 +215,7 @@ void MField_CharEvent( mfield_t *edit, int ch ) {
 
 	if ( ch == 'h' - 'a' + 1 )	{	// ctrl-h is backspace
 		if ( edit->cursor > 0 ) {
-			memmove( edit->buffer + edit->cursor - 1, 
+			memmove( edit->buffer + edit->cursor - 1,
 				edit->buffer + edit->cursor, len + 1 - edit->cursor );
 			edit->cursor--;
 			if ( edit->cursor < edit->scroll )
@@ -247,7 +247,7 @@ void MField_CharEvent( mfield_t *edit, int ch ) {
 		return;
 	}
 
-	if ( !trap_Key_GetOverstrikeMode() ) {	
+	if ( !trap_Key_GetOverstrikeMode() ) {
 		if ((edit->cursor == MAX_EDIT_LINE - 1) || (edit->maxchars && edit->cursor >= edit->maxchars))
 			return;
 	} else {
@@ -308,8 +308,8 @@ void MenuField_Init( menufield_s* m ) {
 	{
 		w = GIANTCHAR_WIDTH;
 		h = GIANTCHAR_HEIGHT;
-	}	
-	else 
+	}
+	else
 	{
 		w = SMALLCHAR_WIDTH;
 		h = SMALLCHAR_HEIGHT;
@@ -318,7 +318,7 @@ void MenuField_Init( menufield_s* m ) {
 
 
 	if (m->generic.name) {
-		l = (strlen( m->generic.name )+1) * w;		
+		l = (strlen( m->generic.name )+1) * w;
 	}
 	else {
 		l = 0;
@@ -366,8 +366,8 @@ void MenuField_Draw( menufield_s *f )
 		w = GIANTCHAR_WIDTH;
 		h = GIANTCHAR_HEIGHT;
 		style = UI_GIANTFONT;
-	}	
-	else 
+	}
+	else
 	{
 		w = SMALLCHAR_WIDTH;
 		h = SMALLCHAR_HEIGHT;
@@ -375,7 +375,7 @@ void MenuField_Draw( menufield_s *f )
 	}
 
 
-	if (Menu_ItemAtCursor( f->generic.parent ) == f) 
+	if (Menu_ItemAtCursor( f->generic.parent ) == f)
 	{
 		focus = qtrue;
 		style |= UI_SHOWCOLOR;
@@ -400,8 +400,8 @@ void MenuField_Draw( menufield_s *f )
 	// draw higlighted box
 	if ( focus )
 	{
-		UI_FillRect( f->generic.left, f->generic.top, f->generic.right-f->generic.left+1, 
-			f->generic.bottom-f->generic.top+1, listbar_color ); 
+		UI_FillRect( f->generic.left, f->generic.top, f->generic.right-f->generic.left+1,
+			f->generic.bottom-f->generic.top+1, listbar_color );
 
 		// Print description
 		if (menu_button_text[f->field.titleEnum][1])
@@ -411,21 +411,21 @@ void MenuField_Draw( menufield_s *f )
 		}
 	}
 
-	if ( f->field.titleEnum ) 
+	if ( f->field.titleEnum )
 	{
 		if (f->field.titlecolor)
-		{ 
+		{
 			titleColor = f->field.titlecolor;
 		}
 		else
-		{ 
+		{
 			titleColor = CT_BLACK;
 		}
 
-		UI_DrawProportionalString(  x - 10, y, menu_button_text[f->field.titleEnum][0],UI_RIGHT | UI_SMALLFONT, colorTable[titleColor]);	
+		UI_DrawProportionalString(  x - 10, y, menu_button_text[f->field.titleEnum][0],UI_RIGHT | UI_SMALLFONT, colorTable[titleColor]);
 	}
 
-	if ( f->generic.name ) 
+	if ( f->generic.name )
 	{
 		UI_DrawString( x - w, y, f->generic.name, style|UI_RIGHT, colorTable[color] );
 	}

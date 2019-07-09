@@ -30,7 +30,7 @@ SOUND OPTIONS MENU
 =======================================================================
 */
 
-typedef struct 
+typedef struct
 {
 	menuframework_s		menu;
 
@@ -52,17 +52,17 @@ typedef struct
 
 static soundOptionsInfo_t	soundOptionsInfo;
 
-static void SoundQualityAction( qboolean result ) 
+static void SoundQualityAction( qboolean result )
 {
-	if ( result ) 
+	if ( result )
 	{
-		soundOptionsInfo.holdSoundQuality = soundOptionsInfo.quality.curvalue; 
-		if( soundOptionsInfo.quality.curvalue ) 
+		soundOptionsInfo.holdSoundQuality = soundOptionsInfo.quality.curvalue;
+		if( soundOptionsInfo.quality.curvalue )
 		{
 			trap_Cvar_SetValue( "s_khz", 22 );
 //			trap_Cvar_SetValue( "s_compression", 0 );
 		}
-		else 
+		else
 		{
 			trap_Cvar_SetValue( "s_khz", 11 );
 //			trap_Cvar_SetValue( "s_compression", 1 );
@@ -72,7 +72,7 @@ static void SoundQualityAction( qboolean result )
 	}
 	else
 	{
-		soundOptionsInfo.quality.curvalue =	soundOptionsInfo.holdSoundQuality; 
+		soundOptionsInfo.quality.curvalue =	soundOptionsInfo.holdSoundQuality;
 	}
 }
 
@@ -82,35 +82,35 @@ UI_SoundOptionsMenu_Event
 =================
 */
 
-static void UI_SoundOptionsMenu_Event( void* ptr, int event ) 
+static void UI_SoundOptionsMenu_Event( void* ptr, int event )
 {
 	int holdCurvalue;
 
-	if( event != QM_ACTIVATED ) 
+	if( event != QM_ACTIVATED )
 	{
 		return;
 	}
 
-	switch( ((menucommon_s*)ptr)->id ) 
+	switch( ((menucommon_s*)ptr)->id )
 	{
 	case ID_RATE:
-		if( soundOptionsInfo.rate.curvalue == 0 ) 
+		if( soundOptionsInfo.rate.curvalue == 0 )
 		{
 			trap_Cvar_SetValue( "rate", 2500 );
 		}
-		else if( soundOptionsInfo.rate.curvalue == 1 ) 
+		else if( soundOptionsInfo.rate.curvalue == 1 )
 		{
 			trap_Cvar_SetValue( "rate", 3000 );
 		}
-		else if( soundOptionsInfo.rate.curvalue == 2 ) 
+		else if( soundOptionsInfo.rate.curvalue == 2 )
 		{
 			trap_Cvar_SetValue( "rate", 4000 );
 		}
-		else if( soundOptionsInfo.rate.curvalue == 3 ) 
+		else if( soundOptionsInfo.rate.curvalue == 3 )
 		{
 			trap_Cvar_SetValue( "rate", 5000 );
 		}
-		else if( soundOptionsInfo.rate.curvalue == 4 ) 
+		else if( soundOptionsInfo.rate.curvalue == 4 )
 		{
 			trap_Cvar_SetValue( "rate", 25000 );
 		}
@@ -187,9 +187,9 @@ void M_Sound_Graphics (void)
 	trap_R_SetColor( colorTable[CT_DKBROWN1]);
 	UI_DrawHandlePic(356,342,  8, 93, uis.whiteShader);		// Middle Bottom Left column
 	trap_R_SetColor( colorTable[CT_LTPURPLE1]);
-	UI_DrawHandlePic( 98, 359, 248, 64,soundOptionsInfo.grid); 
+	UI_DrawHandlePic( 98, 359, 248, 64,soundOptionsInfo.grid);
 	trap_R_SetColor( colorTable[CT_LTBLUE1]);
-	UI_DrawHandlePic( 98, 359, 248, 64, soundOptionsInfo.wave1); 
+	UI_DrawHandlePic( 98, 359, 248, 64, soundOptionsInfo.wave1);
 	trap_R_SetColor( colorTable[CT_DKBROWN1]);
 	UI_DrawHandlePic(96,359,  4, 64, uis.whiteShader);		// Left side of frame
 	UI_DrawHandlePic(342,359,  4, 64, uis.whiteShader);		// Right side of frame
@@ -199,9 +199,9 @@ void M_Sound_Graphics (void)
 
 	UI_DrawHandlePic(367,342,  8, 93, uis.whiteShader);		// Middle Bottom Right column
 	trap_R_SetColor( colorTable[CT_LTPURPLE1]);
-	UI_DrawHandlePic( 392, 359, 220, 64, soundOptionsInfo.grid); 
+	UI_DrawHandlePic( 392, 359, 220, 64, soundOptionsInfo.grid);
 	trap_R_SetColor( colorTable[CT_LTRED1]);
-	UI_DrawHandlePic( 392, 359, 220, 64, soundOptionsInfo.wave2); 
+	UI_DrawHandlePic( 392, 359, 220, 64, soundOptionsInfo.wave2);
 	trap_R_SetColor( colorTable[CT_DKBROWN1]);
 	UI_DrawHandlePic(392, 359,   4, 64, uis.whiteShader);		// Left side of frame
 	UI_DrawHandlePic(608, 359,   4, 64, uis.whiteShader);		// Right side of frame
@@ -247,7 +247,7 @@ static sfxHandle_t M_Sound_MenuKey( int key )
 SoundMenu_Cache
 ===============
 */
-void UI_SoundMenu_Cache( void ) 
+void UI_SoundMenu_Cache( void )
 {
 	soundOptionsInfo.corner =  trap_R_RegisterShaderNoMip("menu/common/con_ssetup.tga");
 	soundOptionsInfo.grid =  trap_R_RegisterShaderNoMip("menu/special/grid.tga");
@@ -261,7 +261,7 @@ void UI_SoundMenu_Cache( void )
 SoundMenu_Init
 ===============
 */
-void SoundMenu_Init(void) 
+void SoundMenu_Init(void)
 {
 	int x,y;
 	int	rate;
@@ -404,30 +404,30 @@ void SoundMenu_Init(void)
 	soundOptionsInfo.sfxvolume.curvalue = trap_Cvar_VariableValue( "s_volume" ) * 10;
 	soundOptionsInfo.musicvolume.curvalue = trap_Cvar_VariableValue( "s_musicvolume" ) * 10;
 	soundOptionsInfo.quality.curvalue = trap_Cvar_VariableValue( "s_khz" ) != 11;
-	soundOptionsInfo.holdSoundQuality = soundOptionsInfo.quality.curvalue; 
+	soundOptionsInfo.holdSoundQuality = soundOptionsInfo.quality.curvalue;
 	soundOptionsInfo.a3d.curvalue = (int)trap_Cvar_VariableValue( "s_usingA3D" );
 
 	soundOptionsInfo.menu.initialized = qtrue;
 
 
 	rate = trap_Cvar_VariableValue( "rate" );
-	if( rate <= 2500 ) 
+	if( rate <= 2500 )
 	{
 		soundOptionsInfo.rate.curvalue = 0;
 	}
-	else if( rate <= 3000 ) 
+	else if( rate <= 3000 )
 	{
 		soundOptionsInfo.rate.curvalue = 1;
 	}
-	else if( rate <= 4000 ) 
+	else if( rate <= 4000 )
 	{
 		soundOptionsInfo.rate.curvalue = 2;
 	}
-	else if( rate <= 5000 ) 
+	else if( rate <= 5000 )
 	{
 		soundOptionsInfo.rate.curvalue = 3;
 	}
-	else 
+	else
 	{
 		soundOptionsInfo.rate.curvalue = 4;
 	}
@@ -438,12 +438,12 @@ void SoundMenu_Init(void)
 UI_SoundMenu
 ===============
 */
-void UI_SoundMenu( void) 
+void UI_SoundMenu( void)
 {
-	
+
 //	if (!s_sound.menu.initialized)
 //	{
-		SoundMenu_Init(); 
+		SoundMenu_Init();
 //	}
 
 	UI_PushMenu( &soundOptionsInfo.menu);

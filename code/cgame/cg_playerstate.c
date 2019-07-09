@@ -134,7 +134,7 @@ void CG_DamageFeedback( int yawByte, int pitchByte, int damage, int shielddamage
 		}
 
 		cg.v_dmg_roll = kick * left;
-		
+
 		cg.v_dmg_pitch = -kick * front;
 
 		if ( front <= 0.1 ) {
@@ -229,7 +229,7 @@ void CG_CheckPlayerstateEvents( playerState_t *ps, playerState_t *ops ) {
 			// or the server told us to play another event instead of a predicted event we already issued
 			// or something the server told us changed our prediction causing a different event
 			|| (i > ops->eventSequence - MAX_PS_EVENTS && ps->events[i & (MAX_PS_EVENTS-1)] != ops->events[i & (MAX_PS_EVENTS-1)]) ) {
-			
+
 			event = ps->events[ i & (MAX_PS_EVENTS-1) ];
 			cent->currentState.event = event;
 			cent->currentState.eventParm = ps->eventParms[ i & (MAX_PS_EVENTS-1) ];
@@ -436,7 +436,7 @@ void CG_CheckDamageDealt(playerState_t *ps, playerState_t *ops)
 			Com_Printf("Damage this second:  %d\n", damageamount);
 			damageamount = 0;
 		}
-	}			
+	}
 }
 
 
@@ -470,7 +470,7 @@ void CG_TransitionPlayerState( playerState_t *ps, playerState_t *ops ) {
 		cg.mapRestart = qfalse;
 	}
 */
-	if ( cg.snap->ps.pm_type != PM_INTERMISSION 
+	if ( cg.snap->ps.pm_type != PM_INTERMISSION
 		&& ps->persistant[PERS_TEAM] != TEAM_SPECTATOR && !(ps->eFlags&EF_ELIMINATED)) {
 		CG_CheckLocalSounds( ps, ops );
 	}

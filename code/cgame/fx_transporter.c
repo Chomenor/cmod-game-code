@@ -35,7 +35,7 @@ qboolean TransporterParticle( localEntity_t *le)
 					0.0f,
 					450.0f,
 					shader );
-	
+
 	VectorScale( velocity, -1, velocity );
 	VectorScale( accel, -1, accel );
 

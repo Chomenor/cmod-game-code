@@ -295,7 +295,7 @@ static sfxHandle_t M_Fonts_MenuKey( int key )
 UI_FontsMenu_Cache
 ===============
 */
-void UI_FontsMenu_Cache( void ) 
+void UI_FontsMenu_Cache( void )
 {
 	;
 }
@@ -306,7 +306,7 @@ void UI_FontsMenu_Cache( void )
 FontsMenu_Init
 ===============
 */
-void FontsMenu_Init(void) 
+void FontsMenu_Init(void)
 {
 	UI_FontsMenu_Cache();
 
@@ -325,7 +325,7 @@ void FontsMenu_Init(void)
 
 	SetupMenu_TopButtons(&s_fonts_menu,MENU_FONTS,NULL);
 
-	s_fonts_small.generic.type			= MTYPE_BITMAP;      
+	s_fonts_small.generic.type			= MTYPE_BITMAP;
 	s_fonts_small.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_fonts_small.generic.x				= 100;
 	s_fonts_small.generic.y				= 170;
@@ -342,7 +342,7 @@ void FontsMenu_Init(void)
 	s_fonts_small.textcolor				= CT_BLACK;
 	s_fonts_small.textcolor2			= CT_WHITE;
 
-	s_fonts_medium.generic.type			= MTYPE_BITMAP;      
+	s_fonts_medium.generic.type			= MTYPE_BITMAP;
 	s_fonts_medium.generic.flags		= QMF_HIGHLIGHT_IF_FOCUS;
 	s_fonts_medium.generic.x			= 250;
 	s_fonts_medium.generic.y			= 170;
@@ -359,7 +359,7 @@ void FontsMenu_Init(void)
 	s_fonts_medium.textcolor			= CT_BLACK;
 	s_fonts_medium.textcolor2			= CT_WHITE;
 
-	s_fonts_large.generic.type			= MTYPE_BITMAP;      
+	s_fonts_large.generic.type			= MTYPE_BITMAP;
 	s_fonts_large.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_fonts_large.generic.x				= 400;
 	s_fonts_large.generic.y				= 170;
@@ -376,7 +376,7 @@ void FontsMenu_Init(void)
 	s_fonts_large.textcolor				= CT_BLACK;
 	s_fonts_large.textcolor2			= CT_WHITE;
 
-	s_fonts_grid.generic.type			= MTYPE_BITMAP;      
+	s_fonts_grid.generic.type			= MTYPE_BITMAP;
 	s_fonts_grid.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_fonts_grid.generic.x				= 550;
 	s_fonts_grid.generic.y				= 170;
@@ -407,10 +407,10 @@ void FontsMenu_Init(void)
 UI_FontsMenu
 ===============
 */
-void UI_FontsMenu( void) 
+void UI_FontsMenu( void)
 {
-	
-	FontsMenu_Init(); 
+
+	FontsMenu_Init();
 
 	UI_PushMenu( &s_fonts_menu);
 }

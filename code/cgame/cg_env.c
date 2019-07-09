@@ -41,7 +41,7 @@ qboolean SparkThink( localEntity_t *le)
 	//cgi_S_StartSound( origin, ENTITYNUM_WORLD, CHAN_AUTO, cgi_S_RegisterSound( va( "sound/world/ric%d.wav", (rand() & 2)+1) ) );
 
 	numSparks = 8 + (random() * 4.0f);
-	
+
 	scale = 0.2f + (random() *0.4);
 	VectorMA( le->refEntity.origin, 24.0f + (crandom() * 4.0f), dir, end );
 
@@ -55,14 +55,14 @@ qboolean SparkThink( localEntity_t *le)
 				0.25f,
 				125.0f,
 				cgs.media.sparkShader );
-	
+
 	for ( i = 0; i < numSparks; i++ )
-	{	
+	{
 		scale = 0.2f + (random() *0.4);
 
 		for ( j = 0; j < 3; j ++ )
 			direction[j] = dir[j] + (0.25f * crandom());
-		
+
 		VectorNormalize(direction);
 
 		VectorMA( le->refEntity.origin, 0.0f + ( random() * 2.0f ), direction, start );
@@ -83,7 +83,7 @@ qboolean SparkThink( localEntity_t *le)
 	{
 		numSparks = 1 + (random() * 2.0f);
 		for ( i = 0; i < numSparks; i++ )
-		{	
+		{
 			scale = 0.5f + (random() * 0.5f);
 
 			VectorScale( direction, 250, velocity );
@@ -111,9 +111,9 @@ qboolean SparkThink( localEntity_t *le)
 
 	VectorSet( velocity, 0, 0, 8 );
 
-	FX_AddSprite(	direction, 
-					velocity, 
-					qfalse, 
+	FX_AddSprite(	direction,
+					velocity,
+					qfalse,
 					scale,
 					scale,
 					alpha,
@@ -167,15 +167,15 @@ qboolean SteamThink( localEntity_t *le )
 	dscale = scale * 4.0;
 
 	FX_AddSprite(	le->refEntity.origin,
-					velocity, 
-					qfalse, 
-					scale, 
-					dscale, 
-					1.0f, 
+					velocity,
+					qfalse,
+					scale,
+					dscale,
+					1.0f,
 					0.0f,
 					random() * 360,
 					0.25f,
-					300,//(len / speed) * 1000, 
+					300,//(len / speed) * 1000,
 					cgs.media.steamShader );
 
 	return qtrue;
@@ -234,8 +234,8 @@ void BoltSparkSpew( vec3_t origin, vec3_t normal )
 
 qboolean BoltFireback( localEntity_t *le)
 {
-//localEntity_t *FX_AddElectricity( vec3_t origin, vec3_t origin2, float stScale, float scale, float dscale, 
-//									float startalpha, float endalpha, float killTime, qhandle_t shader, float deviation );							
+//localEntity_t *FX_AddElectricity( vec3_t origin, vec3_t origin2, float stScale, float scale, float dscale,
+//									float startalpha, float endalpha, float killTime, qhandle_t shader, float deviation );
 	float killTime = (0 == le->data.spawner.delay)?10000:200;
 
 	FX_AddElectricity(le->refEntity.origin, le->data.spawner.dir, 0.2f, 15.0, -15.0, 1.0, 0.5, killTime,
@@ -632,7 +632,7 @@ void CG_Chunks( vec3_t origin, vec3_t dir, float scale, material_type_t type )
 		{
 			re->hModel = cgs.media.chunkModels[type][irandom(0,5)];
 		}
-		
+
 		le->pos.trType = TR_GRAVITY;
 		le->pos.trTime = cg.time;
 		le->angles.trType = TR_INTERPOLATE;

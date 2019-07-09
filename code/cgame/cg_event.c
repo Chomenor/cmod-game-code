@@ -92,30 +92,30 @@ static void CG_Obituary( entityState_t *ent ) {
 	attacker = ent->otherEntityNum2;
 	mod = ent->eventParm;
 
-	if ( target < 0 || target >= MAX_CLIENTS ) 
+	if ( target < 0 || target >= MAX_CLIENTS )
 	{
 		CG_Error( "CG_Obituary: target out of range" );
 	}
 
-	if ( attacker < 0 || attacker >= MAX_CLIENTS ) 
+	if ( attacker < 0 || attacker >= MAX_CLIENTS )
 	{
 		attacker = ENTITYNUM_WORLD;
 		attackerInfo = NULL;
-	} 
-	else 
+	}
+	else
 	{
 		attackerInfo = CG_ConfigString( CS_PLAYERS + attacker );
 	}
 
 	targetInfo = CG_ConfigString( CS_PLAYERS + target );
-	if ( !targetInfo ) 
+	if ( !targetInfo )
 	{
 		return;
 	}
 	Q_strncpyz( targetName, Info_ValueForKey( targetInfo, "n" ), sizeof(targetName) - 2);
 //	strcat( targetName, S_COLOR_WHITE );
 
-	switch( mod ) 
+	switch( mod )
 	{
 	case MOD_WATER:
 		method = ingame_text[IGT_DROWNING];
@@ -231,7 +231,7 @@ static void CG_Obituary( entityState_t *ent ) {
 	}
 
 	// If killed self, send "Casualty" message.
-	if (attacker == target || attacker == ENTITYNUM_WORLD || !attackerInfo) 
+	if (attacker == target || attacker == ENTITYNUM_WORLD || !attackerInfo)
 	{	// Killed self
 		CG_Printf(S_COLOR_CYAN"%s: "S_COLOR_WHITE"%10s   "S_COLOR_CYAN"%s: "S_COLOR_WHITE"%s\n", ingame_text[IGT_CASUALTY],targetName,ingame_text[IGT_METHOD], method);
 		return;
@@ -241,13 +241,13 @@ static void CG_Obituary( entityState_t *ent ) {
 	if ( attacker == cg.snap->ps.clientNum ) {
 		char	*s;
 
-		if ( cgs.gametype < GT_TEAM ) 
+		if ( cgs.gametype < GT_TEAM )
 		{
-			s = va("%s %s\n%s %s %i", ingame_text[IGT_YOUELIMINATED],targetName, 
+			s = va("%s %s\n%s %s %i", ingame_text[IGT_YOUELIMINATED],targetName,
 					CG_PlaceString( cg.snap->ps.persistant[PERS_RANK] + 1 ),ingame_text[IGT_PLACEWITH],
 					cg.snap->ps.persistant[PERS_SCORE] );
-		} 
-		else 
+		}
+		else
 		{
 			//Assimilated message as well
 			if ( mod == MOD_ASSIMILATE )
@@ -265,12 +265,12 @@ static void CG_Obituary( entityState_t *ent ) {
 	}
 
 	// check for double client messages
-	if ( !attackerInfo ) 
+	if ( !attackerInfo )
 	{
 		attacker = ENTITYNUM_WORLD;
 		strcpy( attackerName, "noname" );
-	} 
-	else 
+	}
+	else
 	{
 		Q_strncpyz( attackerName, Info_ValueForKey( attackerInfo, "n" ), sizeof(attackerName) - 2);
 //		strcat( attackerName, S_COLOR_WHITE );
@@ -280,7 +280,7 @@ static void CG_Obituary( entityState_t *ent ) {
 		}
 	}
 
-	CG_Printf(S_COLOR_CYAN"%s: "S_COLOR_WHITE"%10s   "S_COLOR_CYAN"%s: "S_COLOR_WHITE"%10s   "S_COLOR_CYAN"%s: "S_COLOR_WHITE"%s\n", 
+	CG_Printf(S_COLOR_CYAN"%s: "S_COLOR_WHITE"%10s   "S_COLOR_CYAN"%s: "S_COLOR_WHITE"%10s   "S_COLOR_CYAN"%s: "S_COLOR_WHITE"%s\n",
 			ingame_text[IGT_OBITELIMINATED],targetName,ingame_text[IGT_CREDIT],attackerName, ingame_text[IGT_METHOD], method);
 }
 
@@ -296,7 +296,7 @@ static void CG_UseItem( centity_t *cent ) {
 	entityState_t *es;
 
 	es = &cent->currentState;
-	
+
 	itemNum = (es->event & ~EV_EVENT_BITS) - EV_USE_ITEM0;
 	if ( itemNum < 0 || itemNum > HI_NUM_HOLDABLE ) {
 		itemNum = 0;
@@ -432,7 +432,7 @@ void CG_PainEvent( centity_t *cent, int health ) {
 	} else {
 		snd = "*pain100.wav";
 	}
-	trap_S_StartSound( NULL, cent->currentState.number, CHAN_VOICE, 
+	trap_S_StartSound( NULL, cent->currentState.number, CHAN_VOICE,
 		CG_CustomSound( cent->currentState.number, snd ) );
 
 	// save pain time for programitic twitch animation
@@ -483,35 +483,35 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 	case EV_FOOTSTEP:
 		DEBUGNAME("EV_FOOTSTEP");
 		if (cg_footsteps.integer) {
-			trap_S_StartSound (NULL, es->number, CHAN_BODY, 
+			trap_S_StartSound (NULL, es->number, CHAN_BODY,
 				cgs.media.footsteps[ ci->footsteps ][rand()&3] );
 		}
 		break;
 	case EV_FOOTSTEP_METAL:
 		DEBUGNAME("EV_FOOTSTEP_METAL");
 		if (cg_footsteps.integer) {
-			trap_S_StartSound (NULL, es->number, CHAN_BODY, 
+			trap_S_StartSound (NULL, es->number, CHAN_BODY,
 				cgs.media.footsteps[ FOOTSTEP_METAL ][rand()&3] );
 		}
 		break;
 	case EV_FOOTSPLASH:
 		DEBUGNAME("EV_FOOTSPLASH");
 		if (cg_footsteps.integer) {
-			trap_S_StartSound (NULL, es->number, CHAN_BODY, 
+			trap_S_StartSound (NULL, es->number, CHAN_BODY,
 				cgs.media.footsteps[ FOOTSTEP_SPLASH ][rand()&3] );
 		}
 		break;
 	case EV_FOOTWADE:
 		DEBUGNAME("EV_FOOTWADE");
 		if (cg_footsteps.integer) {
-			trap_S_StartSound (NULL, es->number, CHAN_BODY, 
+			trap_S_StartSound (NULL, es->number, CHAN_BODY,
 				cgs.media.footsteps[ FOOTSTEP_SPLASH ][rand()&3] );
 		}
 		break;
 	case EV_SWIM:
 		DEBUGNAME("EV_SWIM");
 		if (cg_footsteps.integer) {
-			trap_S_StartSound (NULL, es->number, CHAN_BODY, 
+			trap_S_StartSound (NULL, es->number, CHAN_BODY,
 				cgs.media.footsteps[ FOOTSTEP_SPLASH ][rand()&3] );
 		}
 		break;
@@ -679,7 +679,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 					clientInfo_t	*us;
 
 					us = &cgs.clientinfo[ cg.snap->ps.clientNum ];
-					
+
 					if (us->team != TEAM_SPECTATOR)
 					{
 						// red or blue?
@@ -879,13 +879,13 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 
 	case EV_IMOD:
 		DEBUGNAME("EV_IMOD");
-		ByteToDir( es->eventParm, dir );		
+		ByteToDir( es->eventParm, dir );
 		FX_IMODShot( cent->lerpOrigin, cent->currentState.origin2, dir );
 		break;
 
 	case EV_IMOD_ALTFIRE:
 		DEBUGNAME("EV_IMOD_ALTFIRE");
-		ByteToDir( es->eventParm, dir );		
+		ByteToDir( es->eventParm, dir );
 		FX_AltIMODShot( cent->lerpOrigin, cent->currentState.origin2, dir );
 		break;
 
@@ -918,7 +918,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 
 	case EV_GRENADE_SHRAPNEL_EXPLODE:
 		DEBUGNAME("EV_GRENADE_SHRAPNEL_EXPLODE");
-		ByteToDir( es->eventParm, dir );		
+		ByteToDir( es->eventParm, dir );
 		FX_GrenadeShrapnelExplode( position, dir );
 		break;
 
@@ -929,13 +929,13 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 		break;
 
 	case EV_DETPACK:
-        DEBUGNAME("EV_DETPACK");
+		DEBUGNAME("EV_DETPACK");
 		FX_Detpack(cent->lerpOrigin);
 		break;
 
 	case EV_DREADNOUGHT_MISS:
 		DEBUGNAME("EV_DREADNOUGHT_MISS");
-		ByteToDir( es->eventParm, dir );		
+		ByteToDir( es->eventParm, dir );
 		FX_DreadnoughtShotMiss( cent->lerpOrigin, dir );
 		break;
 
@@ -944,7 +944,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 		// lerpOrigin == muzzle
 		// angles2 == firing direction
 		UnVectorShort(cent->currentState.angles2);
-	   	FX_TetrionShot( cent->lerpOrigin, cent->currentState.angles2 );
+		FX_TetrionShot( cent->lerpOrigin, cent->currentState.angles2 );
 		break;
 
 	case EV_SHIELD_HIT:
@@ -955,7 +955,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 
 	//special effects
 
-	case EV_FX_SPARK: 
+	case EV_FX_SPARK:
 		DEBUGNAME("EV_FX_SPARK");
 		UnVectorShort(cent->currentState.angles);
 		CG_Spark( cent->lerpOrigin, cent->currentState.angles, cent->currentState.time2 );
@@ -1098,7 +1098,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 	case EV_DEATH2:
 	case EV_DEATH3:
 		DEBUGNAME("EV_DEATHx");
-		trap_S_StartSound( NULL, es->number, CHAN_VOICE, 
+		trap_S_StartSound( NULL, es->number, CHAN_VOICE,
 				CG_CustomSound( es->number, va("*death%i.wav", event - EV_DEATH1 + 1) ) );
 		break;
 
@@ -1164,7 +1164,7 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 		break;
 	case EV_POWERUP_SEEKER_FIRE:
 		DEBUGNAME("EV_POWERUP_SEEKER_FIRE");
-		CG_FireSeeker( cent ); 
+		CG_FireSeeker( cent );
 		break;
 	case EV_DEBUG_LINE:
 		DEBUGNAME("EV_DEBUG_LINE");

@@ -14,7 +14,7 @@ void FX_TetrionProjectileThink( centity_t *cent, const struct weaponInfo_s *wi )
 	if ( VectorNormalize2( cent->currentState.pos.trDelta, forward ) == 0 )
 		forward[2] = 1;
 
-	FX_AddSprite(	cent->lerpOrigin, 
+	FX_AddSprite(	cent->lerpOrigin,
 					NULL, qfalse,
 					4.0f + random() * 16.0f, 0.0f,
 					0.4f, 0.0f,
@@ -58,7 +58,7 @@ void FX_TetrionShot( vec3_t start, vec3_t forward )
 	for (i = 0; i < numBullets; i++)
 	{
 		render_impact = qtrue;
-		// determine new firing position 
+		// determine new firing position
 		fxRandCircumferencePos(start, forward, firingRadius, new_start);
 		VectorSubtract(new_start, start, radial);
 		VectorMA(start, 10, forward, start2);
@@ -69,7 +69,7 @@ void FX_TetrionShot( vec3_t start, vec3_t forward )
 		VectorMA(new_start, MAXRANGE_TETRION, spreadFwd, end);
 		CG_Trace( &trace, new_start, NULL, NULL, end, cg_entities[cg.predictedPlayerState.clientNum].currentState.number, MASK_SHOT );
 		// Get the length of the whole shot
-		VectorSubtract( trace.endpos, new_start, dir ); 
+		VectorSubtract( trace.endpos, new_start, dir );
 		len = VectorNormalize( dir );
 		// Don't do tracers when it gets really short
 		if ( len >= 64 )
@@ -87,7 +87,7 @@ void FX_TetrionShot( vec3_t start, vec3_t forward )
 		if (len >= 32)
 		{
 			// Rendering things like impacts when hitting a sky box would look bad, but you still want to see the tracer
-			if ( trace.surfaceFlags & SURF_NOIMPACT ) 
+			if ( trace.surfaceFlags & SURF_NOIMPACT )
 			{
 				render_impact = qfalse;
 			}
@@ -118,10 +118,10 @@ FX_TetrionWeaponHitWall
 void FX_TetrionWeaponHitWall( vec3_t origin, vec3_t normal )
 {
 	vec3_t	vel, accel, org;
-	int		i = 0, t = 0; 
+	int		i = 0, t = 0;
 	float	scale = random() * 2.5 + 1.5;
 
-	CG_ImpactMark( cgs.media.bulletmarksShader, origin, normal, random()*360, 1,1,1,0.2, qfalse, 
+	CG_ImpactMark( cgs.media.bulletmarksShader, origin, normal, random()*360, 1,1,1,0.2, qfalse,
 					scale, qfalse );
 
 	// Move out a hair to avoid z buffer nastiness
@@ -130,19 +130,19 @@ void FX_TetrionWeaponHitWall( vec3_t origin, vec3_t normal )
 	// Add a bit of variation every now and then
 	if ( rand() & 1 )
 	{
-		FX_AddQuad( org, normal, 
-					scale * 2, -4, 
-					0.5, 0.5, 
-					0, 
-					175, 
+		FX_AddQuad( org, normal,
+					scale * 2, -4,
+					0.5, 0.5,
+					0,
+					175,
 					cgs.media.sunnyFlareShader );
 	}
 
-	FX_AddQuad( org, normal, 
-				scale * 4, -8, 
-				1.0, 1.0, 
-				0, 
-				175, 
+	FX_AddQuad( org, normal,
+				scale * 4, -8,
+				1.0, 1.0,
+				0,
+				175,
 				cgs.media.borgFlareShader );
 
 	// Add some smoke puffs
@@ -158,13 +158,13 @@ void FX_TetrionWeaponHitWall( vec3_t origin, vec3_t normal )
 		vel[2] += 16;
 
 		VectorScale( vel, -0.25, accel );
-		FX_AddSprite( origin, 
-						vel, qfalse, 
-						random() * 4 + 2, 12, 
-						0.6 + random() * 0.4, 0.0, 
-						random() * 180, 
-						0.0, 
-						random() * 200 + 300, 
+		FX_AddSprite( origin,
+						vel, qfalse,
+						random() * 4 + 2, 12,
+						0.6 + random() * 0.4, 0.0,
+						random() * 180,
+						0.0,
+						random() * 200 + 300,
 						cgs.media.steamShader );
 	}
 }
@@ -207,7 +207,7 @@ void FX_TetrionAltHitWall( vec3_t origin, vec3_t normal )
 
 	scale = random() * 2.0 + 1.0;
 
-	CG_ImpactMark( cgs.media.bulletmarksShader, origin, normal, random()*360, 1,1,1,0.2, qfalse, 
+	CG_ImpactMark( cgs.media.bulletmarksShader, origin, normal, random()*360, 1,1,1,0.2, qfalse,
 					scale, qfalse );
 
 	// Move out a hair to avoid z buffer nastiness

@@ -47,7 +47,7 @@ int adjustRespawnTime(float respawnTime)
 		{	// From 12-32, scale from 0.5 to 0.25;
 			respawnTime *= 20.0 / (float)(level.numPlayingClients + 8);
 		}
-		else 
+		else
 		{	// From 4-12, scale from 1.0 to 0.5;
 			respawnTime *= 8.0 / (float)(level.numPlayingClients + 4);
 		}
@@ -72,7 +72,7 @@ int Pickup_Powerup( gentity_t *ent, gentity_t *other ) {
 	if ( !other->client->ps.powerups[ent->item->giTag] ) {
 		// round timing to seconds to make multiple powerup timers
 		// count in sync
-		other->client->ps.powerups[ent->item->giTag] = 
+		other->client->ps.powerups[ent->item->giTag] =
 			level.time - ( level.time % 1000 );
 
 		// kef -- log the fact that we picked up this powerup
@@ -105,11 +105,11 @@ int Pickup_Powerup( gentity_t *ent, gentity_t *other ) {
 			continue;
 		}
 
-    // if same team in team game, no sound
-    // cannot use OnSameTeam as it expects to g_entities, not clients
-  	if ( g_gametype.integer >= GT_TEAM && other->client->sess.sessionTeam == client->sess.sessionTeam  ) {
-      continue;
-    }
+	// if same team in team game, no sound
+	// cannot use OnSameTeam as it expects to g_entities, not clients
+	if ( g_gametype.integer >= GT_TEAM && other->client->sess.sessionTeam == client->sess.sessionTeam ) {
+		continue;
+	}
 
 		// if too far away, no sound
 		VectorSubtract( ent->s.pos.trBase, client->ps.origin, delta );
@@ -229,9 +229,9 @@ int Pickup_Weapon (gentity_t *ent, gentity_t *other) {
 	Add_Ammo( other, ent->item->giTag, quantity );
 
 	G_LogWeaponPickup(other->s.number, ent->item->giTag);
-	
+
 	// team deathmatch has slow weapon respawns
-	if ( g_gametype.integer == GT_TEAM ) 
+	if ( g_gametype.integer == GT_TEAM )
 	{
 		return adjustRespawnTime(RESPAWN_TEAM_WEAPON);
 	}
@@ -458,8 +458,8 @@ void Touch_Item (gentity_t *ent, gentity_t *other, trace_t *trace) {
 
 // ***************
 	// ZOID
-	// A negative respawn times means to never respawn this item (but don't 
-	// delete it).  This is used by items that are respawned by third party 
+	// A negative respawn times means to never respawn this item (but don't
+	// delete it).  This is used by items that are respawned by third party
 	// events such as ctf flags
 	if ( respawn <= 0 ) {
 		ent->nextthink = 0;
@@ -712,7 +712,7 @@ qboolean FinishSpawningDetpack( gentity_t *ent, int itemIndex )
 	ent->r.svFlags &= ~SVF_NOCLIENT;
 
 	trap_LinkEntity (ent);
-	
+
 	ent->noise_index = G_SoundIndex("sound/weapons/detpacklatch.wav");
 	G_AddEvent( ent, EV_GENERAL_SOUND, ent->noise_index );
 	return qtrue;
@@ -1115,7 +1115,7 @@ void G_RunItem( gentity_t *ent ) {
 	} else {
 		mask = MASK_PLAYERSOLID & ~CONTENTS_BODY;//MASK_SOLID;
 	}
-	trap_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin, 
+	trap_Trace( &tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, origin,
 		ent->r.ownerNum, mask );
 
 	VectorCopy( tr.endpos, ent->r.currentOrigin );

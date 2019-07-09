@@ -30,7 +30,7 @@ void	trap_Error( const char *fmt ) {
 }
 
 int		trap_Milliseconds( void ) {
-	return syscall( G_MILLISECONDS ); 
+	return syscall( G_MILLISECONDS );
 }
 int		trap_Argc( void ) {
 	return syscall( G_ARGC );
@@ -86,7 +86,7 @@ void trap_Cvar_VariableStringBuffer( const char *var_name, char *buffer, int buf
 
 
 void trap_LocateGameData( gentity_t *gEnts, int numGEntities, int sizeofGEntity_t,
-						 playerState_t *clients, int sizeofGClient ) {
+						playerState_t *clients, int sizeofGClient ) {
 	syscall( G_LOCATE_GAME_DATA, gEnts, numGEntities, sizeofGEntity_t, clients, sizeofGClient );
 }
 

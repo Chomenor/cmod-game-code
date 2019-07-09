@@ -14,7 +14,7 @@ void FX_AltIMODBolt( vec3_t start, vec3_t end, vec3_t dir )
 	vec3_t	direction, vr, vu;
 	float	len;
 	localEntity_t *le;
-	
+
 	MakeNormalVectors( dir, vr, vu );
 
 	VectorSubtract( end, start, direction );
@@ -36,8 +36,8 @@ void FX_AltIMODBolt( vec3_t start, vec3_t end, vec3_t dir )
 
 	VectorClear(control1_acceleration);
 	VectorClear(control2_acceleration);
-	le = FX_AddBezier( start, end, 
-					control1, control2, control1_vel, control2_vel, control1_acceleration, control2_acceleration, 
+	le = FX_AddBezier( start, end,
+					control1, control2, control1_vel, control2_vel, control1_acceleration, control2_acceleration,
 					4.0f,				//scale
 					1000.0f,			//killtime
 					cgs.media.IMOD2Shader );
@@ -62,7 +62,7 @@ void FX_IMODBolt2( vec3_t start, vec3_t end, vec3_t dir )
 	// initial position of control points
 	VectorSubtract(end, start, vTemp);
 	length = VectorNormalize(vTemp);
-	VectorMA(start, 0.5 * length, vTemp, control1);				
+	VectorMA(start, 0.5 * length, vTemp, control1);
 	VectorMA(start, 0.25 * length, vTemp, control2);
 
 	// initial velocity of control points
@@ -79,7 +79,7 @@ void FX_IMODBolt2( vec3_t start, vec3_t end, vec3_t dir )
 
 	// constant acceleration of control points
 	/*
-	VectorScale(control1_velocity, -1.2, control1_acceleration);	
+	VectorScale(control1_velocity, -1.2, control1_acceleration);
 	for (i = 0; i < 3; i++)
 	{
 		control1_acceleration[i] += flrandom (-10, 10);
@@ -126,7 +126,7 @@ void FX_IMODShot( vec3_t end, vec3_t start, vec3_t dir)
 	VectorMA(start, MAXRANGE_IMOD, cg.refdef.viewaxis[0], end2);
 	CG_Trace( &trace, start, NULL, NULL, end2, 0, MASK_SHOT );
 
-	if ( trace.surfaceFlags & SURF_NOIMPACT ) 
+	if ( trace.surfaceFlags & SURF_NOIMPACT )
 	{
 		render_impact = qfalse;
 	}
@@ -183,12 +183,12 @@ void FX_AltIMODShot( vec3_t end, vec3_t start, vec3_t dir)
 	// cover up the start point of the beam
 	FX_AddSprite( start, NULL, qfalse, FX_ALT_IMOD_FLASHSIZE, 0, 1.0, 0.6, 0.0, 0.0, FX_ALT_IMOD_HOLD, cgs.media.blueParticleShader);
 	FX_AddSpawner( start, dir, NULL, NULL, qfalse, FX_ALT_IMOD_HOLD,
-							 0, FX_ALT_IMOD_HOLD+100, IMODAltAftereffect, 10 );
+							0, FX_ALT_IMOD_HOLD+100, IMODAltAftereffect, 10 );
 	// where do we put an explosion?
 	VectorMA(start, MAXRANGE_IMOD, cg.refdef.viewaxis[0], end2);
 	CG_Trace( &trace, start, NULL, NULL, end2, 0, MASK_SHOT );
 
-	if ( trace.surfaceFlags & SURF_NOIMPACT ) 
+	if ( trace.surfaceFlags & SURF_NOIMPACT )
 	{
 		render_impact = qfalse;
 	}
@@ -224,9 +224,9 @@ void FX_IMODExplosion( vec3_t origin, vec3_t normal )
 	numSparks = 3 + (rand() & 7);
 	// kef -- fixme. what does vel do?
 	VectorClear(vel);
-	
+
 	for ( i = 0; i < numSparks; i++ )
-	{	
+	{
 		scale = 1.0f + (random() * 0.5f);
 		dscale = -scale*0.5;
 
@@ -276,19 +276,19 @@ void FX_AltIMODExplosion( vec3_t origin, vec3_t normal )
 	for ( i = 0; i < 2; i ++)
 	{
 		VectorSet( org, origin[0] + 16 * random(), origin[1] + 16 * random(), origin[2] + 16 * random() );
-		CG_MakeExplosion( org, direction, cgs.media.explosionModel, cgs.media.electricalExplosionFastShader, 
+		CG_MakeExplosion( org, direction, cgs.media.explosionModel, cgs.media.electricalExplosionFastShader,
 					250, qfalse);
 	}
 
 	//Sparks
 
 	numSparks = 8 + (rand() & 7);
-	
+
 	// kef -- fixme. what does this vector do!?! waaaaaah!
 	VectorClear(vel);
 
 	for ( i = 0; i < numSparks; i++ )
-	{	
+	{
 		scale = 1.5f + (random() * 0.5f);
 		dscale = -scale*0.5;
 

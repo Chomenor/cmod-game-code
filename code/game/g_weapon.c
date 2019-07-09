@@ -1,6 +1,6 @@
 // Copyright (C) 1999-2000 Id Software, Inc.
 //
-// g_weapon.c 
+// g_weapon.c
 // perform the server side effects of a weapon firing
 
 #include "g_local.h"
@@ -39,7 +39,7 @@ extern int	borgQueenClientNum;
 #define SCAV_DAMAGE					8		// 16
 #define SCAV_ALT_DAMAGE				60		// 60
 #define SCAV_ALT_SPLASH_RAD			100
-#define SCAV_ALT_SPLASH_DAM			60		// 60	
+#define SCAV_ALT_SPLASH_DAM			60		// 60
 
 // Stasis Weapon
 #define STASIS_DAMAGE				9		// 15
@@ -79,7 +79,7 @@ SnapVectorTowards
 
 Round a vector to integers for more efficient network
 transmission, but make sure that it rounds towards a given point
-rather than blindly truncating.  This prevents it from truncating 
+rather than blindly truncating.  This prevents it from truncating
 into a wall.
 ======================
 */
@@ -186,7 +186,7 @@ void WP_FirePhaser( gentity_t *ent, qboolean alt_fire )
 		}
 		traceEnt = &g_entities[ trEnts[i] ];
 
-		if ( traceEnt->takedamage) 
+		if ( traceEnt->takedamage)
 		{
 //			damage = (float)PHASER_DAMAGE*DMG_VAR*s_quadFactor;		// No variance on phaser
 			damage = (float)PHASER_DAMAGE*s_quadFactor;
@@ -204,17 +204,17 @@ void WP_FirePhaser( gentity_t *ent, qboolean alt_fire )
 			{
 				damage *= .35; // weak out-of-ammo phaser
 			}
-			
+
 			if (damage > 0)
 			{
 				if ( alt_fire || ent->client->ps.ammo[WP_PHASER])		// If empty, don't armor pierce.
 				{
-					G_Damage( traceEnt, ent, ent, forward, tr.endpos, damage, 
+					G_Damage( traceEnt, ent, ent, forward, tr.endpos, damage,
 								DAMAGE_NO_KNOCKBACK | DAMAGE_NOT_ARMOR_PIERCING, MOD_PHASER_ALT );
 				}
 				else
 				{
-					G_Damage( traceEnt, ent, ent, forward, tr.endpos, damage, 
+					G_Damage( traceEnt, ent, ent, forward, tr.endpos, damage,
 								DAMAGE_NO_KNOCKBACK | DAMAGE_ARMOR_PIERCING, MOD_PHASER );
 				}
 			}
@@ -278,15 +278,15 @@ void WP_FireCompressionRifle ( gentity_t *ent, qboolean alt_fire )
 		VectorMA (end, r, right, end);
 		VectorMA (end, u, up, end);
 	}
-	
+
 	trap_Trace (&tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT );
 
 	// If the beam hits a skybox, etc. it would look foolish to add in an explosion
-	if ( tr.surfaceFlags & SURF_NOIMPACT ) 
+	if ( tr.surfaceFlags & SURF_NOIMPACT )
 	{
 		render_impact = qfalse;
 	}
-	
+
 	traceEnt = &g_entities[ tr.entityNum ];
 
 	SnapVector(tr.endpos);		// Make this less networking-intensive.
@@ -307,10 +307,10 @@ void WP_FireCompressionRifle ( gentity_t *ent, qboolean alt_fire )
 	if ( render_impact )
 	{
 		// send bullet impact
-		if ( traceEnt->takedamage && traceEnt->client ) 
+		if ( traceEnt->takedamage && traceEnt->client )
 		{
-		} 
-		else if ( splashDmg && splashRadius ) 
+		}
+		else if ( splashDmg && splashRadius )
 		{
 			if (alt_fire)
 			{
@@ -320,7 +320,7 @@ void WP_FireCompressionRifle ( gentity_t *ent, qboolean alt_fire )
 			{
 				mod = MOD_CRIFLE_SPLASH;
 			}
-			
+
 			if( G_RadiusDamage( tr.endpos, ent, splashDmg, splashRadius, NULL, 0, mod ) )
 			{
 				// Does a burst radius hit really count as a "hit"?  Not for compression rifles...
@@ -342,7 +342,7 @@ void WP_FireCompressionRifle ( gentity_t *ent, qboolean alt_fire )
 
 		// give the shooter a reward sound if they have made two sniper hits in a row
 		// check for "impressive" reward sound
-	
+
 		if (traceEnt->client)
 		{
 			if (((g_gametype.integer >= GT_TEAM) && (ent->client->ps.persistant[PERS_TEAM] != traceEnt->client->ps.persistant[PERS_TEAM]))
@@ -351,7 +351,7 @@ void WP_FireCompressionRifle ( gentity_t *ent, qboolean alt_fire )
 				if (alt_fire)
 				{
 					ent->client->accurateCount++;
-					if ( ent->client->accurateCount >= 2 ) 
+					if ( ent->client->accurateCount >= 2 )
 					{
 						ent->client->accurateCount -= 2;
 						ent->client->ps.persistant[PERS_REWARD_COUNT]++;
@@ -365,7 +365,7 @@ void WP_FireCompressionRifle ( gentity_t *ent, qboolean alt_fire )
 				}
 			}
 		}
-		
+
 		// log hit
 		if (ent->client)
 		{
@@ -390,17 +390,17 @@ void WP_FireCompressionRifle ( gentity_t *ent, qboolean alt_fire )
 #define MAXRANGE_IMOD			4096
 #define	MAX_RAIL_HITS	4
 
-void IMODHit(qboolean alt_fire, gentity_t *traceEnt, gentity_t *ent, vec3_t d_dir, vec3_t endpos, vec3_t normal, 
-			 qboolean render_impact)
+void IMODHit(qboolean alt_fire, gentity_t *traceEnt, gentity_t *ent, vec3_t d_dir, vec3_t endpos, vec3_t normal,
+			qboolean render_impact)
 {
 	gentity_t	*tent = NULL;
 
 	if ( alt_fire )
 	{
 		// send beam impact
-		if ( traceEnt && traceEnt->takedamage ) 
+		if ( traceEnt && traceEnt->takedamage )
 		{
-			G_Damage( traceEnt, ent, ent, d_dir, endpos, IMOD_ALT_DAMAGE*DMG_VAR*s_quadFactor, 
+			G_Damage( traceEnt, ent, ent, d_dir, endpos, IMOD_ALT_DAMAGE*DMG_VAR*s_quadFactor,
 						DAMAGE_NO_ARMOR | DAMAGE_NO_INVULNERABILITY, MOD_IMOD_ALT);	// Used to be DAMAGE_SUPER_ARMOR_PIERCING
 			if (render_impact)
 			{
@@ -416,9 +416,9 @@ void IMODHit(qboolean alt_fire, gentity_t *traceEnt, gentity_t *ent, vec3_t d_di
 	else
 	{
 		// send beam impact
-		if ( traceEnt && traceEnt->takedamage ) 
+		if ( traceEnt && traceEnt->takedamage )
 		{
-			G_Damage( traceEnt, ent, ent, d_dir, endpos, IMOD_DAMAGE*DMG_VAR*s_quadFactor, 
+			G_Damage( traceEnt, ent, ent, d_dir, endpos, IMOD_DAMAGE*DMG_VAR*s_quadFactor,
 						DAMAGE_NO_ARMOR | DAMAGE_NO_INVULNERABILITY, MOD_IMOD);		// Used to be DAMAGE_SUPER_ARMOR_PIERCING
 			if (render_impact)
 			{
@@ -462,10 +462,10 @@ void WP_FireIMOD ( gentity_t *ent, qboolean alt_fire )
 	{
 		trap_Trace (&tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT );
 		traceEnt = &g_entities[ tr.entityNum ];
-		if ( tr.surfaceFlags & SURF_NOIMPACT ) 
+		if ( tr.surfaceFlags & SURF_NOIMPACT )
 		{	// If the beam hit the skybox, etc. it would look foolish to add in an explosion
 			render_impact = qfalse;
-		} else 
+		} else
 		{
 			render_impact = qtrue;
 		}
@@ -496,7 +496,7 @@ void WP_FireIMOD ( gentity_t *ent, qboolean alt_fire )
 					if (alt_fire)
 					{
 						ent->client->accurateCount++;
-						if ( ent->client->accurateCount >= 2 ) 
+						if ( ent->client->accurateCount >= 2 )
 						{
 							ent->client->accurateCount -= 2;
 							ent->client->ps.persistant[PERS_REWARD_COUNT]++;
@@ -569,8 +569,8 @@ void WP_FireIMOD ( gentity_t *ent, qboolean alt_fire )
 #define SCAV_SPREAD			0.5
 #define SCAV_VELOCITY		1500
 #define SCAV_SIZE			3
-	
-#define SCAV_ALT_VELOCITY	1000	
+
+#define SCAV_ALT_VELOCITY	1000
 #define SCAV_ALT_UP_VELOCITY	100
 #define SCAV_ALT_SIZE		6
 
@@ -581,7 +581,7 @@ void FireScavengerBullet( gentity_t *ent, vec3_t start, vec3_t dir )
 	gentity_t	*bolt;
 
 	bolt = G_Spawn();
-	
+
 	bolt->classname = "scav_proj";
 	bolt->nextthink = level.time + 10000;
 	bolt->think = G_FreeEntity;
@@ -624,7 +624,7 @@ void FireScavengerGrenade( gentity_t *ent, vec3_t start, vec3_t dir )
 	gentity_t	*grenade;
 
 	grenade = G_Spawn();
-	
+
 	grenade->classname = "scav_grenade";
 	grenade->nextthink = level.time + 9000;
 	grenade->think = G_FreeEntity;
@@ -632,7 +632,7 @@ void FireScavengerGrenade( gentity_t *ent, vec3_t start, vec3_t dir )
 	grenade->s.weapon = WP_SCAVENGER_RIFLE;
 	grenade->r.ownerNum = ent->s.number;
 	grenade->parent = ent;
-	grenade->damage = SCAV_ALT_DAMAGE*DMG_VAR*s_quadFactor; 
+	grenade->damage = SCAV_ALT_DAMAGE*DMG_VAR*s_quadFactor;
 	grenade->splashDamage = SCAV_ALT_SPLASH_DAM*s_quadFactor;
 	grenade->splashRadius = SCAV_ALT_SPLASH_RAD;//*s_quadFactor;
 	grenade->methodOfDeath = MOD_SCAVENGER_ALT;
@@ -646,7 +646,7 @@ void FireScavengerGrenade( gentity_t *ent, vec3_t start, vec3_t dir )
 
 	grenade->s.pos.trType = TR_GRAVITY;
 	grenade->s.pos.trTime = level.time;		// move a bit on the very first frame
-	
+
 	VectorCopy( start, grenade->s.pos.trBase );
 	SnapVector( grenade->s.pos.trBase );			// save net bandwidth
 	VectorScale( dir, random() * 100 + SCAV_ALT_VELOCITY, grenade->s.pos.trDelta );
@@ -688,7 +688,7 @@ void WP_FireScavenger( gentity_t *ent, qboolean alt_fire )
 		// try to make the shot alternate between barrels
 		offset = irandom(0, 1) * 2 + 1;
 
-		// FIXME:  These offsets really don't work like they should 
+		// FIXME:  These offsets really don't work like they should
 		VectorMA( start, offset, right, temp_org );
 		VectorMA( temp_org, offset, up, temp_org );
 		FireScavengerBullet( ent, temp_org, dir );
@@ -704,7 +704,7 @@ void WP_FireScavenger( gentity_t *ent, qboolean alt_fire )
 */
 
 #define STASIS_VELOCITY		1100	//800	//650
-#define STASIS_VELOCITY2	1000	
+#define STASIS_VELOCITY2	1000
 // #define STASIS_SPREAD		5.0		//2.5	//1.8	// Keep the spread relatively small so that you can get multiple projectile impacts when a badie is close
 #define STASIS_SPREAD		0.085f		// Roughly equivalent to sin(5 deg).
 
@@ -727,7 +727,7 @@ void FireStasisMissile( gentity_t *ent, vec3_t origin, vec3_t dir, int size )
 	bolt = G_Spawn();
 	bolt->classname = "stasis_projectile";
 
-	
+
 	bolt->nextthink = level.time + 10000;
 	bolt->think = G_FreeEntity;
 
@@ -748,7 +748,7 @@ void FireStasisMissile( gentity_t *ent, vec3_t origin, vec3_t dir, int size )
 	boltsize=-boltsize;
 	VectorSet(bolt->r.mins, boltsize, boltsize, boltsize);
 
-//	bolt->trigger_formation = qfalse;		// don't draw tail on first frame	
+//	bolt->trigger_formation = qfalse;		// don't draw tail on first frame
 
 	// There are going to be a couple of different sized projectiles, so store 'em here
 	bolt->count = size;
@@ -759,9 +759,9 @@ void FireStasisMissile( gentity_t *ent, vec3_t origin, vec3_t dir, int size )
 	bolt->s.pos.trTime = level.time;
 	VectorCopy( origin, bolt->s.pos.trBase );
 	SnapVector( bolt->s.pos.trBase );			// save net bandwidth
-	
+
 	VectorScale( dir, STASIS_VELOCITY + ( 50 * size ), bolt->s.pos.trDelta );
-	
+
 	SnapVector( bolt->s.pos.trDelta );			// save net bandwidth
 	VectorCopy (origin, bolt->r.currentOrigin);
 	// Used by trails
@@ -804,7 +804,7 @@ void DoSmallStasisBeam(gentity_t *ent, vec3_t start, vec3_t dir)
 
 	traceEnt = &g_entities[ tr.entityNum ];
 
-	if ( traceEnt->takedamage) 
+	if ( traceEnt->takedamage)
 	{
 		//For knockback - send them up in air
 		if ( dir[2] < 0.20f )
@@ -813,7 +813,7 @@ void DoSmallStasisBeam(gentity_t *ent, vec3_t start, vec3_t dir)
 		}
 
 		VectorNormalize( dir );
-	
+
 		G_Damage(traceEnt, ent, ent, dir, tr.endpos, STASIS_ALT_DAMAGE2*DMG_VAR*s_quadFactor, DAMAGE_ARMOR_PIERCING, MOD_STASIS_ALT );
 		// log hit
 		if (ent->client)
@@ -836,7 +836,7 @@ void WP_FireStasisAlt( gentity_t *ent )
 	// Find the main impact point
 	VectorMA (muzzle, MAXRANGE_ALT_STASIS, forward, end);
 	trap_Trace ( &tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT);
-	
+
 	traceEnt = &g_entities[ tr.entityNum ];
 
 	// Why am I doing this when I've got a right and up already?  Well, because this is how it is calc'ed on the client side.
@@ -873,7 +873,7 @@ void WP_FireStasisAlt( gentity_t *ent )
 	tent = G_TempEntity( tr.endpos, EV_STASIS );
 	tent->s.angles[YAW] = (int)(ent->client->ps.viewangles[YAW]);
 
-	if ( traceEnt->takedamage) 
+	if ( traceEnt->takedamage)
 	{
 		//For knockback - send them up in air
 		VectorCopy( forward, d_dir );
@@ -883,8 +883,8 @@ void WP_FireStasisAlt( gentity_t *ent )
 		}
 
 		VectorNormalize( d_dir );
-	
-		G_Damage( traceEnt, ent, ent, d_dir, tr.endpos, STASIS_ALT_DAMAGE*DMG_VAR*s_quadFactor, 
+
+		G_Damage( traceEnt, ent, ent, d_dir, tr.endpos, STASIS_ALT_DAMAGE*DMG_VAR*s_quadFactor,
 					DAMAGE_ARMOR_PIERCING, MOD_STASIS_ALT );
 		// log hit
 		if (ent->client)
@@ -946,8 +946,8 @@ void grenadeExplode( gentity_t *ent )
 
 	// splash damage (doesn't apply to person directly hit)
 	if ( ent->splashDamage ) {
-		G_RadiusDamage( pos, ent->parent, ent->splashDamage, ent->splashRadius, 
-			NULL, 0, ent->splashMethodOfDeath ); 
+		G_RadiusDamage( pos, ent->parent, ent->splashDamage, ent->splashRadius,
+			NULL, 0, ent->splashMethodOfDeath );
 	}
 	G_FreeEntity( ent );
 }
@@ -962,7 +962,7 @@ void grenadeSpewShrapnel( gentity_t *ent )
 	tent->s.eventParm = DirToByte(ent->pos1);
 
 	// just do radius dmg for altfire
-	if( G_RadiusDamage( ent->r.currentOrigin, ent->parent, ent->splashDamage, ent->splashRadius, 
+	if( G_RadiusDamage( ent->r.currentOrigin, ent->parent, ent->splashDamage, ent->splashRadius,
 		ent, 0, ent->splashMethodOfDeath ) )
 	{
 		// log hit
@@ -993,7 +993,7 @@ void WP_FireGrenade( gentity_t *ent, qboolean alt_fire )
 	VectorCopy( muzzle, start );
 
 	grenade = G_Spawn();
-	
+
 	// kef -- make sure count is 0 so it won't get its bounciness removed like the tetrion projectile
 	grenade->count = 0;
 
@@ -1107,7 +1107,7 @@ void WP_FireGrenade( gentity_t *ent, qboolean alt_fire )
 	grenade->s.pos.trTime = level.time;		// move a bit on the very first frame
 	VectorCopy( start, grenade->s.pos.trBase );
 	SnapVector( grenade->s.pos.trBase );			// save net bandwidth
-	
+
 	SnapVector( grenade->s.pos.trDelta );			// save net bandwidth
 	VectorCopy (start, grenade->r.currentOrigin);
 
@@ -1190,7 +1190,7 @@ void FireTetrionBullet( gentity_t *ent, vec3_t start, vec3_t dir )
 
 	for (i = 0; i < NUM_TETRION_BULLETS; i++)
 	{
-		// determine new firing position 
+		// determine new firing position
 		fxRandCircumferencePos(start, forward, firingRadius, new_start);
 		VectorSubtract(new_start, start, radial);
 		VectorMA(start, 10, forward, start2);
@@ -1228,9 +1228,9 @@ void FireTetrionBullet( gentity_t *ent, vec3_t start, vec3_t dir )
 		dmgPerHit = (int)(totalDmg/(float)numHits);
 		for (i = 0; i < numHits; i++)
 		{
-			if (hitEnts[i].ent->takedamage) 
+			if (hitEnts[i].ent->takedamage)
 			{
-				G_Damage( hitEnts[i].ent, ent, ent, forward, hitEnts[i].pos, dmgPerHit, 
+				G_Damage( hitEnts[i].ent, ent, ent, forward, hitEnts[i].pos, dmgPerHit,
 							DAMAGE_ARMOR_PIERCING|DAMAGE_NO_KNOCKBACK, MOD_TETRION );
 			}
 			// log hit
@@ -1325,7 +1325,7 @@ void FireQuantumBurst( gentity_t *ent, vec3_t start, vec3_t dir )
 
 	bolt = G_Spawn();
 	bolt->classname = "quantum_projectile";
-	
+
 	bolt->nextthink = level.time + 6000;
 	bolt->think = G_FreeEntity;
 
@@ -1350,9 +1350,9 @@ void FireQuantumBurst( gentity_t *ent, vec3_t start, vec3_t dir )
 	bolt->s.pos.trTime = level.time;		// move a bit on the very first frame
 	VectorCopy( start, bolt->s.pos.trBase );
 	SnapVector( bolt->s.pos.trBase );			// save net bandwidth
-	
+
 	VectorScale( dir, QUANTUM_VELOCITY, bolt->s.pos.trDelta );
-	
+
 	SnapVector( bolt->s.pos.trDelta );			// save net bandwidth
 	VectorCopy (start, bolt->r.currentOrigin);
 	VectorCopy (start, bolt->pos1);
@@ -1369,14 +1369,14 @@ qboolean SearchTarget(gentity_t *ent, vec3_t start, vec3_t end)
 	traceEnt = &g_entities[ tr.entityNum ];
 
 	// Don't find teleporting borg in Assimilation mode
-	if ( g_pModAssimilation.integer != 0 && traceEnt->client 
-				&& traceEnt->client->sess.sessionClass == PC_BORG 
+	if ( g_pModAssimilation.integer != 0 && traceEnt->client
+				&& traceEnt->client->sess.sessionClass == PC_BORG
 				&& traceEnt->s.eFlags == EF_NODRAW )
 	{
 		return qfalse;
 	}
 
-	if (traceEnt->takedamage && traceEnt->client && !OnSameTeam(traceEnt, &g_entities[ent->r.ownerNum])) 
+	if (traceEnt->takedamage && traceEnt->client && !OnSameTeam(traceEnt, &g_entities[ent->r.ownerNum]))
 	{
 		ent->target_ent = traceEnt;
 		VectorSubtract(ent->target_ent->r.currentOrigin, ent->r.currentOrigin, fwd);
@@ -1389,13 +1389,13 @@ qboolean SearchTarget(gentity_t *ent, vec3_t start, vec3_t end)
 		ent->nextthink = level.time + QUANTUM_ALT_THINK_TIME;
 		return qtrue;
 	}
-	return qfalse; 
+	return qfalse;
 }
 
 
 void WP_QuantumAltThink(gentity_t *ent)
 {
-	vec3_t start, newdir, targetdir, up={0,0,1}, right, search; 
+	vec3_t start, newdir, targetdir, up={0,0,1}, right, search;
 	float dot, dot2;
 
 	ent->health--;
@@ -1407,10 +1407,10 @@ void WP_QuantumAltThink(gentity_t *ent)
 
 	if (ent->target_ent)
 	{	// Already have a target, start homing.
-		if (ent->health <= 0 || !ent->inuse || 
-			  (	g_pModAssimilation.integer != 0 && ent->target_ent->client 
-				&& ent->target_ent->client->sess.sessionClass == PC_BORG 
-				&& ent->target_ent->s.eFlags == EF_NODRAW ))
+		if (ent->health <= 0 || !ent->inuse ||
+				(g_pModAssimilation.integer != 0 && ent->target_ent->client
+					&& ent->target_ent->client->sess.sessionClass == PC_BORG
+					&& ent->target_ent->s.eFlags == EF_NODRAW))
 		{	// No longer target this
 			ent->target_ent = NULL;
 			ent->nextthink = level.time + 1000;
@@ -1478,7 +1478,7 @@ void WP_QuantumAltThink(gentity_t *ent)
 		VectorMA(search, QUANTUM_ALT_SEARCH_DIST*0.1, right, search);
 		if (SearchTarget(ent, start, search))
 			return;
-		
+
 		// Search to the left.
 		VectorMA(search, -QUANTUM_ALT_SEARCH_DIST*0.2, right, search);
 		if (SearchTarget(ent, start, search))
@@ -1499,7 +1499,7 @@ void FireQuantumBurstAlt( gentity_t *ent, vec3_t start, vec3_t dir )
 
 	bolt = G_Spawn();
 	bolt->classname = "quantum_alt_projectile";
-	
+
 	bolt->nextthink = level.time + 100;
 	bolt->think = WP_QuantumAltThink;
 	bolt->health = 25;		// 10 seconds.
@@ -1526,10 +1526,10 @@ void FireQuantumBurstAlt( gentity_t *ent, vec3_t start, vec3_t dir )
 	bolt->s.pos.trTime = level.time;		// move a bit on the very first frame
 	VectorCopy( start, bolt->s.pos.trBase );
 	SnapVector(bolt->s.pos.trBase);
-	
+
 	VectorScale( dir, QUANTUM_ALT_VELOCITY, bolt->s.pos.trDelta );
 	VectorCopy(dir, bolt->movedir);
-	
+
 	SnapVector( bolt->s.pos.trDelta );			// save net bandwidth
 	VectorCopy (start, bolt->r.currentOrigin);
 }
@@ -1584,7 +1584,7 @@ void WP_FireDreadnoughtBeam( gentity_t *ent )
 
 	if ( traceEnt->takedamage)
 	{
-		G_Damage( traceEnt, ent, ent, forward, tr.endpos, DREADNOUGHT_DAMAGE*s_quadFactor, 
+		G_Damage( traceEnt, ent, ent, forward, tr.endpos, DREADNOUGHT_DAMAGE*s_quadFactor,
 					DAMAGE_NOT_ARMOR_PIERCING, MOD_DREADNOUGHT);
 		bHit = qtrue;
 	}
@@ -1599,7 +1599,7 @@ void WP_FireDreadnoughtBeam( gentity_t *ent )
 
 	if ( traceEnt->takedamage)
 	{
-		G_Damage( traceEnt, ent, ent, forward, tr.endpos, DREADNOUGHT_DAMAGE*s_quadFactor, 
+		G_Damage( traceEnt, ent, ent, forward, tr.endpos, DREADNOUGHT_DAMAGE*s_quadFactor,
 					DAMAGE_NOT_ARMOR_PIERCING, MOD_DREADNOUGHT);
 		bHit = qtrue;
 	}
@@ -1664,7 +1664,7 @@ void DreadnoughtBurstThink(gentity_t *ent)
 	if (traceEnt->classname && !Q_stricmp(traceEnt->classname, "holdable_shield"))
 	{
 		// Make sure you damage the surface first
-		G_Damage( traceEnt, ent, &g_entities[ent->r.ownerNum], forward, tr.endpos, ent->damage, 
+		G_Damage( traceEnt, ent, &g_entities[ent->r.ownerNum], forward, tr.endpos, ent->damage,
 					DAMAGE_NOT_ARMOR_PIERCING, MOD_DREADNOUGHT_ALT);
 
 		VectorCopy(ent->s.origin, ent->s.origin2);
@@ -1686,7 +1686,7 @@ void DreadnoughtBurstThink(gentity_t *ent)
 		return;
 	}
 
-	if (traceEnt->takedamage) 
+	if (traceEnt->takedamage)
 	{
 		ent->target_ent = traceEnt;
 		VectorCopy(ent->s.origin, ent->s.origin2);
@@ -1696,7 +1696,7 @@ void DreadnoughtBurstThink(gentity_t *ent)
 		trap_LinkEntity(ent);
 		VectorNormalize(ent->movedir);
 		ent->nextthink = level.time + DN_ALT_THINK_TIME;
-		G_Damage( traceEnt, ent, &g_entities[ent->r.ownerNum], forward, tr.endpos, ent->damage, 
+		G_Damage( traceEnt, ent, &g_entities[ent->r.ownerNum], forward, tr.endpos, ent->damage,
 					DAMAGE_NOT_ARMOR_PIERCING, MOD_DREADNOUGHT_ALT);
 		// log hit
 		if (ent->client)
@@ -1743,7 +1743,7 @@ void DreadnoughtBurstThink(gentity_t *ent)
 
 				return;
 			}
-				
+
 		}
 
 		VectorCopy(tr.endpos, dest);
@@ -1793,7 +1793,7 @@ void DreadnoughtBurstThink(gentity_t *ent)
 
 		return;
 	}
-	if (traceEnt->takedamage) 
+	if (traceEnt->takedamage)
 	{
 		ent->target_ent = traceEnt;
 		VectorCopy(ent->s.origin, ent->s.origin2);
@@ -1803,7 +1803,7 @@ void DreadnoughtBurstThink(gentity_t *ent)
 		trap_LinkEntity(ent);
 		VectorNormalize(ent->movedir);
 		ent->nextthink = level.time + DN_ALT_THINK_TIME;
-		G_Damage( traceEnt, ent, &g_entities[ent->r.ownerNum], forward, tr.endpos, ent->damage, 
+		G_Damage( traceEnt, ent, &g_entities[ent->r.ownerNum], forward, tr.endpos, ent->damage,
 					DAMAGE_NOT_ARMOR_PIERCING, MOD_DREADNOUGHT_ALT);
 
 		// log hit
@@ -1813,7 +1813,7 @@ void DreadnoughtBurstThink(gentity_t *ent)
 		}
 		// NOTE Send this as a hit effect once we have one...
 		G_Sound( traceEnt, G_SoundIndex( SOUND_DIR "dreadnought/dn_althit.wav"));
-			
+
 		return;
 	}
 
@@ -1846,7 +1846,7 @@ void DreadnoughtBurstThink(gentity_t *ent)
 
 		return;
 	}
-	if (traceEnt->takedamage) 
+	if (traceEnt->takedamage)
 	{
 		ent->target_ent = traceEnt;
 		VectorCopy(ent->s.origin, ent->s.origin2);
@@ -1856,7 +1856,7 @@ void DreadnoughtBurstThink(gentity_t *ent)
 		trap_LinkEntity(ent);
 		VectorNormalize(ent->movedir);
 		ent->nextthink = level.time + DN_ALT_THINK_TIME;
-		G_Damage( traceEnt, ent, &g_entities[ent->r.ownerNum], forward, tr.endpos, ent->damage, 
+		G_Damage( traceEnt, ent, &g_entities[ent->r.ownerNum], forward, tr.endpos, ent->damage,
 					DAMAGE_NOT_ARMOR_PIERCING, MOD_DREADNOUGHT_ALT);
 		// log hit
 		if (ent->client)
@@ -1891,7 +1891,7 @@ void WP_FireDreadnoughtBurst( gentity_t *ent )
 
 	bolt = G_Spawn();
 	bolt->classname = "dn_projectile";
-	
+
 	bolt->nextthink = level.time + 200;
 	bolt->think = DreadnoughtBurstThink;
 
@@ -1914,7 +1914,7 @@ void WP_FireDreadnoughtBurst( gentity_t *ent )
 	SnapVector(bolt->s.origin);
 
 	VectorCopy( forward, bolt->movedir);
-	
+
 	SnapVector( bolt->s.pos.trDelta );			// save net bandwidth
 	VectorCopy( start, bolt->r.currentOrigin );
 	VectorCopy( start, bolt->pos1 );
@@ -1990,7 +1990,7 @@ void WP_FireBorgProjectile( gentity_t *ent, vec3_t start )
 	gentity_t	*bolt;
 
 	bolt = G_Spawn();
-	
+
 	bolt->classname = "borg_proj";
 	bolt->nextthink = level.time + 10000;
 	bolt->think = G_FreeEntity;
@@ -2119,54 +2119,54 @@ set muzzle location relative to pivoting eye
 */
 
 // Muzzle point table...
-vec3_t WP_MuzzlePoint[WP_NUM_WEAPONS] = 
+vec3_t WP_MuzzlePoint[WP_NUM_WEAPONS] =
 {//	Fwd,	right,	up.
 	{0,		0,		0	},	// WP_NONE,
-	{29,	2,		-4	},	// WP_PHASER,			
+	{29,	2,		-4	},	// WP_PHASER,
 	{25,	7,		-10	},	// WP_COMPRESSION_RIFLE,
-	{25,	4,		-5	},	// WP_IMOD,				
-	{10,	14,		-8	},	// WP_SCAVENGER_RIFLE,	
-	{25,	5,		-8	},	// WP_STASIS,			
-	{25,	5,		-10	},	// WP_GRENADE_LAUNCHER,	
+	{25,	4,		-5	},	// WP_IMOD,
+	{10,	14,		-8	},	// WP_SCAVENGER_RIFLE,
+	{25,	5,		-8	},	// WP_STASIS,
+	{25,	5,		-10	},	// WP_GRENADE_LAUNCHER,
 	{22,	4.5,	-8	},	// WP_TETRION_DISRUPTOR,
-	{5,		6,		-6	},	// WP_QUANTUM_BURST,	
-	{27,	8,		-10	},	// WP_DREADNOUGHT,		
-	{29,	2,		-4	},	// WP_VOYAGER_HYPO,	
+	{5,		6,		-6	},	// WP_QUANTUM_BURST,
+	{27,	8,		-10	},	// WP_DREADNOUGHT,
+	{29,	2,		-4	},	// WP_VOYAGER_HYPO,
 	{29,	2,		-4	},	// WP_BORG_ASSIMILATOR
 	{27,	8,		-10	},	// WP_BORG_WEAPON
 };
 
 
-float WP_ShotSize[WP_NUM_WEAPONS] = 
+float WP_ShotSize[WP_NUM_WEAPONS] =
 {
 	0,							// WP_NONE,
-	0,							// WP_PHASER,			
+	0,							// WP_PHASER,
 	0,							// WP_COMPRESSION_RIFLE,
-	0,							// WP_IMOD,				
-	SCAV_SIZE,					// WP_SCAVENGER_RIFLE,	
-	STASIS_MAIN_MISSILE_BIG*3,	// WP_STASIS,			
-	GRENADE_SIZE,				// WP_GRENADE_LAUNCHER,	
+	0,							// WP_IMOD,
+	SCAV_SIZE,					// WP_SCAVENGER_RIFLE,
+	STASIS_MAIN_MISSILE_BIG*3,	// WP_STASIS,
+	GRENADE_SIZE,				// WP_GRENADE_LAUNCHER,
 	0,							// WP_TETRION_DISRUPTOR,
-	QUANTUM_SIZE,				// WP_QUANTUM_BURST,	
-	0,							// WP_DREADNOUGHT,		
+	QUANTUM_SIZE,				// WP_QUANTUM_BURST,
+	0,							// WP_DREADNOUGHT,
 	0,							// WP_VOYAGER_HYPO,
 	0,							// WP_BORG_ASSIMILATOR
 	BORG_PROJECTILE_SIZE,		// WP_BORG_WEAPON
 };
 
-float WP_ShotAltSize[WP_NUM_WEAPONS] = 
+float WP_ShotAltSize[WP_NUM_WEAPONS] =
 {
 	0,							// WP_NONE,
-	PHASER_ALT_RADIUS,			// WP_PHASER,			
+	PHASER_ALT_RADIUS,			// WP_PHASER,
 	0,							// WP_COMPRESSION_RIFLE,
-	0,							// WP_IMOD,				
-	SCAV_ALT_SIZE,				// WP_SCAVENGER_RIFLE,	
-	0,							// WP_STASIS,			
-	GRENADE_SIZE,				// WP_GRENADE_LAUNCHER,	
+	0,							// WP_IMOD,
+	SCAV_ALT_SIZE,				// WP_SCAVENGER_RIFLE,
+	0,							// WP_STASIS,
+	GRENADE_SIZE,				// WP_GRENADE_LAUNCHER,
 	TETRION_ALT_SIZE,			// WP_TETRION_DISRUPTOR,
-	QUANTUM_SIZE,				// WP_QUANTUM_BURST,	
-	DN_ALT_SIZE,				// WP_DREADNOUGHT,		
-	0,							// WP_VOYAGER_HYPO,		
+	QUANTUM_SIZE,				// WP_QUANTUM_BURST,
+	DN_ALT_SIZE,				// WP_DREADNOUGHT,
+	0,							// WP_VOYAGER_HYPO,
 	0,							// WP_BORG_ASSIMILATOR
 	0,							// WP_BORG_WEAPON
 };
@@ -2174,7 +2174,7 @@ float WP_ShotAltSize[WP_NUM_WEAPONS] =
 
 
 //---------------------------------------------------------
-void CalcMuzzlePoint ( gentity_t *ent, vec3_t forward, vec3_t right, vec3_t up, vec3_t muzzlePoint, float projsize) 
+void CalcMuzzlePoint ( gentity_t *ent, vec3_t forward, vec3_t right, vec3_t up, vec3_t muzzlePoint, float projsize)
 //---------------------------------------------------------
 {
 	int weapontype;
@@ -2323,12 +2323,12 @@ FireWeapon
 #define ACCURACY_TRACKING_DELAY			100		// in ms
 #define NUM_FAST_WEAPONS				3
 
-void FireWeapon( gentity_t *ent, qboolean alt_fire ) 
+void FireWeapon( gentity_t *ent, qboolean alt_fire )
 {
 	float			projsize;
 	int				i = 0;
 	qboolean		bFastWeapon = qfalse;
-	weapon_t		fastWeapons[NUM_FAST_WEAPONS] = 
+	weapon_t		fastWeapons[NUM_FAST_WEAPONS] =
 	{
 		WP_PHASER,
 		WP_TETRION_DISRUPTOR,
@@ -2470,7 +2470,7 @@ qboolean SeekerAcquiresTarget ( gentity_t *ent, vec3_t pos )
 			{
 				continue;
 			}
-			
+
 			// only players are valid targets
 			if (!target->classname || strcmp(target->classname, "player"))
 			{
@@ -2510,7 +2510,7 @@ qboolean SeekerAcquiresTarget ( gentity_t *ent, vec3_t pos )
 void FireSeeker( gentity_t *owner, gentity_t *target, vec3_t origin)
 {
 	vec3_t dir;
-	
+
 	VectorSubtract( target->r.currentOrigin, origin, dir);
 	VectorNormalize(dir);
 

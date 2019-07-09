@@ -44,14 +44,14 @@ void G_RandomActionHero( int ignoreClientNum )
 
 	if ( g_pModActionHero.integer != 0 )
 	{
-		for ( i = 0; i < level.maxclients; i++ ) 
+		for ( i = 0; i < level.maxclients; i++ )
 		{
 			if ( i == ignoreClientNum )
 			{
 				continue;
 			}
 
-			if ( level.clients[i].pers.connected != CON_DISCONNECTED ) 
+			if ( level.clients[i].pers.connected != CON_DISCONNECTED )
 			{
 				//note: these next few checks will mean that the first player to join (usually server client if a listen server) when a new map starts is *always* the AH
 				if ( &g_entities[i] != NULL && g_entities[i].client != NULL )
@@ -364,7 +364,7 @@ gentity_t *SelectSpawnPoint ( vec3_t avoidPoint, vec3_t origin, vec3_t angles ) 
 		if ( spot == nearestSpot ) {
 			// last try
 			spot = SelectRandomDeathmatchSpawnPoint ( );
-		}		
+		}
 	}
 
 	// find a single player start spot
@@ -464,13 +464,13 @@ BodyRezOut
 After sitting around for five seconds, fade out.
 =============
 */
-void BodyRezOut( gentity_t *ent ) 
+void BodyRezOut( gentity_t *ent )
 {
 	if ( level.time - ent->timestamp >= 7500 ) {
 		// the body ques are never actually freed, they are just unlinked
 		trap_UnlinkEntity( ent );
 		ent->physicsObject = qfalse;
-		return;	
+		return;
 	}
 
 	ent->nextthink = level.time + 2500;
@@ -557,7 +557,7 @@ void CopyToBodyQue( gentity_t *ent ) {
 	body->die = body_die;
 
 	// if there shouldn't be a body, don't show one.
-	if (ent->client && 
+	if (ent->client &&
 			((level.time - ent->client->ps.powerups[PW_DISINTEGRATE]) < 10000 ||
 			(level.time - ent->client->ps.powerups[PW_EXPLODE]) < 10000))
 	{
@@ -666,7 +666,7 @@ void respawn( gentity_t *ent ) {
 		}
 		return;
 	}
-	
+
 	if ( g_pModAssimilation.integer != 0 && ent->client )
 	{//Go to Borg team if killed by assimilation
 		if ( ent->client->sess.sessionClass != PC_BORG )
@@ -951,7 +951,7 @@ void randomSkin(const char* race, char* model, int current_team, int clientNum)
 			{
 				break;
 			}
-			
+
 			ent = g_entities + i;
 			if (!ent->inuse || i == clientNum)
 				continue;
@@ -1000,7 +1000,7 @@ void randomSkin(const char* race, char* model, int current_team, int clientNum)
 	for (i=0; i<group_count && howManySkins < MAX_SKINS_FOR_RACE; i++)
 	{
 
-		// if this models race list contains the race we want, then add it to the list 
+		// if this models race list contains the race we want, then add it to the list
 		if (legalSkin(group_list[i].text, race))
 		{
 			Q_strncpyz( skinsForRace[howManySkins++], group_list[i].name , 128 );
@@ -1031,21 +1031,21 @@ qboolean getNewSkin(const char *group, char *model, const char *color, const gcl
 {
 	char	*temp_string;
 
-  	// go away and get what ever races this skin is attached to.
-  	// remove blue or red name
-  	ForceClientSkin(model, "");
+	// go away and get what ever races this skin is attached to.
+	// remove blue or red name
+	ForceClientSkin(model, "");
 
-  	temp_string = G_searchGroupList(model);
+	temp_string = G_searchGroupList(model);
 
-  	// are any of the races legal for this team race?
-  	if (legalSkin(temp_string, group))
-  	{
-  		ForceClientSkin(model, color);
-  		return qfalse;
-  	}
+	// are any of the races legal for this team race?
+	if (legalSkin(temp_string, group))
+	{
+		ForceClientSkin(model, color);
+		return qfalse;
+	}
 
-  	//if we got this far, then we need to reset the skin to something appropriate
-  	randomSkin(group, model, client->sess.sessionTeam, clientNum);
+	//if we got this far, then we need to reset the skin to something appropriate
+	randomSkin(group, model, client->sess.sessionTeam, clientNum);
 	return qtrue;
 }
 
@@ -1112,7 +1112,7 @@ void ClientUserinfoChanged( int clientNum ) {
 	char	*sex;
 
 	model[0] = 0;
-	
+
 	ent = g_entities + clientNum;
 	client = ent->client;
 
@@ -1152,7 +1152,7 @@ void ClientUserinfoChanged( int clientNum ) {
 		if ( strcmp( oldname, client->pers.netname ) ) {
 			if ( !levelExiting )
 			{//no need to do this during level changes
-				trap_SendServerCommand( -1, va("print \"%s" S_COLOR_WHITE " renamed to %s\n\"", oldname, 
+				trap_SendServerCommand( -1, va("print \"%s" S_COLOR_WHITE " renamed to %s\n\"", oldname,
 					client->pers.netname) );
 			}
 		}
@@ -1370,7 +1370,7 @@ void ClientUserinfoChanged( int clientNum ) {
 		Q_strncpyz( model, Info_ValueForKey (userinfo, "model"), sizeof( model ) );
 		break;
 	}
-	
+
 	// team
 	if ( client->sess.sessionClass != PC_BORG )
 	{//borg class doesn't need to use team color
@@ -1426,7 +1426,7 @@ void ClientUserinfoChanged( int clientNum ) {
 					if ( !levelExiting )
 					{//no need to do this during level changes
 						trap_SendServerCommand( -1, va("print \"In-appropriate skin selected for %s on team %s\nSkin selection overridden from skin %s to skin %s\n\"",
-							client->pers.netname, g_team_group_red.string, Info_ValueForKey (userinfo, "model"), model)); 
+							client->pers.netname, g_team_group_red.string, Info_ValueForKey (userinfo, "model"), model));
 					}
 					ForceClientSkin(model, "red");
 					// change the value in out local copy, then update it on the server
@@ -1487,7 +1487,7 @@ void ClientUserinfoChanged( int clientNum ) {
 					if ( !levelExiting )
 					{//no need to do this during level changes
 						trap_SendServerCommand( -1, va("print \"In-appropriate skin selected for %s on team %s\nSkin selection overridden from skin %s to skin %s\n\"",
-							client->pers.netname, g_team_group_blue.string, Info_ValueForKey (userinfo, "model"), model)); 
+							client->pers.netname, g_team_group_blue.string, Info_ValueForKey (userinfo, "model"), model));
 					}
 					ForceClientSkin(model, "blue");
 					// change the value in out local copy, then update it on the server
@@ -1992,7 +1992,7 @@ void G_RestoreClientInitialStatus( gentity_t *ent )
 	trap_GetUserinfo( ent->s.number, userinfo, sizeof( userinfo ) );
 
 	if ( clientInitialStatus[ent->s.number].team != ent->client->sess.sessionTeam &&
-		 clientInitialStatus[ent->s.number].pClass != ent->client->sess.sessionClass )
+		clientInitialStatus[ent->s.number].pClass != ent->client->sess.sessionClass )
 	{
 		SetClass( ent, ClassNameForValue( clientInitialStatus[ent->s.number].pClass ), (char *)TeamName( clientInitialStatus[ent->s.number].team ) );
 	}
@@ -2054,13 +2054,13 @@ void ClientSpawn(gentity_t *ent) {
 	// do it before setting health back up, so farthest
 	// ranging doesn't count this client
 	if ( client->sess.sessionTeam == TEAM_SPECTATOR ) {
-		spawnPoint = SelectSpectatorSpawnPoint ( 
+		spawnPoint = SelectSpectatorSpawnPoint (
 			spawn_origin, spawn_angles);
 	} else if (g_gametype.integer >= GT_TEAM) {
-		spawnPoint = SelectCTFSpawnPoint ( 
-			ent, 
-			client->sess.sessionTeam, 
-			client->pers.teamState.state, 
+		spawnPoint = SelectCTFSpawnPoint (
+			ent,
+			client->sess.sessionTeam,
+			client->pers.teamState.state,
 			spawn_origin, spawn_angles);
 	} else {
 		do {
@@ -2070,8 +2070,8 @@ void ClientSpawn(gentity_t *ent) {
 				spawnPoint = SelectInitialSpawnPoint( spawn_origin, spawn_angles );
 			} else {
 				// don't spawn near existing origin if possible
-				spawnPoint = SelectSpawnPoint ( 
-					client->ps.origin, 
+				spawnPoint = SelectSpawnPoint (
+					client->ps.origin,
 					spawn_origin, spawn_angles);
 			}
 
@@ -2141,7 +2141,7 @@ void ClientSpawn(gentity_t *ent) {
 	ent->waterlevel = 0;
 	ent->watertype = 0;
 	ent->flags = 0;
-	
+
 	VectorCopy (playerMins, ent->r.mins);
 	VectorCopy (playerMaxs, ent->r.maxs);
 
@@ -2352,7 +2352,7 @@ void ClientSpawn(gentity_t *ent) {
 			//G_Sound( ent, G_SoundIndex( "sound/voice/computer/misc/borgqueen.wav" ) );
 		}
 	}
-	else 
+	else
 	{
 		if ( g_pModElimination.integer )
 		{
@@ -2459,7 +2459,7 @@ void ClientDisconnect( int clientNum ) {
 	}
 
 	// send effect if they were completely connected
-	if ( ent->client->pers.connected == CON_CONNECTED 
+	if ( ent->client->pers.connected == CON_CONNECTED
 		&& ent->client->sess.sessionTeam != TEAM_SPECTATOR ) {
 		tent = G_TempEntity( ent->client->ps.origin, EV_PLAYER_TELEPORT_OUT );
 		tent->s.clientNum = ent->s.clientNum;
@@ -2501,7 +2501,7 @@ void ClientDisconnect( int clientNum ) {
 
 	//also remove any initial data
 	clientInitialStatus[clientNum].initialized = qfalse;
-	
+
 	//If the queen or action hero leaves, have to pick a new one...
 	if ( g_pModAssimilation.integer != 0 )
 	{

@@ -6,7 +6,7 @@
 -------------------------
 FX_GrenadeThink
 -------------------------
-*/ 
+*/
 
 void FX_GrenadeThink( centity_t *cent, const struct weaponInfo_s *weapon )
 {
@@ -23,7 +23,7 @@ FX_GrenadeHitWall
 
 void FX_GrenadeHitWall( vec3_t origin, vec3_t normal )
 {
-	trap_S_StartSound( origin, ENTITYNUM_WORLD, CHAN_AUTO, cgs.media.grenadeExplodeSound );	
+	trap_S_StartSound( origin, ENTITYNUM_WORLD, CHAN_AUTO, cgs.media.grenadeExplodeSound );
 	CG_SurfaceExplosion( origin, normal, 8, 1, qfalse );
 }
 
@@ -35,7 +35,7 @@ FX_GrenadeHitPlayer
 
 void FX_GrenadeHitPlayer( vec3_t origin, vec3_t normal )
 {
-	trap_S_StartSound( origin, ENTITYNUM_WORLD, CHAN_AUTO, cgs.media.grenadeExplodeSound );	
+	trap_S_StartSound( origin, ENTITYNUM_WORLD, CHAN_AUTO, cgs.media.grenadeExplodeSound );
 	CG_SurfaceExplosion( origin, normal, 8, 1, qfalse );
 }
 
@@ -72,15 +72,15 @@ void FX_GrenadeExplode( vec3_t origin, vec3_t normal )
 		FXE_Spray( normal, 470, 325, 0.5f, vel);
 		length = 24.0 + random() * 12;
 		width = 0.5 + random() * 2;
-		FX_AddTrail( origin, vel, qtrue, length, -length, width, -width, 
+		FX_AddTrail( origin, vel, qtrue, length, -length, width, -width,
 						1.0f, 1.0f, 0.5f, 1000.0f,  cgs.media.orangeTrailShader);
 	}
 
-	trap_S_StartSound( origin, ENTITYNUM_WORLD, CHAN_AUTO, cgs.media.grenadeExplodeSound );	
+	trap_S_StartSound( origin, ENTITYNUM_WORLD, CHAN_AUTO, cgs.media.grenadeExplodeSound );
 
 	// Smoke and impact
 //	FX_AddSpawner( origin, normal, NULL, NULL, 100, 25.0f, 2000.0f, (void *) CG_SmokeSpawn, NULL, 1024 );
-	CG_ImpactMark( cgs.media.compressionMarkShader, origin, normal, random()*360, 1,1,1,1.0, qfalse, 
+	CG_ImpactMark( cgs.media.compressionMarkShader, origin, normal, random()*360, 1,1,1,1.0, qfalse,
 				random() * 16 + 48, qfalse );
 }
 
@@ -112,14 +112,14 @@ void FX_GrenadeShrapnelExplode( vec3_t origin, vec3_t norm )
 		FXE_Spray( norm, 470, 325, 0.5f, vel);
 		length = 24.0 + random() * 12;
 		width = 0.5 + random() * 2;
-		FX_AddTrail( origin, vel, qtrue, length, -length, width, -width, 
+		FX_AddTrail( origin, vel, qtrue, length, -length, width, -width,
 						1.0f, 1.0f, 0.5f, 1000.0f,  cgs.media.orangeTrailShader);
 	}
 
-	trap_S_StartSound( origin, ENTITYNUM_WORLD, CHAN_AUTO, cgs.media.grenadeExplodeSound );	
+	trap_S_StartSound( origin, ENTITYNUM_WORLD, CHAN_AUTO, cgs.media.grenadeExplodeSound );
 
 	// Smoke and impact
-	CG_ImpactMark( cgs.media.compressionMarkShader, origin, norm, random()*360, 1,1,1,1.0, qfalse, 
+	CG_ImpactMark( cgs.media.compressionMarkShader, origin, norm, random()*360, 1,1,1,1.0, qfalse,
 				random() * 16 + 48, qfalse );
 }
 
@@ -137,7 +137,7 @@ void FX_GrenadeShrapnelBits( vec3_t start  )
 	vec3_t	zero = {0, 0, 0};
 	// check G_MissileStick() to make sure this killtime coincides with that nextthink
 	FX_AddSpawner( start, zero, NULL, NULL, qfalse, 300,
-							 0, FX_GRENADE_ALT_STICK_TIME, GrenadeBeep, 10 );
+							0, FX_GRENADE_ALT_STICK_TIME, GrenadeBeep, 10 );
 }
 
 

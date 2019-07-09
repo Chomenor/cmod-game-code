@@ -7,7 +7,7 @@
  * desc:		elementary actions
  *
  * $Archive: /StarTrek/Code-DM/game/be_ea.h $
- * $Author: Dkramer $ 
+ * $Author: Dkramer $
  * $Revision: 2 $
  * $Modtime: 4/21/00 2:20p $
  * $Date: 4/24/00 11:25a $

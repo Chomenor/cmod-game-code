@@ -130,7 +130,7 @@ void fturret_fire ( gentity_t *ent, vec3_t start, vec3_t dir )
 	gentity_t	*bolt;
 
 	bolt = G_Spawn();
-	
+
 	bolt->classname = "red turret shot";
 	bolt->nextthink = level.time + 10000;
 	bolt->think = G_FreeEntity;
@@ -202,7 +202,7 @@ void turret_head_think (gentity_t *self)
 
 		VectorMA( self->r.currentOrigin, rOfs, right, muzzleSpot );
 
-		
+
 		if ( atoi(self->team) == TEAM_RED )
 		{
 			//G_Sound(self, G_SoundIndex("sound/enemies/turret/ffire.wav"));
@@ -426,7 +426,7 @@ void turret_turnoff (gentity_t *self)
 	}
 	//shut-down sound
 	G_Sound(self, G_SoundIndex("sound/enemies/turret/shutdown.wav"));
-	
+
 	//make turret keep animating for 3 secs
 	self->lastEnemy->lastEnemy->pain_debounce_time = level.time + 3000;
 
@@ -588,11 +588,11 @@ Will aim and shoot at enemies
   wait	- How fast it shoots (shots per second, default 4, can't be less)
   dmg	- How much damage each shot does (default 5)
   health - How much damage it can take before exploding (default 100)
-  
+
   splashDamage - How much damage the explosion does
   splashRadius - The random of the explosion
   NOTE: If either of the above two are 0, it will not make an explosion
-  
+
   targetname - Toggles it on/off
   target - What to use when destroyed
 
@@ -808,13 +808,13 @@ void laser_arm_fire (gentity_t *ent)
 	// If a fool gets in the laser path, fry 'em
 	AngleVectors( ent->r.currentAngles, fwd, rt, up );
 
-	VectorMA( ent->r.currentOrigin, 20, fwd, start );	
+	VectorMA( ent->r.currentOrigin, 20, fwd, start );
 	//VectorMA( start, -6, rt, start );
 	//VectorMA( start, -3, up, start );
 	VectorMA( start, 4096, fwd, end );
-	
+
 	trap_Trace( &trace, start, NULL, NULL, end, -1, MASK_SHOT );//ignore
-	
+
 	// Only deal damage when in alt-fire mode
 	if ( trace.fraction < 1.0 && ent->alt_fire )
 	{
@@ -827,7 +827,7 @@ void laser_arm_fire (gentity_t *ent)
 			}
 		}
 	}
-	
+
 	if ( ent->alt_fire )
 	{
 		CG_FireLaser( start, trace.endpos, trace.plane.normal, ent->nextTrain->startRGBA, qfalse );
@@ -903,7 +903,7 @@ void laser_arm_use (gentity_t *self, gentity_t *other, gentity_t *activator)
 	}
 }
 */
-/*QUAKED misc_laser_arm (1 0 0) (-8 -8 -8) (8 8 8) 
+/*QUAKED misc_laser_arm (1 0 0) (-8 -8 -8) (8 8 8)
 
 What it does when used depends on it's "count" (can be set by a script)
 	count:
@@ -916,7 +916,7 @@ What it does when used depends on it's "count" (can be set by a script)
   speed - How fast it turns (degrees per second, default 30)
   dmg	- How much damage the laser does 10 times a second (default 5 = 50 points per second)
   wait  - How long the beam lasts, in seconds (default is 3)
-  
+
   targetname - to use it
   target - What thing for it to be pointing at to start with
 

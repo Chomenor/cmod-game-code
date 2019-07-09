@@ -605,7 +605,7 @@ int UI_GetCurrentGame( int curLevel ) {
 	}
 
 	// kef 7/31/00 -- we think we'd like to just send you to the next map, not the first map you haven't won
-	
+
 	if (curLevel == -1)
 	{
 		// -1 is a special value, the meaning of which is not currently clear to me
@@ -642,7 +642,7 @@ int UI_GetCurrentGame( int curLevel ) {
 		return atoi( Info_ValueForKey( info, "num" ) );
 	}
 
-/*	
+/*
 	if ((curLevel != -1) && (curLevel == (ui_numSinglePlayerArenas-1)))
 	{
 		return 0;
@@ -669,7 +669,7 @@ int UI_GetCurrentGame( int curLevel ) {
 		return -1;
 	}
 	return atoi( Info_ValueForKey( info, "num" ) );
-*/	
+*/
 }
 
 
@@ -716,7 +716,7 @@ int UI_GetNumSPArenas( void ) {
 UI_GetNumSPTiers
 ===============
 */
-int UI_GetNumSPTiers( void ) 
+int UI_GetNumSPTiers( void )
 {
 	int remainder;
 

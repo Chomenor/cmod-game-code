@@ -74,6 +74,16 @@
 
 #endif
 
+// Needed for mods compiled in 64 bit shared objects.
+#ifdef Q3_VM
+	typedef int intptr_t;
+#else
+	#ifdef _MSC_VER
+		#include <stddef.h>
+	#else
+		#include <stdint.h>
+	#endif
+#endif
 
 // this is the define for determining if we have an asm version of a C function
 #if (defined _M_IX86 || defined __i386__) && !defined __sun__  && !defined __LCC__

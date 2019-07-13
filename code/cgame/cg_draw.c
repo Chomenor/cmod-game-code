@@ -2119,7 +2119,7 @@ CG_DrawCrosshairNames
 */
 static void CG_DrawCrosshairNames( void ) {
 	float		*color;
-	char		name[MAX_QPATH];
+	char		name[MAX_NAME_LENGTH];
 	int			team;
 
 	if ( !cg_drawCrosshair.integer )

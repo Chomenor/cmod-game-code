@@ -34,7 +34,7 @@
 //ctf task preferences for a client
 typedef struct bot_ctftaskpreference_s
 {
-	char		name[36];
+	char		name[MAX_NAME_LENGTH];
 	int			preference;
 } bot_ctftaskpreference_t;
 

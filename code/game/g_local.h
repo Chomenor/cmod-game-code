@@ -234,7 +234,7 @@ typedef struct {
 	qboolean	localClient;		// true if "ip" info key is "localhost"
 	qboolean	initialSpawn;		// the first spawn should be at a cool location
 	qboolean	predictItemPickup;	// based on cg_predictItems userinfo
-	char		netname[36];
+	char		netname[MAX_NAME_LENGTH];
 	int			maxHealth;			// for handicapping
 	int			enterTime;			// level.time the client entered the game
 	playerTeamState_t teamState;	// status in teamplay games

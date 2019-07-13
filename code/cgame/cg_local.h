@@ -395,7 +395,7 @@ typedef struct {
 typedef struct {
 	qboolean		infoValid;
 
-	char			name[MAX_QPATH];
+	char			name[MAX_NAME_LENGTH];
 	team_t			team;
 	pclass_t		pClass;
 

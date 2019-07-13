@@ -214,7 +214,7 @@ G_AddRandomBot
 */
 void G_AddRandomBot( int team ) {
 	int		i, n, num, skill;
-	char	*value, netname[36], *teamstr;
+	char	*value, netname[MAX_NAME_LENGTH], *teamstr;
 	gclient_t	*cl;
 
 	num = 0;
@@ -283,7 +283,7 @@ G_RemoveRandomBot
 */
 int G_RemoveRandomBot( int team ) {
 	int i;
-	char netname[36];
+	char netname[MAX_NAME_LENGTH];
 	gclient_t	*cl;
 
 	for ( i=0 ; i< g_maxclients.integer ; i++ ) {

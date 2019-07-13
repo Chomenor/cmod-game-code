@@ -13,7 +13,7 @@
  *****************************************************************************/
 
 //some maxs
-#define MAX_NETNAME				36
+#define MAX_NETNAME			MAX_NAME_LENGTH
 #define MAX_FILEPATH			144
 
 //bot settings

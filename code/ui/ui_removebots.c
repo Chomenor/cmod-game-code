@@ -39,7 +39,7 @@ typedef struct {
 	int				numBots;
 	int				baseBotNum;
 	int				selectedBotNum;
-	char			botnames[BOTS_VIEWABLE][32];
+	char			botnames[BOTS_VIEWABLE][MAX_NAME_LENGTH];
 	int				botClientNums[MAX_BOTS];
 } removeBotsMenuInfo_t;
 

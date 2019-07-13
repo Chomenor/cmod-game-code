@@ -77,7 +77,7 @@ CG_LoadingClient
 void CG_LoadingClient( int clientNum ) {
 	const char		*info;
 	char			*skin;
-	char			personality[MAX_QPATH];
+	char			personality[MAX_NAME_LENGTH];
 	char			model[MAX_QPATH];
 	char			iconName[MAX_QPATH];
 

@@ -233,7 +233,7 @@ typedef int		clipHandle_t;
 #define	MAX_QPATH			64		// max length of a quake game pathname
 #define	MAX_OSPATH			128		// max length of a filesystem pathname
 
-#define	MAX_NAME_LENGTH		32		// max length of a client name
+#define	MAX_NAME_LENGTH		36		// max length of a client name
 
 //client->sess.sessionClass and client->ps.persistant[PERS_CLASS]
 typedef enum

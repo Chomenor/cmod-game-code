@@ -38,11 +38,21 @@ char *COM_SkipPath (char *pathname)
 COM_StripExtension
 ============
 */
-void COM_StripExtension( const char *in, char *out ) {
-	while ( *in && *in != '.' ) {
-		*out++ = *in++;
+void COM_StripExtension(const char *in, char *out, int destsize)
+{
+	int		length;
+
+	Q_strncpyz(out, in, destsize);
+
+	length = strlen(out)-1;
+	while (length > 0 && out[length] != '.')
+	{
+		length--;
+		if (out[length] == '/')
+		return;         // no extension
 	}
-	*out = 0;
+	if (length)
+		out[length] = 0;
 }
 
 

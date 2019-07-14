@@ -70,7 +70,7 @@ tryagain:
 	}
 
 	strcpy( path, item->world_model );
-	COM_StripExtension( path, path );
+	COM_StripExtension(path, path, sizeof(path));
 	strcat( path, "_flash.md3" );
 	pi->flashModel = trap_R_RegisterModel( path );
 

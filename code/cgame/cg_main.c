@@ -1348,7 +1348,7 @@ void CG_LoadObjectivesForMap(void)
 	char	fullFileName[MAX_QPATH];
 	char	objtext[MAX_OBJ_TEXT_LENGTH];
 
-	COM_StripExtension( cgs.mapname, fileName );
+	COM_StripExtension(cgs.mapname, fileName, sizeof(fileName));
 	CG_LanguageFilename( fileName, "efo", fullFileName);
 
 	len = trap_FS_FOpenFile( fullFileName, &f, FS_READ );

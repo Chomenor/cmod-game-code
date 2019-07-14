@@ -95,7 +95,7 @@ void CG_RegisterWeapon( int weaponNum ) {
 //	}
 
 	strcpy( path, item->view_model );
-	COM_StripExtension( path, path );
+	COM_StripExtension(path, path, sizeof(path));
 	strcat( path, "_flash.md3" );
 	weaponInfo->flashModel = trap_R_RegisterModel( path );
 
@@ -109,7 +109,7 @@ void CG_RegisterWeapon( int weaponNum ) {
 	}
 	for (i=0; i< numBarrels; i++) {
 		Q_strncpyz( path, item->view_model, MAX_QPATH );
-		COM_StripExtension( path, path );
+		COM_StripExtension(path, path, sizeof(path));
 		if (i)
 		{
 			strcat( path, va("_barrel%d.md3", i+1));
@@ -120,7 +120,7 @@ void CG_RegisterWeapon( int weaponNum ) {
 	}
 
 	strcpy( path, item->view_model );
-	COM_StripExtension( path, path );
+	COM_StripExtension(path, path, sizeof(path));
 	strcat( path, "_hand.md3" );
 	weaponInfo->handsModel = trap_R_RegisterModel( path );
 

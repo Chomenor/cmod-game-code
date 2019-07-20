@@ -496,6 +496,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	G_Printf ("gamename: %s\n", GAMEVERSION);
 	G_Printf ("gamedate: %s\n", __DATE__);
 
+	init_tonextint(qtrue);
 	srand( randomSeed );
 
 	noJoinLimit = 0;//allow players to join the game still

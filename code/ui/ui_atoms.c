@@ -1276,6 +1276,8 @@ UI_Init
 */
 void UI_Init( void ) {
 
+	init_tonextint(qfalse);
+
 	UI_RegisterCvars();
 
 	UI_LoadMenuText();

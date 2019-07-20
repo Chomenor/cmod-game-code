@@ -3,6 +3,7 @@
 // q_math.c -- stateless support routines that are included in each code module
 #include "q_shared.h"
 
+int nonansicast = 0;
 
 vec3_t	vec3_origin = {0,0,0};
 vec3_t	axisDefault[3] = { { 1, 0, 0 }, { 0, 1, 0 }, { 0, 0, 1 } };
@@ -1371,4 +1372,39 @@ void UnVectorShort(vec3_t vect)
 	vect[0] /= 8191.0;
 	vect[1] /= 8191.0;
 	vect[2] /= 8191.0;
+}
+
+// Rounds the argument to the next integer. Used by SnapVector.
+void init_tonextint(qboolean verbose)
+{
+	float decimal = 0.9;
+
+	nonansicast = (int) decimal;
+
+	if(verbose)
+	{
+		if(nonansicast)
+			Com_Printf("Float to int casting behaviour: round to next int\n");
+		else
+			Com_Printf("Float to int casting behaviour: ISO compliant\n");
+	}
+}
+
+float tonextint(float x)
+{
+	int casted;
+	float rest;
+
+	if(nonansicast)
+		return (int) x;
+
+	casted = (int) x;
+	rest = x - (float) casted;
+
+	if(rest >= 0.5f)
+		return casted+1;
+	else if(rest <= -0.5f)
+		return casted - 1;
+	else
+		return casted;
 }

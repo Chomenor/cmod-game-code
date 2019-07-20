@@ -9,7 +9,7 @@ rem Set locations
 set code_directory=..\..\code
 set output_directory=output
 set vm_directory=%output_directory%\vm
-set output_file=%vm_directory%\game
+set output_file=%vm_directory%\qagame
 set build_temp=%output_directory%\temp
 set module_temp=%build_temp%\game
 set q3asm_file=%module_temp%\game.q3asm
@@ -61,11 +61,11 @@ set src=game&set name=g_usable&call :compile
 set src=game&set name=g_utils&call :compile
 set src=game&set name=g_weapon&call :compile
 
-echo Creating the GAME.QVM file...
+echo Creating the QAGAME.QVM file...
 q3asm.exe -o %output_file% -vq3 -f %q3asm_file%
-if errorlevel 1 echo Error creating GAME.QVM&pause&exit
+if errorlevel 1 echo Error creating QAGAME.QVM&pause&exit
 
-echo GAME.QVM compiled successfully.
+echo QAGAME.QVM compiled successfully.
 echo.
 if not "%1" == "script" pause
 goto :eof

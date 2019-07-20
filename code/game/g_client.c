@@ -1576,11 +1576,14 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 		return "Banned.";
 	}
 
-	// check for a password
-	value = Info_ValueForKey (userinfo, "password");
-	if ( g_password.string[0] && Q_stricmp( g_password.string, "none" ) &&
-		strcmp( g_password.string, value) != 0) {
-		return "Invalid password";
+	// check for password, but exempt bots and local player
+	if (!isBot && strcmp(value, "localhost"))
+	{
+		value = Info_ValueForKey (userinfo, "password");
+		if ( g_password.string[0] && Q_stricmp( g_password.string, "none" ) &&
+			strcmp( g_password.string, value) != 0) {
+			return "Invalid password";
+		}
 	}
 
 	// they can connect

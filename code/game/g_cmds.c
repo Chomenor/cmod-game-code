@@ -398,7 +398,11 @@ Cmd_Kill_f
 int lastKillTime[MAX_CLIENTS];
 void Cmd_Kill_f( gentity_t *ent ) {
 
-	if ( ent->client->sess.sessionTeam == TEAM_SPECTATOR || (ent->client->ps.eFlags&EF_ELIMINATED) ) {
+	if (ent->client->sess.sessionTeam == TEAM_SPECTATOR || (ent->client->ps.eFlags & EF_ELIMINATED))
+		return;
+	if(g_pModAssimilation.integer && ent->client->sess.sessionClass != PC_BORG)
+	{
+		// Disallow suicides by feds so they can't cheat their way out of dangerous situations.
 		return;
 	}
 	if ( lastKillTime[ent->client->ps.clientNum] > level.time - 30000 )

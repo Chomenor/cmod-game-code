@@ -1159,7 +1159,7 @@ void CreateShield(gentity_t *ent)
 	if (xaxis)
 	{
 		VectorSet(ent->r.mins, -halfWidth, -SHIELD_HALFTHICKNESS, -(height>>1));
-		VectorSet(ent->r.maxs, halfWidth, SHIELD_HALFTHICKNESS, height>>1);
+		VectorSet(ent->r.maxs, halfWidth, SHIELD_HALFTHICKNESS, height);
 	}
 	else
 	{

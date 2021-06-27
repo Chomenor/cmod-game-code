@@ -1341,7 +1341,7 @@ void PerpendicularVector( vec3_t dst, const vec3_t src )
 */
 float flrandom(float min, float max)
 {
-	return ((rand() * (max - min)) / 32768.0F) + min;
+	return (((rand() & 0x7FFF) * (max - min)) / 32768.0F) + min;
 }
 
 /*
@@ -1351,7 +1351,7 @@ float flrandom(float min, float max)
 int irandom(int min, int max)
 {
 	max++; //so it can round down
-	return ((rand() * (max - min)) >> 15) + min;
+	return (((rand() & 0x7FFF) * (max - min)) >> 15) + min;
 }
 
 

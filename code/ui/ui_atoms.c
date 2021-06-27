@@ -1851,16 +1851,16 @@ static void UI_ParseMenuText()
 			i++;
 		}
 
-		if (i> MNT_MAX)
+		if (i> MNT_MAX_FROM_FILE)
 		{
-			Com_Printf( S_COLOR_RED "UI_ParseMenuText : too many values! Needed %d but got %d.\n",MNT_MAX,i);
+			Com_Printf( S_COLOR_RED "UI_ParseMenuText : too many values! Needed %d but got %d.\n",MNT_MAX_FROM_FILE,i);
 			return;
 		}
 	}
-	if (i != MNT_MAX)
+	if (i != MNT_MAX_FROM_FILE)
 	{
-		Com_Printf( S_COLOR_RED "UI_ParseMenuText : not enough lines. Read %d of %d!\n",i,MNT_MAX);
-		for(;i<MNT_MAX;i++) {
+		Com_Printf( S_COLOR_RED "UI_ParseMenuText : not enough lines. Read %d of %d!\n",i,MNT_MAX_FROM_FILE);
+		for(;i<MNT_MAX_FROM_FILE;i++) {
 			menu_normal_text[i] = "?";
 		}
 	}
@@ -1876,6 +1876,7 @@ void UI_LoadMenuText()
 	int len;//,i;
 	fileHandle_t	f;
 	char	filename[MAX_QPATH];
+	char	language[32];
 
 	UI_LanguageFilename("ext_data/mp_normaltext","dat",filename);
 
@@ -1902,6 +1903,26 @@ void UI_LoadMenuText()
 
 	UI_ParseMenuText();
 
+	// add some new definitions not in the text file
+	trap_Cvar_VariableStringBuffer( "g_language", language, 32 );
+
+	if ( !Q_stricmp( language, "francais" ) ) {
+		menu_normal_text[MNT_PC_NOCLASS] = "SansClasse";
+		menu_normal_text[MNT_PC_INFILTRATOR] = "Infiltrateur";
+		menu_normal_text[MNT_PC_SNIPER] = "TireurD'Élite";
+		menu_normal_text[MNT_PC_HEAVY] = "Dur";
+		menu_normal_text[MNT_PC_MEDIC] = "Médecin";
+		menu_normal_text[MNT_PC_TECH] = "Technicien";
+		menu_normal_text[MNT_SHORTCUT_USEINVENTORY] = "UTILISER INVENTAIRE";
+		menu_normal_text[MNT_SHORTCUT_USEOBJECT] = "UTILISER OBJET";
+		menu_normal_text[MNT_SHORTCUT_OBJECTIVES] = "VOIR OBJECTIFS";
+		menu_normal_text[MNT_PARAMETERS] = "PARAMETRES";
+		menu_normal_text[MNT_ADV_STATUS1_NOJOINTIMEOUT] = "Doit être entre 0 et 600";
+		menu_normal_text[MNT_ADV_STATUS2_NOJOINTIMEOUT] = "Valeur standarde: 120";
+		menu_normal_text[MNT_ADV_STATUS1_CLASSCHANGETIMEOUT] = "Doit être un nombre positif";
+		menu_normal_text[MNT_ADV_STATUS2_CLASSCHANGETIMEOUT] = "Valeur standarde: 180";
+		menu_normal_text[MNT_ACTIONHERO] = "ACTION HEROS";
+	}
 }
 
 #define MAXBUTTONTEXT 15000
@@ -1954,16 +1975,16 @@ static void UI_ParseButtonText()
 			++i;
 		}
 
-		if (i> MBT_MAX)
+		if (i> MBT_MAX_FROM_FILE)
 		{
 			Com_Printf( S_COLOR_RED "UI_ParseButtonText : too many values!\n");
 			return;
 		}
 	}
-	if (i != MBT_MAX)
+	if (i != MBT_MAX_FROM_FILE)
 	{
-		Com_Printf( S_COLOR_RED "UI_ParseButtonText : not enough lines. Read %d of %d!\n",i,MBT_MAX);
-		for(;i<MBT_MAX;i++) {
+		Com_Printf( S_COLOR_RED "UI_ParseButtonText : not enough lines. Read %d of %d!\n",i,MBT_MAX_FROM_FILE);
+		for(;i<MBT_MAX_FROM_FILE;i++) {
 			menu_button_text[i][0] = "?";
 			menu_button_text[i][1] = "?";
 		}
@@ -1980,6 +2001,7 @@ void UI_LoadButtonText()
 	char	filename[MAX_QPATH];
 	int len,i;
 	fileHandle_t	f;
+	char	language[32];
 
 	UI_LanguageFilename("ext_data/mp_buttontext","dat",filename);
 
@@ -2012,6 +2034,21 @@ void UI_LoadButtonText()
 
 	UI_ParseButtonText();
 
+	// add some new definitions not in the text file
+	trap_Cvar_VariableStringBuffer( "g_language", language, 32 );
+
+	if ( !Q_stricmp( language, "francais" ) ) {
+		menu_button_text[MBT_ASSIMILATION][1] = "JOUEURS TUE JOINDRENT LES BORG";
+		menu_button_text[MBT_SPECIALTIES][1] = "JOUERS DOIVENT SELECTER UNE CLASSE";
+		menu_button_text[MBT_DISINTEGRATION][1] = "UN SEUL COUP REUSSI CAUSE LE MORT IMMEDIATEMENT";
+		menu_button_text[MBT_ACTIONHERO][1] = "UN JOUEUR FORTUIT RECOIT TOUS LES ARMES ET DE L'ARMURE";
+		menu_button_text[MBT_ELIMINATION][1] = "DERNIER PERSONNE VIVANTE GAGNE LE JEUX";
+		menu_button_text[MBT_PLAYERCLASS][1] = "CLASSE DE JOUEUR";
+		menu_button_text[MBT_TEAMCLASS][1] = "SELECTES L'EQUIPE ET LE CLASSE DE JOUEUR";
+		menu_button_text[MBT_AUTOTEAM][1] = "JOUEURS NOUVEAUX ENTRENT L'EQUIPE PLUS NECESSITEUX";
+		menu_button_text[MBT_NOJOINTIMEOUT][1] = "EMPLOYEE DANS L'ASSIMILATION ET L'ELIMINATION";
+		menu_button_text[MBT_CLASSCHANGE][1] = "DELAI FORCEE AVENT QU'EN PUISSE CHANGER LA CLASSE";
+	}
 }
 
 /*

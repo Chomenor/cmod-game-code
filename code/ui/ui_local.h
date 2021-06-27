@@ -556,6 +556,8 @@ typedef enum
 	MNT_MAX
 } menuNormalTextType_t;
 
+#define MNT_MAX_FROM_FILE ( MNT_VIP + 1 )
+
 extern const char *menu_normal_text[MNT_MAX];
 
 
@@ -901,6 +903,7 @@ typedef enum
 	MBT_MAX
 } menuButtonTextType_t;
 
+#define MBT_MAX_FROM_FILE ( MBT_CLASSCHANGE + 1 )
 
 #define GRAPHIC_BUTTONRIGHT "menu/new/bar1.tga"
 #define GRAPHIC_BUTTONSLIDER "menu/common/slider.tga"

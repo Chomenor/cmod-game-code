@@ -2285,7 +2285,7 @@ void BotAIBlocked(bot_state_t *bs, bot_moveresult_t *moveresult, int activate) {
 #ifdef OBSTACLEDEBUG
 	ClientName(bs->client, netname, sizeof(netname));
 	BotAI_Print(PRT_MESSAGE, "%s: I'm blocked by model %d\n", netname, entinfo.modelindex);
-#endif OBSTACLEDEBUG
+#endif
 	//if blocked by a bsp model and the bot wants to activate it if possible
 	if (entinfo.modelindex > 0 && entinfo.modelindex <= max_bspmodelindex && activate) {
 		//find the bsp entity which should be activated in order to remove
@@ -2295,14 +2295,14 @@ void BotAIBlocked(bot_state_t *bs, bot_moveresult_t *moveresult, int activate) {
 			strcpy(classname, "");
 #ifdef OBSTACLEDEBUG
 			BotAI_Print(PRT_MESSAGE, "%s: can't find activator for blocking entity\n", ClientName(bs->client, netname, sizeof(netname)));
-#endif //OBSTACLEDEBUG
+#endif
 		}
 		else {
 			trap_AAS_ValueForBSPEpairKey(ent, "classname", classname, sizeof(classname));
 #ifdef OBSTACLEDEBUG
 			ClientName(bs->client, netname, sizeof(netname));
 			BotAI_Print(PRT_MESSAGE, "%s: I should activate %s\n", netname, classname);
-#endif OBSTACLEDEBUG
+#endif
 		}
 		if (!strcmp(classname, "func_button")) {
 			//create a bot goal towards the button

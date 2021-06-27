@@ -16,12 +16,6 @@ REMOVE BOTS MENU
 #define ID_DOWN				12
 #define ID_DELETE			13
 #define ID_BOTNAME0			20
-#define ID_BOTNAME1			21
-#define ID_BOTNAME2			22
-#define ID_BOTNAME3			23
-#define ID_BOTNAME4			24
-#define ID_BOTNAME5			25
-#define ID_BOTNAME6			26
 
 #define BOTS_VIEWABLE		11
 

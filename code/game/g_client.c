@@ -1091,7 +1091,7 @@ void SetCSTeam( team_t team, char *teamname )
 }
 /*
 ===========
-ClientUserInfoChanged
+ClientUserinfoChanged
 
 Called from ClientConnect when the player first connects and
 directly by the server system when the player updates a userinfo variable.

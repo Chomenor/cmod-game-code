@@ -1335,6 +1335,11 @@ extern char	*ui_medalPicNames[];
 extern char	*ui_medalSounds[];
 
 //
+// ui_main.c
+//
+extern qboolean UI_NoCompat(void);
+
+//
 // ui_mfield.c
 //
 extern void			MField_Clear( mfield_t *edit );

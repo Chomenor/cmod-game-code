@@ -280,3 +280,13 @@ void UI_UpdateCvars( void ) {
 		trap_Cvar_Update( cv->vmCvar );
 	}
 }
+
+/*
+=================
+UI_NoCompat
+=================
+*/
+qboolean UI_NoCompat(void)
+{
+	return ((int) trap_Cvar_VariableValue("com_novmcompat")) ? qtrue : qfalse;
+}

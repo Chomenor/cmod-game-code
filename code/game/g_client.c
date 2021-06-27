@@ -2096,7 +2096,7 @@ void ClientSpawn(gentity_t *ent) {
 
 
 	// toggle the teleport bit so the client knows to not lerp
-	flags = ent->client->ps.eFlags & EF_TELEPORT_BIT;
+	flags = ent->client->ps.eFlags & (EF_TELEPORT_BIT | EF_VOTED);
 	flags ^= EF_TELEPORT_BIT;
 
 	// clear everything but the persistant data

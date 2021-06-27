@@ -553,6 +553,10 @@ typedef enum
 	MNT_ADV_STATUS2_CLASSCHANGETIMEOUT,
 	MNT_ACTIONHERO,
 	MNT_VIP,
+
+	// Added fields - not included in text file; set directly by C code
+	MNT_ORDER_TOEVERYONE,
+
 	MNT_MAX
 } menuNormalTextType_t;
 

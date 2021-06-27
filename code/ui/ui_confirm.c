@@ -157,6 +157,10 @@ void ConfirmMenu_Cache( void )
 static const char* TranslateQuestion(const char *question) {
 	static char translatedQuestion[128];
 
+	// ignore a leading whitespace character as it appears in server messages.
+	if(*question == ' ')
+		question++;
+
 	if (!strcmp(question, "Unpure client detected. Invalid .PK3 files referenced!")) {
 		return menu_normal_text[MNT_UNPURECLIENT];
 	}
@@ -165,7 +169,7 @@ static const char* TranslateQuestion(const char *question) {
 		return menu_normal_text[MNT_CANNOTVALIDATE];
 	}
 
-	if (!strcmp(question, "kicked")) {
+	if (!strcmp(question, "kicked") || !strcmp(question, "was kicked")) {
 		return menu_normal_text[MNT_KICKED];
 	}
 

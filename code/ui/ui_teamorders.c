@@ -335,7 +335,7 @@ static void UI_TeamOrdersMenu_BuildBotList( void ) {
 
 	trap_GetClientState( &cs );
 
-	Q_strncpyz( teamOrdersMenuInfo.botNames[0], "Everyone", 16 );
+	Q_strncpyz( teamOrdersMenuInfo.botNames[0], menu_normal_text[MNT_ORDER_TOEVERYONE], 16 );
 	teamOrdersMenuInfo.numBots = 1;
 
 	trap_GetConfigString( CS_SERVERINFO, info, sizeof(info) );

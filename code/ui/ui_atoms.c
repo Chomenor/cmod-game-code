@@ -1906,7 +1906,12 @@ void UI_LoadMenuText()
 	// add some new definitions not in the text file
 	trap_Cvar_VariableStringBuffer( "g_language", language, 32 );
 
-	if ( !Q_stricmp( language, "francais" ) ) {
+	menu_normal_text[MNT_ORDER_TOEVERYONE] = "To Everyone";
+
+	if ( !Q_stricmp( language, "deutsch" ) ) {
+		menu_normal_text[MNT_ORDER_TOEVERYONE] = "An alle";
+
+	} else if ( !Q_stricmp( language, "francais" ) ) {
 		menu_normal_text[MNT_PC_NOCLASS] = "SansClasse";
 		menu_normal_text[MNT_PC_INFILTRATOR] = "Infiltrateur";
 		menu_normal_text[MNT_PC_SNIPER] = "TireurD'Élite";
@@ -1922,6 +1927,8 @@ void UI_LoadMenuText()
 		menu_normal_text[MNT_ADV_STATUS1_CLASSCHANGETIMEOUT] = "Doit être un nombre positif";
 		menu_normal_text[MNT_ADV_STATUS2_CLASSCHANGETIMEOUT] = "Valeur standarde: 180";
 		menu_normal_text[MNT_ACTIONHERO] = "ACTION HEROS";
+
+		menu_normal_text[MNT_ORDER_TOEVERYONE] = "A tous";
 	}
 }
 

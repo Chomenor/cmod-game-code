@@ -34,6 +34,7 @@ set src=ui&set name=ui_cvars&call :compile
 set src=ui&set name=ui_demo2&call :compile
 set src=ui&set name=ui_fonts&call :compile
 set src=ui&set name=ui_gameinfo&call :compile
+set src=ui&set name=ui_ignores&call :compile
 set src=ui&set name=ui_ingame&call :compile
 set src=ui&set name=ui_menu&call :compile
 set src=ui&set name=ui_mfield&call :compile

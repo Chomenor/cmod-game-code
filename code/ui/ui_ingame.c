@@ -28,6 +28,7 @@ int		ingameFlag = qfalse;	// true when in game menu is in use
 #define ID_RESUME				18
 #define ID_TEAMORDERS			19
 #define ID_SCREENSHOT			20
+#define ID_IGNORES				21
 #define ID_INGAMEMENU			125
 #define ID_INGAME_QUIT_YES		131
 #define ID_INGAME_QUIT_NO		132
@@ -44,6 +45,7 @@ typedef struct
 	menubitmap_s	addbots;
 	menubitmap_s	removebots;
 	menubitmap_s	teamorders;
+	menubitmap_s	ignores;
 	menubitmap_s	screenshot;
 	menubitmap_s	resume;
 } ingamemenu_t;
@@ -168,6 +170,10 @@ void InGame_Event( void *ptr, int notification )
 		UI_TeamOrdersMenu(0);
 		break;
 
+	case ID_IGNORES:
+		UI_IgnoresMenu();
+		break;
+
 	case ID_RESUME:
 		UI_PopMenu();
 		break;
@@ -205,6 +211,9 @@ static void UI_InGameMenu_Draw( void )
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
 	UI_DrawHandlePic(s_ingame.teamorders.generic.x - 14, s_ingame.teamorders.generic.y,
+		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
+
+	UI_DrawHandlePic(s_ingame.ignores.generic.x - 14, s_ingame.ignores.generic.y,
 		MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 
 	UI_DrawHandlePic(s_ingame.setup.generic.x - 14, s_ingame.setup.generic.y,
@@ -342,6 +351,24 @@ void InGame_MenuInit( void )
 	s_ingame.teamorders.textcolor			= CT_BLACK;
 	s_ingame.teamorders.textcolor2			= CT_WHITE;
 
+	y += INGAME_MENU_VERTICAL_SPACING;
+	s_ingame.ignores.generic.type		= MTYPE_BITMAP;
+	s_ingame.ignores.generic.flags		= QMF_HIGHLIGHT_IF_FOCUS;
+	s_ingame.ignores.generic.x			= x;
+	s_ingame.ignores.generic.y			= y;
+	s_ingame.ignores.generic.id			= ID_IGNORES;
+	s_ingame.ignores.generic.name		= BUTTON_GRAPHIC_LONGRIGHT;
+	s_ingame.ignores.generic.callback	= InGame_Event;
+	s_ingame.ignores.width				= MENU_BUTTON_MED_WIDTH;
+	s_ingame.ignores.height				= MENU_BUTTON_MED_HEIGHT;
+	s_ingame.ignores.color				= CT_DKPURPLE1;
+	s_ingame.ignores.color2				= CT_LTPURPLE1;
+	s_ingame.ignores.textX				= MENU_BUTTON_TEXT_X;
+	s_ingame.ignores.textY				= MENU_BUTTON_TEXT_Y;
+	s_ingame.ignores.textEnum			= MBT_INGAMEIGNORES;
+	s_ingame.ignores.textcolor			= CT_BLACK;
+	s_ingame.ignores.textcolor2			= CT_WHITE;
+
 	// make sure it's a team game
 	trap_GetConfigString( CS_SERVERINFO, info, sizeof(info) );
 	if( (atoi( Info_ValueForKey( info, "g_gametype" ) )) < GT_TEAM)
@@ -474,6 +501,7 @@ void InGame_MenuInit( void )
 	Menu_AddItem( &s_ingame.menu, &s_ingame.addbots );
 	Menu_AddItem( &s_ingame.menu, &s_ingame.removebots );
 	Menu_AddItem( &s_ingame.menu, &s_ingame.teamorders );
+	Menu_AddItem( &s_ingame.menu, &s_ingame.ignores );
 	Menu_AddItem( &s_ingame.menu, &s_ingame.setup );
 	Menu_AddItem( &s_ingame.menu, &s_ingame.server );
 	Menu_AddItem( &s_ingame.menu, &s_ingame.leave );

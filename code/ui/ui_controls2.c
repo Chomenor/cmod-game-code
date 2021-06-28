@@ -312,7 +312,8 @@ typedef struct
 #define ID_CHAT4		34
 #define ID_USEINVENTORY	35
 #define ID_OBJECTIVES	36
-
+#define ID_IGNORE		37
+#define ID_UNIGNORE		38
 
 #define ID_USE			1
 
@@ -403,6 +404,8 @@ typedef struct
 	menuaction_s		chat2;
 	menuaction_s		chat3;
 	menuaction_s		chat4;
+	menuaction_s		ignore;
+	menuaction_s		unignore;
 	menulist_s			joyenable;
 	menuslider_s		joythreshold;
 	int					section;
@@ -462,6 +465,8 @@ static bind_t g_bindings[] =
 	{"messagemode4", 	MNT_SHORTCUT_CHATATTACKER,	ID_CHAT4,		ANIM_CHAT,		-1,				-1,		-1, -1,MNT_SHORTCUT_KEY},
 	{"+button2",		MNT_SHORTCUT_USEINVENTORY,	ID_USEINVENTORY,ANIM_IDLE,		K_SPACE,		-1,		-1, -1,MNT_SHORTCUT_KEY},
 	{"+analysis",		MNT_SHORTCUT_OBJECTIVES,	ID_OBJECTIVES,	ANIM_IDLE,		-1,				-1,		-1, -1,MNT_SHORTCUT_KEY},
+	{"ignore",			MNT_SHORTCUT_IGNORE,			ID_IGNORE,		ANIM_IDLE,		-1,			-1,		-1, -1,MNT_SHORTCUT_KEY},
+	{"unignore",		MNT_SHORTCUT_UNIGNORE,			ID_UNIGNORE,		ANIM_IDLE,		-1,			-1,		-1, -1,MNT_SHORTCUT_KEY},
 	{(char*)NULL,		0,							0,				0,				-1,				-1,		-1,	-1,0},
 };
 
@@ -523,6 +528,8 @@ static void* g_command_controls[] =
 	&s_controls.chat3,
 	&s_controls.chat4,
 	&s_controls.gesture,
+	&s_controls.ignore,
+	&s_controls.unignore,
 	NULL,
 };
 
@@ -605,6 +612,8 @@ static menucommon_s *g_misc_controls[] =
 	(menucommon_s *)&s_controls.chat3,
 	(menucommon_s *)&s_controls.chat4,
 	(menucommon_s *)&s_controls.gesture,
+	(menucommon_s *)&s_controls.ignore,
+	(menucommon_s *)&s_controls.unignore,
 	(menucommon_s *)&s_controls.showscores,
 	NULL,
 };
@@ -3756,6 +3765,18 @@ static void ControlsCommand_MenuInit( void )
 	s_controls.gesture.generic.ownerdraw	= Controls_DrawKeyBinding;
 	s_controls.gesture.generic.id 			= ID_GESTURE;
 
+	s_controls.ignore.generic.type			= MTYPE_ACTION;
+	s_controls.ignore.generic.flags			= QMF_LEFT_JUSTIFY|QMF_HIGHLIGHT_IF_FOCUS;
+	s_controls.ignore.generic.callback		= Controls_ActionEvent;
+	s_controls.ignore.generic.ownerdraw		= Controls_DrawKeyBinding;
+	s_controls.ignore.generic.id 			= ID_IGNORE;
+
+	s_controls.unignore.generic.type		= MTYPE_ACTION;
+	s_controls.unignore.generic.flags		= QMF_LEFT_JUSTIFY|QMF_HIGHLIGHT_IF_FOCUS;
+	s_controls.unignore.generic.callback	= Controls_ActionEvent;
+	s_controls.unignore.generic.ownerdraw	= Controls_DrawKeyBinding;
+	s_controls.unignore.generic.id 			= ID_UNIGNORE;
+
 	s_attack_waiting_action.generic.type			= MTYPE_ACTION;
 	s_attack_waiting_action.generic.flags			= QMF_HIDDEN;
 	s_attack_waiting_action.generic.x				= 202;
@@ -3781,6 +3802,8 @@ static void ControlsCommand_MenuInit( void )
 	Menu_AddItem( &s_controlscommand_menu, ( void * )&s_controls.chat3);
 	Menu_AddItem( &s_controlscommand_menu, ( void * )&s_controls.chat4);
 	Menu_AddItem( &s_controlscommand_menu, ( void * )&s_controls.gesture);
+	Menu_AddItem( &s_controlscommand_menu, ( void * )&s_controls.ignore);
+	Menu_AddItem( &s_controlscommand_menu, ( void * )&s_controls.unignore);
 	Menu_AddItem( &s_controlscommand_menu, ( void * )&s_attack_waiting_action);
 
 	// initialize the configurable cvars

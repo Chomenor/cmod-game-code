@@ -556,6 +556,11 @@ typedef enum
 
 	// Added fields - not included in text file; set directly by C code
 	MNT_ORDER_TOEVERYONE,
+	MNT_SHORTCUT_IGNORE,
+	MNT_SHORTCUT_UNIGNORE,
+	MNT_IGNORES_TITLE,
+	MNT_IGNORES,
+	MNT_IGNORES_PLAYERLIST,
 
 	MNT_MAX
 } menuNormalTextType_t;
@@ -907,6 +912,10 @@ typedef enum
 
 	// Added fields - not included in text file; set directly by C code
 	MBT_MOTD,
+	MBT_INGAMEIGNORES,
+	MBT_ADD_IGNORE,
+	MBT_REMOVE_IGNORE,
+	MBT_FLUSH_IGNORE,
 
 	MBT_MAX
 } menuButtonTextType_t;
@@ -1784,6 +1793,12 @@ void UI_RemoveBotsMenu( void );
 extern void UI_TeamOrdersMenu( int fromMenu );
 extern void UI_TeamOrdersMenu_f( void );
 extern void UI_TeamOrdersMenu_Cache( void );
+
+//
+// ui_ignores.c
+//
+void UI_Ignores_Cache(void);
+void UI_IgnoresMenu(void);
 
 //
 // ui_display.c

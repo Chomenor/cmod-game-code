@@ -235,6 +235,8 @@ typedef int		clipHandle_t;
 
 #define	MAX_NAME_LENGTH		36		// max length of a client name
 
+#define MAX_IGNORE_LENGTH	4096		// max length of ignored clients
+
 //client->sess.sessionClass and client->ps.persistant[PERS_CLASS]
 typedef enum
 {//FIXME: restrict pickups to the proper PC?
@@ -671,6 +673,7 @@ int		Q_stricmpn (const char *s1, const char *s2, int n);
 char	*Q_strlwr( char *s1 );
 char	*Q_strupr( char *s1 );
 char	*Q_strrchr( const char* string, int c );
+char	*Q_strstr(const char *string, const char *substring);
 
 // buffer size safe library replacements
 void	Q_strncpyz( char *dest, const char *src, int destsize );
@@ -678,8 +681,10 @@ void	Q_strcat( char *dest, int size, const char *src );
 
 // strlen that discounts Quake color sequences
 int Q_PrintStrlen( const char *string );
-// removes color sequences from string
+// removes color sequences and special chars from string
 char *Q_CleanStr( char *string );
+// removed color sequences from string
+char *Q_StripColor(char *string);
 
 //=============================================
 
@@ -1146,5 +1151,11 @@ typedef enum {
 	AIGT_TEAM,			// any team game
 	AIGT_OTHER			// anything else!
 } aiGametype_t;
+
+/* Ignore variables for client side system */
+// entry seperator for ignore entries in the cvar. must be a character that clients cannot use in names.
+#define IGNORE_CVARNAME "cg_ignoredPlayers"
+#define IGNORE_SEP '\3'
+#define IGNORE_SEP2 "\3"
 
 #endif	// __Q_SHARED_H

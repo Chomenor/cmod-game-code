@@ -344,6 +344,71 @@ static void CG_MapRestart( void ) {
 	}
 }
 
+/*
+=================
+CG_PrintChat
+
+Print a chat message but check for ignored players.
+=================
+*/
+
+static void CG_PrintChat(const char *chatstring, int chattype)
+{
+	clientInfo_t *curclient;
+	const char *chatptr = chatstring;
+	int namelen;
+
+	for(curclient = cgs.clientinfo; (curclient - cgs.clientinfo) < MAX_CLIENTS; curclient++)
+	{
+		if(curclient->infoValid && curclient->ignore)
+		{
+			namelen = strlen(curclient->name);
+
+			if(chattype)
+			{
+				if(chatptr[0] == '(' &&
+					!Q_stricmpn(chatptr+1, curclient->name, namelen) &&
+					chatptr[namelen+1] == '^' && chatptr[namelen+2] == '7' &&
+					chatptr[namelen+3] == ')' &&
+					((chatptr[namelen+4] == ':' && chatptr[namelen+5] == ' ') ||
+					(chatptr[namelen+4] == ' ' && chatptr[namelen+5] == '('))
+					)
+				{
+					// This user is being ingored.
+					return;
+				}
+			}
+			else
+			{
+				if(
+					(!Q_stricmpn(chatptr, curclient->name, namelen) &&
+					chatptr[namelen] == '^' && chatptr[namelen+1] == '7' &&
+					chatptr[namelen+2] == ':' && chatptr[namelen+3] == ' ')
+					||
+					(chatptr[0] == '[' &&
+					!Q_stricmpn(chatptr+1, curclient->name, namelen) &&
+					chatptr[namelen+1] == '^' && chatptr[namelen+2] == '7' &&
+					chatptr[namelen+3] == ']' &&
+					((chatptr[namelen+4] == ':' && chatptr[namelen+5] == ' ') ||
+					(chatptr[namelen+4] == ' ' && chatptr[namelen+5] == '('))
+					)
+					)
+				{
+					// This user is being ignored.
+					return;
+				}
+			}
+		}
+
+	}
+
+	trap_S_StartLocalSound(cgs.media.talkSound, CHAN_LOCAL_SOUND);
+
+	if(chattype)
+		CG_AddToTeamChat(chatstring);
+
+	CG_Printf("%s\n", chatstring);
+}
 
 /*
 =================
@@ -379,8 +444,7 @@ static void CG_ServerCommand( void ) {
 	}
 
 	if ( !strcmp( cmd, "chat" ) ) {
-		trap_S_StartLocalSound( cgs.media.talkSound, CHAN_LOCAL_SOUND );
-		CG_Printf( "%s\n", CG_Argv(1) );
+		CG_PrintChat(CG_Argv(1), 0);
 		return;
 	}
 
@@ -390,9 +454,7 @@ static void CG_ServerCommand( void ) {
 	}
 
 	if ( !strcmp( cmd, "tchat" ) ) {
-		trap_S_StartLocalSound( cgs.media.talkSound, CHAN_LOCAL_SOUND );
-		CG_AddToTeamChat( CG_Argv(1) );
-		CG_Printf( "%s\n", CG_Argv(1) );
+		CG_PrintChat(CG_Argv(1), 1);
 		return;
 	}
 

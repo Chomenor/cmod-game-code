@@ -199,6 +199,7 @@
     <ClCompile Include="..\..\code\ui\ui_demo2.c" />
     <ClCompile Include="..\..\code\ui\ui_fonts.c" />
     <ClCompile Include="..\..\code\ui\ui_gameinfo.c" />
+    <ClCompile Include="..\..\code\ui\ui_ignores.c" />
     <ClCompile Include="..\..\code\ui\ui_ingame.c" />
     <ClCompile Include="..\..\code\ui\ui_main.c" />
     <ClCompile Include="..\..\code\ui\ui_menu.c" />

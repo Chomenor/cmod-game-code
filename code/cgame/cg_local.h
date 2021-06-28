@@ -445,6 +445,8 @@ typedef struct {
 
 	sfxHandle_t		sounds[MAX_CUSTOM_SOUNDS];
 	int				numTaunts;
+
+	qboolean		ignore;			// ignore all text messages from this player.
 } clientInfo_t;
 
 
@@ -1356,6 +1358,10 @@ void CG_ResetPlayerEntity( centity_t *cent );
 void CG_AddRefEntityWithPowerups( refEntity_t *ent, int powerups, int eFlags, qboolean borg );
 void CG_NewClientInfo( int clientNum );
 sfxHandle_t	CG_CustomSound( int clientNum, const char *soundName );
+
+qboolean CG_IsIgnored(char *testnick);
+qboolean CG_AddIgnore(char *newignore);
+void CG_DelIgnore(char *newignore, qboolean substring);
 
 //
 // cg_predict.c

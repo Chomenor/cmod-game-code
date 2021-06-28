@@ -68,6 +68,9 @@
     <ClCompile Include="..\..\code\ui\ui_gameinfo.c">
       <Filter>ui</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\code\ui\ui_ignores.c">
+      <Filter>ui</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\code\ui\ui_ingame.c">
       <Filter>ui</Filter>
     </ClCompile>

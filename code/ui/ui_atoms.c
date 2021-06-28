@@ -1095,6 +1095,7 @@ static void UI_Cache_f( void ) {
 	TeamMain_Cache();
 	UI_AddBots_Cache();
 	UI_RemoveBots_Cache();
+	UI_Ignores_Cache();
 //	UI_LoadConfig_Cache();
 //	UI_SaveConfigMenu_Cache();
 	UI_BotSelectMenu_Cache();
@@ -1907,9 +1908,19 @@ void UI_LoadMenuText()
 	trap_Cvar_VariableStringBuffer( "g_language", language, 32 );
 
 	menu_normal_text[MNT_ORDER_TOEVERYONE] = "To Everyone";
+	menu_normal_text[MNT_SHORTCUT_IGNORE] = "IGNORE";
+	menu_normal_text[MNT_SHORTCUT_UNIGNORE] = "UNIGNORE";
+	menu_normal_text[MNT_IGNORES_TITLE] = "ELITE FORCE HOLOMATCH : IGNORED PLAYERS";
+	menu_normal_text[MNT_IGNORES] = "IGNORED PLAYERS";
+	menu_normal_text[MNT_IGNORES_PLAYERLIST] = "PLAYERLIST";
 
 	if ( !Q_stricmp( language, "deutsch" ) ) {
 		menu_normal_text[MNT_ORDER_TOEVERYONE] = "An alle";
+		menu_normal_text[MNT_SHORTCUT_IGNORE] = "IGNORIEREN";
+		menu_normal_text[MNT_SHORTCUT_UNIGNORE] = "NICHT MEHR IGNORIEREN";
+		menu_normal_text[MNT_IGNORES_TITLE] = "ELITE FORCE HOLOMATCH: IGNORIERTE SPIELER";
+		menu_normal_text[MNT_IGNORES] = "IGNORIERTE SPIELER";
+		menu_normal_text[MNT_IGNORES_PLAYERLIST] = "SPIELERLISTE";
 
 	} else if ( !Q_stricmp( language, "francais" ) ) {
 		menu_normal_text[MNT_PC_NOCLASS] = "SansClasse";
@@ -1929,6 +1940,11 @@ void UI_LoadMenuText()
 		menu_normal_text[MNT_ACTIONHERO] = "ACTION HEROS";
 
 		menu_normal_text[MNT_ORDER_TOEVERYONE] = "A tous";
+		menu_normal_text[MNT_SHORTCUT_IGNORE] = "IGNORER";
+		menu_normal_text[MNT_SHORTCUT_UNIGNORE] = "N'IGNORER PAS ENCORE";
+		menu_normal_text[MNT_IGNORES_TITLE] = "ELITE FORCE HOLOMATCH : JOUEURS IGNOREE";
+		menu_normal_text[MNT_IGNORES] = "JOUEURS IGNOREE";
+		menu_normal_text[MNT_IGNORES_PLAYERLIST] = "LISTE DES JOUEURS";
 	}
 }
 
@@ -2046,10 +2062,26 @@ void UI_LoadButtonText()
 
 	menu_button_text[MBT_MOTD][0] = "HOST MOTD :";
 	menu_button_text[MBT_MOTD][1] = "MESSAGE OF THE DAY DURING CONNECTION BUILDUP";
+	menu_button_text[MBT_INGAMEIGNORES][0] = "IGNORES";
+	menu_button_text[MBT_INGAMEIGNORES][1] = "MANAGE IGNORED NAMES";
+	menu_button_text[MBT_ADD_IGNORE][0] = "ADD";
+	menu_button_text[MBT_ADD_IGNORE][1] = "IGNORE SELECTED PLAYER";
+	menu_button_text[MBT_REMOVE_IGNORE][0] = "REMOVE";
+	menu_button_text[MBT_REMOVE_IGNORE][1] = "REMOVE IGNORE";
+	menu_button_text[MBT_FLUSH_IGNORE][0] = "CLEAR";
+	menu_button_text[MBT_FLUSH_IGNORE][1] = "REMOVE ALL IGNORES";
 
 	if ( !Q_stricmp( language, "deutsch" ) ) {
 		menu_button_text[MBT_MOTD][0] = "HOST MOTD :";
 		menu_button_text[MBT_MOTD][1] = "NACHRICHT DES TAGES WAEHREND DES VERBINDUNGSAUFBAUS";
+		menu_button_text[MBT_INGAMEIGNORES][0] = "IGNORES";
+		menu_button_text[MBT_INGAMEIGNORES][1] = "IGNORIERTE NAMEN VERWALTEN";
+		menu_button_text[MBT_ADD_IGNORE][0] = "HINZUFÜGEN";
+		menu_button_text[MBT_ADD_IGNORE][1] = "AUSGEWÄHLTEN SPIELER IGNORIEREN";
+		menu_button_text[MBT_REMOVE_IGNORE][0] = "ENTFERNEN";
+		menu_button_text[MBT_REMOVE_IGNORE][1] = "IGNORE AUFHEBEN";
+		menu_button_text[MBT_FLUSH_IGNORE][0] = "ALLE LÖSCHEN";
+		menu_button_text[MBT_FLUSH_IGNORE][1] = "ALLE IGNORES ENTFERNEN";
 
 	} else if ( !Q_stricmp( language, "francais" ) ) {
 		menu_button_text[MBT_ASSIMILATION][1] = "JOUEURS TUE JOINDRENT LES BORG";
@@ -2065,6 +2097,14 @@ void UI_LoadButtonText()
 
 		menu_button_text[MBT_MOTD][0] = "HOST MOTD :";
 		menu_button_text[MBT_MOTD][1] = "MESSAGE DU JOUR PENDANT L'ETABLISSEMENT DE LA CONNEXION";
+		menu_button_text[MBT_INGAMEIGNORES][0] = "JOUEURS IGNOREE";
+		menu_button_text[MBT_INGAMEIGNORES][1] = "ADMINISTRER LES NOMS IGNOREE";
+		menu_button_text[MBT_ADD_IGNORE][0] = "AJOUT.";
+		menu_button_text[MBT_ADD_IGNORE][1] = "IGNORER JOUEUR SELECTEE";
+		menu_button_text[MBT_REMOVE_IGNORE][0] = "SUPPR.";
+		menu_button_text[MBT_REMOVE_IGNORE][1] = "SUPPRIMER L'IGNORE";
+		menu_button_text[MBT_FLUSH_IGNORE][0] = "SUPPR. TOUS";
+		menu_button_text[MBT_FLUSH_IGNORE][1] = "VIDER LA LISTE DES JOUEURS IGNOREE";
 	}
 }
 

@@ -218,6 +218,10 @@ void CG_RegisterCvars( void ) {
 	// see if we are also running the server on this machine
 	trap_Cvar_VariableStringBuffer( "sv_running", var, sizeof( var ) );
 	cgs.localServer = atoi( var );
+
+	// Register the ignored players cvar. We can't use a vmCvar_t anyways as we need
+	// way larger string values than just 256.
+	trap_Cvar_Register( NULL, IGNORE_CVARNAME, "", CVAR_ROM );
 }
 
 /*

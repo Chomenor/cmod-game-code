@@ -124,6 +124,120 @@ static void CG_TellAttacker_f( void ) {
 	trap_SendClientCommand( command );
 }
 
+static void CG_Ignore_f(void)
+{
+	int clientNum;
+	char clientName[sizeof(cgs.clientinfo[0].name)] = "";
+	char strsub[2];
+	char tname[sizeof(clientName)];
+	clientInfo_t *curclient;
+	qboolean substring = qfalse;
+
+	trap_Argv(1, clientName, sizeof(clientName));
+
+	trap_Argv(2, strsub, sizeof(strsub));
+	if(*strsub && atoi(strsub))
+		substring = qtrue;
+
+	if(*clientName)
+	{
+		Q_StripColor(clientName);
+
+		// user specified in console which nick to ignore
+		for(curclient = cgs.clientinfo; (curclient - cgs.clientinfo) < MAX_CLIENTS; curclient++)
+		{
+			if(!curclient->infoValid)
+				continue;
+
+			Q_strncpyz(tname, curclient->name, sizeof(tname));
+			Q_StripColor(tname);
+
+			if((!substring && !Q_stricmp(tname, clientName)) || (substring && Q_strstr(tname, clientName)))
+			{
+				curclient->ignore = qtrue;
+				if(substring && CG_AddIgnore(tname))
+					Com_Printf("Ignoring player %s\n", tname);
+			}
+		}
+
+		if(!substring && CG_AddIgnore(clientName))
+			Com_Printf("Ignoring player %s\n", clientName);
+	}
+	else
+	{
+		clientNum = CG_CrosshairPlayer();
+		if(clientNum >= 0)
+		{
+			curclient = &cgs.clientinfo[clientNum];
+			curclient->ignore = qtrue;
+
+			Q_strncpyz(tname, curclient->name, sizeof(tname));
+			Q_StripColor(tname);
+
+			if(CG_AddIgnore(tname))
+				Com_Printf("Ignoring player %s\n", tname);
+		}
+	}
+}
+
+static void CG_Unignore_f(void)
+{
+	int clientNum;
+	char clientName[sizeof(cgs.clientinfo[0].name)] = "";
+	char strsub[2];
+	char tname[sizeof(clientName)];
+	clientInfo_t *curclient;
+	qboolean substring = qfalse;
+
+	trap_Argv(1, clientName, sizeof(clientName));
+	trap_Argv(2, strsub, sizeof(strsub));
+	if(*strsub && atoi(strsub))
+		substring = qtrue;
+
+	if(*clientName)
+	{
+		Q_StripColor(clientName);
+
+		// user specified in console which nick to ignore
+		for(curclient = cgs.clientinfo; (curclient - cgs.clientinfo) < MAX_CLIENTS; curclient++)
+		{
+			if(!curclient->infoValid)
+				continue;
+
+			Q_strncpyz(tname, curclient->name, sizeof(tname));
+			Q_StripColor(tname);
+
+			if((!substring && !Q_stricmp(tname, clientName)) || (substring && Q_strstr(tname, clientName)))
+				curclient->ignore = qfalse;
+		}
+
+		CG_DelIgnore(clientName, substring);
+	}
+	else
+	{
+		clientNum = CG_CrosshairPlayer();
+		if(clientNum >= 0)
+		{
+			curclient = &cgs.clientinfo[clientNum];
+			curclient->ignore = qfalse;
+
+			Q_strncpyz(tname, curclient->name, sizeof(tname));
+			Q_StripColor(tname);
+
+			CG_DelIgnore(tname, 0);
+		}
+	}
+}
+
+static void CG_UnignoreAll_f(void)
+{
+	clientInfo_t *curclient;
+
+	for(curclient = cgs.clientinfo; (curclient - cgs.clientinfo) < MAX_CLIENTS; curclient++)
+		curclient->ignore = qfalse;
+
+	trap_Cvar_Set(IGNORE_CVARNAME, "");
+}
 
 typedef struct {
 	char	*cmd;
@@ -153,7 +267,9 @@ static consoleCommand_t	commands[] = {
 	{ "loaddefered", CG_LoadDeferredPlayers },	// spelled wrong, but not changing for demo...
 	{ "+analysis", CG_ObjectivesDown_f },
 	{ "-analysis", CG_ObjectivesUp_f },
-
+	{ "ignore", CG_Ignore_f },
+	{ "unignore", CG_Unignore_f },
+	{ "unignoreall", CG_UnignoreAll_f },
 };
 
 
@@ -217,5 +333,8 @@ void CG_InitConsoleCommands( void ) {
 	trap_AddCommand ("vote");
 	trap_AddCommand ("callvote");
 	trap_AddCommand ("loaddefered");	// spelled wrong, but not changing for demo
+	trap_AddCommand ("ignore");
+	trap_AddCommand ("unignore");
+	trap_AddCommand ("unignoreall");
 }
 

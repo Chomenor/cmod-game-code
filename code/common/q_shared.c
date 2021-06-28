@@ -587,6 +587,23 @@ char* Q_strrchr( const char* string, int c )
 	return sp;
 }
 
+char* Q_strstr(const char *string, const char *substring)
+{
+	int slen = strlen(string);
+	int sublen = strlen(substring);
+
+	while(slen >= sublen)
+	{
+		if(!Q_stricmpn(string, substring, sublen))
+			return (char *) string;
+
+		string++;
+		slen--;
+	}
+
+	return NULL;
+}
+
 /*
 =============
 Q_strncpyz
@@ -751,6 +768,26 @@ char *Q_CleanStr( char *string ) {
 	return string;
 }
 
+char *Q_StripColor(char *string)
+{
+	char*	d;
+	char*	s;
+	int		c;
+
+	s = string;
+	d = string;
+	while ((c = *s) != 0 ) {
+		if (Q_IsColorString(s))
+			s++;
+		else
+			*d++ = c;
+
+		s++;
+	}
+	*d = '\0';
+
+	return string;
+}
 
 void QDECL Com_sprintf( char *dest, int size, const char *fmt, ...) {
 	int		len;

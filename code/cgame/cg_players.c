@@ -587,6 +587,9 @@ void CG_NewClientInfo( int clientNum ) {
 	v = Info_ValueForKey(configstring, "n");
 	Q_strncpyz( newInfo.name, v, sizeof( newInfo.name ) );
 
+	if(CG_IsIgnored(newInfo.name) || (ci->infoValid && ci->ignore))
+		newInfo.ignore = qtrue;
+
 	// colors
 	v = Info_ValueForKey( configstring, "c1" );
 	CG_ColorFromString( v, newInfo.color );
@@ -2164,3 +2167,153 @@ void CG_ResetPlayerEntity( centity_t *cent ) {
 	}
 }
 
+/************* IGNORE STUFF *************/
+
+/*
+===============
+CG_FindIgnore
+
+Find an ignore entry.
+===============
+*/
+
+char *CG_FindIgnore(char *ignores, char *findentry, int substring)
+{
+	char *ignored = ignores, *end;
+	int foundcount = 0, iglen = strlen(findentry);
+
+	while(ignored = Q_strstr(ignored, findentry))
+	{
+		// find the end of the entry
+		for(end = ignored + 1; *end && *(end - 1) != IGNORE_SEP; end++);
+
+		if(substring)
+		{
+			// we found parts of the string in an ignore.
+
+			// now get the start of the entry, not the substring.
+			while(ignores != ignored && *(ignored-1) != IGNORE_SEP)
+			{
+				ignored--;
+			}
+
+			foundcount++;
+
+			if(foundcount >= substring)
+				break;
+
+			ignored = end;
+		}
+		else
+		{
+			// Make sure that this is not a substring
+			if((ignored != ignores && *(ignored-1) != IGNORE_SEP) ||
+				(ignored[iglen] != '\0' && ignored[iglen] != IGNORE_SEP))
+			{
+				ignored = end;
+				continue;
+			}
+
+			break;
+		}
+	}
+
+	return ignored;
+}
+
+
+
+/*
+===============
+CG_IsIgnored
+
+Checks whether a certain nick is ignored.
+===============
+*/
+
+qboolean CG_IsIgnored(char *testnick)
+{
+	char ignores[MAX_IGNORE_LENGTH];
+	char tnick[sizeof(cgs.clientinfo[0].name)];
+
+	Q_strncpyz(tnick, testnick, sizeof(tnick));
+	Q_StripColor(tnick);
+
+	trap_Cvar_VariableStringBuffer(IGNORE_CVARNAME, ignores, sizeof(ignores));
+
+	if(CG_FindIgnore(ignores, tnick, 0))
+		return qtrue;
+
+	return qfalse;
+}
+
+/*
+===============
+CG_AddIgnore
+
+Add a playername to cg_ignoredPlayers cvar
+===============
+*/
+
+qboolean CG_AddIgnore(char *newignore)
+{
+	char curignored[MAX_IGNORE_LENGTH];
+	int newiglen = strlen(newignore);
+
+	trap_Cvar_VariableStringBuffer(IGNORE_CVARNAME, curignored, sizeof(curignored));
+
+	if(CG_FindIgnore(curignored, newignore, 0))
+		return qfalse;		// Already in list.
+
+	if(strlen(curignored) + strlen(newignore) + 1 >= sizeof(curignored))
+	{
+		CG_Printf("Warning: ignored players list is full!\n");
+		return qfalse;
+	}
+
+	Q_strcat(curignored, sizeof(curignored), newignore);
+	Q_strcat(curignored, sizeof(curignored), IGNORE_SEP2);
+
+	trap_Cvar_Set(IGNORE_CVARNAME, curignored);
+	return qtrue;
+}
+
+/*
+===============
+CG_DelIgnore
+
+Remove a playername from the cg_ignoredPlayers cvar
+===============
+*/
+
+void CG_DelIgnore(char *delignore, qboolean substring)
+{
+	char curignored[MAX_IGNORE_LENGTH];
+	char *ignptr, *start;
+	int restlen;
+	qboolean waslast = qfalse;
+
+	trap_Cvar_VariableStringBuffer(IGNORE_CVARNAME, curignored, sizeof(curignored));
+
+	while((start = CG_FindIgnore(curignored, delignore, substring ? 1 : 0)))
+	{
+		ignptr = start;
+		for(; *ignptr && *(ignptr) != IGNORE_SEP; ignptr++);
+
+		if(!ignptr)
+			waslast = qtrue;
+		else
+			*ignptr = '\0';
+
+		CG_Printf("Unignoring player %s\n", start);
+
+		if(waslast)
+			break;
+
+		ignptr++;
+		restlen = strlen(ignptr);
+		memmove(start, ignptr, restlen+1);
+	}
+
+	trap_Cvar_Set(IGNORE_CVARNAME, curignored);
+}

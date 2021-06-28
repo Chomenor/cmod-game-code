@@ -1270,6 +1270,87 @@ void UI_LoadFonts( void )
 	holdBuf = UI_ParseFontParms( holdBuf,propMapBig);
 }
 
+#define MAX_MASTER_SLOTS 5
+
+/*
+=================
+UI_CompareMasterAddress
+
+Returns qtrue if master server addresses are effectively equal.
+=================
+*/
+static qboolean UI_CompareMasterAddress( char *address1, char *address2 ) {
+	char buffer1[256];
+	char buffer2[256];
+
+	Com_sprintf( buffer1, sizeof( buffer1 ), strchr( address1, ':' ) ? "%s" : "%s:27953", address1 );
+	Com_sprintf( buffer2, sizeof( buffer2 ), strchr( address2, ':' ) ? "%s" : "%s:27953", address2 );
+	return !Q_stricmp( buffer1, buffer2 );
+}
+
+/*
+=================
+UI_InsertMaster
+
+Checks if master server is already registered in any slot. If not, attempts to insert
+it into the next free slot.
+=================
+*/
+static void UI_InsertMaster( char *address ) {
+	char cvarName[32];
+	char cvarBuffer[256];
+	int emptySlot = -1;
+	int i;
+
+	for ( i = 1; i <= MAX_MASTER_SLOTS; ++i ) {
+		Com_sprintf( cvarName, sizeof( cvarName ), "sv_master%i", i );
+		trap_Cvar_VariableStringBuffer( cvarName, cvarBuffer, sizeof( cvarBuffer ) );
+		if ( UI_CompareMasterAddress( address, cvarBuffer ) ) {
+			// already registered
+			return;
+		}
+
+		// look for next empty slot to save address to; also overwrite certain defunct master addresses
+		if ( emptySlot == -1 && ( !*cvarBuffer ||
+				UI_CompareMasterAddress( cvarBuffer, "master.gamespy.com:27900" ) ||
+				UI_CompareMasterAddress( cvarBuffer, "master.thewizclan.com" ) ||
+				UI_CompareMasterAddress( cvarBuffer, "efmaster.kickchat.com" ) ) ) {
+			emptySlot = i;
+		}
+	}
+
+	if ( emptySlot != -1 ) {
+		// have a slot to write master to
+		Com_sprintf( cvarName, sizeof( cvarName ), "sv_master%i", emptySlot );
+		trap_Cvar_Set( cvarName, address );
+	}
+}
+
+/*
+=================
+UI_UpdateMasters
+
+Attempt to add some modern master server addresses. This is a fix for old clients which may not
+have any working master servers loaded by default.
+=================
+*/
+static void UI_UpdateMasters( void ) {
+	char cvarBuffer[256];
+
+	// replace the default raven master from the first slot, since it is currently offline
+	// it will be restored in a lower priority slot below, if free slots are available
+	trap_Cvar_VariableStringBuffer( "sv_master1", cvarBuffer, sizeof( cvarBuffer ) );
+	if ( UI_CompareMasterAddress( cvarBuffer, "master.stef1.ravensoft.com" ) ) {
+		trap_Cvar_Set( "sv_master1", "master.stvef.org" );
+	}
+
+	// load the following masters in any free slot
+	UI_InsertMaster( "master.stvef.org" );
+	UI_InsertMaster( "efmaster.tjps.eu" );
+	UI_InsertMaster( "master.stef1.daggolin.de" );
+	UI_InsertMaster( "master.stef1.ravensoft.com" );
+}
+
 /*
 =================
 UI_Init
@@ -1280,6 +1361,8 @@ void UI_Init( void ) {
 	init_tonextint(qfalse);
 
 	UI_RegisterCvars();
+
+	UI_UpdateMasters();
 
 	UI_LoadMenuText();
 

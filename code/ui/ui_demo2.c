@@ -11,13 +11,19 @@ DEMOS MENU
 
 #include "ui_local.h"
 
+// Number of demos in the list
+#define MAX_DEMODISP 12
+#define SCROLL_SPEED MAX_DEMODISP
+#define MAX_DEMONAMELEN 48
 
-#define MAX_DEMOS			128
-#define NAMEBUFSIZE			( MAX_DEMOS * 16 )
+#define MAX_DEMOS			1024
+#define NAMEBUFSIZE			( MAX_DEMOS * 32 )
 
 #define ID_MAINMENU				10
 #define ID_ENGAGE				11
 #define ID_LIST					12
+#define ID_UP					13
+#define ID_DOWN					14
 
 #define ID_DEMOCOMMENT1			110
 #define ID_DEMOCOMMENT2			111
@@ -34,6 +40,9 @@ DEMOS MENU
 
 #define PIC_UNDERLINE			"menu/common/underline.tga"
 
+#define PIC_UPARROW				"menu/common/arrow_up_16.tga"
+#define PIC_DNARROW				"menu/common/arrow_dn_16.tga"
+
 typedef struct
 {
 	menuframework_s	menu;
@@ -41,6 +50,8 @@ typedef struct
 	menubitmap_s	main;
 	menubitmap_s	engage;
 	menulist_s		list;
+	menubitmap_s	upArrow;
+	menubitmap_s	downArrow;
 
 	qhandle_t		currentGameTopLeft;		// Upper left corner of current game box
 	qhandle_t		currentGameBotLeft;		// Bottom left corner of current game box
@@ -54,7 +65,12 @@ typedef struct
 
 	int				numDemos;
 	char			names[NAMEBUFSIZE];
+	int				numCompatDemos;
+	char			compatnames[NAMEBUFSIZE];
+
+	int				numitems;
 	char			*demolist[MAX_DEMOS];
+	char			displaylist[MAX_DEMODISP][MAX_DEMONAMELEN];
 
 	int				currentDemoIndex;
 
@@ -76,8 +92,6 @@ menufield_s	s_demoline10;
 menufield_s	s_demoline11;
 menufield_s	s_demoline12;
 
-#define MAX_DEMODISP 12
-
 static void* g_demoline[] =
 {
 	&s_demoline1,
@@ -95,6 +109,46 @@ static void* g_demoline[] =
 	NULL,
 };
 
+/*
+=================
+DemoMenu_PopulateList
+TiM: Fills the control
+list with values from the array,
+based off of an offset generated
+by the scroll buttons
+=================
+*/
+void DemoMenu_PopulateList ( int startingIndex ) {
+	int	i;
+	char*	demoName;
+
+	for(i = 0; g_demoline[i]; i++)
+	{
+		if (i >= s_demos.numitems)
+			break;
+
+		demoName = s_demos.demolist[startingIndex+i];
+
+		//TiM - Error trapping. Although this should never happen
+		if ( !demoName ) {
+			((menubitmap_s *)g_demoline[i])->generic.flags	= QMF_INACTIVE|QMF_HIDDEN;
+			continue;
+		}
+
+		// No demos???
+		if (s_demos.numitems == 1)
+		{
+			if (!strcmp(demoName, menu_normal_text[MNT_NO_DEMOS_FOUND]))
+				((menubitmap_s *)g_demoline[i])->generic.flags	= QMF_INACTIVE;
+		}
+
+		COM_StripExtension(demoName, s_demos.displaylist[i], sizeof(s_demos.displaylist[i]));
+		Q_strupr(s_demos.displaylist[i]);
+
+		((menubitmap_s *)g_demoline[i])->textPtr = s_demos.displaylist[i];
+		((menubitmap_s *)g_demoline[i])->generic.flags	= QMF_HIGHLIGHT_IF_FOCUS;
+	}
+}
 
 /*
 =================
@@ -124,10 +178,8 @@ static void DemoMenu_Graphics (void)
 
 	// Current game box
 	trap_R_SetColor( colorTable[CT_DKPURPLE2]);
-	UI_DrawHandlePic(130,64,  88, 24, uis.whiteShader);	// Left Side of current game line box 3
-	UI_DrawHandlePic(218,64,  320, 3, uis.whiteShader);	// Top of current game line
-	UI_DrawHandlePic(218,85,  320, 3, uis.whiteShader);	// Bottom of current game line
-	UI_DrawHandlePic(516,64,  44, 24, uis.whiteShader);	// Right side of current game line
+	UI_DrawHandlePic(130,64,  430, 3, uis.whiteShader);	// Top of current game line
+	UI_DrawHandlePic(130,85,  430, 3, uis.whiteShader);	// Bottom of current game line
 
 	UI_DrawHandlePic(113, 64,  32,	32, s_demos.currentGameTopLeft);	// Upper left corner of current game box
 	UI_DrawHandlePic(113, 97,  32,	32, s_demos.currentGameBotLeft);	// Bottom left corner of current game box
@@ -149,8 +201,12 @@ static void DemoMenu_Graphics (void)
 
 	UI_DrawHandlePic(205, 168,  277,  18, uis.whiteShader);			// Top bar
 	UI_DrawHandlePic(189, 193,  16,  224, uis.whiteShader);			// Left column
-	UI_DrawHandlePic(485, 193,  16,  224, uis.whiteShader);			// Right column
 	UI_DrawHandlePic(205, 424,  277,   8, uis.whiteShader);			// Bottom bar
+
+	//TiM - Arrow Boxes
+	UI_DrawHandlePic(485, 193,  16,  16, uis.whiteShader);		// Up Arrow
+	UI_DrawHandlePic(485, 212,  16,  187, uis.whiteShader);		// Right column
+	UI_DrawHandlePic(485, 402,  16,  16, uis.whiteShader);		// Down Arrow
 
 	UI_DrawProportionalString(  124,  67, "67B",UI_TINYFONT, colorTable[CT_BLACK]);
 
@@ -188,6 +244,29 @@ static void Demos_MenuEvent( void *ptr, int event )
 
 	switch( ((menucommon_s*)ptr)->id )
 	{
+
+	case ID_UP:
+			s_demos.currentDemoIndex -= SCROLL_SPEED;
+
+			if ( s_demos.currentDemoIndex < 0 )
+				s_demos.currentDemoIndex = 0;
+
+			DemoMenu_PopulateList( s_demos.currentDemoIndex );
+			break;
+
+		case ID_DOWN:
+			s_demos.currentDemoIndex += SCROLL_SPEED;
+
+			//TiM - cap it when the final entry comes into view
+			if ( s_demos.numitems > MAX_DEMODISP
+				&& ( s_demos.currentDemoIndex + MAX_DEMODISP ) > s_demos.numitems )
+			{
+				s_demos.currentDemoIndex = s_demos.numitems-MAX_DEMODISP;
+			}
+
+			DemoMenu_PopulateList( s_demos.currentDemoIndex );
+			break;
+
 		case ID_DEMOCOMMENT1:
 		case ID_DEMOCOMMENT2:
 		case ID_DEMOCOMMENT3:
@@ -200,11 +279,10 @@ static void Demos_MenuEvent( void *ptr, int event )
 		case ID_DEMOCOMMENT10:
 		case ID_DEMOCOMMENT11:
 		case ID_DEMOCOMMENT12:
-			index = ((menucommon_s*)ptr)->id - ID_DEMOCOMMENT1;
-			if (((menubitmap_s *)g_demoline[index])->textPtr)
+			index = ((menucommon_s*)ptr)->id - ID_DEMOCOMMENT1 + s_demos.currentDemoIndex;
+			if ( s_demos.demolist[index] )
 			{
-				s_demos.currentDemoIndex = index;
-				s_demos.currentFile.textPtr = (((menubitmap_s *)g_demoline[index])->textPtr);
+				s_demos.currentFile.textPtr = s_demos.demolist[index];
 				//make it so
 				s_demos.engage.generic.flags	= QMF_HIGHLIGHT_IF_FOCUS;
 			}
@@ -213,7 +291,7 @@ static void Demos_MenuEvent( void *ptr, int event )
 
 		case ID_ENGAGE:
 			UI_ForceMenuOff ();
-			trap_Cmd_ExecuteText( EXEC_APPEND, va( "demo %s.efdemo\n", s_demos.currentFile.textPtr) );
+			trap_Cmd_ExecuteText( EXEC_APPEND, va( "demo %s\n", s_demos.currentFile.textPtr) );
 			break;
 
 		case ID_MAINMENU:
@@ -247,9 +325,14 @@ void UI_DemosMenu_Cache( void )
 	s_demos.currentGameTopLeft = trap_R_RegisterShaderNoMip("menu/common/corner_ul_18_24.tga");
 	s_demos.currentGameBotLeft = trap_R_RegisterShaderNoMip("menu/common/corner_ll_18_18.tga");
 	s_demos.currentGameTopRight = trap_R_RegisterShaderNoMip("menu/common/corner_ur_18_24.tga");
+
 	s_demos.directoryUpperCorner1 = trap_R_RegisterShaderNoMip("menu/common/corner_ul_16_18.tga");
 	s_demos.directoryLowerCorner1 = trap_R_RegisterShaderNoMip("menu/common/corner_ll_8_16.tga");
 	s_demos.directoryUpperCorner2 = trap_R_RegisterShaderNoMip("menu/common/corner_ur_16_18.tga");
+
+	trap_R_RegisterShaderNoMip(PIC_UPARROW);
+	trap_R_RegisterShaderNoMip(PIC_DNARROW);
+
 	trap_R_RegisterShaderNoMip(PIC_UNDERLINE);
 
 }
@@ -263,7 +346,6 @@ Demos_MenuInit
 static void Demos_MenuInit( void )
 {
 	int		i,x,y;
-	int		len;
 	char	*demoname;
 
 	memset( &s_demos, 0 ,sizeof(demos_t) );
@@ -317,13 +399,13 @@ static void Demos_MenuInit( void )
 
 	s_demos.currentFile.generic.type		= MTYPE_BITMAP;
 	s_demos.currentFile.generic.flags		= QMF_INACTIVE;
-	s_demos.currentFile.generic.x			= 218;
+	s_demos.currentFile.generic.x			= 138;
 	s_demos.currentFile.generic.y			= 68;
 	s_demos.currentFile.generic.name		= BUTTON_GRAPHIC_LONGRIGHT;
 	s_demos.currentFile.generic.id			= ID_MAINMENU;
 	s_demos.currentFile.generic.callback	= Demos_MenuEvent;
-	s_demos.currentFile.width				= MENU_BUTTON_MED_WIDTH;
-	s_demos.currentFile.height				= MENU_BUTTON_MED_HEIGHT;
+	s_demos.currentFile.width				= 421;
+	s_demos.currentFile.height				= MENU_BUTTON_MED_HEIGHT-1;
 	s_demos.currentFile.color				= CT_BLACK;
 	s_demos.currentFile.color2				= CT_BLACK;
 	s_demos.currentFile.textX				= MENU_BUTTON_TEXT_X;
@@ -332,22 +414,46 @@ static void Demos_MenuInit( void )
 	s_demos.currentFile.textPtr				= NULL;
 	s_demos.currentFile.textcolor			= CT_YELLOW;
 
-	s_demos.list.generic.type				= MTYPE_SCROLLLIST;
-	s_demos.list.generic.flags				= QMF_PULSEIFFOCUS;
-	s_demos.list.generic.callback			= Demos_MenuEvent;
-	s_demos.list.generic.id					= ID_LIST;
-	s_demos.list.generic.x					= 118;
-	s_demos.list.generic.y					= 170;
-	s_demos.list.width						= 16;
-	s_demos.list.height						= 14;
-	s_demos.list.numitems					= trap_FS_GetFileList( "demos", ".efdemo", s_demos.names, NAMEBUFSIZE );
-	s_demos.list.itemnames					= (const char **)s_demos.demolist;
-	s_demos.list.columns					= 3;
+	//TiM - Scroll Buttons
+	s_demos.upArrow.generic.type			= MTYPE_BITMAP;
+	s_demos.upArrow.generic.flags			= (QMF_INACTIVE|QMF_GRAYED); //Disabled by default
+	s_demos.upArrow.generic.x				= 486;
+	s_demos.upArrow.generic.y				= 195;
+	s_demos.upArrow.generic.name			= PIC_UPARROW;
+	s_demos.upArrow.generic.id				= ID_UP;
+	s_demos.upArrow.generic.callback		= Demos_MenuEvent;
+	s_demos.upArrow.width					= 14;
+	s_demos.upArrow.height					= 14;
+	s_demos.upArrow.color					= CT_DKGOLD1;
+	s_demos.upArrow.color2					= CT_LTGOLD1;
+	s_demos.upArrow.textcolor				= CT_BLACK;
+	s_demos.upArrow.textcolor2				= CT_WHITE;
+
+	s_demos.downArrow.generic.type			= MTYPE_BITMAP;
+	s_demos.downArrow.generic.flags			= (QMF_INACTIVE|QMF_GRAYED);
+	s_demos.downArrow.generic.x				= 486;
+	s_demos.downArrow.generic.y				= 404;
+	s_demos.downArrow.generic.name			= PIC_DNARROW;
+	s_demos.downArrow.generic.id			= ID_DOWN;
+	s_demos.downArrow.generic.callback		= Demos_MenuEvent;
+	s_demos.downArrow.width					= 14;
+	s_demos.downArrow.height				= 14;
+	s_demos.downArrow.color					= CT_DKGOLD1;
+	s_demos.downArrow.color2				= CT_LTGOLD1;
+	s_demos.downArrow.textcolor				= CT_BLACK;
+	s_demos.downArrow.textcolor2			= CT_WHITE;
+
+	if(UI_NoCompat())
+		s_demos.numDemos = trap_FS_GetFileList("demos", ".dm_25", s_demos.names, NAMEBUFSIZE);
+	else
+		s_demos.numDemos = 0;
+
+	s_demos.numCompatDemos = trap_FS_GetFileList("demos", ".efdemo", s_demos.compatnames, NAMEBUFSIZE);
+	s_demos.numitems = s_demos.numDemos + s_demos.numCompatDemos;
 
 	x = 225;
 	y = 200;
-	i=0;
-	while (g_demoline[i])
+	for(i = 0; g_demoline[i]; i++)
 	{
 		((menubitmap_s *)g_demoline[i])->generic.type			= MTYPE_BITMAP;
 		((menubitmap_s *)g_demoline[i])->generic.flags			= QMF_INACTIVE | QMF_HIDDEN;
@@ -370,61 +476,55 @@ static void Demos_MenuInit( void )
 
 		Menu_AddItem( &s_demos.menu, ( void * )g_demoline[i]);
 		y += 18;
-		++i;
 	}
 
 	// No demos??
-	if (!s_demos.list.numitems)
+	if (!s_demos.numitems)
 	{
 		strcpy( s_demos.names, menu_normal_text[MNT_NO_DEMOS_FOUND] );
-		s_demos.list.numitems = 1;
+		s_demos.numitems = 1;
 	}
-	else if (s_demos.list.numitems > MAX_DEMOS)
+	else if (s_demos.numitems > MAX_DEMOS)
 	{// Too many demos???
-		s_demos.list.numitems = MAX_DEMOS;
+		s_demos.numitems = MAX_DEMOS;
+	}
+
+	//TiM - If the list is longer than we can fit, enable the scroll buttons
+	if ( s_demos.numitems > MAX_DEMODISP ) {
+		s_demos.upArrow.generic.flags = QMF_HIGHLIGHT_IF_FOCUS;
+		s_demos.downArrow.generic.flags = QMF_HIGHLIGHT_IF_FOCUS;
 	}
 
 	// Point fields to demo names
-	i=0;
 	demoname = s_demos.names;
-	while (g_demoline[i])
+
+	//TiM - instead of sending the list names directly to the controls, we'll populate an array
+	//with all of them, and then specify which ones to display afterwards.
+	for(i = 0; i < s_demos.numitems; i++)
 	{
-		if (i >= s_demos.list.numitems)
-		{
+		if(i == s_demos.numDemos)
+			demoname = s_demos.compatnames;
+
+		if ( !demoname )
 			break;
-		}
 
-		((menubitmap_s *)g_demoline[i])->textPtr		= demoname;
-		((menubitmap_s *)g_demoline[i])->generic.flags	= QMF_HIGHLIGHT_IF_FOCUS;
+		//insert into the array
+		s_demos.demolist[i] = demoname;
 
-		// No demos???
-		if (s_demos.list.numitems == 1)
-		{
-			if (!strcmp( demoname, menu_normal_text[MNT_NO_DEMOS_FOUND]))
-			{
-				((menubitmap_s *)g_demoline[i])->generic.flags	= QMF_INACTIVE;
-			}
-		}
+		//increment
+		for(; *demoname; demoname++);
 
-		// strip extension
-		len = strlen( demoname );
-		if ( len>7 && !Q_stricmp(demoname +  len - 7,".efdemo"))
-		{
-			demoname[len-7] = '\0';
-		}
-
-		Q_strupr(demoname);
-
-		demoname += len + 1;
-
-		i++;
+		demoname++;
 	}
 
+	//Populate the controls with the values from the array
+	DemoMenu_PopulateList( s_demos.currentDemoIndex );
+
 	Menu_AddItem( &s_demos.menu, &s_demos.main );
-//	Menu_AddItem( &s_demos.menu, &s_demos.list );
 	Menu_AddItem( &s_demos.menu, &s_demos.engage );
 	Menu_AddItem( &s_demos.menu, &s_demos.currentFile );
-
+	Menu_AddItem( &s_demos.menu, &s_demos.upArrow );
+	Menu_AddItem( &s_demos.menu, &s_demos.downArrow );
 }
 
 

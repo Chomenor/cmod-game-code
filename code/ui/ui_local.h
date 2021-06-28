@@ -904,6 +904,10 @@ typedef enum
 	MBT_AUTOTEAM,
 	MBT_NOJOINTIMEOUT,
 	MBT_CLASSCHANGE,
+
+	// Added fields - not included in text file; set directly by C code
+	MBT_MOTD,
+
 	MBT_MAX
 } menuButtonTextType_t;
 

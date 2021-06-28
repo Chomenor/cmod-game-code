@@ -2044,7 +2044,14 @@ void UI_LoadButtonText()
 	// add some new definitions not in the text file
 	trap_Cvar_VariableStringBuffer( "g_language", language, 32 );
 
-	if ( !Q_stricmp( language, "francais" ) ) {
+	menu_button_text[MBT_MOTD][0] = "HOST MOTD :";
+	menu_button_text[MBT_MOTD][1] = "MESSAGE OF THE DAY DURING CONNECTION BUILDUP";
+
+	if ( !Q_stricmp( language, "deutsch" ) ) {
+		menu_button_text[MBT_MOTD][0] = "HOST MOTD :";
+		menu_button_text[MBT_MOTD][1] = "NACHRICHT DES TAGES WAEHREND DES VERBINDUNGSAUFBAUS";
+
+	} else if ( !Q_stricmp( language, "francais" ) ) {
 		menu_button_text[MBT_ASSIMILATION][1] = "JOUEURS TUE JOINDRENT LES BORG";
 		menu_button_text[MBT_SPECIALTIES][1] = "JOUERS DOIVENT SELECTER UNE CLASSE";
 		menu_button_text[MBT_DISINTEGRATION][1] = "UN SEUL COUP REUSSI CAUSE LE MORT IMMEDIATEMENT";
@@ -2055,6 +2062,9 @@ void UI_LoadButtonText()
 		menu_button_text[MBT_AUTOTEAM][1] = "JOUEURS NOUVEAUX ENTRENT L'EQUIPE PLUS NECESSITEUX";
 		menu_button_text[MBT_NOJOINTIMEOUT][1] = "EMPLOYEE DANS L'ASSIMILATION ET L'ELIMINATION";
 		menu_button_text[MBT_CLASSCHANGE][1] = "DELAI FORCEE AVENT QU'EN PUISSE CHANGER LA CLASSE";
+
+		menu_button_text[MBT_MOTD][0] = "HOST MOTD :";
+		menu_button_text[MBT_MOTD][1] = "MESSAGE DU JOUR PENDANT L'ETABLISSEMENT DE LA CONNEXION";
 	}
 }
 

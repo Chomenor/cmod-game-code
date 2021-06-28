@@ -21,7 +21,11 @@ START SERVER MENU *****
 
 #define	MAX_SERVERSTEXT	8192
 
-#define MAX_SERVERMAPS	64
+// * TS 3.3.2002
+//#define MAX_SERVERMAPS	64
+#define MAX_SERVERMAPS	1024
+// --
+
 #define MAX_NAMELENGTH	24
 
 #define ID_GAMETYPE				10
@@ -189,16 +193,18 @@ static int gametype_items[] =
 {
 	MNT_TYPE_FREEFORALL,
 	MNT_TYPE_TEAMDEATHMATCH,
-//	MNT_TYPE_TOURNAMENT,
+	MNT_TYPE_TOURNAMENT,
 	MNT_TYPE_CAPTURETHEFLAG,
 	0
 };
 
-//static int gametype_remap[] = {GT_FFA, GT_TEAM, GT_TOURNAMENT, GT_CTF};
+
+// TS 10.12.2001
+static int gametype_remap[] = {GT_FFA, GT_TEAM, GT_TOURNAMENT, GT_CTF};
 //static int gametype_remap2[] = {0, 2, 0, 1, 3};
 
-static int gametype_remap[] = {GT_FFA, GT_TEAM, GT_CTF};
-static int gametype_remap2[] = {0, 0, 0, 1, 2};
+// TS 10.12.2001
+static int gametype_remap2[] = {0, 0, 0, 0, 2};
 
 
 
@@ -231,9 +237,12 @@ static int GametypeBits( char *string ) {
 
 		if( Q_stricmp( token, "ffa" ) == 0 ) {
 			bits |= 1 << GT_FFA;
+			// TS 10.12.2001
+			bits |= 1 << GT_TOURNAMENT;
 			continue;
 		}
 
+		// TS 10.12.2001
 		if( Q_stricmp( token, "tourney" ) == 0 ) {
 			bits |= 1 << GT_TOURNAMENT;
 			continue;
@@ -418,9 +427,16 @@ static void StartServer_GametypeEvent( void* ptr, int event ) {
 	count = UI_GetNumArenas();
 	s_startserver.nummaps = 0;
 	matchbits = 1 << gametype_remap[s_startserver.gametype.curvalue];
+
 	if( gametype_remap[s_startserver.gametype.curvalue] == GT_FFA ) {
 		matchbits |= ( 1 << GT_SINGLE_PLAYER );
 	}
+
+	// TS 10.12.2001
+  else if( gametype_remap[s_startserver.gametype.curvalue] == GT_TOURNAMENT ) {
+		matchbits |= ( 1 << GT_SINGLE_PLAYER );
+	}
+
 	for( i = 0; i < count; i++ ) {
 		info = UI_GetArenaInfoByNumber( i );
 
@@ -432,11 +448,15 @@ static void StartServer_GametypeEvent( void* ptr, int event ) {
 		Q_strncpyz( s_startserver.maplist[s_startserver.nummaps], Info_ValueForKey( info, "map"), MAX_NAMELENGTH );
 		Q_strupr( s_startserver.maplist[s_startserver.nummaps] );
 
-		if (ui_language.string[0] == 0 || Q_stricmp ("ENGLISH",ui_language.string)==0 ) {
+		if (ui_language.string[0] == 0 || Q_stricmp ("ENGLISH",ui_language.string)==0 )
+		{
 			Q_strncpyz( s_startserver.maplongname[s_startserver.nummaps], Info_ValueForKey( info, "longname"), MAX_NAMELENGTH );
-		} else {
+		}
+		else
+		{
 			Q_strncpyz( s_startserver.maplongname[s_startserver.nummaps], Info_ValueForKey( info, va("longname_%s",ui_language.string) ), MAX_NAMELENGTH );
-			if (!s_startserver.maplongname[s_startserver.nummaps][0]) {
+			if (!s_startserver.maplongname[s_startserver.nummaps][0])
+			{
 				Q_strncpyz( s_startserver.maplongname[s_startserver.nummaps], Info_ValueForKey( info, "longname"), MAX_NAMELENGTH );
 			}
 		}
@@ -897,7 +917,7 @@ static void StartServer_LevelshotDraw( void *self ) {
 	x += b->width / 2;
 	y += 4;
 
-	UI_DrawProportionalString( x, y, s_startserver.maplongname[n], UI_CENTER|UI_SMALLFONT, colorTable[color] );
+	UI_DrawProportionalString( x, y, s_startserver.maplist[n], UI_CENTER|UI_SMALLFONT, colorTable[color] );
 
 	x = b->generic.x;
 	y = b->generic.y;
@@ -1456,6 +1476,11 @@ typedef struct {
 	int					newBotIndex;
 	char				newBotName[16];
 
+	// TS 10.12.2001
+	menufield_s			motd;
+	menubitmap_s		motd_bg1;
+	menubitmap_s		motd_bg2;
+
 } serveroptions_t;
 
 static serveroptions_t s_serveroptions;
@@ -1635,6 +1660,9 @@ static void ServerOptions_Start( void ) {
 		trap_Cvar_SetValue( "ui_ctf_friendly", friendlyfire );
 		break;
 	}
+
+  // TS 10.12.2001
+	trap_Cvar_Set("g_motd", s_serveroptions.motd.field.buffer );
 
 	trap_Cvar_SetValue( "sv_maxclients", Com_Clamp( 0, 64, maxclients ) );
 	trap_Cvar_SetValue( "dedicated", Com_Clamp( 0, 2, dedicated ) );
@@ -2113,6 +2141,8 @@ static void ServerOptions_SetMenuItems( void ) {
 	Q_strncpyz( s_serveroptions.hostname.field.buffer, UI_Cvar_VariableString( "sv_hostname" ), sizeof( s_serveroptions.hostname.field.buffer ) );
 	s_serveroptions.pure.curvalue = Com_Clamp( 0, 1, trap_Cvar_VariableValue( "sv_pure" ) );
 
+	// TS 10.12.2001
+	Q_strncpyz( s_serveroptions.motd.field.buffer, UI_Cvar_VariableString( "g_motd" ), sizeof( s_serveroptions.motd.field.buffer ) );
 
 	// set the map pic
 	Com_sprintf( picname, 64, "levelshots/%s", s_startserver.maplist[s_startserver.currentmap] );
@@ -2453,19 +2483,24 @@ static void ServerOptions_MenuInit( qboolean multiplayer )
 		s_serveroptions.hostname.generic.type       = MTYPE_FIELD;
 		s_serveroptions.hostname.generic.flags      = QMF_SMALLFONT;
 		s_serveroptions.hostname.generic.x          = 180;
-		s_serveroptions.hostname.generic.y	        = 63;
-		s_serveroptions.hostname.field.widthInChars = 18;
+		s_serveroptions.hostname.generic.y	        = 60;
+		// TS 10.12.2001
+		// s_serveroptions.hostname.field.widthInChars = 18;
+		s_serveroptions.hostname.field.widthInChars = 22;
 		s_serveroptions.hostname.field.maxchars     = 64;
 		s_serveroptions.hostname.field.style		= UI_SMALLFONT;
 		s_serveroptions.hostname.field.titleEnum	= MBT_HOSTNAME;
-		s_serveroptions.hostname.field.titlecolor	= CT_BLACK;
+		// TS 10.12.2001
+		// s_serveroptions.hostname.field.titlecolor	= CT_BLACK;
+		s_serveroptions.hostname.field.titlecolor	= CT_WHITE;
+
 		s_serveroptions.hostname.field.textcolor	= CT_DKGOLD1;
 		s_serveroptions.hostname.field.textcolor2	= CT_LTGOLD1;
 
 		s_serveroptions.hostnamebackground1.generic.type			= MTYPE_BITMAP;
 		s_serveroptions.hostnamebackground1.generic.flags		= QMF_INACTIVE;
 		s_serveroptions.hostnamebackground1.generic.x			= 80;
-		s_serveroptions.hostnamebackground1.generic.y			= 60;
+		s_serveroptions.hostnamebackground1.generic.y			= 57;
 		s_serveroptions.hostnamebackground1.generic.name			= GRAPHIC_SQUARE;
 		s_serveroptions.hostnamebackground1.width				= 265;
 		s_serveroptions.hostnamebackground1.height				= 22;
@@ -2475,12 +2510,46 @@ static void ServerOptions_MenuInit( qboolean multiplayer )
 		s_serveroptions.hostnamebackground2.generic.type		= MTYPE_BITMAP;
 		s_serveroptions.hostnamebackground2.generic.flags		= QMF_INACTIVE;
 		s_serveroptions.hostnamebackground2.generic.x			= 180;
-		s_serveroptions.hostnamebackground2.generic.y			= 63;
+		s_serveroptions.hostnamebackground2.generic.y			= 60;
 		s_serveroptions.hostnamebackground2.generic.name		= GRAPHIC_SQUARE;
 		s_serveroptions.hostnamebackground2.width				= 153;
 		s_serveroptions.hostnamebackground2.height				= 17;
 		s_serveroptions.hostnamebackground2.color				= CT_BLACK;
 		s_serveroptions.hostnamebackground2.textEnum			= MBT_NONE;
+
+		// TS 10.12.2001 -->
+		s_serveroptions.motd.generic.type       = MTYPE_FIELD;
+		s_serveroptions.motd.generic.flags      = QMF_SMALLFONT;
+		s_serveroptions.motd.generic.x          = 180;
+		s_serveroptions.motd.generic.y	        = 79;
+		s_serveroptions.motd.field.widthInChars = 22;
+		s_serveroptions.motd.field.maxchars     = 64;
+		s_serveroptions.motd.field.style		= UI_SMALLFONT;
+		s_serveroptions.motd.field.titleEnum	= MBT_MOTD;
+		s_serveroptions.motd.field.titlecolor	= CT_WHITE;
+		s_serveroptions.motd.field.textcolor	= CT_DKGOLD1;
+		s_serveroptions.motd.field.textcolor2	= CT_LTGOLD1;
+
+		s_serveroptions.motd_bg1.generic.type			= MTYPE_BITMAP;
+		s_serveroptions.motd_bg1.generic.flags		= QMF_INACTIVE;
+		s_serveroptions.motd_bg1.generic.x			= 80;
+		s_serveroptions.motd_bg1.generic.y			= 76;
+		s_serveroptions.motd_bg1.generic.name			= GRAPHIC_SQUARE;
+		s_serveroptions.motd_bg1.width				= 265;
+		s_serveroptions.motd_bg1.height				= 22;
+		s_serveroptions.motd_bg1.color				= CT_DKPURPLE1;
+		s_serveroptions.motd_bg1.textEnum				= MBT_NONE;
+
+		s_serveroptions.motd_bg2.generic.type		= MTYPE_BITMAP;
+		s_serveroptions.motd_bg2.generic.flags		= QMF_INACTIVE;
+		s_serveroptions.motd_bg2.generic.x			= 180;
+		s_serveroptions.motd_bg2.generic.y			= 79;
+		s_serveroptions.motd_bg2.generic.name		= GRAPHIC_SQUARE;
+		s_serveroptions.motd_bg2.width				= 153;
+		s_serveroptions.motd_bg2.height				= 17;
+		s_serveroptions.motd_bg2.color				= CT_BLACK;
+		s_serveroptions.motd_bg2.textEnum			= MBT_NONE;
+		// TS 10.12.2001 <--
 
 	}
 
@@ -2687,9 +2756,13 @@ static void ServerOptions_MenuInit( qboolean multiplayer )
 
 	if ( s_serveroptions.multiplayer )
 	{
-		Menu_AddItem( &s_serveroptions.menu, &s_serveroptions.hostnamebackground1 );
-		Menu_AddItem( &s_serveroptions.menu, &s_serveroptions.hostnamebackground2 );
+		// Menu_AddItem( &s_serveroptions.menu, &s_serveroptions.hostnamebackground1 );
+		// Menu_AddItem( &s_serveroptions.menu, &s_serveroptions.hostnamebackground2 );
 		Menu_AddItem( &s_serveroptions.menu, &s_serveroptions.hostname );
+
+		// Menu_AddItem( &s_serveroptions.menu, &s_serveroptions.motd_bg1 );
+		// Menu_AddItem( &s_serveroptions.menu, &s_serveroptions.motd_bg2 );
+		Menu_AddItem( &s_serveroptions.menu, &s_serveroptions.motd );
 	}
 
 	Menu_AddItem( &s_serveroptions.menu, &s_serveroptions.mainmenu );
@@ -4019,6 +4092,7 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	s_advancedserver.runspeed.field.textcolor2				= CT_LTGOLD1;
 
 	y += pad;
+	/*
 	s_advancedserver.gravity.generic.type					= MTYPE_FIELD;
 	s_advancedserver.gravity.generic.flags					= QMF_NUMBERSONLY|QMF_SMALLFONT;
 	s_advancedserver.gravity.generic.x						= x;
@@ -4033,6 +4107,7 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	s_advancedserver.gravity.field.titlecolor				= CT_LTGOLD1;
 	s_advancedserver.gravity.field.textcolor				= CT_DKGOLD1;
 	s_advancedserver.gravity.field.textcolor2				= CT_LTGOLD1;
+	*/
 
 	y += pad;
 	s_advancedserver.knockback.generic.type					= MTYPE_FIELD;
@@ -4389,7 +4464,10 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 
 	Menu_AddItem( &s_advancedserver.menu, &s_advancedserver.classchangetimeout);
 	Menu_AddItem( &s_advancedserver.menu, &s_advancedserver.nojointimeout);
-//	Menu_AddItem( &s_advancedserver.menu, &s_advancedserver.gravity );
+
+  // TS 12.12.2001
+  // Menu_AddItem( &s_advancedserver.menu, &s_advancedserver.gravity );
+
 	Menu_AddItem( &s_advancedserver.menu, &s_advancedserver.knockback );
 	Menu_AddItem( &s_advancedserver.menu, &s_advancedserver.dmgmult );
 	if (!fromMenu)

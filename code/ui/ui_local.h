@@ -1341,6 +1341,8 @@ extern char	*ui_medalSounds[];
 //
 // ui_main.c
 //
+extern void UI_RegisterCvars( void );
+extern void UI_UpdateCvars( void );
 extern qboolean UI_NoCompat(void);
 
 //
@@ -1359,8 +1361,6 @@ extern sfxHandle_t	MenuField_Key( menufield_s* m, int* key );
 //
 extern void MainMenu_Cache( void );
 extern void UI_MainMenu(void);
-extern void UI_RegisterCvars( void );
-extern void UI_UpdateCvars( void );
 extern void UI_Setup_MenuButtons(void);
 extern void UI_QuitMenu( void );
 extern void UI_ChooseServerTypeMenu( void );

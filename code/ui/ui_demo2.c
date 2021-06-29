@@ -64,16 +64,14 @@ typedef struct
 	menubitmap_s	currentFile;
 
 	int				numDemos;
-	char			names[NAMEBUFSIZE];
-	int				numCompatDemos;
-	char			compatnames[NAMEBUFSIZE];
-
-	int				numitems;
 	char			*demolist[MAX_DEMOS];
+
+	char			nameBuf[NAMEBUFSIZE];
+	char			*nameBufPos;
+
 	char			displaylist[MAX_DEMODISP][MAX_DEMONAMELEN];
 
 	int				currentDemoIndex;
-
 } demos_t;
 
 static demos_t	s_demos;
@@ -122,31 +120,31 @@ void DemoMenu_PopulateList ( int startingIndex ) {
 	int	i;
 	char*	demoName;
 
+	if ( s_demos.numDemos == 0 ) {
+		Q_strncpyz( s_demos.displaylist[0], menu_normal_text[MNT_NO_DEMOS_FOUND], sizeof( s_demos.displaylist[0] ) );
+		((menubitmap_s *)g_demoline[0])->textPtr = s_demos.displaylist[0];
+		((menubitmap_s *)g_demoline[0])->generic.flags = QMF_HIGHLIGHT_IF_FOCUS;
+		return;
+	}
+
 	for(i = 0; g_demoline[i]; i++)
 	{
-		if (i >= s_demos.numitems)
+		if (i >= s_demos.numDemos)
 			break;
 
 		demoName = s_demos.demolist[startingIndex+i];
 
 		//TiM - Error trapping. Although this should never happen
 		if ( !demoName ) {
-			((menubitmap_s *)g_demoline[i])->generic.flags	= QMF_INACTIVE|QMF_HIDDEN;
+			((menubitmap_s *)g_demoline[i])->generic.flags = QMF_INACTIVE|QMF_HIDDEN;
 			continue;
-		}
-
-		// No demos???
-		if (s_demos.numitems == 1)
-		{
-			if (!strcmp(demoName, menu_normal_text[MNT_NO_DEMOS_FOUND]))
-				((menubitmap_s *)g_demoline[i])->generic.flags	= QMF_INACTIVE;
 		}
 
 		COM_StripExtension(demoName, s_demos.displaylist[i], sizeof(s_demos.displaylist[i]));
 		Q_strupr(s_demos.displaylist[i]);
 
 		((menubitmap_s *)g_demoline[i])->textPtr = s_demos.displaylist[i];
-		((menubitmap_s *)g_demoline[i])->generic.flags	= QMF_HIGHLIGHT_IF_FOCUS;
+		((menubitmap_s *)g_demoline[i])->generic.flags = QMF_HIGHLIGHT_IF_FOCUS;
 	}
 }
 
@@ -245,7 +243,7 @@ static void Demos_MenuEvent( void *ptr, int event )
 	switch( ((menucommon_s*)ptr)->id )
 	{
 
-	case ID_UP:
+		case ID_UP:
 			s_demos.currentDemoIndex -= SCROLL_SPEED;
 
 			if ( s_demos.currentDemoIndex < 0 )
@@ -258,10 +256,10 @@ static void Demos_MenuEvent( void *ptr, int event )
 			s_demos.currentDemoIndex += SCROLL_SPEED;
 
 			//TiM - cap it when the final entry comes into view
-			if ( s_demos.numitems > MAX_DEMODISP
-				&& ( s_demos.currentDemoIndex + MAX_DEMODISP ) > s_demos.numitems )
+			if ( s_demos.numDemos > MAX_DEMODISP
+				&& ( s_demos.currentDemoIndex + MAX_DEMODISP ) > s_demos.numDemos )
 			{
-				s_demos.currentDemoIndex = s_demos.numitems-MAX_DEMODISP;
+				s_demos.currentDemoIndex = s_demos.numDemos-MAX_DEMODISP;
 			}
 
 			DemoMenu_PopulateList( s_demos.currentDemoIndex );
@@ -337,6 +335,39 @@ void UI_DemosMenu_Cache( void )
 
 }
 
+/*
+===============
+Demos_SearchDemos
+
+Searches for demo filenames matching extension and adds them to s_demos.demolist, with string
+data stored in s_demos.nameBuf. Both s_demos.numDemos and s_demos.nameBufPos will be incremented
+by this function.
+===============
+*/
+static void Demos_AddDemos( const char *extension ) {
+	int i;
+	int count = 0;
+	int bufAvailable = sizeof( s_demos.nameBuf ) - ( s_demos.nameBufPos - s_demos.nameBuf );
+
+	if ( bufAvailable > 0 ) {
+		count = trap_FS_GetFileList( "demos", extension, s_demos.nameBufPos, bufAvailable );
+	}
+
+	for ( i = 0; i < count; ++i ) {
+		if ( s_demos.numDemos >= MAX_DEMOS ) {
+			break;
+		}
+
+		s_demos.demolist[s_demos.numDemos] = s_demos.nameBufPos;
+		s_demos.numDemos++;
+
+		// advance name buffer pointer
+		while ( *s_demos.nameBufPos ) {
+			s_demos.nameBufPos++;
+		}
+		s_demos.nameBufPos++;
+	}
+}
 
 /*
 ===============
@@ -346,7 +377,6 @@ Demos_MenuInit
 static void Demos_MenuInit( void )
 {
 	int		i,x,y;
-	char	*demoname;
 
 	memset( &s_demos, 0 ,sizeof(demos_t) );
 	s_demos.menu.key = UI_DemosMenu_Key;
@@ -443,13 +473,13 @@ static void Demos_MenuInit( void )
 	s_demos.downArrow.textcolor				= CT_BLACK;
 	s_demos.downArrow.textcolor2			= CT_WHITE;
 
-	if(UI_NoCompat())
-		s_demos.numDemos = trap_FS_GetFileList("demos", ".dm_25", s_demos.names, NAMEBUFSIZE);
-	else
-		s_demos.numDemos = 0;
-
-	s_demos.numCompatDemos = trap_FS_GetFileList("demos", ".efdemo", s_demos.compatnames, NAMEBUFSIZE);
-	s_demos.numitems = s_demos.numDemos + s_demos.numCompatDemos;
+	// Currently just list all demo types, regardless of client support
+	// Most clients will provide an error message if unsupported demo is attempted to be played
+	s_demos.numDemos = 0;
+	s_demos.nameBufPos = s_demos.nameBuf;
+	Demos_AddDemos( ".dm_26" );
+	Demos_AddDemos( ".dm_25" );
+	Demos_AddDemos( ".efdemo" );
 
 	x = 225;
 	y = 200;
@@ -478,43 +508,10 @@ static void Demos_MenuInit( void )
 		y += 18;
 	}
 
-	// No demos??
-	if (!s_demos.numitems)
-	{
-		strcpy( s_demos.names, menu_normal_text[MNT_NO_DEMOS_FOUND] );
-		s_demos.numitems = 1;
-	}
-	else if (s_demos.numitems > MAX_DEMOS)
-	{// Too many demos???
-		s_demos.numitems = MAX_DEMOS;
-	}
-
 	//TiM - If the list is longer than we can fit, enable the scroll buttons
-	if ( s_demos.numitems > MAX_DEMODISP ) {
+	if ( s_demos.numDemos > MAX_DEMODISP ) {
 		s_demos.upArrow.generic.flags = QMF_HIGHLIGHT_IF_FOCUS;
 		s_demos.downArrow.generic.flags = QMF_HIGHLIGHT_IF_FOCUS;
-	}
-
-	// Point fields to demo names
-	demoname = s_demos.names;
-
-	//TiM - instead of sending the list names directly to the controls, we'll populate an array
-	//with all of them, and then specify which ones to display afterwards.
-	for(i = 0; i < s_demos.numitems; i++)
-	{
-		if(i == s_demos.numDemos)
-			demoname = s_demos.compatnames;
-
-		if ( !demoname )
-			break;
-
-		//insert into the array
-		s_demos.demolist[i] = demoname;
-
-		//increment
-		for(; *demoname; demoname++);
-
-		demoname++;
 	}
 
 	//Populate the controls with the values from the array

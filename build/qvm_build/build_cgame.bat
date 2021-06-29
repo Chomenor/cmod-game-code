@@ -75,7 +75,7 @@ goto :eof
 
 :compile
 echo %src%\%name%.c
-q3lcc.exe -o %module_temp%\%name%.asm -I%code_directory%\cgame -I%code_directory%\common %code_directory%\%src%\%name%.c
+q3lcc.exe -o %module_temp%\%name%.asm -DMODULE_CGAME -I%code_directory%\cgame -I%code_directory%\common %code_directory%\%src%\%name%.c
 if errorlevel 1 echo Error compiling %src%\%name%.c&pause&exit
 >>%q3asm_file% echo %module_temp%\%name%
 goto :eof

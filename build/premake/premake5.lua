@@ -22,50 +22,47 @@ workspace "StefGame"
       optimize "On"
 
 project "game"
-   files { "../../code/game/*.h",
-      "../../code/game/*.c",
-      "../../code/common/*.h",
-      "../../code/common/*.c" }
-
+   files { "../../code/game/**.h",
+      "../../code/game/**.c",
+      "../../code/common/**.h",
+      "../../code/common/**.c" }
    removefiles { "../../code/common/bg_lib.*" }
 
+   defines { "MODULE_GAME" }
    includedirs { "../../code/game",
       "../../code/common" }
 
    targetname "qagamex86"
-
    filter "platforms:Win64"
       targetname "qagamex86_64"
 
 project "cgame"
-   files { "../../code/cgame/*.h",
-      "../../code/cgame/*.c",
-      "../../code/common/*.h",
-      "../../code/common/*.c" }
-
+   files { "../../code/cgame/**.h",
+      "../../code/cgame/**.c",
+      "../../code/common/**.h",
+      "../../code/common/**.c" }
    removefiles { "../../code/common/bg_lib.*" }
 
+   defines { "MODULE_CGAME" }
    includedirs { "../../code/cgame",
       "../../code/common" }
 
    targetname "cgamex86"
-
    filter "platforms:Win64"
       targetname "cgamex86_64"
 
 project "ui"
-   files { "../../code/ui/*.h",
-      "../../code/ui/*.c",
-      "../../code/common/bg_misc.c",
-      "../../code/common/q_math.c",
-      "../../code/common/q_shared.c",
-      "../../code/common/bg_public.h",
-      "../../code/common/tr_types.h" }
+   files { "../../code/ui/**.h",
+      "../../code/ui/**.c",
+      "../../code/common/**.h",
+      "../../code/common/**.c" }
+   removefiles { "../../code/common/bg_*" }
+   files { "../../code/common/bg_misc.c" }
 
+   defines { "MODULE_UI" }
    includedirs { "../../code/ui",
       "../../code/common" }
 
    targetname "uix86"
-
    filter "platforms:Win64"
       targetname "uix86_64"

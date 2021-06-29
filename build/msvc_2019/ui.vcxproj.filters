@@ -9,7 +9,10 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\code\common\bg_public.h">
+    <ClInclude Include="..\..\code\common\q_shared.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\common\surfaceflags.h">
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="..\..\code\common\tr_types.h">

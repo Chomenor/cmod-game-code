@@ -64,6 +64,11 @@
 #error overflow: (CS_MAX) > MAX_CONFIGSTRINGS
 #endif
 
+// Arbitrary index that the game module uses to write mod config info. Clients will look for
+// mod config prefix in all configstrings, so this can be changed to any non-conflicting value
+// without affecting the client.
+#define CS_MOD_CONFIG		870
+
 typedef enum {
 	GT_FFA,				// free for all
 	GT_TOURNAMENT,		// one on one tournament
@@ -155,7 +160,8 @@ typedef struct {
 
 // if a full pmove isn't done on the client, you can just update the angles
 void PM_UpdateViewAngles( playerState_t *ps, const usercmd_t *cmd );
-void Pmove (pmove_t *pmove);
+int PM_NextMoveTime( int currentTime, int targetTime, int pMoveFixed );
+void Pmove( pmove_t *pmove, int pMoveFixed );
 
 //===================================================================================
 

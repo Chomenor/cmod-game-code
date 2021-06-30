@@ -126,6 +126,48 @@ void CG_ParseServerinfo( void ) {
 
 /*
 ==================
+CG_ParseModConfig
+
+The mod config format provides a standard method for servers to send mod configuration
+data to clients. Any configstring index can be used to send mod config values, to allow
+the server more flexibility to avoid conflicts or optimize. In the case of duplicate
+keys the numerically higher configstring index takes precedence.
+
+Configstrings containing mod config data begin with the prefix "!modcfg ", followed by
+a standard slash-separated info string similar to serverinfo or systeminfo.
+==================
+*/
+void CG_ParseModConfig( void ) {
+	int i;
+	char key[BIG_INFO_STRING];
+	char value[BIG_INFO_STRING];
+
+	memset( &cgs.modConfig, 0, sizeof( cgs.modConfig ) );
+	memset( cgs.modConfigSet, 0, sizeof( cgs.modConfigSet ) );
+
+	// look for any configstring matching "!modcfg " prefix
+	for ( i = 0; i < MAX_CONFIGSTRINGS; ++i ) {
+		const char *str = CG_ConfigString( i );
+
+		if ( str[0] == '!' && !Q_stricmpn( str, "!modcfg ", 8 ) && strlen( str ) < BIG_INFO_STRING ) {
+			const char *cur = &str[8];
+
+			// load values
+			while ( 1 ) {
+				Info_NextPair( &cur, key, value );
+				if ( !key[0] )
+					break;
+				if ( !Q_stricmp( key, "pMoveFixed" ) )
+					cgs.modConfig.pMoveFixed = atoi( value );
+			}
+
+			cgs.modConfigSet[i] = qtrue;
+		}
+	}
+}
+
+/*
+==================
 CG_ParseWarmup
 ==================
 */
@@ -184,6 +226,11 @@ static void CG_ConfigStringModified( void ) {
 
 	// look up the individual string that was modified
 	str = CG_ConfigString( num );
+
+	// check if a mod config string was changed
+	if ( !Q_stricmpn( str, "!modcfg ", 8 ) || cgs.modConfigSet[num] ) {
+		CG_ParseModConfig();
+	}
 
 	// do something with it if necessary
 	if ( num == CS_MUSIC ) {

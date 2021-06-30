@@ -569,6 +569,7 @@ static void G_SayTo( gentity_t *ent, gentity_t *other, int mode, int color, cons
 //
 // g_main.c
 //
+int G_PmoveFixedValue( void );
 void FindIntermissionPoint( void );
 void G_RunThink (gentity_t *ent);
 void SendScoreboardMessageToAllClients( void );
@@ -790,6 +791,9 @@ extern  vmCvar_t	g_team_group_blue;
 extern	vmCvar_t	g_random_skin_limit;
 extern	vmCvar_t	g_noJoinTimeout;
 extern	vmCvar_t	g_classChangeDebounceTime;
+
+extern	vmCvar_t	g_pMoveFixed;
+extern	vmCvar_t	g_pMoveMsec;
 
 void	trap_Printf( const char *fmt );
 void	trap_Error( const char *fmt );

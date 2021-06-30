@@ -1167,6 +1167,8 @@ void CG_Init( int serverMessageNum, int serverCommandSequence ) {
 
 	CG_ParseServerinfo();
 
+	CG_ParseModConfig();
+
 	// load the new map
 	CG_LoadingString( "collision map" );
 

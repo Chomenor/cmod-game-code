@@ -1062,6 +1062,11 @@ typedef struct {
 	qhandle_t	corner_ll_8_30;
 } cgMedia_t;
 
+// These values are loaded from server mod configstrings.
+typedef struct {
+	// player movement
+	int pMoveFixed;
+} modConfig_t;
 
 // The client game static (cgs) structure hold everything
 // loaded or calculated from the gamestate.  It will NOT
@@ -1129,6 +1134,10 @@ typedef struct {
 
 	//objectives
 	objective_t	objectives[MAX_OBJECTIVES];
+
+	// config info
+	modConfig_t modConfig;
+	qboolean modConfigSet[MAX_CONFIGSTRINGS];
 } cgs_t;
 
 //==============================================================================
@@ -1566,6 +1575,7 @@ void CG_InitConsoleCommands( void );
 //
 void CG_ExecuteNewServerCommands( int latestSequence );
 void CG_ParseServerinfo( void );
+void CG_ParseModConfig( void );
 void CG_SetConfigValues( void );
 
 //

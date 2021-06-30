@@ -14,6 +14,10 @@ static	centity_t	*cg_solidEntities[MAX_ENTITIES_IN_SNAPSHOT];
 static	int			cg_numTriggerEntities;
 static	centity_t	*cg_triggerEntities[MAX_ENTITIES_IN_SNAPSHOT];
 
+// reference point for prediction error decay
+static	int			lastMoveTime = -1;
+static	vec3_t		lastMoveOrigin;
+
 /*
 ====================
 CG_BuildSolidList
@@ -422,6 +426,47 @@ static void CG_TouchTriggerPrediction( void ) {
 	}
 }
 
+/*
+=================
+CG_HaveStepEvent
+=================
+*/
+static qboolean CG_HaveStepEvent( playerState_t *ps ) {
+	int i;
+
+	for ( i = ps->eventSequence - MAX_PS_EVENTS; i < ps->eventSequence; ++i ) {
+		if ( i >= 0 ) {
+			int event = ps->events[i & ( MAX_PS_EVENTS - 1 )];
+			if ( event == EV_STEP_4 || event == EV_STEP_8 || event == EV_STEP_12 || event == EV_STEP_16 )
+				return qtrue;
+		}
+	}
+
+	return qfalse;
+}
+
+/*
+=================
+CG_FinalPredict
+=================
+*/
+static void CG_FinalPredict( playerState_t *ps, usercmd_t *cmd ) {
+	playerState_t temp = *ps;
+	temp.eventSequence = 0;
+
+	cg_pmove.cmd = *cmd;
+	cg_pmove.ps = &temp;
+	Pmove( &cg_pmove, 0 );
+
+	ps->origin[0] = temp.origin[0];
+	ps->origin[1] = temp.origin[1];
+	if ( !CG_HaveStepEvent( &temp ) ) {
+		ps->origin[2] = temp.origin[2];
+	}
+
+	VectorCopy( temp.viewangles, ps->viewangles );
+	ps->bobCycle = temp.bobCycle;
+}
 
 /*
 =================
@@ -563,57 +608,52 @@ void CG_PredictPlayerState( void ) {
 		// from the snapshot, but on a wan we will have
 		// to predict several commands to get to the point
 		// we want to compare
-		if ( cg.predictedPlayerState.commandTime == oldPlayerState.commandTime ) {
+		if ( cg.predictedPlayerState.commandTime == lastMoveTime && !cg.thisFrameTeleport ) {
 			vec3_t	delta;
 			float	len;
+			vec3_t	adjusted;
 
-			if ( cg.thisFrameTeleport ) {
-				// a teleport will not cause an error decay
-				VectorClear( cg.predictedError );
+			// make sure the error decay is only run once per frame, even if pmove sets the same
+			// commandTime for multiple usercmds due to fixed frame lengths
+			lastMoveTime = -1;
+
+			CG_AdjustPositionForMover( cg.predictedPlayerState.origin,
+				cg.predictedPlayerState.groundEntityNum, cg.physicsTime, cg.oldTime, adjusted );
+
+			if ( cg_showmiss.integer ) {
+				if (!VectorCompare( lastMoveOrigin, adjusted )) {
+					CG_Printf("prediction error\n");
+				}
+			}
+			VectorSubtract( lastMoveOrigin, adjusted, delta );
+			len = VectorLength( delta );
+			if ( len > 0.1 ) {
 				if ( cg_showmiss.integer ) {
-					CG_Printf( "PredictionTeleport\n" );
+					CG_Printf("Prediction miss: %f\n", len);
 				}
-				cg.thisFrameTeleport = qfalse;
-			} else {
-				vec3_t	adjusted;
-				CG_AdjustPositionForMover( cg.predictedPlayerState.origin,
-					cg.predictedPlayerState.groundEntityNum, cg.physicsTime, cg.oldTime, adjusted );
+				if ( cg_errorDecay.integer ) {
+					int		t;
+					float	f;
 
-				if ( cg_showmiss.integer ) {
-					if (!VectorCompare( oldPlayerState.origin, adjusted )) {
-						CG_Printf("prediction error\n");
+					t = cg.time - cg.predictedErrorTime;
+					f = ( cg_errorDecay.value - t ) / cg_errorDecay.value;
+					if ( f < 0 ) {
+						f = 0;
 					}
+					if ( f > 0 && cg_showmiss.integer ) {
+						CG_Printf("Double prediction decay: %f\n", f);
+					}
+					VectorScale( cg.predictedError, f, cg.predictedError );
+				} else {
+					VectorClear( cg.predictedError );
 				}
-				VectorSubtract( oldPlayerState.origin, adjusted, delta );
-				len = VectorLength( delta );
-				if ( len > 0.1 ) {
-					if ( cg_showmiss.integer ) {
-						CG_Printf("Prediction miss: %f\n", len);
-					}
-					if ( cg_errorDecay.integer ) {
-						int		t;
-						float	f;
-
-						t = cg.time - cg.predictedErrorTime;
-						f = ( cg_errorDecay.value - t ) / cg_errorDecay.value;
-						if ( f < 0 ) {
-							f = 0;
-						}
-						if ( f > 0 && cg_showmiss.integer ) {
-							CG_Printf("Double prediction decay: %f\n", f);
-						}
-						VectorScale( cg.predictedError, f, cg.predictedError );
-					} else {
-						VectorClear( cg.predictedError );
-					}
-					VectorAdd( delta, cg.predictedError, cg.predictedError );
-					cg.predictedErrorTime = cg.oldTime;
-				}
+				VectorAdd( delta, cg.predictedError, cg.predictedError );
+				cg.predictedErrorTime = cg.oldTime;
 			}
 		}
 
 
-		Pmove (&cg_pmove);
+		Pmove (&cg_pmove, cgs.modConfig.pMoveFixed);
 
 		moved = qtrue;
 
@@ -621,15 +661,28 @@ void CG_PredictPlayerState( void ) {
 		CG_TouchTriggerPrediction();
 	}
 
+	if ( cg.thisFrameTeleport ) {
+		// reset error decay on teleport
+		VectorClear( cg.predictedError );
+		if ( cg_showmiss.integer ) {
+			CG_Printf( "PredictionTeleport\n" );
+		}
+		cg.thisFrameTeleport = qfalse;
+	}
+
+	// set error decay markers for next frame
+	lastMoveTime = cg.predictedPlayerState.commandTime;
+	CG_AdjustPositionForMover( cg.predictedPlayerState.origin,
+		cg.predictedPlayerState.groundEntityNum,
+		cg.physicsTime, cg.time, lastMoveOrigin );
+
 	if ( cg_showmiss.integer > 1 ) {
 		CG_Printf( "[%i : %i] ", cg_pmove.cmd.serverTime, cg.time );
 	}
 
-	if ( !moved ) {
-		if ( cg_showmiss.integer ) {
-			CG_Printf( "not moved\n" );
-		}
-		return;
+	// simulate any movement fragment left over from main move due to fixed frame length
+	if ( latestCmd.serverTime > cg.predictedPlayerState.commandTime ) {
+		CG_FinalPredict( &cg.predictedPlayerState, &latestCmd );
 	}
 
 	// adjust for the movement of the groundentity

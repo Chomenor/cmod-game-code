@@ -484,7 +484,7 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 		pm.pointcontents = trap_PointContents;
 
 		// perform a pmove
-		Pmove (&pm);
+		Pmove (&pm, G_PmoveFixedValue());
 
 		// save results of pmove
 		VectorCopy( client->ps.origin, ent->s.origin );
@@ -1662,7 +1662,7 @@ void ClientThink_real( gentity_t *ent ) {
 //		G_Printf("serverTime >>>>>\n" );
 	}
 
-	msec = ucmd->serverTime - client->ps.commandTime;
+	msec = PM_NextMoveTime( client->ps.commandTime, ucmd->serverTime, G_PmoveFixedValue() ) - client->ps.commandTime;
 	// following others may result in bad times, but we still want
 	// to check for follow toggles
 	if ( msec < 1 && client->sess.spectatorState != SPECTATOR_FOLLOW ) {
@@ -1761,7 +1761,7 @@ void ClientThink_real( gentity_t *ent ) {
 	VectorCopy( client->ps.origin, oldOrigin );
 
 	// perform a pmove
-	Pmove (&pm);
+	Pmove (&pm, G_PmoveFixedValue());
 
 	// save results of pmove
 	if ( ent->client->ps.eventSequence != oldEventSequence ) {

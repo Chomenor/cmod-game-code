@@ -86,6 +86,9 @@ vmCvar_t	g_noJoinTimeout;
 vmCvar_t	g_classChangeDebounceTime;
 vmCvar_t	ui_playerclass;
 
+vmCvar_t	g_pMoveFixed;
+vmCvar_t	g_pMoveMsec;
+
 cvarTable_t		gameCvarTable[] = {
 	// don't override the cheat state set by the system
 	{ &g_cheats, "sv_cheats", "", 0, 0, qfalse },
@@ -172,11 +175,14 @@ cvarTable_t		gameCvarTable[] = {
 
 	{ &ui_playerclass, "ui_playerclass", "", CVAR_ARCHIVE, 0, qfalse },
 
+	{ &g_pMoveFixed, "g_pMoveFixed", "1", CVAR_ARCHIVE, 0, qfalse },
+	{ &g_pMoveMsec, "g_pMoveMsec", "8", CVAR_ARCHIVE, 0, qfalse },
 };
 
 int		gameCvarTableSize = sizeof( gameCvarTable ) / sizeof( gameCvarTable[0] );
 
 void G_InitGame( int levelTime, int randomSeed, int restart );
+static void G_UpdateModConfigInfo( void );
 void G_RunFrame( int levelTime );
 void G_ShutdownGame( int restart );
 void CheckExitRules( void );
@@ -409,6 +415,48 @@ void G_FindTeams( void ) {
 
 /*
 =================
+G_PmoveFixedValue
+
+Returns fixed frame length control value used by pmove and shared with clients via configstring.
+=================
+*/
+int G_PmoveFixedValue( void ) {
+	if ( g_pMoveFixed.integer && g_pMoveMsec.integer > 0 && g_pMoveMsec.integer < 35 ) {
+		return g_pMoveMsec.integer;
+	}
+
+	return 0;
+}
+
+/*
+=================
+G_UpdateModConfigInfo
+
+Updates mod config configstring. Called on game startup and any time the value
+might have changed.
+=================
+*/
+static void G_UpdateModConfigInfo( void ) {
+	char buffer[BIG_INFO_STRING + 8];
+	char *info = buffer + 8;
+	Q_strncpyz( buffer, "!modcfg ", sizeof( buffer ) );
+
+	{
+		int pMoveFixed = G_PmoveFixedValue();
+		if ( pMoveFixed ) {
+			Info_SetValueForKey( info, "pMoveFixed", va( "%i", pMoveFixed ) );
+		}
+	}
+
+	if ( *info ) {
+		trap_SetConfigstring( CS_MOD_CONFIG, buffer );
+	} else {
+		trap_SetConfigstring( CS_MOD_CONFIG, "" );
+	}
+}
+
+/*
+=================
 G_RegisterCvars
 =================
 */
@@ -455,6 +503,10 @@ void G_UpdateCvars( void ) {
 						trap_SendServerCommand( -1, va("print \"Server: %s changed to %s\n\"",
 							cv->cvarName, cv->vmCvar->string ) );
 					}
+				}
+
+				if ( cv->vmCvar == &g_pMoveFixed || cv->vmCvar == &g_pMoveMsec ) {
+					G_UpdateModConfigInfo();
 				}
 			}
 		}
@@ -607,6 +659,9 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	}
 
 	G_InitModRules();
+
+	// set mod config string
+	G_UpdateModConfigInfo();
 
 	levelExiting = qfalse;
 }

@@ -2242,6 +2242,45 @@ void PmoveSingle (pmove_t *pmove) {
 	SnapVector( pm->ps->velocity );
 }
 
+/*
+================
+PM_NextFrameBreak
+
+Given a current command time, returns next valid frame end time according to
+fixed length settings. Returned value will always be higher than input.
+================
+*/
+static int PM_NextFrameBreak( int commandTime, int fixedLength ) {
+	return ( commandTime + fixedLength ) - ( commandTime % fixedLength );
+}
+
+/*
+================
+PM_NextMoveTime
+
+Given a current and target time, returns next time to move player.
+Returns currentTime if no move is needed, otherwise returns a value greater than currentTime.
+================
+*/
+int PM_NextMoveTime( int currentTime, int targetTime, int pMoveFixed ) {
+	if ( currentTime > targetTime ) {
+		return currentTime;
+	}
+
+	if ( pMoveFixed > 0 && pMoveFixed < 35 ) {
+		int nextTime = PM_NextFrameBreak( currentTime, pMoveFixed );
+		if ( nextTime > targetTime ) {
+			return currentTime;
+		}
+		return nextTime;
+	}
+
+	if ( targetTime > currentTime + 66 ) {
+		targetTime = currentTime + 66;
+	}
+
+	return targetTime;
+}
 
 /*
 ================
@@ -2250,31 +2289,23 @@ Pmove
 Can be called by either the server or the client
 ================
 */
-void Pmove (pmove_t *pmove) {
-	int			finalTime;
+void Pmove( pmove_t *pmove, int pMoveFixed ) {
+	usercmd_t inputCmd = pmove->cmd;
 
-	finalTime = pmove->cmd.serverTime;
-
-	if ( finalTime < pmove->ps->commandTime ) {
-		return;	// should not happen
+	if ( inputCmd.serverTime > pmove->ps->commandTime + 1000 ) {
+		pmove->ps->commandTime = inputCmd.serverTime - 1000;
 	}
 
-	if ( finalTime > pmove->ps->commandTime + 1000 ) {
-		pmove->ps->commandTime = finalTime - 1000;
-	}
-
-	// chop the move up if it is too long, to prevent framerate
-	// dependent behavior
-	while ( pmove->ps->commandTime != finalTime ) {
-		int		msec;
-
-		msec = finalTime - pmove->ps->commandTime;
-
-		if ( msec > 66 ) {
-			msec = 66;
+	while( 1 ) {
+		int nextTime = PM_NextMoveTime( pmove->ps->commandTime, inputCmd.serverTime, pMoveFixed );
+		if ( nextTime <= pmove->ps->commandTime ) {
+			break;
 		}
-		pmove->cmd.serverTime = pmove->ps->commandTime + msec;
-		PmoveSingle( pmove );
-	}
 
+		pmove->cmd.serverTime = nextTime;
+		PmoveSingle( pmove );
+
+		// reset any changes to command during move
+		pmove->cmd = inputCmd;
+	}
 }

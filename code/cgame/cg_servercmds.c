@@ -159,6 +159,18 @@ void CG_ParseModConfig( void ) {
 					break;
 				if ( !Q_stricmp( key, "pMoveFixed" ) )
 					cgs.modConfig.pMoveFixed = atoi( value );
+				if ( !Q_stricmp( key, "noJumpKeySlowdown" ) )
+					cgs.modConfig.noJumpKeySlowdown = atoi( value ) ? qtrue : qfalse;
+				if ( !Q_stricmp( key, "bounceFix" ) )
+					cgs.modConfig.bounceFix = atoi( value ) ? qtrue : qfalse;
+				if ( !Q_stricmp( key, "snapVectorGravLimit" ) )
+					cgs.modConfig.snapVectorGravLimit = atoi( value );
+				if ( !Q_stricmp( key, "noFlyingDrift" ) )
+					cgs.modConfig.noFlyingDrift = atoi( value ) ? qtrue : qfalse;
+				if ( !Q_stricmp( key, "infilJumpFactor" ) )
+					cgs.modConfig.infilJumpFactor = atof( value );
+				if ( !Q_stricmp( key, "infilAirAccelFactor" ) )
+					cgs.modConfig.infilAirAccelFactor = atof( value );
 			}
 
 			cgs.modConfigSet[i] = qtrue;

@@ -23,6 +23,9 @@
 
 #define	INTERMISSION_DELAY_TIME	2000
 
+#define SNAPVECTOR_GRAV_LIMIT 100
+#define SNAPVECTOR_GRAV_LIMIT_STR "100"
+
 // gentity->flags
 #define	FL_GODMODE				0x00000010
 #define	FL_NOTARGET				0x00000020
@@ -794,6 +797,9 @@ extern	vmCvar_t	g_classChangeDebounceTime;
 
 extern	vmCvar_t	g_pMoveFixed;
 extern	vmCvar_t	g_pMoveMsec;
+extern	vmCvar_t	g_noJumpKeySlowdown;
+extern	vmCvar_t	g_infilJumpFactor;
+extern	vmCvar_t	g_infilAirAccelFactor;
 
 void	trap_Printf( const char *fmt );
 void	trap_Error( const char *fmt );

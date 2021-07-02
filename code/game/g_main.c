@@ -88,6 +88,9 @@ vmCvar_t	ui_playerclass;
 
 vmCvar_t	g_pMoveFixed;
 vmCvar_t	g_pMoveMsec;
+vmCvar_t	g_noJumpKeySlowdown;
+vmCvar_t	g_infilJumpFactor;
+vmCvar_t	g_infilAirAccelFactor;
 
 cvarTable_t		gameCvarTable[] = {
 	// don't override the cheat state set by the system
@@ -177,12 +180,14 @@ cvarTable_t		gameCvarTable[] = {
 
 	{ &g_pMoveFixed, "g_pMoveFixed", "1", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_pMoveMsec, "g_pMoveMsec", "8", CVAR_ARCHIVE, 0, qfalse },
+	{ &g_noJumpKeySlowdown, "g_noJumpKeySlowdown", "0", CVAR_ARCHIVE, 0, qfalse },
+	{ &g_infilJumpFactor, "g_infilJumpFactor", "0", CVAR_ARCHIVE, 0, qfalse },
+	{ &g_infilAirAccelFactor, "g_infilAirAccelFactor", "0", CVAR_ARCHIVE, 0, qfalse },
 };
 
 int		gameCvarTableSize = sizeof( gameCvarTable ) / sizeof( gameCvarTable[0] );
 
 void G_InitGame( int levelTime, int randomSeed, int restart );
-static void G_UpdateModConfigInfo( void );
 void G_RunFrame( int levelTime );
 void G_ShutdownGame( int restart );
 void CheckExitRules( void );
@@ -448,6 +453,23 @@ static void G_UpdateModConfigInfo( void ) {
 		}
 	}
 
+	if ( g_noJumpKeySlowdown.integer ) {
+		Info_SetValueForKey( info, "noJumpKeySlowdown", "1" );
+	}
+
+	if ( g_infilJumpFactor.value > 0.0f ) {
+		Info_SetValueForKey( info, "infilJumpFactor", va( "%f", g_infilJumpFactor.value ) );
+	}
+
+	if ( g_infilAirAccelFactor.value > 0.0f ) {
+		Info_SetValueForKey( info, "infilAirAccelFactor", va( "%f", g_infilAirAccelFactor.value ) );
+	}
+
+	// general stuff that is just automatically enabled
+	Info_SetValueForKey( info, "bounceFix", "1" );
+	Info_SetValueForKey( info, "snapVectorGravLimit", SNAPVECTOR_GRAV_LIMIT_STR );
+	Info_SetValueForKey( info, "noFlyingDrift", "1" );
+
 	if ( *info ) {
 		trap_SetConfigstring( CS_MOD_CONFIG, buffer );
 	} else {
@@ -505,7 +527,8 @@ void G_UpdateCvars( void ) {
 					}
 				}
 
-				if ( cv->vmCvar == &g_pMoveFixed || cv->vmCvar == &g_pMoveMsec ) {
+				if ( cv->vmCvar == &g_pMoveFixed || cv->vmCvar == &g_pMoveMsec || cv->vmCvar == &g_noJumpKeySlowdown ||
+						cv->vmCvar == &g_infilJumpFactor || cv->vmCvar == &g_infilAirAccelFactor ) {
 					G_UpdateModConfigInfo();
 				}
 			}

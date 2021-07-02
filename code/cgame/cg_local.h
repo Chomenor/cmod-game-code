@@ -1066,6 +1066,12 @@ typedef struct {
 typedef struct {
 	// player movement
 	int pMoveFixed;
+	qboolean noJumpKeySlowdown;
+	qboolean bounceFix;
+	int snapVectorGravLimit;
+	qboolean noFlyingDrift;
+	float infilJumpFactor;
+	float infilAirAccelFactor;
 } modConfig_t;
 
 // The client game static (cgs) structure hold everything

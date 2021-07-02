@@ -482,6 +482,7 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 		pm.tracemask = MASK_PLAYERSOLID & ~CONTENTS_BODY;	// spectators can fly through bodies
 		pm.trace = trap_Trace;
 		pm.pointcontents = trap_PointContents;
+		pm.noSpectatorDrift = qtrue;
 
 		// perform a pmove
 		Pmove (&pm, G_PmoveFixedValue());
@@ -1757,6 +1758,12 @@ void ClientThink_real( gentity_t *ent ) {
 	pm.debugLevel = g_debugMove.integer;
 	pm.noFootsteps = ( g_dmflags.integer & DF_NO_FOOTSTEPS ) > 0;
 	pm.pModDisintegration = g_pModDisintegration.integer > 0;
+	pm.noJumpKeySlowdown = g_noJumpKeySlowdown.integer ? qtrue : qfalse;
+	pm.bounceFix = qtrue;
+	pm.snapVectorGravLimit = SNAPVECTOR_GRAV_LIMIT;
+	pm.noFlyingDrift = qtrue;
+	pm.infilJumpFactor = g_infilJumpFactor.value;
+	pm.infilAirAccelFactor = g_infilAirAccelFactor.value;
 
 	VectorCopy( client->ps.origin, oldOrigin );
 

@@ -545,6 +545,12 @@ void CG_PredictPlayerState( void ) {
 	}
 	cg_pmove.noFootsteps = ( cgs.dmflags & DF_NO_FOOTSTEPS ) > 0;
 	cg_pmove.pModDisintegration = cgs.pModDisintegration > 0;
+	cg_pmove.noJumpKeySlowdown = cgs.modConfig.noJumpKeySlowdown;
+	cg_pmove.bounceFix = cgs.modConfig.bounceFix;
+	cg_pmove.snapVectorGravLimit = cgs.modConfig.snapVectorGravLimit;
+	cg_pmove.noFlyingDrift = cgs.modConfig.noFlyingDrift;
+	cg_pmove.infilJumpFactor = cgs.modConfig.infilJumpFactor;
+	cg_pmove.infilAirAccelFactor = cgs.modConfig.infilAirAccelFactor;
 
 	// save the state before the pmove so we can detect transitions
 	oldPlayerState = cg.predictedPlayerState;

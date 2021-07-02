@@ -156,6 +156,27 @@ typedef struct {
 	// these will be different functions during game and cgame
 	void		(*trace)( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int passEntityNum, int contentMask );
 	int			(*pointcontents)( const vec3_t point, int passEntityNum );
+
+	// Don't reduce movement/strafing speed when the jump key is held while in the air.
+	qboolean	noJumpKeySlowdown;
+
+	// Fix a bug that causes the player to occasionally bounce during respawn or landing from jumps.
+	qboolean	bounceFix;
+
+	// Skip z velocity snapvector when gravity is less than this value, to avoid cases where
+	// low gravity may not work properly.
+	int			snapVectorGravLimit;
+
+	// Fix a bug that can cause spectators to slowly drift along the z axis.
+	qboolean	noSpectatorDrift;
+
+	// Disable snapvector while holding jetpack to prevent drifting.
+	// This still leaves a relatively minor z drift effect, but it seems aesthetically fine.
+	qboolean	noFlyingDrift;
+
+	// Specialties infiltrator options (0 = revert to default)
+	float		infilJumpFactor;		// default: 2.0
+	float		infilAirAccelFactor;	// default: 2.0
 } pmove_t;
 
 // if a full pmove isn't done on the client, you can just update the angles

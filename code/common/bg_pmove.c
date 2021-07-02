@@ -204,6 +204,9 @@ static void PM_Friction( void ) {
 		vel[0] = 0;
 		vel[1] = 0;		// allow sinking underwater
 		// FIXME: still have z friction underwater?
+		if ( pm->noSpectatorDrift && (pm->ps->pm_type == PM_SPECTATOR || (pm->ps->eFlags&EF_ELIMINATED)) ) {
+			vel[2] = 0;
+		}
 		return;
 	}
 
@@ -394,7 +397,11 @@ static qboolean PM_CheckJump( void ) {
 	pm->ps->groundEntityNum = ENTITYNUM_NONE;
 	if ( pm->ps->persistant[PERS_CLASS] == PC_INFILTRATOR )
 	{//INFILTRATORs jump twice as high
-		pm->ps->velocity[2] = JUMP_VELOCITY*2;
+		if ( pm->infilJumpFactor > 0.0f ) {
+			pm->ps->velocity[2] = JUMP_VELOCITY * pm->infilJumpFactor;
+		} else {
+			pm->ps->velocity[2] = JUMP_VELOCITY*2;
+		}
 	}
 	else
 	{
@@ -636,6 +643,10 @@ static void PM_AirMove( void ) {
 	smove = pm->cmd.rightmove;
 
 	cmd = pm->cmd;
+	if ( pm->noJumpKeySlowdown ) {
+		// clear upmove so cmdscale doesn't lower running speed
+		cmd.upmove = 0;
+	}
 	scale = PM_CmdScale( &cmd );
 
 	// set the movementDir so clients can rotate the legs for strafing
@@ -659,7 +670,11 @@ static void PM_AirMove( void ) {
 	// not on ground, so little effect on velocity
 	if ( pm->ps->persistant[PERS_CLASS] == PC_INFILTRATOR )
 	{//INFILTRATORs have more air control
-		PM_Accelerate (wishdir, wishspeed, pm_airaccelerate*2);
+		if ( pm->infilAirAccelFactor > 0.0f ) {
+			PM_Accelerate (wishdir, wishspeed, pm_airaccelerate * pm->infilAirAccelFactor);
+		} else {
+			PM_Accelerate (wishdir, wishspeed, pm_airaccelerate*2);
+		}
 	}
 	else
 	{
@@ -787,9 +802,11 @@ static void PM_WalkMove( void ) {
 	PM_ClipVelocity (pm->ps->velocity, pml.groundTrace.plane.normal,
 		pm->ps->velocity, OVERCLIP );
 
-	// don't decrease velocity when going up or down a slope
-	VectorNormalize(pm->ps->velocity);
-	VectorScale(pm->ps->velocity, vel, pm->ps->velocity);
+	if ( !( pm->bounceFix && vel > VectorLength(pm->ps->velocity) * 2 ) ) {
+		// don't decrease velocity when going up or down a slope
+		VectorNormalize(pm->ps->velocity);
+		VectorScale(pm->ps->velocity, vel, pm->ps->velocity);
+	}
 
 	// don't do anything if standing still
 	if (!pm->ps->velocity[0] && !pm->ps->velocity[1]) {
@@ -2238,8 +2255,16 @@ void PmoveSingle (pmove_t *pmove) {
 	// entering / leaving water splashes
 	PM_WaterEvents();
 
-	// snap some parts of playerstate to save network bandwidth
-	SnapVector( pm->ps->velocity );
+	if ( !( pm->noFlyingDrift && pm->ps->powerups[PW_FLIGHT] ) ) {
+		// snap velocity for traditional physics behavior
+		if ( pm->ps->gravity < pm->snapVectorGravLimit ) {
+			float oldVelocity = pm->ps->velocity[2];
+			SnapVector( pm->ps->velocity );
+			pm->ps->velocity[2] = oldVelocity;
+		} else {
+			SnapVector( pm->ps->velocity );
+		}
+	}
 }
 
 /*

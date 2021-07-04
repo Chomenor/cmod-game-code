@@ -55,6 +55,7 @@ int sscanf( const char *buffer, const char *fmt, ... );
 void *memmove( void *dest, const void *src, size_t count );
 void *memset( void *dest, int c, size_t count );
 void *memcpy( void *dest, const void *src, size_t count );
+int memcmp( const void *p1, const void *p2, size_t size );
 
 // Math functions
 double ceil( double x );

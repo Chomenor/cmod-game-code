@@ -558,6 +558,7 @@ typedef struct {
 	playerState_t	predictedPlayerState;
 	centity_t		predictedPlayerEntity;
 	qboolean	validPPS;				// clear until the first call to CG_PredictPlayerState
+	int			mapRestartUsercmd;		// current usercmd number when map_restart command was received
 	int			predictedErrorTime;
 	vec3_t		predictedError;
 
@@ -1187,6 +1188,7 @@ extern	vmCvar_t		cg_debugPosition;
 extern	vmCvar_t		cg_debugEvents;
 extern	vmCvar_t		cg_errorDecay;
 extern	vmCvar_t		cg_nopredict;
+extern	vmCvar_t		cg_predictCache;
 extern	vmCvar_t		cg_noPlayerAnims;
 extern	vmCvar_t		cg_showmiss;
 extern	vmCvar_t		cg_footsteps;
@@ -1381,6 +1383,8 @@ void CG_DelIgnore(char *newignore, qboolean substring);
 //
 // cg_predict.c
 //
+qboolean CG_PlayerstatePredictionActive( void );
+void CG_FilterPredictableEvent( entity_event_t event, int eventParm, playerState_t *ps, qboolean serverEvent );
 void CG_BuildSolidList( void );
 int	CG_PointContents( const vec3_t point, int passEntityNum );
 void CG_Trace( trace_t *result, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end,
@@ -1588,6 +1592,7 @@ void CG_SetConfigValues( void );
 // cg_playerstate.c
 //
 void CG_Respawn( void );
+void CG_CheckPlayerstateEvents( playerState_t *ps, playerState_t *ops );
 void CG_TransitionPlayerState( playerState_t *ps, playerState_t *ops );
 
 

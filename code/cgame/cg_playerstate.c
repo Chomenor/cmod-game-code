@@ -207,11 +207,13 @@ void CG_Respawn( void ) {
 /*
 ==============
 CG_CheckPlayerstateEvents
+
+Checks for playerstate events from server snapshot transitions. No longer called for predicted
+playerstate transitions, as predicted events are handled by the prediction system directly.
 ==============
 */
 void CG_CheckPlayerstateEvents( playerState_t *ps, playerState_t *ops ) {
 	int			i;
-	int			event;
 	centity_t	*cent;
 
 	if ( ps->externalEvent && ps->externalEvent != ops->externalEvent ) {
@@ -225,19 +227,14 @@ void CG_CheckPlayerstateEvents( playerState_t *ps, playerState_t *ops ) {
 	// go through the predictable events buffer
 	for ( i = ps->eventSequence - MAX_PS_EVENTS ; i < ps->eventSequence ; i++ ) {
 		// if we have a new predictable event
-		if ( i >= ops->eventSequence
+		if ( i >= 0 && ( i >= ops->eventSequence
 			// or the server told us to play another event instead of a predicted event we already issued
 			// or something the server told us changed our prediction causing a different event
-			|| (i > ops->eventSequence - MAX_PS_EVENTS && ps->events[i & (MAX_PS_EVENTS-1)] != ops->events[i & (MAX_PS_EVENTS-1)]) ) {
+			|| (i > ops->eventSequence - MAX_PS_EVENTS && ps->events[i & (MAX_PS_EVENTS-1)] != ops->events[i & (MAX_PS_EVENTS-1)]) ) ) {
 
-			event = ps->events[ i & (MAX_PS_EVENTS-1) ];
-			cent->currentState.event = event;
-			cent->currentState.eventParm = ps->eventParms[ i & (MAX_PS_EVENTS-1) ];
-			CG_EntityEvent( cent, cent->lerpOrigin );
-
-//			cg.predictableEvents[ i & (MAX_PREDICTED_EVENTS-1) ] = event;
-
-//			cg.eventSequence++;
+			// passing older playerstate to filter, as the older command time should be less likely to let
+			// duplicate events through in cases of lag or packet loss
+			CG_FilterPredictableEvent( ps->events[ i & (MAX_PS_EVENTS-1) ], ps->eventParms[ i & (MAX_PS_EVENTS-1) ], ops, qtrue );
 		}
 	}
 }
@@ -477,9 +474,6 @@ void CG_TransitionPlayerState( playerState_t *ps, playerState_t *ops ) {
 
 	// check for going low on ammo
 	CG_CheckAmmo();
-
-	// run events
-	CG_CheckPlayerstateEvents( ps, ops );
 
 	// smooth the ducking viewheight change
 	if ( ps->viewheight != ops->viewheight ) {

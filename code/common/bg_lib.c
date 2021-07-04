@@ -299,6 +299,31 @@ void *memmove( void *dest, const void *src, size_t count ) {
 	return dest;
 }
 
+int memcmp( const void *p1, const void *p2, size_t size ) {
+	// NOTE: Currently just returns 1 if differences encountered, so not suitable
+	// for sorting operations, just basic comparisons
+	size_t i;
+
+	if ( !( (intptr_t)p1 & 3 ) && !( (intptr_t)p2 & 3 ) && !( size & 3 ) ) {
+		size_t count = size >> 2;
+		const int *p1i = p1;
+		const int *p2i = p2;
+		for ( i = 0; i < count; ++i ) {
+			if ( p1i[i] != p2i[i] )
+				return 1;
+		}
+	} else {
+		const char *p1c = p1;
+		const char *p2c = p2;
+		for ( i = 0; i < size; ++i ) {
+			if ( p1c[i] != p2c[i] )
+				return 1;
+		}
+	}
+
+	return 0;
+}
+
 
 #if 0
 

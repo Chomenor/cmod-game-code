@@ -1764,18 +1764,13 @@ Should we draw something differnet for long lag vs no packets?
 */
 static void CG_DrawDisconnect( void ) {
 	float		x, y;
-	int			cmdNum;
 	usercmd_t	cmd;
 	const char		*s;
 	int			w;
 
-	// draw the phone jack if we are completely past our buffers
-	cmdNum = trap_GetCurrentCmdNumber() - CMD_BACKUP + 1;
-	trap_GetUserCmd( cmdNum, &cmd );
-	if (	cmd.serverTime <= cg.snap->ps.commandTime	||
-			cmd.serverTime > cg.time					||	// special check for map_restart
-			cmd.serverTime < cg.snap->ps.introTime)			// special check for holointro
-	{
+	// draw the phone jack if we are at least 1 second ahead of server
+	if ( !trap_GetUserCmd( trap_GetCurrentCmdNumber(), &cmd ) ||
+			cg.snap->ps.commandTime + 1000 >= cmd.serverTime ) {
 		return;
 	}
 

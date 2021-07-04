@@ -182,6 +182,7 @@ typedef struct {
 // if a full pmove isn't done on the client, you can just update the angles
 void PM_UpdateViewAngles( playerState_t *ps, const usercmd_t *cmd );
 int PM_NextMoveTime( int currentTime, int targetTime, int pMoveFixed );
+qboolean PM_IsMoveNeeded( int currentTime, int targetTime, int pMoveFixed );
 void Pmove( pmove_t *pmove, int pMoveFixed );
 
 //===================================================================================

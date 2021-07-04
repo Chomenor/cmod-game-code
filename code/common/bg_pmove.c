@@ -2309,6 +2309,17 @@ int PM_NextMoveTime( int currentTime, int targetTime, int pMoveFixed ) {
 
 /*
 ================
+PM_IsMoveNeeded
+
+Given a current and target time, returns whether any move is needed given the current fps settings.
+================
+*/
+qboolean PM_IsMoveNeeded( int currentTime, int targetTime, int pMoveFixed ) {
+	return PM_NextMoveTime( currentTime, targetTime, pMoveFixed ) > currentTime;
+}
+
+/*
+================
 Pmove
 
 Can be called by either the server or the client

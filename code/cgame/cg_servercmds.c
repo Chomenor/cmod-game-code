@@ -392,6 +392,8 @@ static void CG_MapRestart( void ) {
 
 	cgs.voteTime = 0;
 
+	cg.mapRestartUsercmd = trap_GetCurrentCmdNumber();
+
 	CG_StartMusic();
 
 	// we really should clear more parts of cg here and stop sounds

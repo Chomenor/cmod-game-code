@@ -10,15 +10,12 @@
 #define	GIB_HEALTH			-40
 #define	ARMOR_PROTECTION	1.0//0.66
 #define PIERCED_ARMOR_PROTECTION		0.50 // trek: shields only stop 50% of armor-piercing dmg
-// #define SUPER_PIERCED_ARMOR_PROTECTION	0.25 // trek: shields only stop 25% of super-armor-piercing dmg
 
 #define	MAX_ITEMS			256
 
 #define	RANK_TIED_FLAG		0x4000
 
 #define	ITEM_RADIUS			15		// item sizes are needed for client side pickup detection
-
-#define	LIGHTNING_RANGE		768
 
 #define	SCORE_NOT_PRESENT	-9999	// for the CS_SCORES[12] when only one player is present
 

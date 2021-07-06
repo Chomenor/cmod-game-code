@@ -510,6 +510,7 @@ void CG_LightningBolt( centity_t *cent, vec3_t origin )
 	vec3_t		startpos, endpos, forward;
 	qboolean	spark = qfalse, impact = qtrue;
 	int i;
+	int weaponNum = cent->currentState.clientNum == cg.predictedPlayerState.clientNum ? cg.predictedPlayerState.weapon : cent->currentState.weapon;
 
 	if ( cg.snap->ps.pm_type == PM_INTERMISSION )
 	{
@@ -520,14 +521,14 @@ void CG_LightningBolt( centity_t *cent, vec3_t origin )
 	if ( cent->currentState.clientNum == cg.snap->ps.clientNum
 		&& !cg.renderingThirdPerson ) {
 		// different checks for first person view
-		if ( ( cg.snap->ps.weapon == WP_DREADNOUGHT && !( cg.snap->ps.eFlags & EF_ALT_FIRING ))
-				|| cg.snap->ps.weapon == WP_PHASER)
+		if ( ( weaponNum == WP_DREADNOUGHT && !( cg.snap->ps.eFlags & EF_ALT_FIRING ))
+				|| weaponNum == WP_PHASER)
 		{	/*continue*/	}
 		else
 			return;
 	} else {
-		if ( ( cent->currentState.weapon == WP_DREADNOUGHT && !( cent->currentState.eFlags & EF_ALT_FIRING ))
-				|| cent->currentState.weapon == WP_PHASER)
+		if ( ( weaponNum == WP_DREADNOUGHT && !( cent->currentState.eFlags & EF_ALT_FIRING ))
+				|| weaponNum == WP_PHASER)
 		{	/*continue*/	}
 		else
 			return;
@@ -586,7 +587,7 @@ void CG_LightningBolt( centity_t *cent, vec3_t origin )
 	}
 
 	// Add in the effect
-	switch ( cent->currentState.weapon )
+	switch ( weaponNum )
 	{
 	case WP_PHASER:
 		if (cg.snap->ps.rechargeTime == 0)

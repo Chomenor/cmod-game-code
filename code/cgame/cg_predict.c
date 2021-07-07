@@ -329,10 +329,12 @@ static void CG_HideGrabbedItems( void ) {
 		// pickup prediction was (roughly) more recent than server snapshot, or currently still touching item...
 		if ( entry->commandTime + 100 > cg.snap->ps.commandTime || ( entry->commandTime + 600 > cg.snap->ps.commandTime &&
 				entry->entityNum >= 0 && BG_PlayerTouchesItem( &cg.predictedPlayerState, &cg_entities[entry->entityNum].currentState, cg.time ) ) ) {
-			// used for fade-in in case the item is restored due to misprediction
+			// reset fade-in timer
 			cent->miscTime = cg.time;
 
-			if ( item->giType == IT_WEAPON || item->giType == IT_POWERUP ) {
+			if ( entry->commandTime + 25 > cg.time ) {
+				// allow slight phasing effect for a moment after item is picked up
+			} else if ( item->giType == IT_WEAPON || item->giType == IT_POWERUP ) {
 				// draw it "gridded out"
 				cent->currentState.eFlags |= EF_ITEMPLACEHOLDER;
 			} else {

@@ -1637,6 +1637,7 @@ once for each server frame, which makes for smooth demo recording.
 ==============
 */
 void ClientThink_real( gentity_t *ent ) {
+	int			oldCommandTime = ent->client->ps.commandTime;
 	gclient_t	*client;
 	pmove_t		pm;
 	vec3_t		oldOrigin;
@@ -1663,14 +1664,11 @@ void ClientThink_real( gentity_t *ent ) {
 //		G_Printf("serverTime >>>>>\n" );
 	}
 
-	msec = PM_NextMoveTime( client->ps.commandTime, ucmd->serverTime, G_PmoveFixedValue() ) - client->ps.commandTime;
-	// following others may result in bad times, but we still want
-	// to check for follow toggles
-	if ( msec < 1 && client->sess.spectatorState != SPECTATOR_FOLLOW ) {
+	if ( !PM_IsMoveNeeded( client->ps.commandTime, ucmd->serverTime, G_PmoveFixedValue() ) &&
+			// following others may result in bad times, but we still want
+			// to check for follow toggles
+			client->sess.spectatorState != SPECTATOR_FOLLOW ) {
 		return;
-	}
-	if ( msec > 200 ) {
-		msec = 200;
 	}
 
 	//
@@ -1849,6 +1847,10 @@ void ClientThink_real( gentity_t *ent ) {
 	}
 
 	// perform once-a-second actions
+	msec = client->ps.commandTime - oldCommandTime;
+	if ( msec > 200 ) {
+		msec = 200;
+	}
 	ClientTimerActions( ent, msec );
 
 	if ( ent->client->teleportTime > 0 && ent->client->teleportTime < level.time )

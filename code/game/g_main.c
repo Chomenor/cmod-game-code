@@ -91,6 +91,7 @@ vmCvar_t	g_pMoveMsec;
 vmCvar_t	g_noJumpKeySlowdown;
 vmCvar_t	g_infilJumpFactor;
 vmCvar_t	g_infilAirAccelFactor;
+vmCvar_t	g_altSwapSupport;
 
 cvarTable_t		gameCvarTable[] = {
 	// don't override the cheat state set by the system
@@ -183,6 +184,7 @@ cvarTable_t		gameCvarTable[] = {
 	{ &g_noJumpKeySlowdown, "g_noJumpKeySlowdown", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_infilJumpFactor, "g_infilJumpFactor", "0", CVAR_ARCHIVE, 0, qfalse },
 	{ &g_infilAirAccelFactor, "g_infilAirAccelFactor", "0", CVAR_ARCHIVE, 0, qfalse },
+	{ &g_altSwapSupport, "g_altSwapSupport", "1", CVAR_ARCHIVE, 0, qfalse },
 };
 
 int		gameCvarTableSize = sizeof( gameCvarTable ) / sizeof( gameCvarTable[0] );
@@ -470,6 +472,10 @@ static void G_UpdateModConfigInfo( void ) {
 	Info_SetValueForKey( info, "snapVectorGravLimit", SNAPVECTOR_GRAV_LIMIT_STR );
 	Info_SetValueForKey( info, "noFlyingDrift", "1" );
 
+	if ( g_altSwapSupport.integer ) {
+		Info_SetValueForKey( info, "altSwapSupport", "1" );
+	}
+
 	if ( *info ) {
 		trap_SetConfigstring( CS_MOD_CONFIG, buffer );
 	} else {
@@ -528,7 +534,7 @@ void G_UpdateCvars( void ) {
 				}
 
 				if ( cv->vmCvar == &g_pMoveFixed || cv->vmCvar == &g_pMoveMsec || cv->vmCvar == &g_noJumpKeySlowdown ||
-						cv->vmCvar == &g_infilJumpFactor || cv->vmCvar == &g_infilAirAccelFactor ) {
+						cv->vmCvar == &g_infilJumpFactor || cv->vmCvar == &g_infilAirAccelFactor || cv->vmCvar == &g_altSwapSupport ) {
 					G_UpdateModConfigInfo();
 				}
 			}

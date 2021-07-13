@@ -2063,6 +2063,25 @@ void PmoveSingle (pmove_t *pmove) {
 		pm->ps->eFlags &= ~EF_TALK;
 	}
 
+	// perform alt attack modification
+	if ( pm->altFireMode == ALTMODE_SWAPPED ) {
+		if ( pm->cmd.buttons & BUTTON_ALT_ATTACK ) {
+			pm->cmd.buttons &= ~BUTTON_ALT_ATTACK;
+			pm->cmd.buttons |= BUTTON_ATTACK;
+		} else if ( pm->cmd.buttons & BUTTON_ATTACK ) {
+			pm->cmd.buttons |= ( BUTTON_ATTACK | BUTTON_ALT_ATTACK );
+		}
+	} else if ( pm->altFireMode == ALTMODE_PRIMARY_ONLY ) {
+		if ( pm->cmd.buttons & ( BUTTON_ATTACK | BUTTON_ALT_ATTACK ) ) {
+			pm->cmd.buttons &= ~BUTTON_ALT_ATTACK;
+			pm->cmd.buttons |= BUTTON_ATTACK;
+		}
+	} else if ( pm->altFireMode == ALTMODE_ALT_ONLY ) {
+		if ( pm->cmd.buttons & ( BUTTON_ATTACK | BUTTON_ALT_ATTACK ) ) {
+			pm->cmd.buttons |= ( BUTTON_ATTACK | BUTTON_ALT_ATTACK );
+		}
+	}
+
 	// set the firing flag for continuous beam weapons
 	if (	!(pm->ps->pm_flags & PMF_RESPAWNED) &&
 			pm->ps->pm_type != PM_INTERMISSION &&

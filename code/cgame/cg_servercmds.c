@@ -122,6 +122,8 @@ void CG_ParseServerinfo( void ) {
 	cgs.maxclients = atoi( Info_ValueForKey( info, "sv_maxclients" ) );
 	mapname = Info_ValueForKey( info, "mapname" );
 	Com_sprintf( cgs.mapname, sizeof( cgs.mapname ), "maps/%s.bsp", mapname );
+
+	CG_AltFire_UpdateServerPrefs();
 }
 
 /*
@@ -171,11 +173,17 @@ void CG_ParseModConfig( void ) {
 					cgs.modConfig.infilJumpFactor = atof( value );
 				if ( !Q_stricmp( key, "infilAirAccelFactor" ) )
 					cgs.modConfig.infilAirAccelFactor = atof( value );
+				if ( !Q_stricmp( key, "altSwapSupport" ) )
+					cgs.modConfig.altSwapSupport = atoi( value ) ? qtrue : qfalse;
+				if ( !Q_stricmp( key, "altSwapPrefs" ) )
+					Q_strncpyz( cgs.modConfig.altSwapPrefs, value, sizeof( cgs.modConfig.altSwapPrefs ) );
 			}
 
 			cgs.modConfigSet[i] = qtrue;
 		}
 	}
+
+	CG_AltFire_UpdateServerPrefs();
 }
 
 /*

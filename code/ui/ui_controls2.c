@@ -1,5 +1,457 @@
 // Copyright (C) 1999-2000 Id Software, Inc.
 //
+
+#include "ui_local.h"
+
+/* ----------------------------------------------------------------------- */
+
+// Alt Fire Button Swapping
+
+/* ----------------------------------------------------------------------- */
+
+static void SetupMenu_SideButtons( menuframework_s *menu, int menuType );
+static void UI_ControlsOtherMenu( void );
+
+#define ALTSWAP_CVAR_NAME "cg_altFireSwap"
+#define ALTSWAP_CVAR_NORMAL "nnnnnnnnnnnnn"
+#define ALTSWAP_CVAR_AUTO "aaaaaaaaaaaaa"
+
+static struct {
+	char currentButtons[WP_NUM_WEAPONS];
+	char storedCustom[WP_NUM_WEAPONS];	// keep the custom config saved temporarily when cycling through other options
+	menulist_s mainButton;
+	menubitmap_s editButton;
+} altSwapData;
+
+static altSwap_mainButtonNames[] = {
+	MNT_OFF,
+	MNT_ALTSWAP_AUTO,
+	MNT_ALTSWAP_CUSTOM,
+	MNT_NONE
+};
+
+typedef enum {
+	// Order must match altSwap_mainButtonNames
+	ALTSWAP_MAINBUTTON_OFF,
+	ALTSWAP_MAINBUTTON_AUTO,
+	ALTSWAP_MAINBUTTON_CUSTOM,
+} altSwap_MainButtonValues_t;
+
+/*
+=================
+AltSwap_ShowHideEditButton
+
+Set edit button to visible in 'custom' mode, but hidden otherwise.
+=================
+*/
+static void AltSwap_ShowHideEditButton( void ) {
+	if ( altSwapData.mainButton.curvalue == ALTSWAP_MAINBUTTON_CUSTOM ) {
+		altSwapData.editButton.generic.flags &= ~QMF_HIDDEN;
+	} else {
+		altSwapData.editButton.generic.flags |= QMF_HIDDEN;
+	}
+}
+
+/*
+=================
+AltSwap_CleanSettingString
+
+Cleans weapon button string replacing missing or invalid characters.
+Target must be size WP_NUM_WEAPONS.
+=================
+*/
+static void AltSwap_CleanSettingString( const char *source, char *target ) {
+	int i;
+	int length = strlen( source );
+
+	for ( i = 0; i < WP_NUM_WEAPONS - 1; ++i ) {
+		target[i] = 'n';
+		if ( i < length ) {
+			if ( source[i] == 'a' || source[i] == 'A' )
+				target[i] = 'a';
+			if ( source[i] == 's' || source[i] == 'S' )
+				target[i] = 's';
+		}
+	}
+
+	target[WP_NUM_WEAPONS - 1] = '\0';
+}
+
+/*
+=================
+AltSwap_CompareSettingString
+
+Returns qtrue if button strings are effectively equal, ignoring assimilator which
+is currently not set by UI.
+=================
+*/
+static qboolean AltSwap_CompareSettingString( const char *src1, char *src2 ) {
+	char buffer1[WP_NUM_WEAPONS];
+	char buffer2[WP_NUM_WEAPONS];
+	AltSwap_CleanSettingString( src1, buffer1 );
+	AltSwap_CleanSettingString( src2, buffer2 );
+	buffer1[WP_BORG_ASSIMILATOR - 1] = 'x';
+	buffer2[WP_BORG_ASSIMILATOR - 1] = 'x';
+	return !Q_stricmp( buffer1, buffer2 );
+}
+
+/*
+=================
+AltSwap_InitMainButtons
+
+Initializes the main alt fire button as well as the custom edit button in the "controls -> other options" menu.
+=================
+*/
+static void AltSwap_InitMainButtons( void ) {
+	char buffer[WP_NUM_WEAPONS];
+
+	trap_Cvar_VariableStringBuffer( ALTSWAP_CVAR_NAME, buffer, sizeof( buffer ) );
+	AltSwap_CleanSettingString( buffer, altSwapData.currentButtons );
+
+	Q_strncpyz( altSwapData.storedCustom, altSwapData.currentButtons, sizeof( altSwapData.storedCustom ) );
+
+	if ( AltSwap_CompareSettingString( altSwapData.currentButtons, ALTSWAP_CVAR_AUTO ) ) {
+		altSwapData.mainButton.curvalue = ALTSWAP_MAINBUTTON_AUTO;
+	} else if ( AltSwap_CompareSettingString( altSwapData.currentButtons, ALTSWAP_CVAR_NORMAL ) ) {
+		altSwapData.mainButton.curvalue = ALTSWAP_MAINBUTTON_OFF;
+	} else {
+		altSwapData.mainButton.curvalue = ALTSWAP_MAINBUTTON_CUSTOM;
+	}
+
+	AltSwap_ShowHideEditButton();
+}
+
+/*
+=================
+AltSwap_WriteConfig
+
+Writes current button configuration to cvar.
+=================
+*/
+static void AltSwap_WriteConfig( void ) {
+	trap_Cvar_Set( ALTSWAP_CVAR_NAME, altSwapData.currentButtons );
+}
+
+/*
+=================
+AltSwap_UpdateStoredCustom
+
+Replaces the stored old custom button configuration with the current value.
+=================
+*/
+static void AltSwap_UpdateStoredCustom( void ) {
+	Q_strncpyz( altSwapData.storedCustom, altSwapData.currentButtons, sizeof( altSwapData.storedCustom ) );
+}
+
+/*
+=================
+AltSwap_MainButtonPress
+=================
+*/
+static void AltSwap_MainButtonPress( void *ptr, int event ) {
+	menulist_s *button = (menulist_s *)ptr;
+	int value = button->curvalue;
+
+	if ( value == ALTSWAP_MAINBUTTON_AUTO ) {
+		Q_strncpyz( altSwapData.currentButtons, ALTSWAP_CVAR_AUTO, sizeof( altSwapData.currentButtons ) );
+	} else if ( value == ALTSWAP_MAINBUTTON_CUSTOM ) {
+		Q_strncpyz( altSwapData.currentButtons, altSwapData.storedCustom, sizeof( altSwapData.currentButtons ) );
+	} else {
+		Q_strncpyz( altSwapData.currentButtons, ALTSWAP_CVAR_NORMAL, sizeof( altSwapData.currentButtons ) );
+	}
+
+	AltSwap_WriteConfig();
+
+	AltSwap_ShowHideEditButton();
+}
+
+
+
+// *** Custom Button Menu ***
+
+
+static menugraphics_s altSwapCustom_MenuGraphics[] = {
+	//	type		timer	x		y		width	height	file/text						graphic,	min		max	target	inc		style	color
+	MG_GRAPHIC, 0.0, 158, 280, 4, 32, "menu/common/square.tga", 0, 0, 0, 0, 0, 0, 0, CT_VDKPURPLE1, NULL, // AMG_MIDLEFT
+	MG_GRAPHIC, 0.0, 158, 180, 8, 97, "menu/common/square.tga", 0, 0, 0, 0, 0, 0, 0, CT_VDKPURPLE1, NULL, // AMG_UPPERLEFT
+	MG_GRAPHIC, 0.0, 158, 315, 8, 100, "menu/common/square.tga", 0, 0, 0, 0, 0, 0, 0, CT_VDKPURPLE1, NULL, // AMG_LOWERLEFT
+	MG_GRAPHIC, 0.0, 158, 164, 16, 16, "menu/common/corner_lu.tga", 0, 0, 0, 0, 0, 0, 0, CT_VDKPURPLE1, NULL, // AMG_UPPERCORNER
+	MG_GRAPHIC, 0.0, 158, 406, 32, 32, "menu/common/newswoosh.tga", 0, 0, 0, 0, 0, 0, 0, CT_VDKPURPLE1, NULL, // AMG_LOWERCORNER
+
+	MG_GRAPHIC, 0.0, 177, 164, 280, 8, "menu/common/square.tga", 0, 0, 0, 0, 0, 0, 0, CT_VDKPURPLE1, NULL, // AMG_UPPERTOP1ST
+	MG_GRAPHIC, 0.0, 175, 410, 282, 18, "menu/common/square.tga", 0, 0, 0, 0, 0, 0, 0, CT_VDKPURPLE1, NULL, // AMG_LOWERTOP1ST
+
+	MG_GRAPHIC, 0.0, 457, 164, 34, 8, "menu/common/square.tga", 0, 0, 0, 0, 0, 0, 0, CT_VDKPURPLE1, NULL, // AMG_UPPERTOP2ND
+	MG_GRAPHIC, 0.0, 457, 410, 34, 18, "menu/common/square.tga", 0, 0, 0, 0, 0, 0, 0, CT_VDKPURPLE1, NULL, // AMG_LOWERTOP2ND
+
+	MG_GRAPHIC, 0.0, 494, 164, 128, 128, "menu/common/swoosh_top.tga", 0, 0, 0, 0, 0, 0, 0, CT_VDKPURPLE1, NULL, // AMG_UPPERSWOOP
+	MG_GRAPHIC, 0.0, 483, 403, 128, 32, "menu/common/newswoosh_long.tga", 0, 0, 0, 0, 0, 0, 0, CT_VDKPURPLE1, NULL, // AMG_LOWERSWOOP
+
+	//MG_GRAPHIC, 0.0, 501, 189, 110, 17, "menu/common/square.tga", 0, 0, 0, 0, 0, 0, 0, CT_VDKPURPLE1, NULL, // AMG_TOPRIGHT
+	//MG_GRAPHIC, 0.0, 501, 383, 110, 17, "menu/common/square.tga", 0, 0, 0, 0, 0, 0, 0, CT_VDKPURPLE1, NULL, // AMG_BOTTOMRIGHT
+
+	//MG_GRAPHIC, 0.0, 501, 206, 110, 177, "menu/common/square.tga", 0, 0, 0, 0, 0, 0, 0, CT_VDKPURPLE1, NULL, // AMG_PLAYERBKGRND
+
+	MG_GRAPHIC, 0.0, 501, 233, 110, 104, "menu/common/square.tga", 0, 0, 0, 0, 0, 0, 0, CT_VDKPURPLE1, NULL,
+};
+
+#define ALTSWAP_CUSTOM_MENU_GFX_COUNT ( sizeof( altSwapCustom_MenuGraphics ) / sizeof( *altSwapCustom_MenuGraphics ) )
+#define ALTSWAP_WEAPON_BUTTON_COUNT 11
+#define ALTSWAP_BUTTON_TO_CHAR_INDEX( buttonIndex ) ( buttonIndex >= 10 ? buttonIndex + 1 : buttonIndex ) // skip assimilator weapon
+
+static struct {
+	menuframework_s menu;
+	menulist_s weapons[ALTSWAP_WEAPON_BUTTON_COUNT];
+	menubitmap_s allStandard;
+	menubitmap_s allAuto;
+	menubitmap_s back;
+} altSwapCustomData;
+
+static int altSwapCustom_WeaponValueNames[] = {
+	MNT_OFF,
+	MNT_ALTSWAP_AUTO,
+	MNT_ON,
+	MNT_NONE
+};
+
+typedef enum {
+	// Order must match altSwapCustom_WeaponValueNames
+	ALTSWAP_WEAPONBUTTON_OFF,
+	ALTSWAP_WEAPONBUTTON_AUTO,
+	ALTSWAP_WEAPONBUTTON_ON,
+} altSwapCustom_WeaponValueIds_t;
+
+/*
+=================
+AltSwapCustom_MenuDraw
+=================
+*/
+static void AltSwapCustom_MenuDraw( void ) {
+	UI_MenuFrame( &altSwapCustomData.menu );
+
+	UI_DrawProportionalString( 74, 66, "56-129", UI_RIGHT | UI_TINYFONT, colorTable[CT_BLACK] );
+	UI_DrawProportionalString( 74, 84, "33", UI_RIGHT | UI_TINYFONT, colorTable[CT_BLACK] );
+	UI_DrawProportionalString( 74, 188, "9893", UI_RIGHT | UI_TINYFONT, colorTable[CT_BLACK] );
+	UI_DrawProportionalString( 74, 395, "12799", UI_RIGHT | UI_TINYFONT, colorTable[CT_BLACK] );
+
+	UI_PrintMenuGraphics( altSwapCustom_MenuGraphics, ALTSWAP_CUSTOM_MENU_GFX_COUNT );
+
+	UI_DrawProportionalString( 607, 174, "981235", UI_RIGHT | UI_TINYFONT, colorTable[CT_BLACK] );
+	UI_DrawProportionalString( 607, 406, "5672141", UI_RIGHT | UI_TINYFONT, colorTable[CT_BLACK] );
+
+	UI_Setup_MenuButtons();
+
+	Menu_Draw( &altSwapCustomData.menu );
+}
+
+/*
+=================
+AltSwapCustom_MenuKey
+=================
+*/
+static sfxHandle_t AltSwapCustom_MenuKey( int key ) {
+	return Menu_DefaultKey( &altSwapCustomData.menu, key );
+}
+
+/*
+=================
+AltSwapCustom_LoadButtonValues
+
+Read button values from altSwapData.currentButtons.
+=================
+*/
+static void AltSwapCustom_LoadButtonValues( void ) {
+	int i;
+
+	for ( i = 0; i < ALTSWAP_WEAPON_BUTTON_COUNT; ++i ) {
+		int settingIndex = ALTSWAP_BUTTON_TO_CHAR_INDEX( i );
+
+		if ( altSwapData.currentButtons[settingIndex] == 'a' ) {
+			altSwapCustomData.weapons[i].curvalue = ALTSWAP_WEAPONBUTTON_AUTO;
+		} else if ( altSwapData.currentButtons[settingIndex] == 's' ) {
+			altSwapCustomData.weapons[i].curvalue = ALTSWAP_WEAPONBUTTON_ON;
+		} else {
+			altSwapCustomData.weapons[i].curvalue = ALTSWAP_WEAPONBUTTON_OFF;
+		}
+	}
+}
+
+/*
+=================
+AltSwapCustom_Event
+=================
+*/
+static void AltSwapCustom_Event( void *ptr, int event ) {
+	if ( event != QM_ACTIVATED ) {
+		return;
+	}
+
+	if ( ptr == &altSwapCustomData.allStandard ) {
+		Q_strncpyz( altSwapData.currentButtons, ALTSWAP_CVAR_NORMAL, sizeof( altSwapData.currentButtons ) );
+		AltSwapCustom_LoadButtonValues();
+		AltSwap_WriteConfig();
+		AltSwap_UpdateStoredCustom();
+
+	} else if ( ptr == &altSwapCustomData.allAuto ) {
+		Q_strncpyz( altSwapData.currentButtons, ALTSWAP_CVAR_AUTO, sizeof( altSwapData.currentButtons ) );
+		AltSwapCustom_LoadButtonValues();
+		AltSwap_WriteConfig();
+		AltSwap_UpdateStoredCustom();
+
+	} else if ( ptr == &altSwapCustomData.back ) {
+		UI_PopMenu();
+		UI_ControlsOtherMenu();
+
+	} else {
+		int i;
+		for ( i = 0; i < ALTSWAP_WEAPON_BUTTON_COUNT; ++i ) {
+			if ( ptr == &altSwapCustomData.weapons[i] ) {
+				menulist_s *button = &altSwapCustomData.weapons[i];
+				int settingIndex = ALTSWAP_BUTTON_TO_CHAR_INDEX( i );
+
+				if ( button->curvalue == ALTSWAP_WEAPONBUTTON_AUTO ) {
+					altSwapData.currentButtons[settingIndex] = 'a';
+				} else if ( button->curvalue == ALTSWAP_WEAPONBUTTON_ON ) {
+					altSwapData.currentButtons[settingIndex] = 's';
+				} else {
+					altSwapData.currentButtons[settingIndex] = 'n';
+				}
+
+				AltSwap_WriteConfig();
+				AltSwap_UpdateStoredCustom();
+				break;
+			}
+		}
+	}
+}
+
+/*
+=================
+AltSwapCustom_MenuInit
+=================
+*/
+static void AltSwapCustom_MenuInit( void ) {
+	int i;
+	int y_pos;
+
+	// Precache all menu graphics in array
+	for ( i = 0; i < ALTSWAP_CUSTOM_MENU_GFX_COUNT; ++i ) {
+		if ( altSwapCustom_MenuGraphics[i].type == MG_GRAPHIC ) {
+			altSwapCustom_MenuGraphics[i].graphic = trap_R_RegisterShaderNoMip( altSwapCustom_MenuGraphics[i].file );
+		}
+	}
+
+	altSwapCustomData.menu.nitems = 0;
+	altSwapCustomData.menu.wrapAround = qtrue;
+	altSwapCustomData.menu.draw = AltSwapCustom_MenuDraw;
+	altSwapCustomData.menu.key = AltSwapCustom_MenuKey;
+	altSwapCustomData.menu.fullscreen = qtrue;
+	altSwapCustomData.menu.descX = MENU_DESC_X;
+	altSwapCustomData.menu.descY = MENU_DESC_Y;
+	altSwapCustomData.menu.listX = 170;
+	altSwapCustomData.menu.listY = 184;
+	altSwapCustomData.menu.titleX = MENU_TITLE_X;
+	altSwapCustomData.menu.titleY = MENU_TITLE_Y;
+	altSwapCustomData.menu.titleI = MNT_CONTROLSMENU_TITLE;
+	altSwapCustomData.menu.footNoteEnum = MNT_WEAPONKEY_SETUP;
+
+	// Set up the weapon buttons
+	y_pos = altSwapCustomData.menu.listY;
+
+	for ( i = 0; i < ALTSWAP_WEAPON_BUTTON_COUNT; ++i ) {
+		menulist_s *button = &altSwapCustomData.weapons[i];
+		button->generic.type = MTYPE_SPINCONTROL;
+		button->generic.flags = QMF_HIGHLIGHT_IF_FOCUS;
+		button->generic.x = altSwapCustomData.menu.listX;
+		button->generic.y = y_pos;
+		button->generic.callback = AltSwapCustom_Event;
+		button->textEnum = MBT_ALTSWAP_WEAPON1 + i;
+		button->textcolor = CT_BLACK;
+		button->textcolor2 = CT_WHITE;
+		button->color = CT_DKORANGE;
+		button->color2 = CT_LTORANGE;
+		button->textX = 5;
+		button->textY = 1;
+		button->height = 18;
+		button->width = 130;
+		button->listnames = altSwapCustom_WeaponValueNames;
+
+		Menu_AddItem( &altSwapCustomData.menu, (void *)button );
+
+		y_pos += 20;
+	}
+
+	AltSwapCustom_LoadButtonValues();
+
+	altSwapCustomData.allStandard.generic.type = MTYPE_BITMAP;
+	altSwapCustomData.allStandard.generic.flags = QMF_HIGHLIGHT_IF_FOCUS;
+	altSwapCustomData.allStandard.generic.x = 501;
+	altSwapCustomData.allStandard.generic.y = 189;
+	altSwapCustomData.allStandard.generic.name = GRAPHIC_SQUARE;
+	altSwapCustomData.allStandard.generic.callback = AltSwapCustom_Event;
+	altSwapCustomData.allStandard.textEnum = MBT_ALTSWAP_ALL_STANDARD;
+	altSwapCustomData.allStandard.textcolor = CT_BLACK;
+	altSwapCustomData.allStandard.textcolor2 = CT_WHITE;
+	altSwapCustomData.allStandard.color = CT_DKPURPLE2;
+	altSwapCustomData.allStandard.color2 = CT_LTPURPLE2;
+	altSwapCustomData.allStandard.textX = 5;
+	altSwapCustomData.allStandard.textY = 2;
+	altSwapCustomData.allStandard.width = 110;
+	altSwapCustomData.allStandard.height = 19;
+	Menu_AddItem( &altSwapCustomData.menu, (void *)&altSwapCustomData.allStandard );
+
+	altSwapCustomData.allAuto.generic.type = MTYPE_BITMAP;
+	altSwapCustomData.allAuto.generic.flags = QMF_HIGHLIGHT_IF_FOCUS;
+	altSwapCustomData.allAuto.generic.x = 501;
+	altSwapCustomData.allAuto.generic.y = altSwapCustomData.allStandard.generic.y + altSwapCustomData.allStandard.height + 3;
+	altSwapCustomData.allAuto.generic.name = GRAPHIC_SQUARE;
+	altSwapCustomData.allAuto.generic.callback = AltSwapCustom_Event;
+	altSwapCustomData.allAuto.textEnum = MBT_ALTSWAP_ALL_AUTO;
+	altSwapCustomData.allAuto.textcolor = CT_BLACK;
+	altSwapCustomData.allAuto.textcolor2 = CT_WHITE;
+	altSwapCustomData.allAuto.color = CT_DKPURPLE2;
+	altSwapCustomData.allAuto.color2 = CT_LTPURPLE2;
+	altSwapCustomData.allAuto.textX = 5;
+	altSwapCustomData.allAuto.textY = 2;
+	altSwapCustomData.allAuto.width = 110;
+	altSwapCustomData.allAuto.height = 19;
+	Menu_AddItem( &altSwapCustomData.menu, (void *)&altSwapCustomData.allAuto );
+
+	altSwapCustomData.back.generic.type = MTYPE_BITMAP;
+	altSwapCustomData.back.generic.flags = QMF_HIGHLIGHT_IF_FOCUS;
+	altSwapCustomData.back.generic.x = 501;
+	altSwapCustomData.back.generic.y = 340;
+	altSwapCustomData.back.generic.name = GRAPHIC_SQUARE;
+	altSwapCustomData.back.generic.callback = AltSwapCustom_Event;
+	altSwapCustomData.back.textEnum = MBT_BACK;
+	altSwapCustomData.back.textcolor = CT_BLACK;
+	altSwapCustomData.back.textcolor2 = CT_WHITE;
+	altSwapCustomData.back.color = CT_DKPURPLE1;
+	altSwapCustomData.back.color2 = CT_LTPURPLE1;
+	altSwapCustomData.back.textX = 5;
+	altSwapCustomData.back.textY = 40;
+	altSwapCustomData.back.width = 110;
+	altSwapCustomData.back.height = 60;
+	Menu_AddItem( &altSwapCustomData.menu, (void *)&altSwapCustomData.back );
+
+	SetupMenu_TopButtons( &altSwapCustomData.menu, MENU_CONTROLS, NULL );
+	SetupMenu_SideButtons( &altSwapCustomData.menu, -1 );
+
+	UI_PopMenu();
+	UI_PushMenu( &altSwapCustomData.menu );
+}
+
+/*
+=================
+AltSwap_EditButtonEvent
+=================
+*/
+static void AltSwap_EditButtonEvent( void *ptr, int event ) {
+	if ( event == QM_ACTIVATED ) {
+		AltSwapCustom_MenuInit();
+	}
+}
+
 /*
 =======================================================================
 
@@ -7,7 +459,6 @@ CONTROLS MENU
 
 =======================================================================
 */
-#include "ui_local.h"
 
 static void SetupMenu_SideButtons(menuframework_s *menu,int menuType);
 static void Controls_UpdateNew( void );
@@ -3613,8 +4064,8 @@ static void ControlsOther_MenuInit( void )
 	s_lookspring_box.textY					= 2;
 	s_lookspring_box.listnames				= s_OffOnNone_Names;
 */
-	y +=22;
-	y +=22;
+	y +=16;
+	y +=16;
 
 	s_controls.autoswitch.generic.type			= MTYPE_SPINCONTROL;
 	s_controls.autoswitch.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
@@ -3631,17 +4082,62 @@ static void ControlsOther_MenuInit( void )
 	s_controls.autoswitch.textY					= 2;
 	s_controls.autoswitch.listnames				= s_Autoswitch_Names;
 
+	y +=16;
+	y +=16;
+
+	altSwapData.mainButton.generic.type			= MTYPE_SPINCONTROL;
+	altSwapData.mainButton.generic.flags		= QMF_HIGHLIGHT_IF_FOCUS;
+	altSwapData.mainButton.generic.x			= x;
+	altSwapData.mainButton.generic.y			= y;
+	altSwapData.mainButton.generic.callback		= AltSwap_MainButtonPress;
+	altSwapData.mainButton.textEnum				= MBT_ALTSWAP_CONTROL;
+	altSwapData.mainButton.textcolor			= CT_BLACK;
+	altSwapData.mainButton.textcolor2			= CT_WHITE;
+	altSwapData.mainButton.color				= CT_DKPURPLE1;
+	altSwapData.mainButton.color2				= CT_LTPURPLE1;
+	altSwapData.mainButton.textX				= 5;
+	altSwapData.mainButton.textY				= 2;
+	altSwapData.mainButton.listnames			= altSwap_mainButtonNames;
+
+	altSwapData.editButton.generic.type			= MTYPE_BITMAP;
+	altSwapData.editButton.generic.flags		= QMF_HIGHLIGHT_IF_FOCUS;
+	if ( strlen( menu_normal_text[MNT_ALTSWAP_CUSTOM] ) > 10 || strlen( menu_button_text[MBT_ALTSWAP_EDIT][0] ) > 8 ) {
+		// Potentially not enough space, so move edit button to next line
+		altSwapData.editButton.generic.x = x + 160;
+		altSwapData.editButton.generic.y = y + 25;
+		altSwapData.editButton.width = 130;
+	} else {
+		altSwapData.editButton.generic.x = x + 250;
+		altSwapData.editButton.generic.y = y;
+		altSwapData.editButton.width = 78;
+	}
+	altSwapData.editButton.generic.name			= GRAPHIC_SQUARE;
+	altSwapData.editButton.generic.id			= 0;
+	altSwapData.editButton.generic.callback		= AltSwap_EditButtonEvent;
+	altSwapData.editButton.height				= MENU_BUTTON_MED_HEIGHT;
+	altSwapData.editButton.color				= CT_DKPURPLE3;
+	altSwapData.editButton.color2				= CT_LTPURPLE3;
+	altSwapData.editButton.textX				= 5;
+	altSwapData.editButton.textY				= 1;
+	altSwapData.editButton.textEnum				= MBT_ALTSWAP_EDIT;
+	altSwapData.editButton.textcolor			= CT_BLACK;
+	altSwapData.editButton.textcolor2			= CT_WHITE;
 
 	Menu_AddItem( &s_controlsother_menu, ( void * )&s_controls.alwaysrun);
 //	Menu_AddItem( &s_controlsother_menu, ( void * )&s_lookspring_box);
 	Menu_AddItem( &s_controlsother_menu, ( void * )&s_keyturnspeed_slider);
 	Menu_AddItem( &s_controlsother_menu, ( void * )&s_controls.autoswitch);
+	Menu_AddItem( &s_controlsother_menu, ( void * )&altSwapData.mainButton);
+	Menu_AddItem( &s_controlsother_menu, ( void * )&altSwapData.editButton);
 
 	// initialize the configurable cvars
 	Controls_InitCvars();
 
 	// initialize the current config
 	Controls_GetConfig();
+
+	// load alt swap config
+	AltSwap_InitMainButtons();
 
 	// initial default section
 	g_section        = C_OTHER;

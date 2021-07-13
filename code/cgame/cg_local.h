@@ -1073,6 +1073,10 @@ typedef struct {
 	qboolean noFlyingDrift;
 	float infilJumpFactor;
 	float infilAirAccelFactor;
+
+	// alt fire button swapping
+	char altSwapPrefs[WP_NUM_WEAPONS];
+	qboolean altSwapSupport;	// whether server support for "setAltSwap" command is available
 } modConfig_t;
 
 // The client game static (cgs) structure hold everything
@@ -1221,6 +1225,7 @@ extern	vmCvar_t		cg_paused;
 extern	vmCvar_t		cg_blood;
 extern	vmCvar_t		cg_predictItems;
 extern	vmCvar_t		cg_deferPlayers;
+extern	vmCvar_t		cg_altFireSwap;
 
 //
 // cg_main.c
@@ -1429,6 +1434,10 @@ void CG_Chunks( vec3_t origin, vec3_t dir, float size, material_type_t type );
 //
 // cg_weapons.c
 //
+void CG_AltFire_UpdateServerPrefs( void );
+altFireMode_t CG_AltFire_PredictionMode( weapon_t weapon );
+void CG_AltFire_Update( qboolean init );
+
 void CG_NextWeapon_f( void );
 void CG_PrevWeapon_f( void );
 void CG_Weapon_f( void );

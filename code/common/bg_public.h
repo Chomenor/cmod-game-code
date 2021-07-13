@@ -108,6 +108,13 @@ typedef enum {
 	WEAPON_FIRING
 } weaponstate_t;
 
+typedef enum {
+	ALTMODE_NORMAL,
+	ALTMODE_SWAPPED,
+	ALTMODE_PRIMARY_ONLY,
+	ALTMODE_ALT_ONLY,
+} altFireMode_t;
+
 // pmove->pm_flags
 #define	PMF_DUCKED			1
 #define	PMF_JUMP_HELD		2
@@ -153,6 +160,9 @@ typedef struct {
 	// these will be different functions during game and cgame
 	void		(*trace)( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs, const vec3_t end, int passEntityNum, int contentMask );
 	int			(*pointcontents)( const vec3_t point, int passEntityNum );
+
+	// Alt fire button configuration
+	altFireMode_t altFireMode;
 
 	// Don't reduce movement/strafing speed when the jump key is held while in the air.
 	qboolean	noJumpKeySlowdown;

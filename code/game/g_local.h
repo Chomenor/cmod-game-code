@@ -225,6 +225,7 @@ typedef struct {
 	spectatorState_t	spectatorState;
 	int			spectatorClient;	// for chasecam and follow mode
 	int			wins, losses;		// tournament stats
+	int			altSwapFlags;		// for alt-fire swapping
 } clientSession_t;
 
 #define	MAX_VOTE_COUNT		3
@@ -800,6 +801,7 @@ extern	vmCvar_t	g_pMoveMsec;
 extern	vmCvar_t	g_noJumpKeySlowdown;
 extern	vmCvar_t	g_infilJumpFactor;
 extern	vmCvar_t	g_infilAirAccelFactor;
+extern	vmCvar_t	g_altSwapSupport;
 
 void	trap_Printf( const char *fmt );
 void	trap_Error( const char *fmt );

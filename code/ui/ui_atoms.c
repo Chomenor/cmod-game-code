@@ -1996,6 +1996,8 @@ void UI_LoadMenuText()
 	menu_normal_text[MNT_IGNORES_TITLE] = "ELITE FORCE HOLOMATCH : IGNORED PLAYERS";
 	menu_normal_text[MNT_IGNORES] = "IGNORED PLAYERS";
 	menu_normal_text[MNT_IGNORES_PLAYERLIST] = "PLAYERLIST";
+	menu_normal_text[MNT_ALTSWAP_AUTO] = "AUTO";
+	menu_normal_text[MNT_ALTSWAP_CUSTOM] = "CUSTOM";
 
 	if ( !Q_stricmp( language, "deutsch" ) ) {
 		menu_normal_text[MNT_ORDER_TOEVERYONE] = "An alle";
@@ -2153,6 +2155,28 @@ void UI_LoadButtonText()
 	menu_button_text[MBT_REMOVE_IGNORE][1] = "REMOVE IGNORE";
 	menu_button_text[MBT_FLUSH_IGNORE][0] = "CLEAR";
 	menu_button_text[MBT_FLUSH_IGNORE][1] = "REMOVE ALL IGNORES";
+	menu_button_text[MBT_ALTSWAP_CONTROL][0] = "ALT FIRE SWAPPING";
+	menu_button_text[MBT_ALTSWAP_CONTROL][1] = "SELECT ALT FIRE BUTTON SWAPPING MODE";
+	menu_button_text[MBT_ALTSWAP_EDIT][0] = "EDIT";
+	menu_button_text[MBT_ALTSWAP_EDIT][1] = "CUSTOMIZE ALT FIRE BUTTON SWAPPING";
+	menu_button_text[MBT_ALTSWAP_ALL_STANDARD][0] = "STANDARD";
+	menu_button_text[MBT_ALTSWAP_ALL_STANDARD][1] = "SET ALL WEAPONS TO STANDARD MODE";
+	menu_button_text[MBT_ALTSWAP_ALL_AUTO][0] = "AUTO";
+	menu_button_text[MBT_ALTSWAP_ALL_AUTO][1] = "SET ALL WEAPONS TO AUTOMATIC MODE";
+	menu_button_text[MBT_ALTSWAP_WEAPON1][0] = "WEAPON 1";
+	menu_button_text[MBT_ALTSWAP_WEAPON2][0] = "WEAPON 2";
+	menu_button_text[MBT_ALTSWAP_WEAPON3][0] = "WEAPON 3";
+	menu_button_text[MBT_ALTSWAP_WEAPON4][0] = "WEAPON 4";
+	menu_button_text[MBT_ALTSWAP_WEAPON5][0] = "WEAPON 5";
+	menu_button_text[MBT_ALTSWAP_WEAPON6][0] = "WEAPON 6";
+	menu_button_text[MBT_ALTSWAP_WEAPON7][0] = "WEAPON 7";
+	menu_button_text[MBT_ALTSWAP_WEAPON8][0] = "WEAPON 8";
+	menu_button_text[MBT_ALTSWAP_WEAPON9][0] = "WEAPON 9";
+	menu_button_text[MBT_ALTSWAP_WEAPON10][0] = "HYPOSPRAY";
+	menu_button_text[MBT_ALTSWAP_WEAPON11][0] = "BORG WEAPON";
+	for ( i = 0; i < 11; ++i ) {
+		menu_button_text[MBT_ALTSWAP_WEAPON1 + i][1] = "SELECT ALT FIRE BUTTON SWAPPING MODE";
+	}
 
 	if ( !Q_stricmp( language, "deutsch" ) ) {
 		menu_button_text[MBT_MOTD][0] = "HOST MOTD :";
@@ -2165,6 +2189,18 @@ void UI_LoadButtonText()
 		menu_button_text[MBT_REMOVE_IGNORE][1] = "IGNORE AUFHEBEN";
 		menu_button_text[MBT_FLUSH_IGNORE][0] = "ALLE LÖSCHEN";
 		menu_button_text[MBT_FLUSH_IGNORE][1] = "ALLE IGNORES ENTFERNEN";
+
+		menu_button_text[MBT_ALTSWAP_WEAPON1][0] = "WAFFE 1";
+		menu_button_text[MBT_ALTSWAP_WEAPON2][0] = "WAFFE 2";
+		menu_button_text[MBT_ALTSWAP_WEAPON3][0] = "WAFFE 3";
+		menu_button_text[MBT_ALTSWAP_WEAPON4][0] = "WAFFE 4";
+		menu_button_text[MBT_ALTSWAP_WEAPON5][0] = "WAFFE 5";
+		menu_button_text[MBT_ALTSWAP_WEAPON6][0] = "WAFFE 6";
+		menu_button_text[MBT_ALTSWAP_WEAPON7][0] = "WAFFE 7";
+		menu_button_text[MBT_ALTSWAP_WEAPON8][0] = "WAFFE 8";
+		menu_button_text[MBT_ALTSWAP_WEAPON9][0] = "WAFFE 9";
+		menu_button_text[MBT_ALTSWAP_WEAPON10][0] = "HYPOSPRAY";
+		menu_button_text[MBT_ALTSWAP_WEAPON11][0] = "BORG-WAFFE";
 
 	} else if ( !Q_stricmp( language, "francais" ) ) {
 		menu_button_text[MBT_ASSIMILATION][1] = "JOUEURS TUE JOINDRENT LES BORG";
@@ -2188,6 +2224,17 @@ void UI_LoadButtonText()
 		menu_button_text[MBT_REMOVE_IGNORE][1] = "SUPPRIMER L'IGNORE";
 		menu_button_text[MBT_FLUSH_IGNORE][0] = "SUPPR. TOUS";
 		menu_button_text[MBT_FLUSH_IGNORE][1] = "VIDER LA LISTE DES JOUEURS IGNOREE";
+
+		menu_button_text[MBT_ALTSWAP_WEAPON1][0] = "ARME 1";
+		menu_button_text[MBT_ALTSWAP_WEAPON2][0] = "ARME 2";
+		menu_button_text[MBT_ALTSWAP_WEAPON3][0] = "ARME 3";
+		menu_button_text[MBT_ALTSWAP_WEAPON4][0] = "ARME 4";
+		menu_button_text[MBT_ALTSWAP_WEAPON5][0] = "ARME 5";
+		menu_button_text[MBT_ALTSWAP_WEAPON6][0] = "ARME 6";
+		menu_button_text[MBT_ALTSWAP_WEAPON7][0] = "ARME 7";
+		menu_button_text[MBT_ALTSWAP_WEAPON8][0] = "ARME 8";
+		menu_button_text[MBT_ALTSWAP_WEAPON9][0] = "ARME 9";
+		menu_button_text[MBT_ALTSWAP_WEAPON11][0] = "ARME BORG";
 	}
 }
 

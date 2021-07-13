@@ -4,6 +4,166 @@
 #include "cg_local.h"
 #include "fx_local.h"
 
+/* ----------------------------------------------------------------------- */
+
+// Alt Fire Button Swapping
+
+/* ----------------------------------------------------------------------- */
+
+// Server preferences are indicated by the 'altSwapPrefs' modcfg value.
+// Each character corresponds to one weapon with the following meanings:
+// 'u' - (undefined) no server preference; client picks setting (default)
+// 'n' - (normal) use original alt fire configuration if client setting is 'auto'
+// 's' - (swapped) use swapped alt fire configuration if client setting is 'auto'
+// 'N' - (forced normal) use original alt fire configuration regardless of client setting
+// 'S' - (forced swap) use swapped alt fire configuration regardless of client setting
+// 'f' - (forced primary) weapon only supports primary fire
+// 'F' - (forced alt) weapon only supports alt fire
+// Example: string "ns" means weapon 1 defaults to normal, weapon 2 defaults to swapped, and the rest undefined
+
+// Client preferences are indicated by the 'cg_altFireSwap' cvar.
+// Each character corresponds to one weapon with the following meanings:
+// 'n' - (normal) use original alt fire configuration (default)
+// 'a' - (auto) automatically select based on server configuration
+// 's' - (swapped) use swapped alt fire configuration
+
+// Current alt swap mode sent to the server.
+static int serverAltSwapActive;
+
+// Copied from server 'altSwapPrefs' string, but with undefined values replaced with calculated defaults.
+static char serverAltSwapPrefs[WP_NUM_WEAPONS];
+
+/*
+=================
+CG_AltFire_UpdateServerPrefs
+
+Updates 'serverAltSwapPrefs' value. Should be called whenever modcfg or serverinfo may have changed.
+=================
+*/
+void CG_AltFire_UpdateServerPrefs( void ) {
+	int i;
+	const char *info = CG_ConfigString( CS_SERVERINFO );
+
+	// initialize
+	Q_strncpyz( serverAltSwapPrefs, "nnnnnnnnnnnn", sizeof( serverAltSwapPrefs ) );
+	serverAltSwapPrefs[WP_PHASER - 1] = 's';
+	serverAltSwapPrefs[WP_COMPRESSION_RIFLE - 1] = 's';
+	serverAltSwapPrefs[WP_IMOD - 1] = 's';
+	serverAltSwapPrefs[WP_SCAVENGER_RIFLE - 1] = 's';
+	serverAltSwapPrefs[WP_GRENADE_LAUNCHER - 1] = 's';
+	serverAltSwapPrefs[WP_DREADNOUGHT - 1] = 's';
+	serverAltSwapPrefs[WP_VOYAGER_HYPO - 1] = 's';
+	serverAltSwapPrefs[WP_BORG_WEAPON - 1] = 's';
+
+	// load mod-specific defaults
+	if ( !Q_stricmp( Info_ValueForKey( info, "gamename" ), "Gladiator Arena III.IV.0-beta" ) ) {
+		serverAltSwapPrefs[WP_DREADNOUGHT - 1] = 'n';
+		serverAltSwapPrefs[WP_VOYAGER_HYPO - 1] = 'n';
+		if ( atoi( Info_ValueForKey( info, "g_mod_instagib" ) ) ) {
+			serverAltSwapPrefs[WP_COMPRESSION_RIFLE - 1] = 'F';
+			serverAltSwapPrefs[WP_IMOD - 1] = 'f';
+		}
+	} else if ( !Q_stricmp( Info_ValueForKey( info, "gamename" ), "IN2TAGIB 1.2.0" ) ) {
+		serverAltSwapPrefs[WP_COMPRESSION_RIFLE - 1] = 'F';
+		serverAltSwapPrefs[WP_IMOD - 1] = 'f';
+	} else if ( !Q_stricmp( Info_ValueForKey( info, "gamename" ), "PiNBALL 2.0.0" ) ) {
+		serverAltSwapPrefs[WP_COMPRESSION_RIFLE - 1] = 'F';
+		serverAltSwapPrefs[WP_QUANTUM_BURST - 1] = 'f';
+	} else if ( !Q_stricmp( Info_ValueForKey( info, "gamename" ), "excessive" ) ) {
+		Q_strncpyz( serverAltSwapPrefs, "nnnnnnnnnnnn", sizeof( serverAltSwapPrefs ) );
+	}
+
+	// load values from 'altSwapPrefs' modcfg string
+	for ( i = 0; i < WP_NUM_WEAPONS - 1 && cgs.modConfig.altSwapPrefs[i]; ++i ) {
+		char value = cgs.modConfig.altSwapPrefs[i];
+		if ( value == 'n' || value == 'N' || value == 's' || value == 'S' || value == 'f' || value == 'F' ) {
+			serverAltSwapPrefs[i] = value;
+		}
+	}
+}
+
+/*
+=================
+CG_AltFire_PredictionMode
+
+Returns alt fire modifications to use for playerstate prediction.
+=================
+*/
+altFireMode_t CG_AltFire_PredictionMode( weapon_t weapon ) {
+	int index = (int)weapon - 1;
+	char serverPref = index >= 0 && index < WP_NUM_WEAPONS - 1 ? serverAltSwapPrefs[index] : '\0';
+
+	if ( serverPref == 'f' )
+		return ALTMODE_PRIMARY_ONLY;
+	if ( serverPref == 'F' )
+		return ALTMODE_ALT_ONLY;
+
+	if ( serverAltSwapActive & ( 1 << index ) )
+		return ALTMODE_SWAPPED;
+
+	return ALTMODE_NORMAL;
+}
+
+/*
+=================
+CG_AltFire_GetSwapState
+
+Returns bitmask of weapon swaps that should be enabled according to client/server configuration.
+=================
+*/
+static int CG_AltFire_GetSwapState( void ) {
+	int i;
+	int clientPrefLen = strlen( cg_altFireSwap.string );
+	int swaps = 0;
+
+	for ( i = 0; i < WP_NUM_WEAPONS - 1; ++i ) {
+		char serverPref = serverAltSwapPrefs[i];
+		char clientPref = i < clientPrefLen ? cg_altFireSwap.string[i] : '\0';
+
+		// check if swaps are force disabled by server.
+		if ( serverPref == 'N' || serverPref == 'f' || serverPref == 'F' ) {
+			continue;
+		}
+
+		// check if swaps are force enabled by server or client.
+		if ( serverPref == 'S' || clientPref == 's' || clientPref == 'S' ) {
+			swaps |= ( 1 << i );
+			continue;
+		}
+
+		// check for automatically enabled swaps.
+		if ( ( clientPref == 'a' || clientPref == 'A' ) && serverPref == 's' ) {
+			swaps |= ( 1 << i );
+			continue;
+		}
+	}
+
+	return swaps;
+}
+
+/*
+=================
+CG_AltFire_Update
+
+Detect changes to alt fire configuration and send update to server if necessary.
+=================
+*/
+void CG_AltFire_Update( qboolean init ) {
+	int newServerSwaps = 0;
+
+	if ( cgs.modConfig.altSwapSupport ) {
+		newServerSwaps = CG_AltFire_GetSwapState();
+
+		// always send update to server when cgame is started to make sure server is in sync
+		if ( init || serverAltSwapActive != newServerSwaps ) {
+			trap_SendClientCommand( va( "setAltSwap %i", newServerSwaps ) );
+		}
+	}
+
+	serverAltSwapActive = newServerSwaps;
+}
+
+// =========================================================================
 
 /*
 =================

@@ -120,6 +120,7 @@ vmCvar_t	cg_deferPlayers;
 vmCvar_t	cg_drawTeamOverlay;
 vmCvar_t	cg_teamOverlayUserinfo;
 vmCvar_t	ui_playerclass;
+vmCvar_t	cg_altFireSwap;
 
 typedef struct {
 	vmCvar_t	*vmCvar;
@@ -189,6 +190,7 @@ cvarTable_t		cvarTable[] = {
 	{ &cg_teamOverlayUserinfo, "teamoverlay", "0", CVAR_ROM | CVAR_USERINFO },
 	{ &cg_stats, "cg_stats", "0", 0 },
 	{ &cg_reportDamage, "cg_reportDamage", "0", 0},
+	{ &cg_altFireSwap, "cg_altFireSwap", "", CVAR_ARCHIVE },
 
 	// the following variables are created in other parts of the system,
 	// but we also reference them here
@@ -1170,6 +1172,8 @@ void CG_Init( int serverMessageNum, int serverCommandSequence ) {
 	CG_ParseServerinfo();
 
 	CG_ParseModConfig();
+
+	CG_AltFire_Update( qtrue );
 
 	// load the new map
 	CG_LoadingString( "collision map" );

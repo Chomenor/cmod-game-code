@@ -28,14 +28,15 @@ void G_WriteClientSessionData( gclient_t *client ) {
 	const char	*s;
 	const char	*var;
 
-	s = va("%i %i %i %i %i %i %i",
+	s = va("%i %i %i %i %i %i %i %i",
 		client->sess.sessionTeam,
 		client->sess.sessionClass,
 		client->sess.spectatorTime,
 		client->sess.spectatorState,
 		client->sess.spectatorClient,
 		client->sess.wins,
-		client->sess.losses
+		client->sess.losses,
+		client->sess.altSwapFlags
 		);
 
 	var = va( "session%i", client - level.clients );
@@ -57,14 +58,15 @@ void G_ReadSessionData( gclient_t *client ) {
 	var = va( "session%i", client - level.clients );
 	trap_Cvar_VariableStringBuffer( var, s, sizeof(s) );
 
-	sscanf( s, "%i %i %i %i %i %i %i",
+	sscanf( s, "%i %i %i %i %i %i %i %i",
 		&client->sess.sessionTeam,
 		&client->sess.sessionClass,
 		&client->sess.spectatorTime,
 		&client->sess.spectatorState,
 		&client->sess.spectatorClient,
 		&client->sess.wins,
-		&client->sess.losses
+		&client->sess.losses,
+		&client->sess.altSwapFlags
 		);
 }
 

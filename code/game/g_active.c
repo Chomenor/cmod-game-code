@@ -1762,6 +1762,11 @@ void ClientThink_real( gentity_t *ent ) {
 	pm.noFlyingDrift = qtrue;
 	pm.infilJumpFactor = g_infilJumpFactor.value;
 	pm.infilAirAccelFactor = g_infilAirAccelFactor.value;
+	if ( client->ps.weapon >= 1 && client->ps.weapon < WP_NUM_WEAPONS ) {
+		if ( client->sess.altSwapFlags & ( 1 << ( client->ps.weapon - 1 ) ) ) {
+			pm.altFireMode = ALTMODE_SWAPPED;
+		}
+	}
 
 	VectorCopy( client->ps.origin, oldOrigin );
 

@@ -2006,6 +2006,8 @@ void UI_LoadMenuText()
 		menu_normal_text[MNT_IGNORES_TITLE] = "ELITE FORCE HOLOMATCH: IGNORIERTE SPIELER";
 		menu_normal_text[MNT_IGNORES] = "IGNORIERTE SPIELER";
 		menu_normal_text[MNT_IGNORES_PLAYERLIST] = "SPIELERLISTE";
+		menu_normal_text[MNT_ALTSWAP_AUTO] = "AUTOMATISCH";
+		menu_normal_text[MNT_ALTSWAP_CUSTOM] = "BENUTZER";
 
 	} else if ( !Q_stricmp( language, "francais" ) ) {
 		menu_normal_text[MNT_PC_NOCLASS] = "SansClasse";
@@ -2159,7 +2161,7 @@ void UI_LoadButtonText()
 	menu_button_text[MBT_ALTSWAP_CONTROL][1] = "SELECT ALT FIRE BUTTON SWAPPING MODE";
 	menu_button_text[MBT_ALTSWAP_EDIT][0] = "EDIT";
 	menu_button_text[MBT_ALTSWAP_EDIT][1] = "CUSTOMIZE ALT FIRE BUTTON SWAPPING";
-	menu_button_text[MBT_ALTSWAP_ALL_STANDARD][0] = "STANDARD";
+	menu_button_text[MBT_ALTSWAP_ALL_STANDARD][0] = "DEFAULT";
 	menu_button_text[MBT_ALTSWAP_ALL_STANDARD][1] = "SET ALL WEAPONS TO STANDARD MODE";
 	menu_button_text[MBT_ALTSWAP_ALL_AUTO][0] = "AUTO";
 	menu_button_text[MBT_ALTSWAP_ALL_AUTO][1] = "SET ALL WEAPONS TO AUTOMATIC MODE";
@@ -2190,6 +2192,14 @@ void UI_LoadButtonText()
 		menu_button_text[MBT_FLUSH_IGNORE][0] = "ALLE LÖSCHEN";
 		menu_button_text[MBT_FLUSH_IGNORE][1] = "ALLE IGNORES ENTFERNEN";
 
+		menu_button_text[MBT_ALTSWAP_CONTROL][0] = "ALT FEUER WECHSELN";
+		menu_button_text[MBT_ALTSWAP_CONTROL][1] = "MODUS FÜR DAS ALTERNATIVE FEUER AUSWÄHLEN";
+		menu_button_text[MBT_ALTSWAP_EDIT][0] = "BEARBEITEN";
+		menu_button_text[MBT_ALTSWAP_EDIT][1] = "BEARBEITE DEN ALTERNATIVEN FEUERMODUS";
+		menu_button_text[MBT_ALTSWAP_ALL_STANDARD][0] = "STANDARD";
+		menu_button_text[MBT_ALTSWAP_ALL_STANDARD][1] = "ALLE WAFFEN IN DEN STANDARDMODUS SETZEN";
+		menu_button_text[MBT_ALTSWAP_ALL_AUTO][0] = "AUTOMATISCH";
+		menu_button_text[MBT_ALTSWAP_ALL_AUTO][1] = "ALLE WAFFEN IN DEN AUTOMATIKMODUS SETZEN";
 		menu_button_text[MBT_ALTSWAP_WEAPON1][0] = "WAFFE 1";
 		menu_button_text[MBT_ALTSWAP_WEAPON2][0] = "WAFFE 2";
 		menu_button_text[MBT_ALTSWAP_WEAPON3][0] = "WAFFE 3";
@@ -2201,6 +2211,9 @@ void UI_LoadButtonText()
 		menu_button_text[MBT_ALTSWAP_WEAPON9][0] = "WAFFE 9";
 		menu_button_text[MBT_ALTSWAP_WEAPON10][0] = "HYPOSPRAY";
 		menu_button_text[MBT_ALTSWAP_WEAPON11][0] = "BORG-WAFFE";
+		for ( i = 0; i < 11; ++i ) {
+			menu_button_text[MBT_ALTSWAP_WEAPON1 + i][1] = "MODUS FÜR DAS ALTERNATIVE FEUER AUSWÄHLEN";
+		}
 
 	} else if ( !Q_stricmp( language, "francais" ) ) {
 		menu_button_text[MBT_ASSIMILATION][1] = "JOUEURS TUE JOINDRENT LES BORG";

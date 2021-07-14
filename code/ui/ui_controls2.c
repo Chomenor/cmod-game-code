@@ -4101,12 +4101,12 @@ static void ControlsOther_MenuInit( void )
 
 	altSwapData.editButton.generic.type			= MTYPE_BITMAP;
 	altSwapData.editButton.generic.flags		= QMF_HIGHLIGHT_IF_FOCUS;
-	if ( strlen( menu_normal_text[MNT_ALTSWAP_CUSTOM] ) > 10 || strlen( menu_button_text[MBT_ALTSWAP_EDIT][0] ) > 8 ) {
+	/* if ( strlen( menu_normal_text[MNT_ALTSWAP_CUSTOM] ) > 10 || strlen( menu_button_text[MBT_ALTSWAP_EDIT][0] ) > 8 ) {
 		// Potentially not enough space, so move edit button to next line
 		altSwapData.editButton.generic.x = x + 160;
 		altSwapData.editButton.generic.y = y + 25;
 		altSwapData.editButton.width = 130;
-	} else {
+	} else */ {
 		altSwapData.editButton.generic.x = x + 250;
 		altSwapData.editButton.generic.y = y;
 		altSwapData.editButton.width = 78;

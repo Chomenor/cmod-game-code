@@ -2032,6 +2032,8 @@ void UI_LoadMenuText()
 		menu_normal_text[MNT_IGNORES_TITLE] = "ELITE FORCE HOLOMATCH : JOUEURS IGNOREE";
 		menu_normal_text[MNT_IGNORES] = "JOUEURS IGNOREE";
 		menu_normal_text[MNT_IGNORES_PLAYERLIST] = "LISTE DES JOUEURS";
+		menu_normal_text[MNT_ALTSWAP_AUTO] = "AUTO";
+		menu_normal_text[MNT_ALTSWAP_CUSTOM] = "SUR MESURE";
 	}
 }
 
@@ -2238,6 +2240,14 @@ void UI_LoadButtonText()
 		menu_button_text[MBT_FLUSH_IGNORE][0] = "SUPPR. TOUS";
 		menu_button_text[MBT_FLUSH_IGNORE][1] = "VIDER LA LISTE DES JOUEURS IGNOREE";
 
+		menu_button_text[MBT_ALTSWAP_CONTROL][0] = "ÉCHANGE DE FEU ALT";
+		menu_button_text[MBT_ALTSWAP_CONTROL][1] = "SÉLECTIONNER LE MODE D'ÉCHANGE DU BOUTON ALT FIRE";
+		menu_button_text[MBT_ALTSWAP_EDIT][0] = "ÉDITER";
+		menu_button_text[MBT_ALTSWAP_EDIT][1] = "PERSONNALISER L'ÉCHANGE DE BOUTON ALT FIRE";
+		menu_button_text[MBT_ALTSWAP_ALL_STANDARD][0] = "DÉFAUT";
+		menu_button_text[MBT_ALTSWAP_ALL_STANDARD][1] = "METTRE TOUTES LES ARMES EN MODE STANDARD";
+		menu_button_text[MBT_ALTSWAP_ALL_AUTO][0] = "AUTO";
+		menu_button_text[MBT_ALTSWAP_ALL_AUTO][1] = "METTRE TOUTES LES ARMES EN MODE AUTOMATIQUE";
 		menu_button_text[MBT_ALTSWAP_WEAPON1][0] = "ARME 1";
 		menu_button_text[MBT_ALTSWAP_WEAPON2][0] = "ARME 2";
 		menu_button_text[MBT_ALTSWAP_WEAPON3][0] = "ARME 3";
@@ -2247,7 +2257,11 @@ void UI_LoadButtonText()
 		menu_button_text[MBT_ALTSWAP_WEAPON7][0] = "ARME 7";
 		menu_button_text[MBT_ALTSWAP_WEAPON8][0] = "ARME 8";
 		menu_button_text[MBT_ALTSWAP_WEAPON9][0] = "ARME 9";
+		menu_button_text[MBT_ALTSWAP_WEAPON10][0] = "HYPOSPRAY";
 		menu_button_text[MBT_ALTSWAP_WEAPON11][0] = "ARME BORG";
+		for ( i = 0; i < 11; ++i ) {
+			menu_button_text[MBT_ALTSWAP_WEAPON1 + i][1] = "SÉLECTIONNER LE MODE D'ÉCHANGE DU BOUTON ALT FIRE";
+		}
 	}
 }
 

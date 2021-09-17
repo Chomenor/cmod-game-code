@@ -60,6 +60,7 @@ set src=game&set name=g_turrets&call :compile
 set src=game&set name=g_usable&call :compile
 set src=game&set name=g_utils&call :compile
 set src=game&set name=g_weapon&call :compile
+set src=common&set name=vm_extensions&call :compile
 
 echo Creating the QAGAME.QVM file...
 q3asm.exe -o %output_file% -vq3 -f %q3asm_file%

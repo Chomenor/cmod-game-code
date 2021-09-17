@@ -24,6 +24,9 @@
     <ClInclude Include="..\..\code\common\tr_types.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\code\common\vm_common.h">
+      <Filter>common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\code\game\ai_chat.h">
       <Filter>game</Filter>
     </ClInclude>
@@ -111,6 +114,9 @@
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\code\common\q_shared.c">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\common\vm_extensions.c">
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\code\game\ai_chat.c">

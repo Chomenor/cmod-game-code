@@ -4,7 +4,7 @@
 // cg_syscalls.asm is included instead when building a qvm
 #include "cg_local.h"
 
-static intptr_t (QDECL *syscall)( intptr_t arg, ... ) = (intptr_t (QDECL *)( intptr_t, ...))-1;
+intptr_t (QDECL *syscall)( intptr_t arg, ... ) = (intptr_t (QDECL *)( intptr_t, ...))-1;
 
 
 #ifdef _MSC_VER

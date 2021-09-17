@@ -3,6 +3,7 @@
 // g_local.h -- local definitions for game module
 
 #include "q_shared.h"
+#include "vm_common.h"
 #include "bg_public.h"
 #include "g_public.h"
 

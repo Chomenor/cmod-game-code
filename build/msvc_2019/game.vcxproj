@@ -183,6 +183,7 @@
     <ClInclude Include="..\..\code\common\q_shared.h" />
     <ClInclude Include="..\..\code\common\surfaceflags.h" />
     <ClInclude Include="..\..\code\common\tr_types.h" />
+    <ClInclude Include="..\..\code\common\vm_common.h" />
     <ClInclude Include="..\..\code\game\ai_chat.h" />
     <ClInclude Include="..\..\code\game\ai_cmd.h" />
     <ClInclude Include="..\..\code\game\ai_dmnet.h" />
@@ -214,6 +215,7 @@
     <ClCompile Include="..\..\code\common\bg_slidemove.c" />
     <ClCompile Include="..\..\code\common\q_math.c" />
     <ClCompile Include="..\..\code\common\q_shared.c" />
+    <ClCompile Include="..\..\code\common\vm_extensions.c" />
     <ClCompile Include="..\..\code\game\ai_chat.c" />
     <ClCompile Include="..\..\code\game\ai_cmd.c" />
     <ClCompile Include="..\..\code\game\ai_dmnet.c" />

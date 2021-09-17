@@ -5,7 +5,7 @@
 // this file is only included when building a dll
 // g_syscalls.asm is included instead when building a qvm
 
-static intptr_t (QDECL *syscall)( intptr_t arg, ... ) = (intptr_t (QDECL *)( intptr_t, ...))-1;
+intptr_t (QDECL *syscall)( intptr_t arg, ... ) = (intptr_t (QDECL *)( intptr_t, ...))-1;
 
 
 #ifdef _MSC_VER

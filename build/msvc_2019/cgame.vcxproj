@@ -188,6 +188,7 @@
     <ClInclude Include="..\..\code\common\q_shared.h" />
     <ClInclude Include="..\..\code\common\surfaceflags.h" />
     <ClInclude Include="..\..\code\common\tr_types.h" />
+    <ClInclude Include="..\..\code\common\vm_common.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\code\cgame\cg_consolecmds.c" />
@@ -230,6 +231,7 @@
     <ClCompile Include="..\..\code\common\bg_slidemove.c" />
     <ClCompile Include="..\..\code\common\q_math.c" />
     <ClCompile Include="..\..\code\common\q_shared.c" />
+    <ClCompile Include="..\..\code\common\vm_extensions.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

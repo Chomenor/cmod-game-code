@@ -2161,6 +2161,11 @@ void UI_LoadButtonText()
 	menu_button_text[MBT_REMOVE_IGNORE][1] = "REMOVE IGNORE";
 	menu_button_text[MBT_FLUSH_IGNORE][0] = "CLEAR";
 	menu_button_text[MBT_FLUSH_IGNORE][1] = "REMOVE ALL IGNORES";
+	menu_button_text[MBT_FOV][0] = "FIELD OF VIEW";
+	menu_button_text[MBT_FOV][1] = "ADJUST FIELD OF VIEW";
+	menu_button_text[MBT_ASPECTCORRECTION][0] = "ASPECT CORRECTION";
+	menu_button_text[MBT_ASPECTCORRECTION][1] = "ENABLE OR DISABLE ASPECT RATIO CORRECTION";
+
 	menu_button_text[MBT_ALTSWAP_CONTROL][0] = "ALT FIRE SWAPPING";
 	menu_button_text[MBT_ALTSWAP_CONTROL][1] = "SELECT ALT FIRE BUTTON SWAPPING MODE";
 	menu_button_text[MBT_ALTSWAP_EDIT][0] = "EDIT";
@@ -2195,6 +2200,10 @@ void UI_LoadButtonText()
 		menu_button_text[MBT_REMOVE_IGNORE][1] = "IGNORE AUFHEBEN";
 		menu_button_text[MBT_FLUSH_IGNORE][0] = "ALLE LÖSCHEN";
 		menu_button_text[MBT_FLUSH_IGNORE][1] = "ALLE IGNORES ENTFERNEN";
+		menu_button_text[MBT_FOV][0] = "SICHTFELD";
+		menu_button_text[MBT_FOV][1] = "SICHTFELD ANPASSEN";
+		menu_button_text[MBT_ASPECTCORRECTION][0] = "ASPEKTKORREKTUR";
+		menu_button_text[MBT_ASPECTCORRECTION][1] = "AKTIVIEREN ODER DEAKTIVIEREN DER SEITENVERHÄLTNISKORREKTUR";
 
 		menu_button_text[MBT_ALTSWAP_CONTROL][0] = "ALT FEUER WECHSELN";
 		menu_button_text[MBT_ALTSWAP_CONTROL][1] = "MODUS FÜR DAS ALTERNATIVE FEUER AUSWÄHLEN";
@@ -2241,6 +2250,10 @@ void UI_LoadButtonText()
 		menu_button_text[MBT_REMOVE_IGNORE][1] = "SUPPRIMER L'IGNORE";
 		menu_button_text[MBT_FLUSH_IGNORE][0] = "SUPPR. TOUS";
 		menu_button_text[MBT_FLUSH_IGNORE][1] = "VIDER LA LISTE DES JOUEURS IGNOREE";
+		menu_button_text[MBT_FOV][0] = "CHAMP DE VISION";
+		menu_button_text[MBT_FOV][1] = "AJUSTER LE CHAMP DE VISION";
+		menu_button_text[MBT_ASPECTCORRECTION][0] = "CORRECTION D'ASPECT";
+		menu_button_text[MBT_ASPECTCORRECTION][1] = "ACTIVER OU DÉSACTIVER LA CORRECTION DU RATIO D'AFFICHAGE";
 
 		menu_button_text[MBT_ALTSWAP_CONTROL][0] = "ÉCHANGE DE FEU ALT";
 		menu_button_text[MBT_ALTSWAP_CONTROL][1] = "SÉLECTIONNER LE MODE D'ÉCHANGE DU BOUTON ALT FIRE";

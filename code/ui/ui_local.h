@@ -920,6 +920,8 @@ typedef enum
 	MBT_ADD_IGNORE,
 	MBT_REMOVE_IGNORE,
 	MBT_FLUSH_IGNORE,
+	MBT_FOV,
+	MBT_ASPECTCORRECTION,
 	MBT_ALTSWAP_CONTROL,
 	MBT_ALTSWAP_EDIT,
 	MBT_ALTSWAP_ALL_STANDARD,
@@ -1841,6 +1843,7 @@ void UI_FontsMenu( void);
 // ui_cvars.c
 //
 extern void GammaCallback( void *s, int notification );
+extern void FovCallback( void *s, int notification );
 extern void ScreensizeCallback( void *s, int notification );
 
 //
@@ -1900,6 +1903,7 @@ void UI_PrintMenuGraphics(menugraphics_s *menuGraphics,int maxI);
 extern void InvertMouseCallback(void *s, int notification);
 extern void MouseSpeedCallback( void *s, int notification );
 extern void SmoothMouseCallback( void *s, int notification );
+extern void AspectCorrectionCallback( void *s, int notification );
 extern void AnisotropicFilteringCallback( void *s, int notification );
 extern void JoyXButtonCallback( void *s, int notification );
 extern void JoyYButtonCallback( void *s, int notification );

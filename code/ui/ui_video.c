@@ -46,7 +46,9 @@ typedef struct
 	menuframework_s	menu;
 
 	menuslider_s	gamma_slider;
+	menuslider_s	fov_slider;
 	menuslider_s	screensize_slider;
+	menulist_s		aspectCorrection;
 	menulist_s		anisotropicfiltering;
 	menuaction_s	apply_action2;
 
@@ -2092,7 +2094,39 @@ static void VideoData2_MenuInit( void )
 	s_videodata2.apply_action2.width					= 82;
 	s_videodata2.apply_action2.height					= 70;
 
-	y = 330;
+	y += 30;
+	s_videodata2.fov_slider.generic.type		= MTYPE_SLIDER;
+	s_videodata2.fov_slider.generic.x			= x + 162;
+	s_videodata2.fov_slider.generic.y			= y;
+	s_videodata2.fov_slider.generic.flags		= QMF_SMALLFONT;
+	s_videodata2.fov_slider.generic.callback	= FovCallback;
+	s_videodata2.fov_slider.minvalue			= 60;
+	s_videodata2.fov_slider.maxvalue			= 120;
+	s_videodata2.fov_slider.color				= CT_DKPURPLE1;
+	s_videodata2.fov_slider.color2				= CT_LTPURPLE1;
+	s_videodata2.fov_slider.generic.name		= PIC_MONBAR2;
+	s_videodata2.fov_slider.width				= 256;
+	s_videodata2.fov_slider.height				= 32;
+	s_videodata2.fov_slider.focusWidth			= 145;
+	s_videodata2.fov_slider.focusHeight			= 18;
+	s_videodata2.fov_slider.picName				= GRAPHIC_SQUARE;
+	s_videodata2.fov_slider.picX				= x;
+	s_videodata2.fov_slider.picY				= y;
+	s_videodata2.fov_slider.picWidth			= MENU_BUTTON_MED_WIDTH + 21;
+	s_videodata2.fov_slider.picHeight			= MENU_BUTTON_MED_HEIGHT;
+	s_videodata2.fov_slider.textX				= MENU_BUTTON_TEXT_X;
+	s_videodata2.fov_slider.textY				= MENU_BUTTON_TEXT_Y;
+	s_videodata2.fov_slider.textEnum			= MBT_FOV;
+	s_videodata2.fov_slider.textcolor			= CT_BLACK;
+	s_videodata2.fov_slider.textcolor2			= CT_WHITE;
+	s_videodata2.fov_slider.thumbName			= PIC_SLIDER;
+	s_videodata2.fov_slider.thumbHeight			= 32;
+	s_videodata2.fov_slider.thumbWidth			= 16;
+	s_videodata2.fov_slider.thumbGraphicWidth	= 9;
+	s_videodata2.fov_slider.thumbColor			= CT_DKBLUE1;
+	s_videodata2.fov_slider.thumbColor2			= CT_LTBLUE1;
+
+	y += 30;
 	s_videodata2.screensize_slider.generic.type		= MTYPE_SLIDER;
 	s_videodata2.screensize_slider.generic.x		= x + 162;
 	s_videodata2.screensize_slider.generic.y		= y;
@@ -2124,7 +2158,23 @@ static void VideoData2_MenuInit( void )
 	s_videodata2.screensize_slider.thumbColor		= CT_DKBLUE1;
 	s_videodata2.screensize_slider.thumbColor2		= CT_LTBLUE1;
 
-	y += 34;
+	y += 30;
+	s_videodata2.aspectCorrection.generic.type			= MTYPE_SPINCONTROL;
+	s_videodata2.aspectCorrection.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
+	s_videodata2.aspectCorrection.generic.x				= x;
+	s_videodata2.aspectCorrection.generic.y				= y;
+	s_videodata2.aspectCorrection.generic.name			= GRAPHIC_BUTTONRIGHT;
+	s_videodata2.aspectCorrection.generic.callback		= AspectCorrectionCallback;
+	s_videodata2.aspectCorrection.color					= CT_DKPURPLE1;
+	s_videodata2.aspectCorrection.color2					= CT_LTPURPLE1;
+	s_videodata2.aspectCorrection.textX					= MENU_BUTTON_TEXT_X;
+	s_videodata2.aspectCorrection.textY					= MENU_BUTTON_TEXT_Y;
+	s_videodata2.aspectCorrection.textEnum				= MBT_ASPECTCORRECTION;
+	s_videodata2.aspectCorrection.textcolor				= CT_BLACK;
+	s_videodata2.aspectCorrection.textcolor2				= CT_WHITE;
+	s_videodata2.aspectCorrection.listnames				= s_OffOnNone_Names;
+
+	y += 30;
 	s_videodata2.anisotropicfiltering.generic.type			= MTYPE_SPINCONTROL;
 	s_videodata2.anisotropicfiltering.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_videodata2.anisotropicfiltering.generic.x				= x;
@@ -2146,9 +2196,38 @@ static void VideoData2_MenuInit( void )
 	{
 		Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.apply_action2);
 	}
+	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.fov_slider);
 	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.screensize_slider);
 	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.anisotropicfiltering);
+	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.aspectCorrection);
 
+}
+
+/*
+=================
+UI_VideoData2SettingsGetCurrentFov
+=================
+*/
+static float UI_VideoData2SettingsGetCurrentFov( void )
+{
+	float fov;
+	char buffer[256];
+
+	trap_Cvar_VariableStringBuffer( "cg_fov", buffer, sizeof( buffer ) );
+	fov = atof( buffer );
+
+	if ( !strchr( buffer, '*' ) ) {
+		// Convert existing unscaled fov to scaled version, which is what is used by UI.
+		float x = uis.glconfig.vidWidth / tan( fov / 360 * M_PI );
+		float fov_y = atan2( uis.glconfig.vidHeight, x );
+		fov_y = fov_y * 360 / M_PI;
+
+		x = 480.0 / tan( fov_y / 360 * M_PI );
+		fov = atan2( 640.0, x );
+		fov = fov * 360 / M_PI;
+	}
+
+	return fov;
 }
 
 /*
@@ -2159,7 +2238,9 @@ UI_VideoData2SettingsGetCvars
 static void	UI_VideoData2SettingsGetCvars()
 {
 	s_videodata2.gamma_slider.curvalue = trap_Cvar_VariableValue( "r_gamma" ) *  10.0f;
+	s_videodata2.fov_slider.curvalue = UI_VideoData2SettingsGetCurrentFov();
 	s_videodata2.screensize_slider.curvalue = trap_Cvar_VariableValue( "cg_viewsize" );
+	s_videodata2.aspectCorrection.curvalue = trap_Cvar_VariableValue( "cg_aspectCorrect" ) ? 1 : 0;
 	s_videodata2.anisotropicfiltering.curvalue = trap_Cvar_VariableValue( "r_ext_texture_filter_anisotropic" );
 }
 

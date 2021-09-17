@@ -90,6 +90,22 @@ void IntensityCallback( void *s, int notification )
 
 /*
 =================
+FovCallback
+=================
+*/
+void FovCallback( void *s, int notification )
+{
+	menuslider_s *slider = ( menuslider_s * ) s;
+
+	if (notification != QM_ACTIVATED)
+		return;
+
+	// Use asterisk notation to enable horizontal scaling.
+	trap_Cvar_Set( "cg_fov", va( "%f*", slider->curvalue ) );
+}
+
+/*
+=================
 ScreensizeCallback
 =================
 */
@@ -134,6 +150,23 @@ void AutoswitchCallback( void *unused, int notification )
 	trap_Cvar_SetValue( "cg_autoswitch", s_autoswitch_box.curvalue );
 }
 
+
+/*
+=================
+AspectCorrectionCallback
+=================
+*/
+void AspectCorrectionCallback( void *s, int notification )
+{
+	menulist_s *aspectCorrection = ( menulist_s * ) s;
+
+	if (notification != QM_ACTIVATED)
+	{
+		return;
+	}
+
+	trap_Cvar_SetValue( "cg_aspectCorrect", aspectCorrection->curvalue );
+}
 
 /*
 =================

@@ -696,8 +696,6 @@ void UI_DrawPlayer( float x, float y, float w, float h, playerInfo_t *pi, int ti
 		}
 	}
 
-	UI_AdjustFrom640( &x, &y, &w, &h );
-
 	y -= jumpHeight;
 
 	memset( &refdef, 0, sizeof( refdef ) );
@@ -709,14 +707,9 @@ void UI_DrawPlayer( float x, float y, float w, float h, playerInfo_t *pi, int ti
 
 	AxisClear( refdef.viewaxis );
 
-	refdef.x = x;
-	refdef.y = y;
-	refdef.width = w;
-	refdef.height = h;
-
-	refdef.fov_x = (int)((float)refdef.width / 640.0f * 90.0f);
-	xx = refdef.width / tan( refdef.fov_x / 360 * M_PI );
-	refdef.fov_y = atan2( refdef.height, xx );
+	refdef.fov_x = (int)(w / 640.0f * 90.0f);
+	xx = w / tan( refdef.fov_x / 360 * M_PI );
+	refdef.fov_y = atan2( h, xx );
 	refdef.fov_y *= ( 360 / M_PI );
 
 	// calculate distance so the player nearly fills the box
@@ -847,6 +840,12 @@ void UI_DrawPlayer( float x, float y, float w, float h, playerInfo_t *pi, int ti
 	origin[1] -= 100;
 	origin[2] -= 100;
 	trap_R_AddLightToScene( origin, 500, 1.0, 0.0, 0.0 );
+
+	UI_AdjustFrom640( &x, &y, &w, &h );
+	refdef.x = x;
+	refdef.y = y;
+	refdef.width = w;
+	refdef.height = h;
 
 	trap_R_RenderScene( &refdef );
 }

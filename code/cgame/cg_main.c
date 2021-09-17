@@ -1159,8 +1159,7 @@ void CG_Init( int serverMessageNum, int serverCommandSequence ) {
 
 	// get the rendering configuration from the client system
 	trap_GetGlconfig( &cgs.glconfig );
-	cgs.screenXScale = cgs.glconfig.vidWidth / 640.0;
-	cgs.screenYScale = cgs.glconfig.vidHeight / 480.0;
+	AspectCorrect_Init( cgs.glconfig.vidWidth, cgs.glconfig.vidHeight );
 
 	// get the gamestate from the client system
 	trap_GetGameState( &cgs.gameState );
@@ -1231,6 +1230,7 @@ Called before every level change or subsystem restart
 void CG_Shutdown( void ) {
 	// some mods may need to do cleanup work here,
 	// like closing files or archiving session data
+	AspectCorrect_Shutdown();
 }
 
 

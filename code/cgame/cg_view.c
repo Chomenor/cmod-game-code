@@ -555,15 +555,18 @@ static int CG_CalcFov( void ) {
 	float	zoomFov;
 	float	f;
 	int		inwater;
+	qboolean noFovScaling = qfalse;
 
 	if ( cg.predictedPlayerState.pm_type == PM_INTERMISSION ) {
 		// if in intermission, use a fixed value
 		fov_x = 90;
+		noFovScaling = qtrue;
 	} else {
 		// user selectable
 		if ( cgs.dmflags & DF_FIXED_FOV ) {
 			// dmflag to prevent wide fov for all clients
 			fov_x = 80;
+			noFovScaling = qtrue;
 		} else {
 			fov_x = cg_fov.value;
 			if ( fov_x < 1 ) {
@@ -625,12 +628,24 @@ static int CG_CalcFov( void ) {
 	if (cg.predictedPlayerState.introTime > cg.time)
 	{	// The stuff is "holodecking in".
 		fov_x = 80;
+		noFovScaling = qtrue;
 	}
 
+	if ( !noFovScaling && strchr( cg_fov.string, '*' ) ) {
+		// Calculate fov_y based on fov_x at theoretical 640x480 resolution
+		x = 640.0 / tan( fov_x / 360 * M_PI );
+		fov_y = atan2( 480.0, x );
+		fov_y = fov_y * 360 / M_PI;
 
-	x = cg.refdef.width / tan( fov_x / 360 * M_PI );
-	fov_y = atan2( cg.refdef.height, x );
-	fov_y = fov_y * 360 / M_PI;
+		// Recalculate fov_x based on fov_y
+		x = cg.refdef.height / tan( fov_y / 360 * M_PI );
+		fov_x = atan2( cg.refdef.width, x );
+		fov_x = fov_x * 360 / M_PI;
+	} else {
+		x = cg.refdef.width / tan( fov_x / 360 * M_PI );
+		fov_y = atan2( cg.refdef.height, x );
+		fov_y = fov_y * 360 / M_PI;
+	}
 
 	// warp if underwater
 	contents = CG_PointContents( cg.refdef.vieworg, -1 );
@@ -899,6 +914,9 @@ void CG_DrawActiveFrame( int serverTime, stereoFrame_t stereoView, qboolean demo
 
 	// update cvars
 	CG_UpdateCvars();
+
+	// update ui scaling
+	AspectCorrect_RunFrame();
 
 	// if we are only updating the screen as a loading
 	// pacifier, don't even try to read snapshots

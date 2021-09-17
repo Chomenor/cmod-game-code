@@ -2,6 +2,7 @@
 //
 #include "q_shared.h"
 #include "vm_common.h"
+#include "aspect_correct.h"
 #include "tr_types.h"
 #include "bg_public.h"
 #include "cg_public.h"
@@ -1087,9 +1088,6 @@ typedef struct {
 typedef struct {
 	gameState_t		gameState;			// gamestate from server
 	glconfig_t		glconfig;			// rendering configuration
-	float			screenXScale;		// derived from glconfig
-	float			screenYScale;
-	float			screenXBias;
 
 	int				serverCommandSequence;	// reliable command stream counter
 	int				processedSnapshotNum;// the number of snapshots cgame has requested

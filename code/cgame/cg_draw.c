@@ -605,6 +605,7 @@ static void CG_DrawStatusBar( void )
 	}
 
 	// draw the team background
+	AspectCorrect_SetMode( HSCALE_STRETCH, VSCALE_BOTTOM );
 	CG_DrawTeamBackground( 0, 420, 640, 60, 0.33, cg.snap->ps.persistant[PERS_TEAM], qfalse );
 
 	cent = &cg_entities[cg.snap->ps.clientNum];
@@ -613,6 +614,7 @@ static void CG_DrawStatusBar( void )
 	VectorClear( angles );
 
 	// draw any 3D icons first, so the changes back to 2D are minimized
+	AspectCorrect_SetMode( HSCALE_RIGHT, VSCALE_BOTTOM );
 	y = (SCREEN_HEIGHT - (4*ICON_SIZE) - 20);
 	if (cg.predictedPlayerState.powerups[PW_REDFLAG])
 	{	//fixme: move to powerup renderer?  make it pulse?
@@ -626,6 +628,7 @@ static void CG_DrawStatusBar( void )
 	}
 
 	// Do start
+	AspectCorrect_ResetMode();	// just to be safe
 	if (!cg.interfaceStartupDone)
 	{
 		CG_InterfaceStartup();
@@ -634,6 +637,7 @@ static void CG_DrawStatusBar( void )
 	//
 	// ammo
 	//
+	AspectCorrect_SetMode( HSCALE_RIGHT, VSCALE_BOTTOM );
 	if ( cent->currentState.weapon )
 	{
 		CG_DrawAmmo(cent);
@@ -643,6 +647,7 @@ static void CG_DrawStatusBar( void )
 	//
 	// health
 	//
+	AspectCorrect_SetMode( HSCALE_LEFT, VSCALE_BOTTOM );
 	CG_DrawHealth(cent);
 
 
@@ -651,6 +656,7 @@ static void CG_DrawStatusBar( void )
 	//
 	CG_DrawArmor(cent);
 
+	AspectCorrect_ResetMode();
 }
 
 /*
@@ -1601,12 +1607,16 @@ static void CG_DrawTeamInfo( void ) {
 			hcolor[3] = 0.33;
 		}
 
+		AspectCorrect_SetMode( HSCALE_STRETCH, VSCALE_BOTTOM );
+
 		trap_R_SetColor( hcolor );
 		CG_DrawPic( CHATLOC_X, CHATLOC_Y - h, 640, h, cgs.media.teamStatusBar );
 		trap_R_SetColor( NULL );
 
 		hcolor[0] = hcolor[1] = hcolor[2] = 1.0;
 		hcolor[3] = 1.0;
+
+		AspectCorrect_SetMode( HSCALE_LEFT, VSCALE_BOTTOM );
 
 		for (i = cgs.teamChatPos - 1; i >= cgs.teamLastChatPos; i--) {
 //			CG_DrawStringExt( CHATLOC_X + TINYCHAR_WIDTH,
@@ -1618,6 +1628,8 @@ static void CG_DrawTeamInfo( void ) {
 				cgs.teamChatMsgs[i % chatHeight], UI_TINYFONT, hcolor);
 
 		}
+
+		AspectCorrect_ResetMode();
 	}
 }
 
@@ -2066,13 +2078,11 @@ static void CG_DrawCrosshair(void) {
 		h *= ( 1 + f );
 	}
 
-	x = cg_crosshairX.integer;
-	y = cg_crosshairY.integer;
+	x = 320.0f + cg_crosshairX.value - ( w / 2.0f );
+	y = 240.0f + cg_crosshairY.value - ( h / 2.0f );
 	CG_AdjustFrom640( &x, &y, &w, &h );
 
-	trap_R_DrawStretchPic( x + cg.refdef.x + 0.5 * (cg.refdef.width - w),
-		y + cg.refdef.y + 0.5 * (cg.refdef.height - h),
-		w, h, 0, 0, 1, 1, hShader );
+	trap_R_DrawStretchPic( x, y, w, h, 0, 0, 1, 1, hShader );
 }
 
 
@@ -2203,6 +2213,7 @@ CG_DrawSpectator
 =================
 */
 static void CG_DrawSpectator(void) {
+	AspectCorrect_SetMode( HSCALE_CENTER, VSCALE_BOTTOM );
 //	CG_DrawBigString(320 - 9 * 8, 440, ingame_text[IGT_SPECTATOR], 1.0F);
 	if ( cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR )
 	{
@@ -2220,6 +2231,7 @@ static void CG_DrawSpectator(void) {
 //		CG_DrawBigString(320 - 25 * 8, 460, ingame_text[IGT_USEDTEAMMENU], 1.0F);
 		UI_DrawProportionalString(SCREEN_WIDTH/2,  SCREEN_HEIGHT - (BIGCHAR_HEIGHT * 1.5), ingame_text[IGT_USEDTEAMMENU], UI_BIGFONT|UI_CENTER, colorTable[CT_LTGOLD1]);
 	}
+	AspectCorrect_ResetMode();
 }
 
 /*
@@ -2533,7 +2545,9 @@ static void CG_DrawZoomMask( void )
 
 		// Set fade color
 		trap_R_SetColor( color1 );
+		AspectCorrect_SetMode( HSCALE_STRETCH, VSCALE_STRETCH );
 		CG_DrawPic( start_x, start_y, width, height, cgs.media.zoomMaskShader );
+		AspectCorrect_ResetMode();
 
 		start_x = 210;
 		start_y = 80;
@@ -2603,7 +2617,9 @@ static void CG_DrawZoomMask( void )
 			}
 
 			trap_R_SetColor( color1 );
+			AspectCorrect_SetMode( HSCALE_STRETCH, VSCALE_STRETCH );
 			CG_DrawPic( start_x, start_y, width, height, cgs.media.zoomMaskShader );
+			AspectCorrect_ResetMode();
 		}
 	}
 }
@@ -2627,9 +2643,10 @@ static void CG_Draw2D( void ) {
 	}
 
 	if ( cg.snap->ps.pm_type == PM_INTERMISSION ) {
-#ifndef FINAL_BUILD
+		AspectCorrect_SetMode( HSCALE_RIGHT, VSCALE_TOP );
 		CG_DrawUpperRight();
-#endif
+		AspectCorrect_ResetMode();
+
 		CG_DrawIntermission();
 		return;
 	}
@@ -2647,11 +2664,16 @@ static void CG_Draw2D( void ) {
 		// don't draw any status if dead
 		if ( cg.snap->ps.stats[STAT_HEALTH] > 0 ) {
 			CG_DrawStatusBar();
+			AspectCorrect_SetMode( HSCALE_CENTER, VSCALE_TOP );
 			CG_DrawAmmoWarning();
+			AspectCorrect_ResetMode();
 			CG_DrawCrosshair();
 			CG_DrawCrosshairNames();
+			AspectCorrect_SetMode( HSCALE_CENTER, VSCALE_BOTTOM );
 			CG_DrawWeaponSelect();
+			AspectCorrect_SetMode( HSCALE_RIGHT, VSCALE_BOTTOM );
 			CG_DrawHoldableItem();
+			AspectCorrect_ResetMode();
 			CG_DrawReward();
 			CG_DrawAbridgedObjective();
 		}
@@ -2665,19 +2687,27 @@ static void CG_Draw2D( void ) {
 		CG_DrawObjectiveInformation();
 	}
 
+	AspectCorrect_SetMode( HSCALE_LEFT, VSCALE_TOP );
 	CG_DrawVote();
 
+	AspectCorrect_SetMode( HSCALE_RIGHT, VSCALE_BOTTOM );
 	CG_DrawLagometer();
 
+	AspectCorrect_SetMode( HSCALE_RIGHT, VSCALE_TOP );
 	CG_DrawUpperRight();
 
+	AspectCorrect_SetMode( HSCALE_RIGHT, VSCALE_BOTTOM );
 	CG_DrawLowerRight();
 
+	AspectCorrect_SetMode( HSCALE_LEFT, VSCALE_BOTTOM );
 	CG_DrawLowerLeft();
 
+	AspectCorrect_SetMode( HSCALE_CENTER, VSCALE_TOP );
 	if ( !CG_DrawFollow() ) {
 		CG_DrawWarmup();
 	}
+
+	AspectCorrect_ResetMode();
 
 	// don't draw center string if scoreboard is up
 	if ( !CG_DrawScoreboard() ) {

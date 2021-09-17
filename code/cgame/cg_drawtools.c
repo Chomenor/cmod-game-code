@@ -13,17 +13,7 @@ Adjusted for resolution and screen aspect ratio
 ================
 */
 void CG_AdjustFrom640( float *x, float *y, float *w, float *h ) {
-#if 0
-	// adjust for wide screens
-	if ( cgs.glconfig.vidWidth * 480 > cgs.glconfig.vidHeight * 640 ) {
-		*x += 0.5 * ( cgs.glconfig.vidWidth - ( cgs.glconfig.vidHeight * 640 / 480 ) );
-	}
-#endif
-	// scale for screen sizes
-	*x *= cgs.screenXScale;
-	*y *= cgs.screenYScale;
-	*w *= cgs.screenXScale;
-	*h *= cgs.screenYScale;
+	AspectCorrect_AdjustFrom640( x, y, w, h );
 }
 
 /*
@@ -585,8 +575,8 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 	trap_R_SetColor( color );
 
 //	ax = x * cgs.screenXScale + cgs.screenXBias;
-	ax = x * cgs.screenXScale;
-	ay = y * cgs.screenYScale;
+	ax = x;
+	ay = y;
 	holdY = ay;
 
 	if (style & UI_TINYFONT)
@@ -615,20 +605,20 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 			{
 				// Because some foreign characters were a little different
 				special = specialTinyPropChars[ch][0];
-				ay = holdY + (specialTinyPropChars[ch][1] * cgs.screenYScale);
+				ay = holdY + (specialTinyPropChars[ch][1]);
 
 				fcol = (float ) propMapTiny[ch][0] / 256.0f;
 				frow = (float)propMapTiny[ch][1] / 256.0f;
 				fwidth = (float)propMapTiny[ch][2] / 256.0f;
 				fheight = (float)(PROP_TINY_HEIGHT + special) / 256.0f;
-				aw = (float)propMapTiny[ch][2] * cgs.screenXScale * sizeScale;
-				ah = (float)(PROP_TINY_HEIGHT + special) * cgs.screenYScale * sizeScale;
+				aw = (float)propMapTiny[ch][2] * sizeScale;
+				ah = (float)(PROP_TINY_HEIGHT + special) * sizeScale;
 
-				trap_R_DrawStretchPic( ax, ay, aw, ah, fcol, frow, fcol + fwidth, frow + fheight, charset );
+				AspectCorrect_DrawAdjustedStretchPic( ax, ay, aw, ah, fcol, frow, fcol + fwidth, frow + fheight, charset );
 
 			}
 
-			ax += (aw + (float)PROP_GAP_TINY_WIDTH * cgs.screenXScale * sizeScale);
+			ax += (aw + (float)PROP_GAP_TINY_WIDTH * sizeScale);
 			s++;
 		}
 	}
@@ -652,22 +642,22 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 			ch = *s & 255;
 			if ( ch == ' ' )
 			{
-				aw = (float)PROP_SPACE_BIG_WIDTH* cgs.screenXScale * sizeScale;
+				aw = (float)PROP_SPACE_BIG_WIDTH * sizeScale;
 			}
 			else if ( propMap[ch][2] != -1 )
 			{
 				// Because some foreign characters were a little different
 				special = specialBigPropChars[ch][0];
-				ay = holdY + (specialBigPropChars[ch][1] * cgs.screenYScale);
+				ay = holdY + (specialBigPropChars[ch][1]);
 
 				fcol = (float ) propMapBig[ch][0] / 256.0f;
 				frow = (float)propMapBig[ch][1] / 256.0f;
 				fwidth = (float)propMapBig[ch][2] / 256.0f;
 				fheight = (float)(PROP_BIG_HEIGHT+ special) / 256.0f;
-				aw = (float)propMapBig[ch][2] * cgs.screenXScale * sizeScale;
-				ah = (float)(PROP_BIG_HEIGHT+ special) * cgs.screenYScale * sizeScale;
+				aw = (float)propMapBig[ch][2] * sizeScale;
+				ah = (float)(PROP_BIG_HEIGHT+ special) * sizeScale;
 
-				trap_R_DrawStretchPic( ax, ay, aw, ah, fcol, frow, fcol + fwidth, frow + fheight,
+				AspectCorrect_DrawAdjustedStretchPic( ax, ay, aw, ah, fcol, frow, fcol + fwidth, frow + fheight,
 					charset );
 
 			}
@@ -676,7 +666,7 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 				aw = 0;
 			}
 
-			ax += (aw + (float)PROP_GAP_BIG_WIDTH * cgs.screenXScale * sizeScale);
+			ax += (aw + (float)PROP_GAP_BIG_WIDTH * sizeScale);
 			s++;
 		}
 	}
@@ -700,28 +690,28 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 			ch = *s & 255;
 			if ( ch == ' ' )
 			{
-				aw = (float)PROP_SPACE_WIDTH * cgs.screenXScale * sizeScale;
+				aw = (float)PROP_SPACE_WIDTH * sizeScale;
 			}
 			else if ( propMap[ch][2] != -1 )
 			{
 				// Because some foreign characters were a little different
 				special = specialPropChars[ch][0];
-				ay = holdY + (specialPropChars[ch][1] * cgs.screenYScale);
+				ay = holdY + (specialPropChars[ch][1]);
 
 				fcol = (float)propMap[ch][0] / 256.0f;
 				frow = (float)propMap[ch][1] / 256.0f;
 				fwidth = (float)propMap[ch][2] / 256.0f;
 				fheight = (float)(PROP_HEIGHT+ special) / 256.0f;
-				aw = (float)propMap[ch][2] * cgs.screenXScale * sizeScale;
-				ah = (float)(PROP_HEIGHT+ special) * cgs.screenYScale * sizeScale;
-				trap_R_DrawStretchPic( ax, ay, aw, ah, fcol, frow, fcol+fwidth, frow+fheight, charset );
+				aw = (float)propMap[ch][2] * sizeScale;
+				ah = (float)(PROP_HEIGHT+ special) * sizeScale;
+				AspectCorrect_DrawAdjustedStretchPic( ax, ay, aw, ah, fcol, frow, fcol+fwidth, frow+fheight, charset );
 			}
 			else
 			{
 				aw = 0;
 			}
 
-			ax += (aw + (float)PROP_GAP_WIDTH * cgs.screenXScale * sizeScale);
+			ax += (aw + (float)PROP_GAP_WIDTH * sizeScale);
 			s++;
 		}
 	}

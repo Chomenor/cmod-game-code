@@ -1663,6 +1663,7 @@ static qboolean AW_Draw( void )
 		{
 			// NON TEAM GAMES
 			//   We want the top three player's names and their ranks below the podium
+			AspectCorrect_SetMode( HSCALE_STRETCH, VSCALE_CENTER );
 			if ( postgameMenuInfo.numClients > 2 )
 			{
 			UI_DrawProportionalString( 510, 480 - 64 - PROP_HEIGHT, postgameMenuInfo.placeNames[2], UI_CENTER, white );
@@ -1679,6 +1680,7 @@ static qboolean AW_Draw( void )
 
 			UI_DrawProportionalString( 320, 480 - 64 - 2 * PROP_HEIGHT, postgameMenuInfo.placeNames[0], UI_CENTER, white );
 			UI_DrawProportionalString( 320, 480 - 38 - 2 * PROP_HEIGHT, ingame_text[IGT_1ST], UI_CENTER, yellow );
+			AspectCorrect_ResetMode();
 		}
 		else //if (cg.snap->ps.persistant[PERS_TEAM]!=TEAM_SPECTATOR)
 		{

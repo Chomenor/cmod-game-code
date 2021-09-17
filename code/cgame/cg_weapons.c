@@ -1082,6 +1082,7 @@ void CG_AddViewWeapon( playerState_t *ps ) {
 	refEntity_t	hand;
 	centity_t	*cent;
 	clientInfo_t	*ci;
+	float		fov;
 	float		fovOffset;
 	vec3_t		angles;
 	weaponInfo_t	*weapon;
@@ -1118,9 +1119,21 @@ void CG_AddViewWeapon( playerState_t *ps ) {
 		return;
 	}
 
+	// determine fov value to use for gun position
+	if ( AspectCorrect_UseCorrectedGunPosition() ) {
+		// base position on vertical fov
+		// convert it to horizontal fov at theoretical 4:3 aspect ratio
+		float x = 480.0 / tan( cg.refdef.fov_y / 360 * M_PI );
+		fov = atan2( 640.0, x );
+		fov = fov * 360 / M_PI;
+	} else {
+		// base position on horizontal fov
+		fov = cg.refdef.fov_x;
+	}
+
 	// drop gun lower at higher fov
-	if ( cg_fov.integer > 80 ) {
-		fovOffset = -0.2 * ( cg_fov.integer - 80 );
+	if ( fov > 80.0f ) {
+		fovOffset = -0.2f * ( fov - 80.0f );
 	} else {
 		fovOffset = 0;
 	}

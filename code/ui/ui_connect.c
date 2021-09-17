@@ -146,6 +146,8 @@ void UI_DrawConnectScreen( qboolean overlay ) {
 	char			info[MAX_INFO_VALUE];
 	int			x,strlength,length;
 
+	AspectCorrect_RunFrame();
+
 	Menu_Cache();
 
 	if ( !overlay ) {
@@ -153,8 +155,12 @@ void UI_DrawConnectScreen( qboolean overlay ) {
 //		trap_R_SetColor( color_white );
 //		UI_DrawHandlePic( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, uis.menuBackShader );
 
+		AspectCorrect_SetLoadingMode( HSCALE_STRETCH, VSCALE_STRETCH, overlay );
+
 		trap_R_SetColor( colorTable[CT_BLACK] );
 		UI_DrawHandlePic( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, uis.whiteShader );
+
+		AspectCorrect_SetLoadingMode( HSCALE_CENTER, HSCALE_CENTER, overlay );
 
 		trap_R_SetColor( colorTable[CT_DKGREY] );
 		UI_DrawHandlePic( 11, 60, 260, 196, uis.whiteShader );
@@ -182,6 +188,8 @@ void UI_DrawConnectScreen( qboolean overlay ) {
 		UI_DrawHandlePic(  274+321,	78,		12,		162,uis.whiteShader);	// Right
 
 	}
+
+	AspectCorrect_SetLoadingMode( HSCALE_CENTER, HSCALE_CENTER, overlay );
 
 	// see what information we should display
 	trap_GetClientState( &cstate );
@@ -250,22 +258,24 @@ void UI_DrawConnectScreen( qboolean overlay ) {
 			trap_Cvar_VariableStringBuffer( "cl_downloadName", downloadName, sizeof(downloadName) );
 			if (*downloadName) {
 				UI_DisplayDownloadInfo( downloadName );
+				AspectCorrect_ResetMode();
 				return;
 			}
 		}
 		s = menu_normal_text[MNT_AWAITINGGAMESTATE];
 		break;
 	case CA_LOADING:
-		return;
 	case CA_PRIMED:
-		return;
 	default:
+		AspectCorrect_ResetMode();
 		return;
 	}
 
 	UI_DrawProportionalString( 222, 442, s, UI_SMALLFONT|UI_DROPSHADOW, colorTable[CT_LTGOLD1]  );
 
 	// password required / connection rejected information goes here
+
+	AspectCorrect_ResetMode();
 }
 
 

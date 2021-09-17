@@ -5,6 +5,7 @@
 
 #include "q_shared.h"
 #include "vm_common.h"
+#include "aspect_correct.h"
 #include "tr_types.h"
 #include "ui_public.h"
 #include "keycodes.h"
@@ -1643,8 +1644,6 @@ typedef struct {
 	qhandle_t			cursor;
 	qhandle_t			rb_on;
 	qhandle_t			rb_off;
-	float				scalex;
-	float				scaley;
 //	float				bias;
 	qboolean			demoversion;
 	qboolean			firstdraw;

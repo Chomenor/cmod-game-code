@@ -24,6 +24,9 @@
     <ClInclude Include="..\..\code\cgame\fx_local.h">
       <Filter>cgame</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\code\common\aspect_correct.h">
+      <Filter>common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\code\common\bg_local.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -148,6 +151,9 @@
     </ClCompile>
     <ClCompile Include="..\..\code\cgame\fx_transporter.c">
       <Filter>cgame</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\common\aspect_correct.c">
+      <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\..\code\common\bg_misc.c">
       <Filter>common</Filter>

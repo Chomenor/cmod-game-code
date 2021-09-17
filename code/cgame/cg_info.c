@@ -135,9 +135,12 @@ void CG_DrawInformation( void ) {
 		levelshot = trap_R_RegisterShaderNoMip( "levelshots/unknownmap" );
 	}
 
+	AspectCorrect_SetLoadingMode( HSCALE_STRETCH, VSCALE_STRETCH, qtrue );
+
 	trap_R_SetColor( colorTable[CT_BLACK] );
 	CG_DrawPic( 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, cgs.media.whiteShader );
 
+	AspectCorrect_SetLoadingMode( HSCALE_CENTER, HSCALE_CENTER, qtrue );
 
 	trap_R_SetColor( colorTable[CT_DKGREY] );
 	CG_DrawPic( 11, 60, 260, 196, cgs.media.whiteShader );
@@ -300,6 +303,7 @@ void CG_DrawInformation( void ) {
 		}
 	}
 
+	AspectCorrect_ResetMode();
 }
 
 /*

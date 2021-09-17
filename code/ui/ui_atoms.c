@@ -240,15 +240,15 @@ static void UI_DrawBannerString2( int x, int y, const char* str, vec4_t color )
 	trap_R_SetColor( color );
 
 //	ax = x * uis.scale + uis.bias;
-	ax = x * uis.scalex;
-	ay = y * uis.scaley;
+	ax = x;
+	ay = y;
 
 	s = str;
 	while ( *s )
 	{
 		ch = *s & 255;
 		if ( ch == ' ' ) {
-			ax += ((float)PROPB_SPACE_WIDTH + (float)PROPB_GAP_WIDTH)* uis.scalex;
+			ax += ((float)PROPB_SPACE_WIDTH + (float)PROPB_GAP_WIDTH);
 		}
 		else if ( ch >= 'A' && ch <= 'Z' ) {
 			ch -= 'A';
@@ -256,10 +256,10 @@ static void UI_DrawBannerString2( int x, int y, const char* str, vec4_t color )
 			frow = (float)propMapB[ch][1] / 256.0f;
 			fwidth = (float)propMapB[ch][2] / 256.0f;
 			fheight = (float)PROPB_HEIGHT / 256.0f;
-			aw = (float)propMapB[ch][2] * uis.scalex;
-			ah = (float)PROPB_HEIGHT * uis.scaley;
-			trap_R_DrawStretchPic( ax, ay, aw, ah, fcol, frow, fcol+fwidth, frow+fheight, uis.charsetPropB );
-			ax += (aw + (float)PROPB_GAP_WIDTH * uis.scalex);
+			aw = (float)propMapB[ch][2];
+			ah = (float)PROPB_HEIGHT;
+			AspectCorrect_DrawAdjustedStretchPic( ax, ay, aw, ah, fcol, frow, fcol+fwidth, frow+fheight, uis.charsetPropB );
+			ax += (aw + (float)PROPB_GAP_WIDTH);
 		}
 		s++;
 	}
@@ -498,8 +498,8 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 	trap_R_SetColor( color );
 
 //	ax = x * uis.scale + uis.bias;
-	ax = x * uis.scalex;
-	ay = y * uis.scaley;
+	ax = x;
+	ay = y;
 	holdY = ay;
 
 	sizeScale = UI_ProportionalSizeScale( style );
@@ -525,16 +525,16 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 			else if ( propMap[ch][2] != -1 ) {
 				// Because some foreign characters were a little different
 				special = specialTinyPropChars[ch][0];
-				ay = holdY + (specialTinyPropChars[ch][1] * uis.scaley);
+				ay = holdY + (specialTinyPropChars[ch][1]);
 
 				fcol = (float ) propMapTiny[ch][0] / 256.0f;
 				frow = (float)propMapTiny[ch][1] / 256.0f;
 				fwidth = (float)propMapTiny[ch][2] / 256.0f;
 				fheight = (float)(PROP_TINY_HEIGHT + special) / 256.0f;
-				aw = (float)propMapTiny[ch][2] * uis.scalex * sizeScale;
-				ah = (float)(PROP_TINY_HEIGHT+ special) * uis.scaley * sizeScale;
+				aw = (float)propMapTiny[ch][2] * sizeScale;
+				ah = (float)(PROP_TINY_HEIGHT+ special) * sizeScale;
 
-				trap_R_DrawStretchPic( ax, ay, aw, ah, fcol, frow, fcol + fwidth, frow + fheight, charset );
+				AspectCorrect_DrawAdjustedStretchPic( ax, ay, aw, ah, fcol, frow, fcol + fwidth, frow + fheight, charset );
 
 			}
 			else
@@ -542,7 +542,7 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 				aw = 0;
 			}
 
-			ax += (aw + (float)PROP_GAP_TINY_WIDTH * uis.scalex * sizeScale);
+			ax += (aw + (float)PROP_GAP_TINY_WIDTH * sizeScale);
 			s++;
 		}
 	}
@@ -562,28 +562,28 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 
 			ch = *s & 255;
 			if ( ch == ' ' ) {
-				aw = (float)PROP_SPACE_BIG_WIDTH * uis.scalex;
+				aw = (float)PROP_SPACE_BIG_WIDTH;
 			}
 			else if ( propMap[ch][2] != -1 ) {
 				// Because some foreign characters were a little different
 				special = specialBigPropChars[ch][0];
-				ay = holdY + (specialBigPropChars[ch][1] * uis.scaley);
+				ay = holdY + (specialBigPropChars[ch][1]);
 
 				fcol = (float ) propMapBig[ch][0] / 256.0f;
 				frow = (float)propMapBig[ch][1] / 256.0f;
 				fwidth = (float)propMapBig[ch][2] / 256.0f;
 				fheight = (float)(PROP_BIG_HEIGHT+ special) / 256.0f;
-				aw = (float)propMapBig[ch][2] * uis.scalex * sizeScale;
-				ah = (float)(PROP_BIG_HEIGHT+ special) * uis.scaley * sizeScale;
+				aw = (float)propMapBig[ch][2] * sizeScale;
+				ah = (float)(PROP_BIG_HEIGHT+ special) * sizeScale;
 
-				trap_R_DrawStretchPic( ax, ay, aw, ah, fcol, frow, fcol + fwidth, frow + fheight, charset );
+				AspectCorrect_DrawAdjustedStretchPic( ax, ay, aw, ah, fcol, frow, fcol + fwidth, frow + fheight, charset );
 			}
 			else
 			{
 				aw = 0;
 			}
 
-			ax += (aw + (float)PROP_GAP_BIG_WIDTH * uis.scalex * sizeScale);
+			ax += (aw + (float)PROP_GAP_BIG_WIDTH * sizeScale);
 			s++;
 		}
 	}
@@ -603,27 +603,27 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 
 			ch = *s & 255;
 			if ( ch == ' ' ) {
-				aw = (float)PROP_SPACE_WIDTH * uis.scalex * sizeScale;
+				aw = (float)PROP_SPACE_WIDTH * sizeScale;
 			}
 			else if ( propMap[ch][2] != -1 ) {
 				// Because some foreign characters were a little different
 				special = specialPropChars[ch][0];
-				ay = holdY + (specialPropChars[ch][1] * uis.scaley);
+				ay = holdY + (specialPropChars[ch][1]);
 
 				fcol = (float)propMap[ch][0] / 256.0f;
 				frow = (float)propMap[ch][1] / 256.0f;
 				fwidth = (float)propMap[ch][2] / 256.0f;
 				fheight = (float)(PROP_HEIGHT+ special) / 256.0f;
-				aw = (float)propMap[ch][2] * uis.scalex * sizeScale;
-				ah = (float)(PROP_HEIGHT+ special) * uis.scaley * sizeScale;
-				trap_R_DrawStretchPic( ax, ay, aw, ah, fcol, frow, fcol+fwidth, frow+fheight, charset );
+				aw = (float)propMap[ch][2] * sizeScale;
+				ah = (float)(PROP_HEIGHT+ special) * sizeScale;
+				AspectCorrect_DrawAdjustedStretchPic( ax, ay, aw, ah, fcol, frow, fcol+fwidth, frow+fheight, charset );
 			}
 			else
 			{
 				aw = 0;
 			}
 
-			ax += (aw + (float)PROP_GAP_WIDTH * uis.scalex * sizeScale);
+			ax += (aw + (float)PROP_GAP_WIDTH * sizeScale);
 			s++;
 		}
 	}
@@ -774,10 +774,10 @@ static void UI_DrawString2( int x, int y, const char* str, vec4_t color, int cha
 	trap_R_SetColor( color );
 
 //	ax = x * uis.scale + uis.bias;
-	ax = x * uis.scalex;
-	ay = y * uis.scaley;
-	aw = charw * uis.scalex;
-	ah = charh * uis.scaley;
+	ax = x;
+	ay = y;
+	aw = charw;
+	ah = charh;
 
 	s = str;
 	while ( *s )
@@ -803,12 +803,12 @@ static void UI_DrawString2( int x, int y, const char* str, vec4_t color, int cha
 		{
 //			frow = (ch>>4)*0.0625;
 //			fcol = (ch&15)*0.0625;
-//			trap_R_DrawStretchPic( ax, ay, aw, ah, fcol, frow, fcol + 0.0625, frow + 0.0625, uis.charset );
+//			AspectCorrect_DrawAdjustedStretchPic( ax, ay, aw, ah, fcol, frow, fcol + 0.0625, frow + 0.0625, uis.charset );
 
 			frow = (ch>>4)*0.0625;
 			fcol = (ch&15)*0.0625;
 
-			trap_R_DrawStretchPic( ax, ay, aw, ah, fcol, frow, fcol + 0.03125, frow + 0.0625, uis.charset );
+			AspectCorrect_DrawAdjustedStretchPic( ax, ay, aw, ah, fcol, frow, fcol + 0.03125, frow + 0.0625, uis.charset );
 
 		}
 
@@ -1167,6 +1167,7 @@ UI_Shutdown
 =================
 */
 void UI_Shutdown( void ) {
+	AspectCorrect_Shutdown();
 }
 
 
@@ -1376,10 +1377,9 @@ void UI_Init( void ) {
 
 	// cache redundant calulations
 	trap_GetGlconfig( &uis.glconfig );
+	AspectCorrect_Init( uis.glconfig.vidWidth, uis.glconfig.vidHeight );
 
 	// for 640x480 virtualized screen
-	uis.scaley = uis.glconfig.vidHeight * (1.0/480.0);
-	uis.scalex = uis.glconfig.vidWidth * (1.0/640.0);
 /*	uis.scale = uis.glconfig.vidHeight * (1.0/480.0);
 	if ( uis.glconfig.vidWidth * 480 > uis.glconfig.vidHeight * 640 ) {
 		// wide screen
@@ -1409,12 +1409,7 @@ Adjusted for resolution and screen aspect ratio
 ================
 */
 void UI_AdjustFrom640( float *x, float *y, float *w, float *h ) {
-	// expect valid pointers
-//	*x = *x * uis.scale + uis.bias;
-	*x *= uis.scalex;
-	*y *= uis.scaley;
-	*w *= uis.scalex;
-	*h *= uis.scaley;
+	AspectCorrect_AdjustFrom640( x, y, w, h );
 }
 
 void UI_DrawNamedPic( float x, float y, float width, float height, const char *picname ) {
@@ -1509,8 +1504,11 @@ void UI_Refresh( int realtime )
 
 	UI_UpdateCvars();
 
+	AspectCorrect_RunFrame();
+
 	if ( uis.activemenu )
 	{
+		AspectCorrect_SetMode( HSCALE_STRETCH, VSCALE_STRETCH );
 		if (uis.activemenu->fullscreen)
 		{
 			// draw the background
@@ -1528,6 +1526,7 @@ void UI_Refresh( int realtime )
 			trap_R_SetColor( color);
 			UI_DrawHandlePic(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT, uis.whiteShader );
 		}
+		AspectCorrect_ResetMode();
 
 		if (uis.activemenu->draw)
 			uis.activemenu->draw();

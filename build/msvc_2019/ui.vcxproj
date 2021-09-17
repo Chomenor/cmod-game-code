@@ -178,6 +178,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\code\common\aspect_correct.h" />
     <ClInclude Include="..\..\code\common\q_shared.h" />
     <ClInclude Include="..\..\code\common\surfaceflags.h" />
     <ClInclude Include="..\..\code\common\tr_types.h" />
@@ -188,6 +189,7 @@
     <ClInclude Include="..\..\code\ui\ui_public.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\code\common\aspect_correct.c" />
     <ClCompile Include="..\..\code\common\bg_misc.c" />
     <ClCompile Include="..\..\code\common\q_math.c" />
     <ClCompile Include="..\..\code\common\q_shared.c" />

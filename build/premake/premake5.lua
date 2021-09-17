@@ -26,7 +26,8 @@ project "game"
       "../../code/game/**.c",
       "../../code/common/**.h",
       "../../code/common/**.c" }
-   removefiles { "../../code/common/bg_lib.*" }
+   removefiles { "../../code/common/bg_lib.*",
+      "../../code/common/aspect_correct.*" }
 
    defines { "MODULE_GAME" }
    includedirs { "../../code/game",

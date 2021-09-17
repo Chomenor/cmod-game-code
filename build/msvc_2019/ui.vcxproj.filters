@@ -9,6 +9,9 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\code\common\aspect_correct.h">
+      <Filter>common</Filter>
+    </ClInclude>
     <ClInclude Include="..\..\code\common\q_shared.h">
       <Filter>common</Filter>
     </ClInclude>
@@ -35,6 +38,9 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\code\common\aspect_correct.c">
+      <Filter>common</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\code\common\bg_misc.c">
       <Filter>common</Filter>
     </ClCompile>

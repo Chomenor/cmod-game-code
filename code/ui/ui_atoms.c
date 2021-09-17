@@ -1396,6 +1396,9 @@ void UI_Init( void ) {
 	uis.activemenu = NULL;
 	uis.menusp     = 0;
 	trap_Cvar_Create ("ui_initialsetup", "0", CVAR_ARCHIVE );
+
+	// Let the engine know we have support for engine-assisted crosshair loading
+	VMExt_GVCommandInt( "crosshair_register_support", 0 );
 }
 
 /*

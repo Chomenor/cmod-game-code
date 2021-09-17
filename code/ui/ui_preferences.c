@@ -183,12 +183,17 @@ static void Preferences_Event( void* ptr, int notification )
 	switch( ((menucommon_s*)ptr)->id )
 	{
 	case ID_CROSSHAIR:
-		s_preferences.currentcrosshair++;
-		if( s_preferences.currentcrosshair == NUM_CROSSHAIRS )
-		{
-			s_preferences.currentcrosshair = 0;
+		if ( VMExt_GVCommandInt( "crosshair_advance_current", 0 ) > 0 ) {
+			// Engine should have taken care of the advancement
+		} else {
+			// No engine support; advance crosshair the traditional way
+			s_preferences.currentcrosshair++;
+			if( s_preferences.currentcrosshair == NUM_CROSSHAIRS )
+			{
+				s_preferences.currentcrosshair = 0;
+			}
+			trap_Cvar_SetValue( "cg_drawCrosshair", s_preferences.currentcrosshair );
 		}
-		trap_Cvar_SetValue( "cg_drawCrosshair", s_preferences.currentcrosshair );
 		break;
 
 	case ID_SIMPLEITEMS:
@@ -304,6 +309,13 @@ GameOptions_MenuDraw
 static void GameOptions_MenuDraw( void )
 {
 	int x;
+	qhandle_t hShader;
+
+	hShader = VMExt_GVCommandInt( "crosshair_get_current_shader", -1 );
+	if ( hShader < 0 ) {
+		// No engine crosshair support - load crosshair the traditional way
+		hShader = s_preferences.currentcrosshair ? s_preferences.crosshairShader[s_preferences.currentcrosshair] : 0;
+	}
 
 	UI_MenuFrame(&s_gameoptions.menu);
 
@@ -335,9 +347,10 @@ static void GameOptions_MenuDraw( void )
 
 	trap_R_SetColor( colorTable[CT_YELLOW]);
 	x = 438;
-	if (s_preferences.currentcrosshair)
+
+	if (hShader)
 	{
-		UI_DrawHandlePic(x,270,  32, 32, s_preferences.crosshairShader[s_preferences.currentcrosshair]);	// Draw crosshair
+		UI_DrawHandlePic(x,270,  32, 32, hShader);	// Draw crosshair
 	}
 	else
 	{

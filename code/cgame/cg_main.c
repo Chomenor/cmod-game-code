@@ -1216,6 +1216,9 @@ void CG_Init( int serverMessageNum, int serverCommandSequence ) {
 	cg.interfaceStartupDone = 0;
 
 	CG_InitModRules();
+
+	// Let the engine know we have support for engine-assisted crosshair loading
+	VMExt_GVCommandInt( "crosshair_register_support", 0 );
 }
 
 /*

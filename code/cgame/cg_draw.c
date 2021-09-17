@@ -2026,15 +2026,23 @@ static void CG_DrawCrosshair(void) {
 	float		f;
 	float		x, y;
 
-	if ( !cg_drawCrosshair.integer ) {
-		return;
-	}
-
 	if ( cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR || (cg.snap->ps.eFlags&EF_ELIMINATED) ) {
 		return;
 	}
 
 	if ( cg.renderingThirdPerson ) {
+		return;
+	}
+
+	hShader = VMExt_GVCommandInt( "crosshair_get_current_shader", -1 );
+	if ( hShader < 0 ) {
+		// No engine crosshair support - load crosshair the traditional way
+		if ( !cg_drawCrosshair.integer ) {
+			return;
+		}
+		hShader = cgs.media.crosshairShader[ cg_drawCrosshair.integer % NUM_CROSSHAIRS ];
+	} else if ( hShader == 0 ) {
+		// Engine crosshair support, but crosshair disabled
 		return;
 	}
 
@@ -2061,8 +2069,6 @@ static void CG_DrawCrosshair(void) {
 	x = cg_crosshairX.integer;
 	y = cg_crosshairY.integer;
 	CG_AdjustFrom640( &x, &y, &w, &h );
-
-	hShader = cgs.media.crosshairShader[ cg_drawCrosshair.integer % NUM_CROSSHAIRS ];
 
 	trap_R_DrawStretchPic( x + cg.refdef.x + 0.5 * (cg.refdef.width - w),
 		y + cg.refdef.y + 0.5 * (cg.refdef.height - h),

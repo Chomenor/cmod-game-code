@@ -1,6 +1,11 @@
 // Copyright (C) 1999-2000 Id Software, Inc.
 //
 // cg_main.c -- initialization and primary entry point for cgame
+
+#ifndef MODULE_CGAME
+#error Building cgame module with no MODULE_CGAME preprocessor definition. Check the build configuration.
+#endif
+
 #include "cg_local.h"
 #include "cg_text.h"
 

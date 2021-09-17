@@ -1,6 +1,10 @@
 // Copyright (C) 1999-2000 Id Software, Inc.
 //
 
+#ifndef MODULE_GAME
+#error Building game module with no MODULE_GAME preprocessor definition. Check the build configuration.
+#endif
+
 #include "g_local.h"
 #include "g_groups.h"
 

@@ -8,6 +8,9 @@ USER INTERFACE MAIN
 =======================================================================
 */
 
+#ifndef MODULE_UI
+#error Building ui module with no MODULE_UI preprocessor definition. Check the build configuration.
+#endif
 
 #include "ui_local.h"
 

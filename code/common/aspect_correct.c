@@ -14,15 +14,10 @@
 
 #ifdef MODULE_CGAME
 #define ASPECT_CORRECT_ENABLED uix.cg_aspectCorrect.integer
-#define AUTO_STRETCH_SETTING uix.cg_aspectCorrectAutoStretch.value
 #endif
 #ifdef MODULE_UI
 #define ASPECT_CORRECT_ENABLED UI_ASPECT_CORRECT_ENABLED
-#define AUTO_STRETCH_SETTING uix.ui_aspectCorrectAutoStretch.value
 #endif
-
-// Limit auto stretch from 1 to 1.25
-#define AUTO_STRETCH_CLAMPED( value ) ( value < 1.0f ? 1.0f : ( value > 1.25f ? 1.25f : value ) )
 
 static struct {
 	// Screen dimensions
@@ -32,11 +27,9 @@ static struct {
 	// Cvars
 	vmCvar_t cg_aspectCorrect;	// enables aspect correction for cgame and hud (0 = disabled, 1 = enabled)
 #ifdef MODULE_CGAME
-	vmCvar_t cg_aspectCorrectAutoStretch;	// adds extra horizontal stretch if space is available (1 = disabled, 1.25 = maximum)
 	vmCvar_t cg_aspectCorrectGunPos;	// enables gun fov correction (0 = disabled, 1 = enabled, -1 = use cg_aspectCorrect value)
 #endif
 	vmCvar_t ui_aspectCorrect;	// enables aspect correction for ui and loading screen (0 = disabled, 1 = enabled, -1 = use cg_aspectCorrect value)
-	vmCvar_t ui_aspectCorrectAutoStretch;	// adds extra horizontal stretch if space is available (1 = disabled, 1.25 = maximum)
 
 	// Current mode
 	uiHorizontalMode_t hModeCurrent;
@@ -45,9 +38,6 @@ static struct {
 	//
 	// Everything below this point is set by AspectCorrect_UpdateValues
 	//
-
-	// Need to call AspectCorrect_UpdateValues again if value changes
-	float currentAutoStretch;
 
 	// Offset from edges of the screen in real pixels to reach the center 4:3 region
 	float XCenterOffset;
@@ -67,8 +57,7 @@ static struct {
 AspectCorrect_UpdateValues
 ================
 */
-void AspectCorrect_UpdateValues( float autoStretch ) {
-	uix.currentAutoStretch = autoStretch;
+void AspectCorrect_UpdateValues( void ) {
 	uix.XStretchFactor = uix.width / 640.0f;
 	uix.YStretchFactor = uix.height / 480.0f;
 
@@ -76,13 +65,6 @@ void AspectCorrect_UpdateValues( float autoStretch ) {
 		// wide screen
 		uix.XScaledFactor = uix.YStretchFactor;
 		uix.YScaledFactor = uix.YStretchFactor;
-
-		// if there is free horizontal space, stretch horizontally up to the autoStretch factor
-		uix.XScaledFactor *= AUTO_STRETCH_CLAMPED( autoStretch );
-		if ( uix.XScaledFactor > uix.XStretchFactor ) {
-			uix.XScaledFactor = uix.XStretchFactor;
-		}
-
 		uix.XCenterOffset = 320.0f * ( uix.XStretchFactor - uix.XScaledFactor );
 		uix.YCenterOffset = 0.0f;
 	} else {
@@ -103,9 +85,6 @@ Configure the display mode for standard cgame/ui drawing.
 */
 void AspectCorrect_SetMode( uiHorizontalMode_t hMode, uiVerticalMode_t vMode ) {
 	if ( ASPECT_CORRECT_ENABLED ) {
-		if ( uix.currentAutoStretch != AUTO_STRETCH_SETTING ) {
-			AspectCorrect_UpdateValues( AUTO_STRETCH_SETTING );
-		}
 		uix.hModeCurrent = hMode;
 		uix.vModeCurrent = vMode;
 	} else {
@@ -138,10 +117,6 @@ void AspectCorrect_SetLoadingMode( uiHorizontalMode_t hMode, uiVerticalMode_t vM
 	}
 
 	if ( scalingEnabled ) {
-		// Use the UI auto stretch value.
-		if ( uix.currentAutoStretch != uix.ui_aspectCorrectAutoStretch.value ) {
-			AspectCorrect_UpdateValues( uix.ui_aspectCorrectAutoStretch.value );
-		}
 		uix.hModeCurrent = hMode;
 		uix.vModeCurrent = vMode;
 	} else {
@@ -225,11 +200,9 @@ AspectCorrect_RunFrame
 void AspectCorrect_RunFrame( void ) {
 	trap_Cvar_Update( &uix.cg_aspectCorrect );
 #ifdef MODULE_CGAME
-	trap_Cvar_Update( &uix.cg_aspectCorrectAutoStretch );
 	trap_Cvar_Update( &uix.cg_aspectCorrectGunPos );
 #endif
 	trap_Cvar_Update( &uix.ui_aspectCorrect );
-	trap_Cvar_Update( &uix.ui_aspectCorrectAutoStretch );
 }
 
 /*
@@ -258,16 +231,14 @@ void AspectCorrect_Init( int width, int height ) {
 
 	uix.width = width;
 	uix.height = height;
-	AspectCorrect_UpdateValues( AUTO_STRETCH_SETTING );
+	AspectCorrect_UpdateValues();
 	AspectCorrect_ResetMode();
 
 	trap_Cvar_Register( &uix.cg_aspectCorrect, "cg_aspectCorrect", "0", CVAR_ARCHIVE );
 #ifdef MODULE_CGAME
-	trap_Cvar_Register( &uix.cg_aspectCorrectAutoStretch, "cg_aspectCorrectAutoStretch", "1.15", CVAR_ARCHIVE );
 	trap_Cvar_Register( &uix.cg_aspectCorrectGunPos, "cg_aspectCorrectGunPos", "-1", CVAR_ARCHIVE );
 #endif
 	trap_Cvar_Register( &uix.ui_aspectCorrect, "ui_aspectCorrect", "-1", CVAR_ARCHIVE );
-	trap_Cvar_Register( &uix.ui_aspectCorrectAutoStretch, "ui_aspectCorrectAutoStretch", "1.1", CVAR_ARCHIVE );
 
 	// Set cvars used to determine support for scaling during the loading screen.
 	// Both ui and cgame modules draw to the screen during loading, so scaling should

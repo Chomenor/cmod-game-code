@@ -84,7 +84,14 @@ void AspectCorrect_UpdateValues( void ) {
 		uix.YCenterOffset = 0.0f;
 
 #ifdef MODULE_CGAME
-		uix.XSideOffset = uix.XCenterOffset * CLAMP_VALUE( uix.cg_aspectCorrectCenterHud.value, 0.0f, 1.0f );
+		if ( strchr( uix.cg_aspectCorrectCenterHud.string, '*' ) ) {
+			// value with trailing asterisk is expressed as an aspect ratio
+			uix.XSideOffset = ( uix.width - uix.height * uix.cg_aspectCorrectCenterHud.value ) / 2.0f;
+			uix.XSideOffset = CLAMP_VALUE( uix.XSideOffset, 0.0f, uix.XCenterOffset );
+		} else {
+			// simple value is a fraction from 0 to 1
+			uix.XSideOffset = uix.XCenterOffset * CLAMP_VALUE( uix.cg_aspectCorrectCenterHud.value, 0.0f, 1.0f );
+		}
 		uix.YSideOffset = 0;
 #endif
 	} else {
@@ -95,7 +102,15 @@ void AspectCorrect_UpdateValues( void ) {
 		uix.YCenterOffset = 240.0f * ( uix.YStretchFactor - uix.YScaledFactor );
 
 #ifdef MODULE_CGAME
-		uix.YSideOffset = uix.YCenterOffset * CLAMP_VALUE( uix.cg_aspectCorrectCenterHud.value, 0.0f, 1.0f );
+		if ( strchr( uix.cg_aspectCorrectCenterHud.string, '*' ) ) {
+			// value with trailing asterisk is expressed as an aspect ratio
+			uix.YSideOffset = uix.cg_aspectCorrectCenterHud.value > 0.01f ?
+					( uix.height - uix.width * uix.cg_aspectCorrectCenterHud.value ) / 2.0f : 0.0f;
+			uix.YSideOffset = CLAMP_VALUE( uix.YSideOffset, 0.0f, uix.YCenterOffset );
+		} else {
+			// simple value is a fraction from 0 to 1
+			uix.YSideOffset = uix.YCenterOffset * CLAMP_VALUE( uix.cg_aspectCorrectCenterHud.value, 0.0f, 1.0f );
+		}
 		uix.XSideOffset = 0;
 #endif
 	}

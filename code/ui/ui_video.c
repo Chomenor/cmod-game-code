@@ -2293,6 +2293,21 @@ static float UI_VideoData2SettingsGetCurrentCenterHud( void )
 	trap_Cvar_VariableStringBuffer( "cg_aspectCorrectCenterHud", buffer, sizeof( buffer ) );
 	value = atof( buffer );
 
+	if ( strchr( buffer, '*' ) ) {
+		// Convert aspect-ratio specifier to fraction.
+		if ( uis.glconfig.vidWidth * 3 > uis.glconfig.vidHeight * 4 ) {
+			float screenAspect = (float)uis.glconfig.vidWidth / (float)uis.glconfig.vidHeight;
+			float max = screenAspect - 4.0f / 3.0f;		// available horizontal space
+			float specified = screenAspect - value;		// horizontal space specified to use
+			value = max > 0.01f ? specified / max : 1.0f;
+		} else {
+			float screenAspect = (float)uis.glconfig.vidHeight / (float)uis.glconfig.vidWidth;
+			float max = screenAspect - 3.0f / 4.0f;		// available vertical space
+			float specified = screenAspect - value;		// vertical space specified to use
+			value = max > 0.01f ? specified / max : 1.0f;
+		}
+	}
+
 	if ( value < 0.0f )
 		value = 0.0f;
 	if ( value > 1.0f )

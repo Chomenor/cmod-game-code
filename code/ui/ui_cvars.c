@@ -121,6 +121,21 @@ void ScreensizeCallback( void *s, int notification )
 
 /*
 =================
+CenterHudCallback
+=================
+*/
+void CenterHudCallback( void *s, int notification )
+{
+	menuslider_s *slider = ( menuslider_s * ) s;
+
+	if (notification != QM_ACTIVATED)
+		return;
+
+	trap_Cvar_SetValue( "cg_aspectCorrectCenterHud", slider->curvalue);
+}
+
+/*
+=================
 AlwaysRunCallback
 =================
 */
@@ -150,7 +165,7 @@ void AutoswitchCallback( void *unused, int notification )
 	trap_Cvar_SetValue( "cg_autoswitch", s_autoswitch_box.curvalue );
 }
 
-
+void VideoData2_EnabledDisableCenterHudSlider( void );
 /*
 =================
 AspectCorrectionCallback
@@ -166,6 +181,8 @@ void AspectCorrectionCallback( void *s, int notification )
 	}
 
 	trap_Cvar_SetValue( "cg_aspectCorrect", aspectCorrection->curvalue );
+
+	VideoData2_EnabledDisableCenterHudSlider();
 }
 
 /*

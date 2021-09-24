@@ -1051,6 +1051,7 @@ static void Slider_Draw( menuslider_s *s )
 
 	if ( s->generic.flags & QMF_GRAYED )
 	{
+		textColor = s->textcolor;
 		color = CT_DKGREY;
 		style = UI_LEFT;
 	}

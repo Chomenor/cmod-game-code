@@ -922,6 +922,7 @@ typedef enum
 	MBT_FLUSH_IGNORE,
 	MBT_FOV,
 	MBT_ASPECTCORRECTION,
+	MBT_CENTERHUD,
 	MBT_ALTSWAP_CONTROL,
 	MBT_ALTSWAP_EDIT,
 	MBT_ALTSWAP_ALL_STANDARD,
@@ -1845,6 +1846,7 @@ void UI_FontsMenu( void);
 extern void GammaCallback( void *s, int notification );
 extern void FovCallback( void *s, int notification );
 extern void ScreensizeCallback( void *s, int notification );
+void CenterHudCallback( void *s, int notification );
 
 //
 // ui_network.c

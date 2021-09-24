@@ -48,6 +48,7 @@ typedef struct
 	menuslider_s	gamma_slider;
 	menuslider_s	fov_slider;
 	menuslider_s	screensize_slider;
+	menuslider_s	centerHud_slider;
 	menulist_s		aspectCorrection;
 	menulist_s		anisotropicfiltering;
 	menuaction_s	apply_action2;
@@ -2016,6 +2017,21 @@ void UI_VideoData2Menu_Cache(void)
 
 /*
 =================
+VideoData2_EnabledDisableCenterHudSlider
+
+Only enable the center HUD slider if aspect correction is enabled.
+=================
+*/
+void VideoData2_EnabledDisableCenterHudSlider( void ) {
+	if ( s_videodata2.aspectCorrection.curvalue ) {
+		s_videodata2.centerHud_slider.generic.flags	&= ~QMF_GRAYED;
+	} else {
+		s_videodata2.centerHud_slider.generic.flags	|= QMF_GRAYED;
+	}
+}
+
+/*
+=================
 VideoData2_MenuInit
 =================
 */
@@ -2046,7 +2062,7 @@ static void VideoData2_MenuInit( void )
 	Video_SideButtons(&s_videodata2.menu,ID_VIDEODATA2);
 
 	x = 180;
-	y = 269;
+	y = 267;
 	s_videodata2.gamma_slider.generic.type		= MTYPE_SLIDER;
 	s_videodata2.gamma_slider.generic.x			= x + 162;
 	s_videodata2.gamma_slider.generic.y			= y;
@@ -2095,7 +2111,7 @@ static void VideoData2_MenuInit( void )
 	s_videodata2.apply_action2.width					= 82;
 	s_videodata2.apply_action2.height					= 70;
 
-	y += 30;
+	y += 25;
 	s_videodata2.fov_slider.generic.type		= MTYPE_SLIDER;
 	s_videodata2.fov_slider.generic.x			= x + 162;
 	s_videodata2.fov_slider.generic.y			= y;
@@ -2127,7 +2143,7 @@ static void VideoData2_MenuInit( void )
 	s_videodata2.fov_slider.thumbColor			= CT_DKBLUE1;
 	s_videodata2.fov_slider.thumbColor2			= CT_LTBLUE1;
 
-	y += 30;
+	y += 25;
 	s_videodata2.screensize_slider.generic.type		= MTYPE_SLIDER;
 	s_videodata2.screensize_slider.generic.x		= x + 162;
 	s_videodata2.screensize_slider.generic.y		= y;
@@ -2159,7 +2175,7 @@ static void VideoData2_MenuInit( void )
 	s_videodata2.screensize_slider.thumbColor		= CT_DKBLUE1;
 	s_videodata2.screensize_slider.thumbColor2		= CT_LTBLUE1;
 
-	y += 30;
+	y += 25;
 	s_videodata2.aspectCorrection.generic.type			= MTYPE_SPINCONTROL;
 	s_videodata2.aspectCorrection.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_videodata2.aspectCorrection.generic.x				= x;
@@ -2175,7 +2191,39 @@ static void VideoData2_MenuInit( void )
 	s_videodata2.aspectCorrection.textcolor2				= CT_WHITE;
 	s_videodata2.aspectCorrection.listnames				= s_OffOnNone_Names;
 
-	y += 30;
+	y += 25;
+	s_videodata2.centerHud_slider.generic.type		= MTYPE_SLIDER;
+	s_videodata2.centerHud_slider.generic.x			= x + 162;
+	s_videodata2.centerHud_slider.generic.y			= y;
+	s_videodata2.centerHud_slider.generic.flags		= QMF_SMALLFONT;
+	s_videodata2.centerHud_slider.generic.callback	= CenterHudCallback;
+	s_videodata2.centerHud_slider.minvalue			= 0;
+	s_videodata2.centerHud_slider.maxvalue			= 1;
+	s_videodata2.centerHud_slider.color				= CT_DKPURPLE1;
+	s_videodata2.centerHud_slider.color2			= CT_LTPURPLE1;
+	s_videodata2.centerHud_slider.generic.name		= PIC_MONBAR2;
+	s_videodata2.centerHud_slider.width				= 256;
+	s_videodata2.centerHud_slider.height			= 32;
+	s_videodata2.centerHud_slider.focusWidth		= 145;
+	s_videodata2.centerHud_slider.focusHeight		= 18;
+	s_videodata2.centerHud_slider.picName			= GRAPHIC_SQUARE;
+	s_videodata2.centerHud_slider.picX				= x;
+	s_videodata2.centerHud_slider.picY				= y;
+	s_videodata2.centerHud_slider.picWidth			= MENU_BUTTON_MED_WIDTH + 21;
+	s_videodata2.centerHud_slider.picHeight			= MENU_BUTTON_MED_HEIGHT;
+	s_videodata2.centerHud_slider.textX				= MENU_BUTTON_TEXT_X;
+	s_videodata2.centerHud_slider.textY				= MENU_BUTTON_TEXT_Y;
+	s_videodata2.centerHud_slider.textEnum			= MBT_CENTERHUD;
+	s_videodata2.centerHud_slider.textcolor			= CT_BLACK;
+	s_videodata2.centerHud_slider.textcolor2		= CT_WHITE;
+	s_videodata2.centerHud_slider.thumbName			= PIC_SLIDER;
+	s_videodata2.centerHud_slider.thumbHeight		= 32;
+	s_videodata2.centerHud_slider.thumbWidth		= 16;
+	s_videodata2.centerHud_slider.thumbGraphicWidth= 9;
+	s_videodata2.centerHud_slider.thumbColor		= CT_DKBLUE1;
+	s_videodata2.centerHud_slider.thumbColor2		= CT_LTBLUE1;
+
+	y += 25;
 	s_videodata2.anisotropicfiltering.generic.type			= MTYPE_SPINCONTROL;
 	s_videodata2.anisotropicfiltering.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_videodata2.anisotropicfiltering.generic.x				= x;
@@ -2199,6 +2247,7 @@ static void VideoData2_MenuInit( void )
 	}
 	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.fov_slider);
 	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.screensize_slider);
+	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.centerHud_slider);
 	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.anisotropicfiltering);
 	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.aspectCorrection);
 
@@ -2233,6 +2282,27 @@ static float UI_VideoData2SettingsGetCurrentFov( void )
 
 /*
 =================
+UI_VideoData2SettingsGetCurrentCenterHud
+=================
+*/
+static float UI_VideoData2SettingsGetCurrentCenterHud( void )
+{
+	float value;
+	char buffer[256];
+
+	trap_Cvar_VariableStringBuffer( "cg_aspectCorrectCenterHud", buffer, sizeof( buffer ) );
+	value = atof( buffer );
+
+	if ( value < 0.0f )
+		value = 0.0f;
+	if ( value > 1.0f )
+		value = 1.0f;
+
+	return value;
+}
+
+/*
+=================
 UI_VideoData2SettingsGetCvars
 =================
 */
@@ -2242,6 +2312,7 @@ static void	UI_VideoData2SettingsGetCvars()
 	s_videodata2.fov_slider.curvalue = UI_VideoData2SettingsGetCurrentFov();
 	s_videodata2.screensize_slider.curvalue = trap_Cvar_VariableValue( "cg_viewsize" );
 	s_videodata2.aspectCorrection.curvalue = trap_Cvar_VariableValue( "cg_aspectCorrect" ) ? 1 : 0;
+	s_videodata2.centerHud_slider.curvalue = UI_VideoData2SettingsGetCurrentCenterHud();
 	s_videodata2.anisotropicfiltering.curvalue = trap_Cvar_VariableValue( "r_ext_texture_filter_anisotropic" );
 }
 
@@ -2258,6 +2329,8 @@ void UI_VideoData2SettingsMenu( void )
 	{
 		VideoData2_MenuInit();
 	}
+
+	VideoData2_EnabledDisableCenterHudSlider();
 
 	UI_PushMenu( &s_videodata2.menu );
 }

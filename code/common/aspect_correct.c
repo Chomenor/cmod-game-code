@@ -5,6 +5,8 @@
 #include "ui_local.h"
 #endif
 
+#define CLAMP_VALUE( value, min, max ) ( value < min ? min : ( value > max ? max : value ) )
+
 // Determines aspect correction support for UI and loading screen, but not cgame
 #define UI_ASPECT_CORRECT_ENABLED ( uix.ui_aspectCorrect.integer >= 0 ? uix.ui_aspectCorrect.integer : uix.cg_aspectCorrect.integer )
 
@@ -28,6 +30,7 @@ static struct {
 	vmCvar_t cg_aspectCorrect;	// enables aspect correction for cgame and hud (0 = disabled, 1 = enabled)
 #ifdef MODULE_CGAME
 	vmCvar_t cg_aspectCorrectGunPos;	// enables gun fov correction (0 = disabled, 1 = enabled, -1 = use cg_aspectCorrect value)
+	vmCvar_t cg_aspectCorrectCenterHud;		// moves hud elements from edge towards center of screen (0 = disabled, 1 = max)
 #endif
 	vmCvar_t ui_aspectCorrect;	// enables aspect correction for ui and loading screen (0 = disabled, 1 = enabled, -1 = use cg_aspectCorrect value)
 
@@ -39,9 +42,17 @@ static struct {
 	// Everything below this point is set by AspectCorrect_UpdateValues
 	//
 
+#ifdef MODULE_CGAME
+	int centerHudModificationCount;
+#endif
+
 	// Offset from edges of the screen in real pixels to reach the center 4:3 region
 	float XCenterOffset;
 	float YCenterOffset;
+
+	// Offset from edges of the screen in real pixels to display edge-aligned graphics
+	float XSideOffset;
+	float YSideOffset;
 
 	// Factor to convert from 640x480 virtual pixels to real pixels when drawing aspect-corrected graphics
 	float XScaledFactor;
@@ -58,6 +69,10 @@ AspectCorrect_UpdateValues
 ================
 */
 void AspectCorrect_UpdateValues( void ) {
+#ifdef MODULE_CGAME
+	uix.centerHudModificationCount = uix.cg_aspectCorrectCenterHud.modificationCount;
+#endif
+
 	uix.XStretchFactor = uix.width / 640.0f;
 	uix.YStretchFactor = uix.height / 480.0f;
 
@@ -67,12 +82,22 @@ void AspectCorrect_UpdateValues( void ) {
 		uix.YScaledFactor = uix.YStretchFactor;
 		uix.XCenterOffset = 320.0f * ( uix.XStretchFactor - uix.XScaledFactor );
 		uix.YCenterOffset = 0.0f;
+
+#ifdef MODULE_CGAME
+		uix.XSideOffset = uix.XCenterOffset * CLAMP_VALUE( uix.cg_aspectCorrectCenterHud.value, 0.0f, 1.0f );
+		uix.YSideOffset = 0;
+#endif
 	} else {
 		// narrow screen
 		uix.XScaledFactor = uix.XStretchFactor;
 		uix.YScaledFactor = uix.XStretchFactor;
 		uix.XCenterOffset = 0.0f;
 		uix.YCenterOffset = 240.0f * ( uix.YStretchFactor - uix.YScaledFactor );
+
+#ifdef MODULE_CGAME
+		uix.YSideOffset = uix.YCenterOffset * CLAMP_VALUE( uix.cg_aspectCorrectCenterHud.value, 0.0f, 1.0f );
+		uix.XSideOffset = 0;
+#endif
 	}
 }
 
@@ -148,9 +173,9 @@ void AspectCorrect_AdjustFrom640( float *x, float *y, float *w, float *h ) {
 		*w *= uix.XScaledFactor;
 	} else {
 		if ( uix.hModeCurrent == HSCALE_LEFT ) {
-			*x = *x * uix.XScaledFactor;
+			*x = *x * uix.XScaledFactor + uix.XSideOffset;
 		} else {
-			*x = uix.width - ( 640.0f - *x ) * uix.XScaledFactor;
+			*x = uix.width - ( 640.0f - *x ) * uix.XScaledFactor - uix.XSideOffset;
 		}
 		*w *= uix.XScaledFactor;
 	}
@@ -163,9 +188,9 @@ void AspectCorrect_AdjustFrom640( float *x, float *y, float *w, float *h ) {
 		*h *= uix.YScaledFactor;
 	} else {
 		if ( uix.vModeCurrent == VSCALE_TOP ) {
-			*y = *y * uix.YScaledFactor;
+			*y = *y * uix.YScaledFactor + uix.YSideOffset;
 		} else {
-			*y = uix.height - ( 480.0f - *y ) * uix.YScaledFactor;
+			*y = uix.height - ( 480.0f - *y ) * uix.YScaledFactor - uix.YSideOffset;
 		}
 		*h *= uix.YScaledFactor;
 	}
@@ -201,8 +226,15 @@ void AspectCorrect_RunFrame( void ) {
 	trap_Cvar_Update( &uix.cg_aspectCorrect );
 #ifdef MODULE_CGAME
 	trap_Cvar_Update( &uix.cg_aspectCorrectGunPos );
+	trap_Cvar_Update( &uix.cg_aspectCorrectCenterHud );
 #endif
 	trap_Cvar_Update( &uix.ui_aspectCorrect );
+
+#ifdef MODULE_CGAME
+	if ( uix.centerHudModificationCount != uix.cg_aspectCorrectCenterHud.modificationCount ) {
+		AspectCorrect_UpdateValues();
+	}
+#endif
 }
 
 /*
@@ -223,22 +255,23 @@ void AspectCorrect_Shutdown( void ) {
 ================
 AspectCorrect_Init
 
-Should be called afters cvars have been initialized, but before any drawing calls are issued.
+Should be called before any drawing calls are issued.
 ================
 */
 void AspectCorrect_Init( int width, int height ) {
 	vmCvar_t temp;
 
+	trap_Cvar_Register( &uix.cg_aspectCorrect, "cg_aspectCorrect", "0", CVAR_ARCHIVE );
+#ifdef MODULE_CGAME
+	trap_Cvar_Register( &uix.cg_aspectCorrectGunPos, "cg_aspectCorrectGunPos", "-1", CVAR_ARCHIVE );
+	trap_Cvar_Register( &uix.cg_aspectCorrectCenterHud, "cg_aspectCorrectCenterHud", "0", CVAR_ARCHIVE );
+#endif
+	trap_Cvar_Register( &uix.ui_aspectCorrect, "ui_aspectCorrect", "-1", CVAR_ARCHIVE );
+
 	uix.width = width;
 	uix.height = height;
 	AspectCorrect_UpdateValues();
 	AspectCorrect_ResetMode();
-
-	trap_Cvar_Register( &uix.cg_aspectCorrect, "cg_aspectCorrect", "0", CVAR_ARCHIVE );
-#ifdef MODULE_CGAME
-	trap_Cvar_Register( &uix.cg_aspectCorrectGunPos, "cg_aspectCorrectGunPos", "-1", CVAR_ARCHIVE );
-#endif
-	trap_Cvar_Register( &uix.ui_aspectCorrect, "ui_aspectCorrect", "-1", CVAR_ARCHIVE );
 
 	// Set cvars used to determine support for scaling during the loading screen.
 	// Both ui and cgame modules draw to the screen during loading, so scaling should

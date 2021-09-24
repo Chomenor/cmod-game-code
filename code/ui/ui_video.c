@@ -861,7 +861,8 @@ GraphicsOptions_SetMenuItems
 static void GraphicsOptions_SetMenuItems( void )
 {
 	s_graphicsoptions.mode.curvalue = (trap_Cvar_VariableValue( "r_mode" ) - 2);
-	if ( s_graphicsoptions.mode.curvalue < 0 )
+	if ( s_graphicsoptions.mode.curvalue < 0 ||
+			s_graphicsoptions.mode.curvalue >= ( sizeof ( s_resolutions ) / sizeof ( *s_resolutions ) ) )
 	{
 		s_graphicsoptions.mode.curvalue = 1;
 	}

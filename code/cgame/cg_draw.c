@@ -614,7 +614,7 @@ static void CG_DrawStatusBar( void )
 	VectorClear( angles );
 
 	// draw any 3D icons first, so the changes back to 2D are minimized
-	AspectCorrect_SetMode( HSCALE_RIGHT, VSCALE_BOTTOM );
+	AspectCorrect_SetMode( HSCALE_LEFT, VSCALE_BOTTOM );
 	y = (SCREEN_HEIGHT - (4*ICON_SIZE) - 20);
 	if (cg.predictedPlayerState.powerups[PW_REDFLAG])
 	{	//fixme: move to powerup renderer?  make it pulse?
@@ -1787,6 +1787,7 @@ static void CG_DrawDisconnect( void ) {
 	}
 
 	// also add text in center of screen
+	AspectCorrect_ResetMode();
 	s = ingame_text[IGT_CONNECTIONINTERRUPTED];
 //	w = CG_DrawStrlen( s ) * BIGCHAR_WIDTH;
 	w = UI_ProportionalStringWidth(s,UI_BIGFONT);
@@ -1801,7 +1802,9 @@ static void CG_DrawDisconnect( void ) {
 	x = 640 - 48;
 	y = 480 - 48;
 
+	AspectCorrect_SetMode( HSCALE_RIGHT, VSCALE_BOTTOM );
 	CG_DrawPic( x, y, 48, 48, trap_R_RegisterShader("gfx/2d/net.tga" ) );
+	AspectCorrect_ResetMode();
 }
 
 
@@ -1824,6 +1827,8 @@ static void CG_DrawLagometer( void ) {
 		CG_DrawDisconnect();
 		return;
 	}
+
+	AspectCorrect_SetMode( HSCALE_RIGHT, VSCALE_BOTTOM );
 
 	//
 	// draw the graph
@@ -1914,6 +1919,7 @@ static void CG_DrawLagometer( void ) {
 	}
 
 	CG_DrawDisconnect();
+	AspectCorrect_ResetMode();
 }
 
 
@@ -2690,7 +2696,6 @@ static void CG_Draw2D( void ) {
 	AspectCorrect_SetMode( HSCALE_LEFT, VSCALE_TOP );
 	CG_DrawVote();
 
-	AspectCorrect_SetMode( HSCALE_RIGHT, VSCALE_BOTTOM );
 	CG_DrawLagometer();
 
 	AspectCorrect_SetMode( HSCALE_RIGHT, VSCALE_TOP );

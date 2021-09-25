@@ -979,7 +979,7 @@ static sfxHandle_t Slider_Key( menuslider_s *s, int key )
 {
 	sfxHandle_t	sound;
 	int			x;
-	int			oldvalue;
+	float		oldvalue;
 
 	switch (key)
 	{

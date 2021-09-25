@@ -1157,6 +1157,10 @@ void CG_Init( int serverMessageNum, int serverCommandSequence ) {
 	cgs.redflag = cgs.blueflag = -1; // For compatibily, default to unset for
 	// old servers
 
+	// indicate to engine that engine-based aspect correction shouldn't be used
+	// should be called ahead of trap_GetGlconfig
+	VMExt_GVCommandInt( "register_aspect_aware", 0 );
+
 	// get the rendering configuration from the client system
 	trap_GetGlconfig( &cgs.glconfig );
 	AspectCorrect_Init( cgs.glconfig.vidWidth, cgs.glconfig.vidHeight );

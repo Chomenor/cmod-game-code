@@ -1375,6 +1375,10 @@ void UI_Init( void ) {
 
 	UI_InitGameinfo();
 
+	// indicate to engine that engine-based aspect correction shouldn't be used
+	// should be called ahead of trap_GetGlconfig
+	VMExt_GVCommandInt( "register_aspect_aware", 0 );
+
 	// cache redundant calulations
 	trap_GetGlconfig( &uis.glconfig );
 	AspectCorrect_Init( uis.glconfig.vidWidth, uis.glconfig.vidHeight );

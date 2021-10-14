@@ -986,7 +986,10 @@ static sfxHandle_t Slider_Key( menuslider_s *s, int key )
 		case K_MOUSE1:
 			x           = uis.cursorx - s->generic.x;
 			oldvalue    = s->curvalue;
-			s->curvalue = (x/(float)(s->focusWidth)) * (s->maxvalue-s->minvalue) + s->minvalue;
+			if ( uis.cursorx > s->generic.x - 40 && uis.cursorx < s->generic.x + s->focusWidth + 40 &&
+					uis.cursory > s->generic.y - 3 && uis.cursory < s->generic.y + s->focusHeight + 3 ) {
+				s->curvalue = (x/(float)(s->focusWidth)) * (s->maxvalue-s->minvalue) + s->minvalue;
+			}
 
 			if (s->curvalue < s->minvalue)
 				s->curvalue = s->minvalue;

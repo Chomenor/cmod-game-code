@@ -11,7 +11,7 @@
 // arena and bot info
 //
 
-#define POOLSIZE	128 * 1024
+#define POOLSIZE	256 * 1024
 
 int				ui_numBots;
 static char		*ui_botInfos[MAX_BOTS];
@@ -149,7 +149,7 @@ static void UI_LoadArenas( void ) {
 	int			numdirs;
 	vmCvar_t	arenasFile;
 	char		filename[128];
-	char		dirlist[10240];
+	char		dirlist[16384];
 	char*		dirptr;
 	int			i, n;
 	int			dirlen;
@@ -168,7 +168,7 @@ static void UI_LoadArenas( void ) {
 	}
 
 	// get all arenas from .arena files
-	numdirs = trap_FS_GetFileList("scripts", ".arena", dirlist, 10240 );
+	numdirs = trap_FS_GetFileList("scripts", ".arena", dirlist, sizeof( dirlist ) );
 	dirptr  = dirlist;
 	for (i = 0; i < numdirs; i++, dirptr += dirlen+1) {
 		dirlen = strlen(dirptr);

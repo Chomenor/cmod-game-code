@@ -35,7 +35,7 @@ int s_SkinFilter_Names[] =
 #define PLAYERGRID_ROWS		3
 #define MAX_MODELSPERPAGE	(PLAYERGRID_ROWS*PLAYERGRID_COLS)
 
-#define MAX_PLAYERMODELS	256
+#define MAX_PLAYERMODELS	1024
 
 #define ID_PLAYERPIC0		0
 #define ID_PLAYERPIC1		1
@@ -482,7 +482,7 @@ static void PlayerModel_BuildList( void )
 {
 	int		numdirs;
 	int		numfiles;
-	char	dirlist[2048];
+	char	dirlist[16384];
 	char	filelist[2048];
 	char	skinname[64];
 	char*	dirptr;
@@ -500,7 +500,7 @@ static void PlayerModel_BuildList( void )
 	s_playermodel.nummodels = 0;
 
 	// iterate directory of all player models
-	numdirs = trap_FS_GetFileList("models/players2", "/", dirlist, 2048 );
+	numdirs = trap_FS_GetFileList("models/players2", "/", dirlist, sizeof( dirlist ) );
 	dirptr  = dirlist;
 	for (i=0; i<numdirs && s_playermodel.nummodels < MAX_PLAYERMODELS; i++,dirptr+=dirlen+1)
 	{

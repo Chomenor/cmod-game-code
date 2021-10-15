@@ -770,17 +770,19 @@ char *Q_CleanStr( char *string ) {
 
 char *Q_StripColor(char *string)
 {
-	char*	d;
-	char*	s;
+	char*	d = string;
+	char*	s = string;
 	int		c;
+	qboolean colorSeq = qfalse;
 
-	s = string;
-	d = string;
 	while ((c = *s) != 0 ) {
-		if (Q_IsColorString(s))
-			s++;
-		else
+		if ( c == '^' ) {
+			colorSeq = qtrue;
+		} else if ( colorSeq ) {
+			colorSeq = qfalse;
+		} else {
 			*d++ = c;
+		}
 
 		s++;
 	}

@@ -563,6 +563,12 @@ typedef enum
 	MNT_IGNORES_TITLE,
 	MNT_IGNORES,
 	MNT_IGNORES_PLAYERLIST,
+	MNT_BROWSER_PLAYER_COUNT,
+	MNT_BROWSER_HUMANS_ONLY,
+	MNT_BROWSER_BOTS_AND_HUMANS,
+	MNT_BROWSER_MOD,
+	MNT_BROWSER_BOTS,
+	MNT_BROWSER_SCAN_PROGRESS,
 	MNT_ALTSWAP_AUTO,
 	MNT_ALTSWAP_CUSTOM,
 
@@ -923,6 +929,7 @@ typedef enum
 	MBT_FOV,
 	MBT_ASPECTCORRECTION,
 	MBT_CENTERHUD,
+	MBT_BROWSER_PLAYERTYPE,
 	MBT_ALTSWAP_CONTROL,
 	MBT_ALTSWAP_EDIT,
 	MBT_ALTSWAP_ALL_STANDARD,
@@ -1011,8 +1018,8 @@ extern vmCvar_t	ui_spSelection;
 extern vmCvar_t	ui_browserMaster;
 extern vmCvar_t	ui_browserGameType;
 extern vmCvar_t	ui_browserSortKey;
-extern vmCvar_t	ui_browserShowFull;
 extern vmCvar_t	ui_browserShowEmpty;
+extern vmCvar_t	ui_browserPlayerType;
 
 extern vmCvar_t	ui_brassTime;
 extern vmCvar_t	ui_drawCrosshair;
@@ -1684,6 +1691,7 @@ extern void			UI_DrawRect( float x, float y, float width, float height, const fl
 extern void			UI_DrawBannerString( int x, int y, const char* str, int style, vec4_t color );
 extern float		UI_ProportionalSizeScale( int style );
 extern void			UI_DrawProportionalString( int x, int y, const char* str, int style, vec4_t color );
+void				UI_TruncateStringWidth( char *source, int width );
 extern int			UI_ProportionalStringWidth( const char* str,int style );
 extern void			UI_DrawString( int x, int y, const char* str, int style, vec4_t color );
 extern void			UI_DrawChar( int x, int y, int ch, int style, vec4_t color );

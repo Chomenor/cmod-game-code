@@ -134,8 +134,8 @@ vmCvar_t	ui_spSelection;
 vmCvar_t	ui_browserMaster;
 vmCvar_t	ui_browserGameType;
 vmCvar_t	ui_browserSortKey;
-vmCvar_t	ui_browserShowFull;
 vmCvar_t	ui_browserShowEmpty;
+vmCvar_t	ui_browserPlayerType;
 
 vmCvar_t	ui_drawCrosshair;
 vmCvar_t	ui_drawCrosshairNames;
@@ -219,8 +219,8 @@ cvarTable_t		cvarTable[] = {
 	{ &ui_browserMaster, "ui_browserMaster", "0", CVAR_ARCHIVE },
 	{ &ui_browserGameType, "ui_browserGameType", "0", CVAR_ARCHIVE },
 	{ &ui_browserSortKey, "ui_browserSortKey", "4", CVAR_ARCHIVE },
-	{ &ui_browserShowFull, "ui_browserShowFull", "1", CVAR_ARCHIVE },
 	{ &ui_browserShowEmpty, "ui_browserShowEmpty", "1", CVAR_ARCHIVE },
+	{ &ui_browserPlayerType, "ui_browserPlayerType", "1", CVAR_ARCHIVE },
 
 	{ &ui_drawCrosshair, "cg_drawCrosshair", "1", CVAR_ARCHIVE },
 	{ &ui_drawCrosshairNames, "cg_drawCrosshairNames", "1", CVAR_ARCHIVE },

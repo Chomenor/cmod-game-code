@@ -328,6 +328,7 @@ typedef enum {
 #define UI_TINYFONT		0x00010000
 #define UI_SHOWCOLOR	0x00020000
 #define UI_FORCECOLOR	0x00040000
+#define UI_NO_BLACK		0x00080000	// replace black color sequence with brown, for drawing on black backgrounds
 
 
 /*

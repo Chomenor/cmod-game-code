@@ -26,13 +26,13 @@ static menubitmap_s			s_create_server;
 #define MAX_LOCALSERVERS		128
 #define MAX_STATUSLENGTH		64
 #define MAX_LISTBOXWIDTH		65 //59
+#define MAX_LISTBOXBUFFER		( MAX_LISTBOXWIDTH + 8 )	// extra space for color sequences
 
 #define ART_UNKNOWNMAP			"levelshots/unknownmap"
 
 #define ID_MASTER			10
 #define ID_GAMETYPE			11
 #define ID_SORTKEY			12
-#define ID_SHOW_FULL		13
 #define ID_SHOW_EMPTY		14
 #define ID_LIST				15
 #define ID_SCROLL_UP		16
@@ -46,6 +46,7 @@ static menubitmap_s			s_create_server;
 #define ID_STOPREFRESH		24
 #define ID_FINDSERVER		25
 #define ID_FAVORITE			26
+#define ID_SHOWINFO			27
 
 #define	ID_MAINMENU			100
 
@@ -109,6 +110,8 @@ static int master_items[] =
 	0
 };
 
+#define NUM_MASTER_ITEMS 7
+
 static int servertype_items[] =
 {
 	MNT_SERVERTYPE_ALL,
@@ -123,11 +126,26 @@ static int sortkey_items[] =
 {
 	MNT_SORTKEY_SERVER_NAME,
 	MNT_SORTKEY_MAP_NAME,
-	MNT_SORTKEY_OPENPLAYER,
+	MNT_BROWSER_PLAYER_COUNT,
 	MNT_SORTKEY_GAMETYPE,
 	MNT_SORTKEY_PINGTIME,
 	0
 };
+
+static int playerstatus_items[] =
+{
+	MNT_BROWSER_HUMANS_ONLY,
+	MNT_SERVERTYPE_ALL,
+	MNT_BROWSER_BOTS_AND_HUMANS,
+	0
+};
+
+typedef enum {
+	// must be same order as playerstatus_items
+	PLAYERTYPE_HUMANS_ONLY,
+	PLAYERTYPE_ALL,
+	PLAYERTYPE_BOTS_AND_HUMANS,
+} playerstatus_ids;
 
 static int noyes_items[] =
 {
@@ -141,29 +159,17 @@ static float server_buttons[5][2] =
 {274, 72},	//	Server type
 {274, 92},	//	Sort by
 {274,112},	//	Game Type
-{274,132},	//	All
-{274,152},	//	Empty
+{274,132},	//	Empty
 };
 
-
-
 static char* gamenames[] = {
-	"DM ",	// deathmatch
+	"FFA",	// deathmatch
 	"1v1",	// tournament
 	"SP ",	// single player
-	"TDM",	// team deathmatch
+	"THM",	// team deathmatch
 	"CTF",	// capture the flag
 	"???",	// unknown
 };
-
-static char* netnames[] = {
-	"???",
-	"UDP",
-	"IPX",
-	NULL
-};
-
-static char quake3worldMessage[] = "For more information, please visit :   www.activision.com   www.ravensoft.com/eliteforce   www.startrek.com";
 
 
 typedef struct {
@@ -176,19 +182,17 @@ typedef struct servernode_s {
 	char	hostname[MAX_HOSTNAMELENGTH];
 	char	mapname[MAX_MAPNAMELENGTH];
 	int		numclients;
+	int		numhumanclients;
 	int		maxclients;
 	int		pingtime;
 	int		gametype;
-	char	gamename[12];
-	int		nettype;
+	char	modname[12];
 	int		minPing;
 	int		maxPing;
-	qboolean	isPure;
-	qboolean	isExpansion;
 } servernode_t;
 
 typedef struct {
-	char			buff[MAX_LISTBOXWIDTH];
+	char			buff[MAX_LISTBOXBUFFER];
 	servernode_t*	servernode;
 } table_t;
 
@@ -200,7 +204,6 @@ typedef struct {
 	menulist_s			master;
 	menulist_s			gametype;
 	menulist_s			sortkey;
-	menulist_s			showfull;
 	menulist_s			showempty;
 
 	menulist_s			list;
@@ -209,14 +212,15 @@ typedef struct {
 	menubitmap_s		up;
 	menubitmap_s		down;
 	menutext_s			status;
-	menutext_s			statusbar;
 
 	menubitmap_s		remove;
 	menubitmap_s		refresh;
 	menubitmap_s		stoprefresh;
 	menubitmap_s		go;
+	menubitmap_s		showinfo;
 	menubitmap_s		favorite;
 
+	qboolean			statusQueryEnabled;
 	pinglist_t			pinglist[MAX_PINGREQUESTS];
 	table_t				table[MAX_LISTBOXITEMS];
 	char*				items[MAX_LISTBOXITEMS];
@@ -248,13 +252,830 @@ static servernode_t		g_localserverlist[MAX_LOCALSERVERS];
 static int				g_numlocalservers;
 static servernode_t		g_favoriteserverlist[MAX_FAVORITESERVERS];
 static int				g_numfavoriteservers;
-static servernode_t		g_mplayerserverlist[MAX_GLOBALSERVERS];
-static int				g_nummplayerservers;
 static int				g_servertype;
 static int				g_gametype;
 static int				g_sortkey;
 static int				g_emptyservers;
-static int				g_fullservers;
+
+
+/* ----------------------------------------------------------------------- */
+
+// Server info parsing
+
+/* ----------------------------------------------------------------------- */
+
+typedef struct {
+	char key[128];
+	char value[128];
+} statusField_t;
+
+typedef struct {
+	char score[8];
+	char ping[8];
+	char name[36];
+} statusPlayer_t;
+
+/*
+=================
+StatusParse_WriteField
+=================
+*/
+static void StatusParse_WriteField( char *source, int sourceLen, char *buffer, int bufSize ) {
+	if ( sourceLen >= bufSize )
+		sourceLen = bufSize - 1;
+	if ( sourceLen < 0 )
+		sourceLen = 0;
+
+	memcpy( buffer, source, sourceLen );
+	buffer[sourceLen] = '\0';
+}
+
+/*
+=================
+StatusParse_ParseField
+=================
+*/
+static qboolean StatusParse_ParseField( char **ptr, statusField_t *output ) {
+	char *p;
+
+	// skip leading slash
+	if ( !*ptr || !**ptr )
+		return qfalse;
+	*ptr = strchr( *ptr, '\\' );
+	if ( !*ptr || !**ptr )
+		return qfalse;
+	++*ptr;
+	
+	// empty key indicates start of player list
+	if ( **ptr == '\\' ) {
+		return qfalse;
+	}
+
+	// read key
+	p = *ptr;
+	*ptr = strchr( *ptr, '\\' );
+	if ( !*ptr || !**ptr )
+		return qfalse;
+	if ( output )
+		StatusParse_WriteField( p, *ptr - p, output->key, sizeof( output->key ) );
+
+	// skip slash
+	++*ptr;
+
+	// read value
+	p = *ptr;
+	*ptr = strchr( *ptr, '\\' );
+	if ( !*ptr || !**ptr )
+		return qfalse;
+	if ( output )
+		StatusParse_WriteField( p, *ptr - p, output->value, sizeof( output->value ) );
+
+	return qtrue;
+}
+
+/*
+=================
+StatusParse_ParsePlayer
+=================
+*/
+static qboolean StatusParse_ParsePlayer( char **ptr, statusPlayer_t *output ) {
+	char *p;
+
+	// skip leading slash
+	if ( !*ptr || **ptr != '\\' )
+		return qfalse;
+	++*ptr;
+
+	// read score
+	p = *ptr;
+	*ptr = strchr( *ptr, ' ' );
+	if ( !*ptr || !**ptr )
+		return qfalse;
+	if ( output )
+		StatusParse_WriteField( p, *ptr - p, output->score, sizeof( output->score ) );
+
+	// skip slash
+	++*ptr;
+
+	// read ping
+	p = *ptr;
+	*ptr = strchr( *ptr, ' ' );
+	if ( !*ptr || !**ptr )
+		return qfalse;
+	if ( output )
+		StatusParse_WriteField( p, *ptr - p, output->ping, sizeof( output->ping ) );
+
+	// skip slash
+	++*ptr;
+
+	// read name
+	p = *ptr;
+	*ptr = strchr( *ptr, '\\' );
+	if ( !*ptr || !**ptr )
+		return qfalse;
+	if ( output ) {
+		// skip leading/trailing quotes from name
+		char *end = *ptr;
+		if ( p[0] == '\"' )
+			++p;
+		if ( end > p && end[-1] == '\"' )
+			--end;
+		StatusParse_WriteField( p, end - p, output->name, sizeof( output->name ) );
+	}
+
+	return qtrue;
+}
+
+/*
+=================
+StatusParse_ValueForKey
+
+Retrieves value from server status info. Used instead of regular Info_ValueForKey
+just to be on the safe side avoiding any issues due to player list at end of string.
+=================
+*/
+static char *StatusParse_ValueForKey( char *info, const char *key ) {
+	static char buffer[128];
+	statusField_t field;
+
+	while ( StatusParse_ParseField( &info, &field ) ) {
+		if ( !Q_stricmp( field.key, key ) ) {
+			Q_strncpyz( buffer, field.value, sizeof( buffer ) );
+			return buffer;
+		}
+	}
+
+	buffer[0] = '\0';
+	return buffer;
+}
+
+/* ----------------------------------------------------------------------- */
+
+// Server info page
+
+/* ----------------------------------------------------------------------- */
+
+#define	MAX_SERVERINFO_LINES		20
+
+#define ID_SERVERINFO_REFRESH		100
+#define ID_SERVERINFO_CONNECT		101
+#define ID_SERVERINFO_BACK			102
+#define	ID_SERVERINFO_ARROWUP		103
+#define	ID_SERVERINFO_ARROWDWN		104
+
+typedef struct
+{
+	menuframework_s	menu;
+	menubitmap_s	refresh;
+	menubitmap_s	back;
+	menubitmap_s	connect;
+	int				lineCnt;
+	int				lineStartCnt;
+	menubitmap_s	arrowdwn;
+	menubitmap_s	arrowup;
+
+	// server query
+	char			adrstr[MAX_ADDRESSLENGTH];
+	qboolean		queryInProgress;
+	char			info[2048];
+
+	// map pic
+	char			mapPicName[128];
+	qhandle_t		mapPicShader;
+	qboolean		mapPicUnknownRegistered;
+	qhandle_t		mapPicUnknownShader;
+} browserServerInfo_t;
+
+static browserServerInfo_t s_browserserverinfo;
+
+/*
+=================
+BrowserServerInfo_UpdateQuery
+=================
+*/
+static void BrowserServerInfo_UpdateQuery( void )
+{
+	if ( s_browserserverinfo.queryInProgress ) {
+		if ( VMExt_FN_LAN_ServerStatus_Ext( s_browserserverinfo.adrstr, s_browserserverinfo.info, sizeof( s_browserserverinfo.info ), NULL, 0 ) ) {
+			s_browserserverinfo.queryInProgress = qfalse;
+		}
+	}
+}
+
+/*
+=================
+BrowserServerInfo_StartQuery
+=================
+*/
+static void BrowserServerInfo_StartQuery( void )
+{
+	if ( !s_browserserverinfo.queryInProgress && *s_browserserverinfo.adrstr ) {
+		s_browserserverinfo.queryInProgress = qtrue;
+		s_browserserverinfo.info[0] = '\0';
+		s_browserserverinfo.lineCnt = 0;
+		s_browserserverinfo.lineStartCnt = 0;
+		VMExt_FN_LAN_ServerStatus_Ext( NULL, NULL, 0, NULL, 0 );
+		BrowserServerInfo_UpdateQuery();
+	}
+}
+
+/*
+=================
+BrowserServerInfo_Event
+=================
+*/
+static void BrowserServerInfo_Event( void* ptr, int event )
+{
+	if ( event == QM_ACTIVATED ) {
+		switch (((menucommon_s*)ptr)->id)
+		{
+			case ID_SERVERINFO_REFRESH:
+				BrowserServerInfo_StartQuery();
+				break;
+
+			case ID_SERVERINFO_CONNECT:
+				trap_Cmd_ExecuteText( EXEC_APPEND, va( "connect %s\n", s_browserserverinfo.adrstr ) );
+				break;
+
+			case ID_SERVERINFO_BACK:
+				UI_PopMenu();
+				break;
+
+			case ID_SERVERINFO_ARROWUP:
+				s_browserserverinfo.lineStartCnt--;
+				break;
+
+			case ID_SERVERINFO_ARROWDWN:
+				s_browserserverinfo.lineStartCnt++;
+				break;
+		}
+	}
+}
+
+/*
+=================
+BrowserServerInfo_NextLinePosition
+
+Increments currentLine, and returns the current Y coordinate to draw the current line to.
+Returns 0 if current line is scrolled out of view.
+=================
+*/
+int BrowserServerInfo_NextLinePosition( int *currentLine ) {
+	int displayLine = *currentLine - s_browserserverinfo.lineStartCnt;
+	int result = 0;
+
+	if ( displayLine >= 0 && displayLine < MAX_SERVERINFO_LINES ) {
+		result = 62 + displayLine * SMALLCHAR_HEIGHT;
+	}
+
+	++*currentLine;
+	return result;
+}
+
+/*
+=================
+BrowserServerInfo_RenderInfoField
+=================
+*/
+void BrowserServerInfo_RenderInfoField( int *currentLine, const char *key, const char *value ) {
+	int yPos = BrowserServerInfo_NextLinePosition( currentLine );
+	if ( yPos ) {
+		char buffer[128];
+		Com_sprintf( buffer, sizeof( buffer ), "%s:", key );
+		UI_DrawProportionalString( 375 - 8, yPos, buffer, UI_RIGHT | UI_SMALLFONT | UI_NO_BLACK, colorTable[CT_LTBLUE2] );
+		UI_DrawProportionalString( 375 + 8, yPos, value, UI_LEFT | UI_SMALLFONT | UI_NO_BLACK, colorTable[CT_LTGOLD1] );
+	}
+}
+
+/*
+=================
+BrowserServerInfo_RenderPlayer
+=================
+*/
+void BrowserServerInfo_RenderPlayer( int *currentLine, statusPlayer_t *player ) {
+	int yPos = BrowserServerInfo_NextLinePosition( currentLine );
+	if ( yPos ) {
+		char name[36];
+		qboolean isBot = !Q_stricmp( player->ping, "0" );
+		const char *ping = isBot ? "BOT" : player->ping;
+
+		// Do a bit of truncation to avoid excessively long player names overflowing
+		Q_strncpyz( name, player->name, sizeof( name ) );
+		UI_TruncateStringWidth( name, 150 );
+
+		UI_DrawProportionalString( 270, yPos, name, UI_LEFT | UI_SMALLFONT | UI_NO_BLACK, colorTable[CT_LTGOLD1] );
+		UI_DrawProportionalString( 430, yPos, player->score, UI_LEFT | UI_SMALLFONT, colorTable[CT_LTGOLD1] );
+		UI_DrawProportionalString( 490, yPos, ping, UI_LEFT | UI_SMALLFONT, isBot ? colorTable[CT_LTGOLD1] : colorTable[CT_LTORANGE] );
+	}
+}
+
+/*
+=================
+BrowserServerInfo_RenderLines
+=================
+*/
+void BrowserServerInfo_RenderLines( void ) {
+	int lineNum = 0;
+	int yPos;
+	char *infoPtr;
+	statusField_t field;
+	statusPlayer_t player;
+
+	if ( s_browserserverinfo.queryInProgress ) {
+		yPos = BrowserServerInfo_NextLinePosition( &lineNum );
+		if ( yPos ) {
+			UI_DrawProportionalString( 320, yPos, "Querying server...", UI_CENTER | UI_SMALLFONT, colorTable[CT_LTGOLD1] );
+		}
+	}
+
+	else {
+		const char *serverName = StatusParse_ValueForKey( s_browserserverinfo.info, "sv_hostname" );
+		if ( *serverName ) {
+			yPos = BrowserServerInfo_NextLinePosition( &lineNum );
+			if ( yPos ) {
+				UI_DrawProportionalString( 400, yPos, serverName, UI_CENTER | UI_SMALLFONT | UI_NO_BLACK, colorTable[CT_LTGOLD1] );
+			}
+			BrowserServerInfo_NextLinePosition( &lineNum );
+		}
+
+		yPos = BrowserServerInfo_NextLinePosition( &lineNum );
+		if ( yPos ) {
+			UI_DrawProportionalString( 270, yPos, "NAME", UI_LEFT | UI_SMALLFONT, colorTable[CT_LTORANGE] );
+			UI_DrawProportionalString( 430, yPos, "SCORE", UI_LEFT | UI_SMALLFONT, colorTable[CT_LTORANGE] );
+			UI_DrawProportionalString( 490, yPos, "PING", UI_LEFT | UI_SMALLFONT, colorTable[CT_LTORANGE] );
+		}
+
+		infoPtr = s_browserserverinfo.info;
+		while ( StatusParse_ParseField( &infoPtr, NULL ) ) {
+		}
+		while ( StatusParse_ParsePlayer( &infoPtr, &player ) ) {
+			BrowserServerInfo_RenderPlayer( &lineNum, &player );
+		}
+		BrowserServerInfo_NextLinePosition( &lineNum );
+
+		BrowserServerInfo_RenderInfoField( &lineNum, "address", s_browserserverinfo.adrstr );
+
+		infoPtr = s_browserserverinfo.info;
+		while ( StatusParse_ParseField( &infoPtr, &field ) ) {
+			BrowserServerInfo_RenderInfoField( &lineNum, field.key, field.value );
+		}
+	}
+
+	// Update line count
+	s_browserserverinfo.lineCnt = lineNum;
+	if ( s_browserserverinfo.lineStartCnt > s_browserserverinfo.lineCnt - MAX_SERVERINFO_LINES )
+		s_browserserverinfo.lineStartCnt = s_browserserverinfo.lineCnt - MAX_SERVERINFO_LINES;
+	if ( s_browserserverinfo.lineStartCnt < 0 )
+		s_browserserverinfo.lineStartCnt = 0;
+
+	// Enable/disable the up/down arrows
+	s_browserserverinfo.arrowdwn.generic.flags &= ~(QMF_HIDDEN|QMF_INACTIVE);
+	s_browserserverinfo.arrowup.generic.flags &= ~(QMF_HIDDEN|QMF_INACTIVE);
+	if ( s_browserserverinfo.lineStartCnt <= 0 )
+		s_browserserverinfo.arrowup.generic.flags |= (QMF_HIDDEN|QMF_INACTIVE);
+	if ( s_browserserverinfo.lineStartCnt >= s_browserserverinfo.lineCnt - MAX_SERVERINFO_LINES )
+		s_browserserverinfo.arrowdwn.generic.flags |= (QMF_HIDDEN|QMF_INACTIVE);
+}
+
+/*
+=================
+BrowserServerInfo_RenderMapPic
+=================
+*/
+void BrowserServerInfo_RenderMapPic( void ) {
+	if ( !s_browserserverinfo.queryInProgress ) {
+		char *mapName = StatusParse_ValueForKey( s_browserserverinfo.info, "mapname" );
+		Q_strlwr( mapName );
+
+		if ( Q_stricmp( s_browserserverinfo.mapPicName, mapName ) ) {
+			Q_strncpyz( s_browserserverinfo.mapPicName, mapName, sizeof( s_browserserverinfo.mapPicName ) );
+			s_browserserverinfo.mapPicShader = trap_R_RegisterShaderNoMip( va( "levelshots/%s.tga", mapName ) );
+
+			if ( !s_browserserverinfo.mapPicShader ) {
+				if ( !s_browserserverinfo.mapPicUnknownRegistered ) {
+					s_browserserverinfo.mapPicUnknownShader = trap_R_RegisterShaderNoMip( ART_UNKNOWNMAP );
+					s_browserserverinfo.mapPicUnknownRegistered = qtrue;
+				}
+
+				s_browserserverinfo.mapPicShader = s_browserserverinfo.mapPicUnknownShader;
+			}
+		}
+
+		if ( s_browserserverinfo.mapPicShader ) {
+			UI_DrawHandlePic( 90, 75, 128, 96, s_browserserverinfo.mapPicShader );
+			UI_DrawProportionalString( 90 + ( 128 / 2 ), 75 + 96 + 4, mapName, UI_CENTER | UI_SMALLFONT, colorTable[CT_LTGOLD1] );
+		}
+	}
+}
+
+/*
+=================
+BrowserServerInfo_MenuDraw
+=================
+*/
+static void BrowserServerInfo_MenuDraw( void )
+{
+	// Draw the basic screen layout
+	UI_MenuFrame2( &s_browserserverinfo.menu );
+
+	// from ServerInfoMenu_Graphics - bottom center button
+	trap_R_SetColor( colorTable[CT_LTPURPLE1] );
+	UI_DrawHandlePic( 250, 400, 180, 20, uis.whiteShader );
+
+	// from ArenaServers_Graphics
+	trap_R_SetColor( colorTable[CT_LTBROWN1] );
+	UI_DrawHandlePic( 30, 203, 47, 186, uis.whiteShader ); // Left side of frame
+
+	UI_DrawProportionalString( 74, 27, "4817", UI_RIGHT | UI_TINYFONT, colorTable[CT_BLACK] );
+	UI_DrawProportionalString( 74, 149, "133", UI_RIGHT | UI_TINYFONT, colorTable[CT_BLACK] );
+	UI_DrawProportionalString( 74, 205, "2293", UI_RIGHT | UI_TINYFONT, colorTable[CT_BLACK] );
+	UI_DrawProportionalString( 74, 395, "1159", UI_RIGHT | UI_TINYFONT, colorTable[CT_BLACK] );
+
+	BrowserServerInfo_UpdateQuery();
+	BrowserServerInfo_RenderLines();
+	BrowserServerInfo_RenderMapPic();
+
+	Menu_Draw( &s_browserserverinfo.menu );
+}
+
+/*
+=================
+BrowserServerInfo_MenuKey
+=================
+*/
+static sfxHandle_t BrowserServerInfo_MenuKey( int key )
+{
+	return ( Menu_DefaultKey( &s_browserserverinfo.menu, key ) );
+}
+
+/*
+=================
+BrowserServerInfo_Cache
+=================
+*/
+void BrowserServerInfo_Cache( void )
+{
+}
+
+/*
+=================
+BrowserServerInfo_Init
+=================
+*/
+static void BrowserServerInfo_InitMenu( const char *adrstr )
+{
+	int	y;
+
+	// zero set all our globals
+	memset( &s_browserserverinfo, 0 ,sizeof(browserServerInfo_t) );
+
+	BrowserServerInfo_Cache();
+
+	s_browserserverinfo.menu.draw						= BrowserServerInfo_MenuDraw;
+	s_browserserverinfo.menu.key						= BrowserServerInfo_MenuKey;
+	s_browserserverinfo.menu.wrapAround				= qtrue;
+	s_browserserverinfo.menu.fullscreen				= qtrue;
+	s_browserserverinfo.menu.nitems					= 0;
+	s_browserserverinfo.menu.descX						= MENU_DESC_X;
+	s_browserserverinfo.menu.descY						= MENU_DESC_Y;
+	s_browserserverinfo.menu.listX						= 230;
+	s_browserserverinfo.menu.listY						= 188;
+	s_browserserverinfo.menu.titleX					= MENU_TITLE_X;
+	s_browserserverinfo.menu.titleY					= MENU_TITLE_Y;
+	s_browserserverinfo.menu.titleI					= MNT_SERVERINFO_TITLE;
+	s_browserserverinfo.menu.footNoteEnum				= MNT_SERVERINFO;
+
+	s_browserserverinfo.refresh.generic.type			= MTYPE_BITMAP;
+	s_browserserverinfo.refresh.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
+	s_browserserverinfo.refresh.generic.x				= 90;
+	s_browserserverinfo.refresh.generic.y				= 375;
+	s_browserserverinfo.refresh.generic.name			= GRAPHIC_SQUARE;
+	s_browserserverinfo.refresh.generic.id				= ID_SERVERINFO_REFRESH;
+	s_browserserverinfo.refresh.generic.callback		= BrowserServerInfo_Event;
+	s_browserserverinfo.refresh.width					= MENU_BUTTON_MED_WIDTH;
+	s_browserserverinfo.refresh.height					= MENU_BUTTON_MED_HEIGHT;
+	s_browserserverinfo.refresh.color					= CT_DKORANGE;
+	s_browserserverinfo.refresh.color2					= CT_LTORANGE;
+	s_browserserverinfo.refresh.textX					= MENU_BUTTON_TEXT_X;
+	s_browserserverinfo.refresh.textY					= MENU_BUTTON_TEXT_Y;
+	s_browserserverinfo.refresh.textEnum				= MBT_REFRESH;
+	s_browserserverinfo.refresh.textcolor				= CT_BLACK;
+	s_browserserverinfo.refresh.textcolor2				= CT_WHITE;
+
+	y = 400;
+	// Button Data
+	s_browserserverinfo.back.generic.type				= MTYPE_BITMAP;
+	s_browserserverinfo.back.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
+	s_browserserverinfo.back.generic.x					= 90;
+	s_browserserverinfo.back.generic.y					= 400;
+	s_browserserverinfo.back.generic.name				= GRAPHIC_SQUARE;
+	s_browserserverinfo.back.generic.id				= ID_SERVERINFO_BACK;
+	s_browserserverinfo.back.generic.callback			= BrowserServerInfo_Event;
+	s_browserserverinfo.back.width						= MENU_BUTTON_MED_WIDTH;
+	s_browserserverinfo.back.height					= MENU_BUTTON_MED_HEIGHT;
+	s_browserserverinfo.back.color						= CT_DKPURPLE1;
+	s_browserserverinfo.back.color2					= CT_LTPURPLE1;
+	s_browserserverinfo.back.textX						= MENU_BUTTON_TEXT_X;
+	s_browserserverinfo.back.textY						= MENU_BUTTON_TEXT_Y;
+	s_browserserverinfo.back.textEnum					= MBT_BACK;
+	s_browserserverinfo.back.textcolor					= CT_BLACK;
+	s_browserserverinfo.back.textcolor2				= CT_WHITE;
+
+	s_browserserverinfo.connect.generic.type			= MTYPE_BITMAP;
+	s_browserserverinfo.connect.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
+	s_browserserverinfo.connect.generic.x				= 460;
+	s_browserserverinfo.connect.generic.y				= y;
+	s_browserserverinfo.connect.generic.name			= GRAPHIC_SQUARE;
+	s_browserserverinfo.connect.generic.id				= ID_SERVERINFO_CONNECT;
+	s_browserserverinfo.connect.generic.callback		= BrowserServerInfo_Event;
+	s_browserserverinfo.connect.width					= MENU_BUTTON_MED_WIDTH;
+	s_browserserverinfo.connect.height					= MENU_BUTTON_MED_HEIGHT;
+	s_browserserverinfo.connect.color					= CT_DKPURPLE1;
+	s_browserserverinfo.connect.color2					= CT_LTPURPLE1;
+	s_browserserverinfo.connect.textX					= MENU_BUTTON_TEXT_X;
+	s_browserserverinfo.connect.textY					= MENU_BUTTON_TEXT_Y;
+	s_browserserverinfo.connect.textEnum				= MBT_ENGAGEMULTIPLAYER;
+	s_browserserverinfo.connect.textcolor				= CT_BLACK;
+	s_browserserverinfo.connect.textcolor2				= CT_WHITE;
+
+	s_browserserverinfo.arrowup.generic.type			= MTYPE_BITMAP;
+	s_browserserverinfo.arrowup.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
+	s_browserserverinfo.arrowup.generic.x				= 270;
+	s_browserserverinfo.arrowup.generic.y				= y+2;
+	s_browserserverinfo.arrowup.generic.name			= "menu/common/arrow_up_16.tga";
+	s_browserserverinfo.arrowup.generic.id				= ID_SERVERINFO_ARROWUP;
+	s_browserserverinfo.arrowup.generic.callback		= BrowserServerInfo_Event;
+	s_browserserverinfo.arrowup.width					= 16;
+	s_browserserverinfo.arrowup.height					= 16;
+	s_browserserverinfo.arrowup.color					= CT_DKBLUE1;
+	s_browserserverinfo.arrowup.color2					= CT_LTBLUE1;
+	s_browserserverinfo.arrowup.textX					= 0;
+	s_browserserverinfo.arrowup.textY					= 0;
+	s_browserserverinfo.arrowup.textEnum				= MBT_NONE;
+	s_browserserverinfo.arrowup.textcolor				= CT_BLACK;
+	s_browserserverinfo.arrowup.textcolor2				= CT_WHITE;
+
+	s_browserserverinfo.arrowdwn.generic.type			= MTYPE_BITMAP;
+	s_browserserverinfo.arrowdwn.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
+	s_browserserverinfo.arrowdwn.generic.x				= 394;
+	s_browserserverinfo.arrowdwn.generic.y				= y+2;
+	s_browserserverinfo.arrowdwn.generic.name			= "menu/common/arrow_dn_16.tga";
+	s_browserserverinfo.arrowdwn.generic.id			= ID_SERVERINFO_ARROWDWN;
+	s_browserserverinfo.arrowdwn.generic.callback		= BrowserServerInfo_Event;
+	s_browserserverinfo.arrowdwn.width					= 16;
+	s_browserserverinfo.arrowdwn.height				= 16;
+	s_browserserverinfo.arrowdwn.color					= CT_DKBLUE1;
+	s_browserserverinfo.arrowdwn.color2				= CT_LTBLUE1;
+	s_browserserverinfo.arrowdwn.textX					= 0;
+	s_browserserverinfo.arrowdwn.textY					= 0;
+	s_browserserverinfo.arrowdwn.textEnum				= MBT_NONE;
+	s_browserserverinfo.arrowdwn.textcolor				= CT_BLACK;
+	s_browserserverinfo.arrowdwn.textcolor2			= CT_WHITE;
+
+	Menu_AddItem( &s_browserserverinfo.menu,( void * ) &s_browserserverinfo.arrowup);
+	Menu_AddItem( &s_browserserverinfo.menu, ( void * ) &s_browserserverinfo.arrowdwn);
+	Menu_AddItem( &s_browserserverinfo.menu, (void*) &s_browserserverinfo.refresh );
+	Menu_AddItem( &s_browserserverinfo.menu, (void*) &s_browserserverinfo.back );
+	Menu_AddItem( &s_browserserverinfo.menu, (void*) &s_browserserverinfo.connect );
+
+	s_browserserverinfo.arrowup.generic.flags |= QMF_HIDDEN|QMF_INACTIVE;
+
+	// Query configuration
+	Q_strncpyz( s_browserserverinfo.adrstr, adrstr, sizeof( s_browserserverinfo.adrstr ) );
+	BrowserServerInfo_StartQuery();
+
+	UI_PushMenu( &s_browserserverinfo.menu );
+}
+
+/* ----------------------------------------------------------------------- */
+
+// Getstatus-based Querying
+
+/* ----------------------------------------------------------------------- */
+
+static int ArenaServers_MaxPing( void );
+static void ArenaServers_UpdateMenu( void );
+static void ArenaServers_StopRefresh( void );
+
+/*
+=================
+StatusQuery_Enabled
+
+Used to set g_arenaservers.statusQueryEnabled
+=================
+*/
+static qboolean StatusQuery_Enabled( void ) {
+	return VMExt_FNAvailable_LAN_ServerStatus_Ext();
+}
+
+/*
+=================
+StatusQuery_Insert
+=================
+*/
+static void StatusQuery_Insert( char* adrstr, char* info, int pingtime )
+{
+	servernode_t*	servernodeptr;
+	char*			s;
+
+	if ((pingtime >= ArenaServers_MaxPing()) && (g_servertype != AS_FAVORITES))
+	{
+		// slow global or local servers do not get entered
+		return;
+	}
+
+	if (*g_arenaservers.numservers >= g_arenaservers.maxservers) {
+		// list full;
+		servernodeptr = g_arenaservers.serverlist+(*g_arenaservers.numservers)-1;
+	} else {
+		// next slot
+		servernodeptr = g_arenaservers.serverlist+(*g_arenaservers.numservers);
+		(*g_arenaservers.numservers)++;
+	}
+
+	Q_strncpyz( servernodeptr->adrstr, adrstr, MAX_ADDRESSLENGTH );
+
+	s = StatusParse_ValueForKey( info, "sv_hostname" );
+	Q_StripColor( s );
+	Q_strncpyz( servernodeptr->hostname, s, MAX_HOSTNAMELENGTH );
+	Q_strupr( servernodeptr->hostname );
+
+	s = StatusParse_ValueForKey( info, "mapname" );
+	Q_StripColor( s );
+	Q_strncpyz( servernodeptr->mapname, s, MAX_MAPNAMELENGTH );
+	Q_strupr( servernodeptr->mapname );
+
+	servernodeptr->maxclients = atoi( StatusParse_ValueForKey( info, "sv_maxclients" ) );
+	servernodeptr->pingtime   = pingtime;
+	servernodeptr->minPing    = atoi( StatusParse_ValueForKey( info, "sv_minPing" ) );
+	servernodeptr->maxPing    = atoi( StatusParse_ValueForKey( info, "sv_maxPing" ) );
+
+	servernodeptr->gametype = atoi( StatusParse_ValueForKey( info, "g_gametype" ) );
+	if( servernodeptr->gametype < 0 ) {
+		servernodeptr->gametype = 0;
+	}
+	else if( servernodeptr->gametype > 5 ) {
+		servernodeptr->gametype = 5;
+	}
+
+	s = StatusParse_ValueForKey( info, "gamename");
+	if( *s && Q_stricmp( s, "baseEF" ) ) {
+		Q_StripColor( s );
+		Q_strncpyz( servernodeptr->modname, s, sizeof(servernodeptr->modname) );
+	} else if ( atoi ( StatusParse_ValueForKey( info, "g_pModAssimilation" ) ) ) {
+		Q_strncpyz( servernodeptr->modname, "Assimilation", sizeof(servernodeptr->modname) );
+	} else if ( atoi ( StatusParse_ValueForKey( info, "g_pModElimination" ) ) ) {
+		Q_strncpyz( servernodeptr->modname, "Elimination", sizeof(servernodeptr->modname) );
+	} else if ( atoi ( StatusParse_ValueForKey( info, "g_pModSpecialties" ) ) ) {
+		Q_strncpyz( servernodeptr->modname, "Specialties", sizeof(servernodeptr->modname) );
+	} else if ( atoi ( StatusParse_ValueForKey( info, "g_pModDisintegration" ) ) ) {
+		Q_strncpyz( servernodeptr->modname, "Disintegration", sizeof(servernodeptr->modname) );
+	} else if ( atoi ( StatusParse_ValueForKey( info, "g_pModActionHero" ) ) ) {
+		Q_strncpyz( servernodeptr->modname, "ActionHero", sizeof(servernodeptr->modname) );
+	} else {
+		*servernodeptr->modname = '\0';
+	}
+
+	// count the number of players
+	servernodeptr->numclients = 0;
+	servernodeptr->numhumanclients = 0;
+	{
+		statusPlayer_t player;
+		s = info;
+		while ( StatusParse_ParseField( &s, NULL ) ) {
+		}
+		while ( StatusParse_ParsePlayer( &s, &player ) ) {
+			++servernodeptr->numclients;
+			if ( atoi( player.ping ) ) {
+				++servernodeptr->numhumanclients;
+			}
+		}
+	}
+}
+
+/*
+=================
+StatusQuery_Refresh
+=================
+*/
+static void StatusQuery_Refresh( void )
+{
+	int		i;
+	int		time;
+	int		maxPing;
+	char	adrstr[MAX_ADDRESSLENGTH];
+	char	info[MAX_INFO_STRING];
+
+	// process ping results
+	maxPing = ArenaServers_MaxPing();
+
+	for ( i = 0; i < MAX_PINGREQUESTS; i++ ) {
+		pinglist_t *listEntry = &g_arenaservers.pinglist[i];
+		char extInfo[1024];
+
+		if ( !listEntry->adrstr[0] ) {
+			// nothing in progress
+			continue;
+		}
+
+		time = uis.realtime - listEntry->start;
+		if (time > maxPing)
+		{
+			// stale it out
+			info[0] = '\0';
+			time = maxPing;
+			VMExt_FN_LAN_ServerStatus_Ext( listEntry->adrstr, NULL, 0, NULL, 0 );
+		}
+
+		else {
+			if ( !VMExt_FN_LAN_ServerStatus_Ext( listEntry->adrstr, info, sizeof( info ), extInfo, sizeof( extInfo ) ) ) {
+				// still waiting
+				continue;
+			}
+			time = atoi( Info_ValueForKey( extInfo, "ping" ) );
+		}
+
+		// insert ping results
+		StatusQuery_Insert( listEntry->adrstr, info, time );
+
+		// clear this query from internal list
+		listEntry->adrstr[0] = '\0';
+	}
+
+	// get results of servers query
+	// counts can increase as servers respond
+	switch (g_servertype)
+	{
+		case AS_LOCAL:
+			g_arenaservers.numqueriedservers = trap_LAN_GetLocalServerCount();
+			break;
+
+		case AS_GLOBAL1:
+		case AS_GLOBAL2:
+		case AS_GLOBAL3:
+		case AS_GLOBAL4:
+		case AS_GLOBAL5:
+			g_arenaservers.numqueriedservers = trap_LAN_GetGlobalServerCount();
+			break;
+
+		case AS_FAVORITES:
+			g_arenaservers.numqueriedservers = g_arenaservers.numfavoriteaddresses;
+			break;
+	}
+
+//	if (g_arenaservers.numqueriedservers > g_arenaservers.maxservers)
+//		g_arenaservers.numqueriedservers = g_arenaservers.maxservers;
+
+	// send ping requests in reasonable bursts
+	// iterate ping through all found servers
+	for (i=0; i<MAX_PINGREQUESTS && g_arenaservers.currentping < g_arenaservers.numqueriedservers; i++)
+	{
+		if ( g_arenaservers.pinglist[i].adrstr[0] ) {
+			// already querying in this slot
+			continue;
+		}
+
+		// get an address to ping
+		switch (g_servertype)
+		{
+			case AS_LOCAL:
+				trap_LAN_GetLocalServerAddressString( g_arenaservers.currentping, adrstr, MAX_ADDRESSLENGTH );
+				break;
+
+			case AS_GLOBAL1:
+			case AS_GLOBAL2:
+			case AS_GLOBAL3:
+			case AS_GLOBAL4:
+			case AS_GLOBAL5:
+				trap_LAN_GetGlobalServerAddressString( g_arenaservers.currentping, adrstr, MAX_ADDRESSLENGTH );
+				break;
+
+			case AS_FAVORITES:
+				strcpy( adrstr, g_arenaservers.favoriteaddresses[g_arenaservers.currentping] );
+				break;
+
+		}
+
+		strcpy( g_arenaservers.pinglist[i].adrstr, adrstr );
+		g_arenaservers.pinglist[i].start = uis.realtime;
+
+		// advance to next server
+		g_arenaservers.currentping++;
+	}
+
+	for ( i = 0; i < MAX_PINGREQUESTS && !g_arenaservers.pinglist[i].adrstr[0]; i++ ) {
+	}
+	if ( i == MAX_PINGREQUESTS ) {
+		// all pings completed
+		ArenaServers_StopRefresh();
+		return;
+	}
+
+	// update the user interface with ping status
+	ArenaServers_UpdateMenu();
+}
+
+// ==============================================================================================
 
 
 /*
@@ -279,6 +1100,7 @@ ArenaServers_Compare
 =================
 */
 static int QDECL ArenaServers_Compare( const void *arg1, const void *arg2 ) {
+	int				x;
 	float			f1;
 	float			f2;
 	servernode_t*	t1;
@@ -289,50 +1111,44 @@ static int QDECL ArenaServers_Compare( const void *arg1, const void *arg2 ) {
 
 	switch( g_sortkey ) {
 	case SORT_HOST:
-		return Q_stricmp( t1->hostname, t2->hostname );
+		x = Q_stricmp( t1->hostname, t2->hostname );
+		if ( x ) {
+			return x;
+		}
 
 	case SORT_MAP:
-		return Q_stricmp( t1->mapname, t2->mapname );
+		x = Q_stricmp( t1->mapname, t2->mapname );
+		if ( x ) {
+			return x;
+		}
 
 	case SORT_CLIENTS:
-		f1 = t1->maxclients - t1->numclients;
-		if( f1 < 0 ) {
-			f1 = 0;
-		}
-
-		f2 = t2->maxclients - t2->numclients;
-		if( f2 < 0 ) {
-			f2 = 0;
-		}
+		f1 = g_arenaservers.statusQueryEnabled ? t1->numhumanclients : t1->numclients;
+		f2 = g_arenaservers.statusQueryEnabled ? t2->numhumanclients : t2->numclients;
 
 		if( f1 < f2 ) {
 			return 1;
 		}
-		if( f1 == f2 ) {
-			return 0;
+		if( f1 > f2 ) {
+			return -1;
 		}
-		return -1;
 
 	case SORT_GAME:
 		if( t1->gametype < t2->gametype ) {
 			return -1;
 		}
-		if( t1->gametype == t2->gametype ) {
-			return 0;
-		}
-		return 1;
-
-	case SORT_PING:
-		if( t1->pingtime < t2->pingtime ) {
-			return -1;
-		}
-		if( t1->pingtime > t2->pingtime ) {
+		if( t1->gametype > t2->gametype ) {
 			return 1;
 		}
-		return Q_stricmp( t1->hostname, t2->hostname );
 	}
 
-	return 0;
+	if( t1->pingtime < t2->pingtime ) {
+		return -1;
+	}
+	if( t1->pingtime > t2->pingtime ) {
+		return 1;
+	}
+	return Q_stricmp( t1->hostname, t2->hostname );
 }
 
 
@@ -392,8 +1208,8 @@ static void ArenaServers_UpdateMenu( void ) {
 		// servers found
 		if( g_arenaservers.refreshservers && ( g_arenaservers.currentping <= g_arenaservers.numqueriedservers ) ) {
 			// show progress
-			Com_sprintf( g_arenaservers.status.string, MAX_STATUSLENGTH, menu_normal_text[MNT_CNT_SERVERS], g_arenaservers.currentping, g_arenaservers.numqueriedservers);
-			g_arenaservers.statusbar.string  = (char*)menu_normal_text[MNT_SPACETOSTOP];
+			Com_sprintf( g_arenaservers.status.string, MAX_STATUSLENGTH, menu_normal_text[MNT_BROWSER_SCAN_PROGRESS],
+					g_arenaservers.currentping, g_arenaservers.numqueriedservers);
 			qsort( g_arenaservers.serverlist, *g_arenaservers.numservers, sizeof( servernode_t ), ArenaServers_Compare);
 		}
 		else {
@@ -402,20 +1218,9 @@ static void ArenaServers_UpdateMenu( void ) {
 			g_arenaservers.gametype.generic.flags	&= ~QMF_GRAYED;
 			g_arenaservers.sortkey.generic.flags	&= ~QMF_GRAYED;
 			g_arenaservers.showempty.generic.flags	&= ~QMF_GRAYED;
-			g_arenaservers.showfull.generic.flags	&= ~QMF_GRAYED;
 			g_arenaservers.list.generic.flags		&= ~QMF_GRAYED;
 			g_arenaservers.refresh.generic.flags	&= ~QMF_GRAYED;
 			g_arenaservers.go.generic.flags			&= ~QMF_GRAYED;
-
-			// update status bar
-			if(( g_servertype >= AS_GLOBAL1) && ( g_servertype <= AS_GLOBAL5))
-			{
-				g_arenaservers.statusbar.string = quake3worldMessage;
-			}
-			else
-			{
-				g_arenaservers.statusbar.string = "";
-			}
 		}
 	}
 	else {
@@ -423,19 +1228,15 @@ static void ArenaServers_UpdateMenu( void ) {
 		if( g_arenaservers.refreshservers )
 		{
 			strcpy( g_arenaservers.status.string,menu_normal_text[MNT_SCANNINGFORSERVERS] );
-			g_arenaservers.statusbar.string = (char*)menu_normal_text[MNT_SPACETOSTOP];
 
 			// disable controls during refresh
 			g_arenaservers.master.generic.flags		|= QMF_GRAYED;
 			g_arenaservers.gametype.generic.flags	|= QMF_GRAYED;
 			g_arenaservers.sortkey.generic.flags	|= QMF_GRAYED;
 			g_arenaservers.showempty.generic.flags	|= QMF_GRAYED;
-			g_arenaservers.showfull.generic.flags	|= QMF_GRAYED;
 			g_arenaservers.list.generic.flags		|= QMF_GRAYED;
 			g_arenaservers.refresh.generic.flags	|= QMF_GRAYED;
 			g_arenaservers.go.generic.flags			|= QMF_GRAYED;
-
-			g_arenaservers.statusbar.string  = (char*)menu_normal_text[MNT_ACCESSING];
 		}
 		else {
 			if( g_arenaservers.numqueriedservers < 0 ) {
@@ -445,21 +1246,11 @@ static void ArenaServers_UpdateMenu( void ) {
 				strcpy(g_arenaservers.status.string,menu_normal_text[MNT_NO_SERVERS] );
 			}
 
-			// update status bar
-			if(( g_servertype >= AS_GLOBAL1) && ( g_servertype <= AS_GLOBAL5))
-			{
-				g_arenaservers.statusbar.string = quake3worldMessage;
-			}
-			else {
-				g_arenaservers.statusbar.string = "";
-			}
-
 			// end of refresh - set control state
 			g_arenaservers.master.generic.flags		&= ~QMF_GRAYED;
 			g_arenaservers.gametype.generic.flags	&= ~QMF_GRAYED;
 			g_arenaservers.sortkey.generic.flags	&= ~QMF_GRAYED;
 			g_arenaservers.showempty.generic.flags	&= ~QMF_GRAYED;
-			g_arenaservers.showfull.generic.flags	&= ~QMF_GRAYED;
 			g_arenaservers.list.generic.flags		|= QMF_GRAYED;
 			g_arenaservers.refresh.generic.flags	&= ~QMF_GRAYED;
 			g_arenaservers.go.generic.flags			|= QMF_GRAYED;
@@ -484,17 +1275,15 @@ static void ArenaServers_UpdateMenu( void ) {
 		tableptr->servernode = servernodeptr;
 		buff = tableptr->buff;
 
-		// can only cull valid results
-		if( (g_servertype != AS_LOCAL) && servernodeptr->isExpansion && (ui_cdkeychecked2.integer != 1) ) {
-			continue;
-		}
-
-		if( !g_emptyservers && !servernodeptr->numclients ) {
-			continue;
-		}
-
-		if( !g_fullservers && ( servernodeptr->numclients == servernodeptr->maxclients ) ) {
-			continue;
+		if ( g_arenaservers.statusQueryEnabled ) {
+			if ( ( g_emptyservers == PLAYERTYPE_HUMANS_ONLY && !servernodeptr->numhumanclients ) ||
+					( g_emptyservers == PLAYERTYPE_BOTS_AND_HUMANS && !servernodeptr->numclients ) ) {
+				continue;
+			}
+		} else {
+			if( !g_emptyservers && !servernodeptr->numclients ) {
+				continue;
+			}
 		}
 
 		switch( g_gametype ) {
@@ -542,17 +1331,25 @@ static void ArenaServers_UpdateMenu( void ) {
 			pingColor = S_COLOR_RED;
 		}
 
-		Com_sprintf( buff, MAX_LISTBOXWIDTH, "%-23.23s %-11.11s %3d/%3d %-8.8s %3s %s%3d",
-			servernodeptr->hostname, servernodeptr->mapname, servernodeptr->numclients,
-			servernodeptr->maxclients, servernodeptr->gamename,
-			netnames[servernodeptr->nettype], pingColor, servernodeptr->pingtime);
-		if (!servernodeptr->isPure) {	//prev length is 62, we can safely add 2 more chars.
-			strcat(buff, " *");	//mark this unpure server!
+		if ( g_arenaservers.statusQueryEnabled ) {
+			Com_sprintf( buff, MAX_LISTBOXBUFFER, "%s%-22.22s %-11.11s %2d/%3d %3s %-9.9s %2d %s%3d",
+				servernodeptr->numhumanclients ? "^5" : "",		// color servers with players blue
+				servernodeptr->hostname, servernodeptr->mapname, servernodeptr->numhumanclients,
+				servernodeptr->maxclients, gamenames[servernodeptr->gametype], servernodeptr->modname,
+				servernodeptr->numclients - servernodeptr->numhumanclients, pingColor, servernodeptr->pingtime);
+		} else {
+			Com_sprintf( buff, MAX_LISTBOXBUFFER, "%-23.23s %-11.11s %3d/%3d %3s %-9.9s  %s%3d",
+				servernodeptr->hostname, servernodeptr->mapname, servernodeptr->numclients,
+				servernodeptr->maxclients, gamenames[servernodeptr->gametype], servernodeptr->modname,
+				pingColor, servernodeptr->pingtime);
 		}
 		j++;
 	}
 
-//	Com_sprintf( g_arenaservers.status.string, MAX_STATUSLENGTH, "%d of %d Arena Servers.", j, *g_arenaservers.numservers );
+	if ( g_arenaservers.numqueriedservers > 0 && !g_arenaservers.refreshservers ) {
+		// Once query has completed, switch to showing the number of servers filtered instead of query progress.
+		Com_sprintf( g_arenaservers.status.string, MAX_STATUSLENGTH, menu_normal_text[MNT_CNT_SERVERS], j, *g_arenaservers.numservers );
+	}
 
 	g_arenaservers.list.numitems = j;
 	g_arenaservers.list.curvalue = 0;
@@ -635,7 +1432,6 @@ static void ArenaServers_Insert( char* adrstr, char* info, int pingtime )
 {
 	servernode_t*	servernodeptr;
 	char*			s;
-	int				i;
 
 	if ((pingtime >= ArenaServers_MaxPing()) && (g_servertype != AS_FAVORITES))
 	{
@@ -668,43 +1464,20 @@ static void ArenaServers_Insert( char* adrstr, char* info, int pingtime )
 	servernodeptr->minPing    = atoi( Info_ValueForKey( info, "minPing") );
 	servernodeptr->maxPing    = atoi( Info_ValueForKey( info, "maxPing") );
 
-	servernodeptr->isPure	  = atoi( Info_ValueForKey( info, "pure") );
-	servernodeptr->isExpansion= atoi( Info_ValueForKey( info, "vv") );
-
-	s = Info_ValueForKey( info, "nettype" );
-	for (i=0; ;i++)
-	{
-		if (!netnames[i])
-		{
-			servernodeptr->nettype = 0;
-			break;
-		}
-		else if (!Q_stricmp( netnames[i], s ))
-		{
-			servernodeptr->nettype = i;
-			break;
-		}
+	servernodeptr->gametype = atoi( Info_ValueForKey( info, "gametype") );
+	if( servernodeptr->gametype < 0 ) {
+		servernodeptr->gametype = 0;
+	}
+	else if( servernodeptr->gametype > 5 ) {
+		servernodeptr->gametype = 5;
 	}
 
 	s = Info_ValueForKey( info, "game");
-	i = atoi( Info_ValueForKey( info, "gametype") );
-	if( i < 0 ) {
-		i = 0;
-	}
-	else if( i > 5 ) {
-		i = 5;
-	}
 	if( *s ) {
-		servernodeptr->gametype = -1;
-		Q_strncpyz( servernodeptr->gamename, s, sizeof(servernodeptr->gamename) );
+		Q_strncpyz( servernodeptr->modname, s, sizeof(servernodeptr->modname) );
 	}
 	else {
-		servernodeptr->gametype = i;
-		if (servernodeptr->isExpansion)	{
-			Com_sprintf( servernodeptr->gamename, sizeof(servernodeptr->gamename), "vv-%s",gamenames[i]);
-		} else {
-			Q_strncpyz( servernodeptr->gamename, gamenames[i], sizeof(servernodeptr->gamename) );
-		}
+		*servernodeptr->modname = '\0';
 	}
 }
 
@@ -895,6 +1668,11 @@ static void ArenaServers_DoRefresh( void )
 	// trigger at 10Hz intervals
 	g_arenaservers.nextpingtime = uis.realtime + 50;
 
+	if ( g_arenaservers.statusQueryEnabled ) {
+		StatusQuery_Refresh();
+		return;
+	}
+
 	// process ping results
 	maxPing = ArenaServers_MaxPing();
 	for (i=0; i<MAX_PINGREQUESTS; i++)
@@ -1039,7 +1817,6 @@ ArenaServers_StartRefresh
 static void ArenaServers_StartRefresh( void )
 {
 	int		i;
-	char	myargs[32];
 
 	memset( g_arenaservers.serverlist, 0, g_arenaservers.maxservers*sizeof(table_t) );
 
@@ -1047,6 +1824,11 @@ static void ArenaServers_StartRefresh( void )
 	{
 		g_arenaservers.pinglist[i].adrstr[0] = '\0';
 		trap_LAN_ClearPing( i );
+	}
+
+	// abort any pending status requests
+	if ( VMExt_FNAvailable_LAN_ServerStatus_Ext() ) {
+		VMExt_FN_LAN_ServerStatus_Ext( NULL, NULL, 0, NULL, 0 );
 	}
 
 	g_arenaservers.refreshservers    = qtrue;
@@ -1077,39 +1859,7 @@ static void ArenaServers_StartRefresh( void )
 //			i = 1;
 //		}
 
-		switch( g_arenaservers.gametype.curvalue ) {
-		default:
-		case GAMES_ALL:
-			myargs[0] = 0;
-			break;
-
-		case GAMES_FFA:
-			strcpy( myargs, " ffa" );
-			break;
-
-		case GAMES_TEAMPLAY:
-			strcpy( myargs, " team" );
-			break;
-
-		case GAMES_TOURNEY:
-			strcpy( myargs, " tourney" );
-			break;
-
-		case GAMES_CTF:
-			strcpy( myargs, " ctf" );
-			break;
-		}
-
-
-		if (g_emptyservers) {
-			strcat(myargs, " empty");
-		}
-
-		if (g_fullservers) {
-			strcat(myargs, " full");
-		}
-
-		trap_Cmd_ExecuteText( EXEC_APPEND, va( "globalservers %d %d%s\n", i, (int)trap_Cvar_VariableValue( "protocol" ), myargs ) );
+		trap_Cmd_ExecuteText( EXEC_APPEND, va( "globalservers %d %d empty full\n", i, (int)trap_Cvar_VariableValue( "protocol" ) ) );
 	}
 }
 
@@ -1248,13 +1998,6 @@ void ArenaServers_SetType( int type )
 		g_arenaservers.numservers = &g_numfavoriteservers;
 		g_arenaservers.maxservers = MAX_FAVORITESERVERS;
 		break;
-
-//	case AS_MPLAYER:
-//		g_arenaservers.remove.generic.flags |= (QMF_INACTIVE|QMF_HIDDEN);
-//		g_arenaservers.serverlist = g_mplayerserverlist;
-//		g_arenaservers.numservers = &g_nummplayerservers;
-//		g_arenaservers.maxservers = MAX_GLOBALSERVERS;
-//		break;
 	}
 
 	if( !*g_arenaservers.numservers ) {
@@ -1265,8 +2008,8 @@ void ArenaServers_SetType( int type )
 		g_arenaservers.currentping       = *g_arenaservers.numservers;
 		g_arenaservers.numqueriedservers = *g_arenaservers.numservers;
 		ArenaServers_UpdateMenu();
+		strcpy(g_arenaservers.status.string,menu_normal_text[MNT_HITREFRESH]);
 	}
-	strcpy(g_arenaservers.status.string,menu_normal_text[MNT_HITREFRESH]);
 }
 
 
@@ -1363,14 +2106,12 @@ static void ArenaServers_Event( void* ptr, int event ) {
 		ArenaServers_UpdateMenu();
 		break;
 
-	case ID_SHOW_FULL:
-		trap_Cvar_SetValue( "ui_browserShowFull", g_arenaservers.showfull.curvalue );
-		g_fullservers = g_arenaservers.showfull.curvalue;
-		ArenaServers_UpdateMenu();
-		break;
-
 	case ID_SHOW_EMPTY:
-		trap_Cvar_SetValue( "ui_browserShowEmpty", g_arenaservers.showempty.curvalue );
+		if ( g_arenaservers.statusQueryEnabled ) {
+			trap_Cvar_SetValue( "ui_browserPlayerType", g_arenaservers.showempty.curvalue );
+		} else {
+			trap_Cvar_SetValue( "ui_browserShowEmpty", g_arenaservers.showempty.curvalue );
+		}
 		g_emptyservers = g_arenaservers.showempty.curvalue;
 		ArenaServers_UpdateMenu();
 		break;
@@ -1387,6 +2128,12 @@ static void ArenaServers_Event( void* ptr, int event ) {
 
 	case ID_SCROLL_DOWN:
 		ScrollList_Key( &g_arenaservers.list, K_DOWNARROW );
+		break;
+
+	case ID_SHOWINFO:
+		if ( g_arenaservers.table[g_arenaservers.list.curvalue].servernode ) {
+			BrowserServerInfo_InitMenu( g_arenaservers.table[g_arenaservers.list.curvalue].servernode->adrstr );
+		}
 		break;
 
 	case ID_FAVORITE:
@@ -1468,11 +2215,20 @@ void ArenaServers_Graphics (void)
 	UI_DrawHandlePic(  87, 366, 268,  18, uis.whiteShader);	// Bottom line
 
 	UI_DrawProportionalString(  105, 177, menu_normal_text[MNT_HOSTNAME],UI_TINYFONT, colorTable[CT_BLACK]);
-	UI_DrawProportionalString(  296, 177, menu_normal_text[MNT_MAP],UI_TINYFONT, colorTable[CT_BLACK]);
-	UI_DrawProportionalString(  410, 177, menu_normal_text[MNT_PLAYERS],UI_TINYFONT, colorTable[CT_BLACK]);
-	UI_DrawProportionalString(  456, 177, menu_normal_text[MNT_TYPE],UI_TINYFONT, colorTable[CT_BLACK]);
-	UI_DrawProportionalString(  528, 177, menu_normal_text[MNT_PORT],UI_TINYFONT, colorTable[CT_BLACK]);
-	UI_DrawProportionalString(  569, 177, menu_normal_text[MNT_PING],UI_TINYFONT, colorTable[CT_BLACK]);
+	if ( g_arenaservers.statusQueryEnabled ) {
+		UI_DrawProportionalString(  288, 177, menu_normal_text[MNT_MAP],UI_TINYFONT, colorTable[CT_BLACK]);
+		UI_DrawProportionalString(  394, 177, menu_normal_text[MNT_PLAYERS],UI_TINYFONT, colorTable[CT_BLACK]);
+		UI_DrawProportionalString(  440, 177, menu_normal_text[MNT_TYPE],UI_TINYFONT, colorTable[CT_BLACK]);
+		UI_DrawProportionalString(  472, 177, menu_normal_text[MNT_BROWSER_MOD],UI_TINYFONT, colorTable[CT_BLACK]);
+		UI_DrawProportionalString(  552, 177, menu_normal_text[MNT_BROWSER_BOTS],UI_TINYFONT, colorTable[CT_BLACK]);
+		UI_DrawProportionalString(  576, 177, menu_normal_text[MNT_PING],UI_TINYFONT, colorTable[CT_BLACK]);
+	} else {
+		UI_DrawProportionalString(  296, 177, menu_normal_text[MNT_MAP],UI_TINYFONT, colorTable[CT_BLACK]);
+		UI_DrawProportionalString(  410, 177, menu_normal_text[MNT_PLAYERS],UI_TINYFONT, colorTable[CT_BLACK]);
+		UI_DrawProportionalString(  456, 177, menu_normal_text[MNT_TYPE],UI_TINYFONT, colorTable[CT_BLACK]);
+		UI_DrawProportionalString(  488, 177, menu_normal_text[MNT_BROWSER_MOD],UI_TINYFONT, colorTable[CT_BLACK]);
+		UI_DrawProportionalString(  576, 177, menu_normal_text[MNT_PING],UI_TINYFONT, colorTable[CT_BLACK]);
+	}
 
 	UI_DrawProportionalString(  74,  27, "819",UI_RIGHT|UI_TINYFONT, colorTable[CT_BLACK]);
 	UI_DrawProportionalString(  74, 149, "42",UI_RIGHT|UI_TINYFONT, colorTable[CT_BLACK]);
@@ -1550,6 +2306,8 @@ static void ArenaServers_MenuInit( void )
 
 	// zero set all our globals
 	memset( &g_arenaservers, 0 ,sizeof(arenaservers_t) );
+
+	g_arenaservers.statusQueryEnabled = StatusQuery_Enabled();
 
 	ArenaServers_Cache();
 
@@ -1648,29 +2406,13 @@ static void ArenaServers_MenuInit( void )
 	g_arenaservers.sortkey.listnames				= sortkey_items;
 
 
-	g_arenaservers.showfull.generic.type			= MTYPE_SPINCONTROL;
-	g_arenaservers.showfull.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
-	g_arenaservers.showfull.generic.callback		= ArenaServers_Event;
-	g_arenaservers.showfull.generic.id				= ID_SHOW_FULL;
-	g_arenaservers.showfull.generic.x				= server_buttons[3][0];
-	g_arenaservers.showfull.generic.y				= server_buttons[3][1];
-	g_arenaservers.showfull.textEnum				= MBT_SHOWFULL;
-	g_arenaservers.showfull.textcolor				= CT_BLACK;
-	g_arenaservers.showfull.textcolor2				= CT_WHITE;
-	g_arenaservers.showfull.color					= CT_DKPURPLE1;
-	g_arenaservers.showfull.color2					= CT_LTPURPLE1;
-	g_arenaservers.showfull.width					= 80;
-	g_arenaservers.showfull.textX					= 5;
-	g_arenaservers.showfull.textY					= 2;
-	g_arenaservers.showfull.listnames				= noyes_items;
-
 	g_arenaservers.showempty.generic.type			= MTYPE_SPINCONTROL;
 	g_arenaservers.showempty.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	g_arenaservers.showempty.generic.callback		= ArenaServers_Event;
 	g_arenaservers.showempty.generic.id				= ID_SHOW_EMPTY;
-	g_arenaservers.showempty.generic.x				= server_buttons[4][0];
-	g_arenaservers.showempty.generic.y				= server_buttons[4][1];
-	g_arenaservers.showempty.textEnum				= MBT_SHOWEMPTY;
+	g_arenaservers.showempty.generic.x				= server_buttons[3][0];
+	g_arenaservers.showempty.generic.y				= server_buttons[3][1];
+	g_arenaservers.showempty.textEnum				= g_arenaservers.statusQueryEnabled ? MBT_BROWSER_PLAYERTYPE : MBT_SHOWEMPTY;
 	g_arenaservers.showempty.textcolor				= CT_BLACK;
 	g_arenaservers.showempty.textcolor2				= CT_WHITE;
 	g_arenaservers.showempty.color					= CT_DKPURPLE1;
@@ -1678,7 +2420,7 @@ static void ArenaServers_MenuInit( void )
 	g_arenaservers.showempty.width					= 80;
 	g_arenaservers.showempty.textX					= 5;
 	g_arenaservers.showempty.textY					= 2;
-	g_arenaservers.showempty.listnames				= noyes_items;
+	g_arenaservers.showempty.listnames				= g_arenaservers.statusQueryEnabled ? playerstatus_items : noyes_items;
 
 	g_arenaservers.list.generic.type			= MTYPE_SCROLLLIST;
 	g_arenaservers.list.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
@@ -1727,6 +2469,23 @@ static void ArenaServers_MenuInit( void )
 	g_arenaservers.down.color2  				= CT_LTGOLD1;
 	g_arenaservers.down.generic.name			= "menu/common/arrow_dn_16.tga";
 	g_arenaservers.down.textEnum				= MBT_ARROW_DOWN;
+
+	g_arenaservers.showinfo.generic.type			= MTYPE_BITMAP;
+	g_arenaservers.showinfo.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS|QMF_MOUSEONLY;
+	g_arenaservers.showinfo.generic.callback		= ArenaServers_Event;
+	g_arenaservers.showinfo.generic.id				= ID_SHOWINFO;
+	g_arenaservers.showinfo.generic.x				= 285;
+	g_arenaservers.showinfo.generic.y				= 391;
+	g_arenaservers.showinfo.width					= MENU_BUTTON_MED_WIDTH + 15;
+	g_arenaservers.showinfo.height					= MENU_BUTTON_MED_HEIGHT;
+	g_arenaservers.showinfo.generic.name			= BUTTON_GRAPHIC_LONGRIGHT;
+	g_arenaservers.showinfo.textEnum				= MBT_INGAMESERVERDATA;
+	g_arenaservers.showinfo.color					= CT_DKPURPLE1;
+	g_arenaservers.showinfo.color2					= CT_LTPURPLE1;
+	g_arenaservers.showinfo.textX					= 5;
+	g_arenaservers.showinfo.textY					= 2;
+	g_arenaservers.showinfo.textcolor				= CT_BLACK;
+	g_arenaservers.showinfo.textcolor2				= CT_WHITE;
 
 	g_arenaservers.favorite.generic.type			= MTYPE_BITMAP;
 	g_arenaservers.favorite.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS|QMF_MOUSEONLY;
@@ -1828,26 +2587,27 @@ static void ArenaServers_MenuInit( void )
 	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.master );
 	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.gametype );
 	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.sortkey );
-	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.showfull);
 	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.showempty );
 
 	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.mappic );
 	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.list );
 	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.status );
 
-//	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.statusbar );
 	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.up );
 	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.down );
 
 	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.refresh );
 	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.stoprefresh );
 	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.remove );
+	if ( g_arenaservers.statusQueryEnabled ) {
+		Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.showinfo );
+	}
 	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.favorite );
 	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.go );
 
 	ArenaServers_LoadFavorites();
 
-	g_servertype = Com_Clamp( 0, 3, ui_browserMaster.integer );
+	g_servertype = Com_Clamp( 0, NUM_MASTER_ITEMS - 1, ui_browserMaster.integer );
 	g_arenaservers.master.curvalue = g_servertype;
 
 	g_gametype = Com_Clamp( 0, 4, ui_browserGameType.integer );
@@ -1856,10 +2616,11 @@ static void ArenaServers_MenuInit( void )
 	g_sortkey = Com_Clamp( 0, 4, ui_browserSortKey.integer );
 	g_arenaservers.sortkey.curvalue = g_sortkey;
 
-	g_fullservers = Com_Clamp( 0, 1, ui_browserShowFull.integer );
-	g_arenaservers.showfull.curvalue = g_fullservers;
-
-	g_emptyservers = Com_Clamp( 0, 1, ui_browserShowEmpty.integer );
+	if ( g_arenaservers.statusQueryEnabled ) {
+		g_emptyservers = Com_Clamp( 0, 2, ui_browserPlayerType.integer );
+	} else {
+		g_emptyservers = Com_Clamp( 0, 1, ui_browserShowEmpty.integer );
+	}
 	g_arenaservers.showempty.curvalue = g_emptyservers;
 
 	// force to initial state and refresh

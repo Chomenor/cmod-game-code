@@ -557,10 +557,10 @@ void Bitmap_Draw( menubitmap_s *b )
 	{
 		b->shader = trap_R_RegisterShaderNoMip( b->generic.name );
 
-//		if (!b->shader && b->errorpic)
-//		{
-///			b->shader = trap_R_RegisterShaderNoMip( b->errorpic );
-//		}
+		if (!b->shader && b->errorpic)
+		{
+			b->shader = trap_R_RegisterShaderNoMip( b->errorpic );
+		}
 	}
 
 	if (b->focuspic && !b->focusshader)

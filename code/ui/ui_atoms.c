@@ -335,6 +335,34 @@ void UI_DrawBannerString( int x, int y, const char* str, int style, vec4_t color
 
 /*
 =================
+UI_TruncateStringWidth
+
+Truncates string to fit within specified pixel width when drawn with UI_SMALLFONT.
+=================
+*/
+void UI_TruncateStringWidth( char *source, int width ) {
+	while ( *source ) {
+		if ( Q_IsColorString( source ) ) {
+			source += 2;
+			continue;
+		} else {
+			int ch = *source & 255;
+			int charWidth = propMap[ch][2];
+			if ( charWidth > 0 ) {
+				width -= charWidth;
+			}
+			width -= PROP_GAP_WIDTH;
+			if ( width < 0 ) {
+				*source = '\0';
+				return;
+			}
+			source++;
+		}
+	}
+}
+
+/*
+=================
 UI_ProportionalStringWidth
 =================
 */
@@ -529,7 +557,11 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 			if ( Q_IsColorString( s ) )
 			{
 				colorI = ColorIndex( *(s+1) );
-				trap_R_SetColor( g_color_table[colorI] );
+				if ( colorI == 0 && ( style & UI_NO_BLACK ) ) {
+					trap_R_SetColor( colorTable[CT_DKBROWN1] );
+				} else {
+					trap_R_SetColor( g_color_table[colorI] );
+				}
 				s += 2;
 				continue;
 			}
@@ -571,7 +603,11 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 			if ( Q_IsColorString( s ) )
 			{
 				colorI = ColorIndex( *(s+1) );
-				trap_R_SetColor( g_color_table[colorI] );
+				if ( colorI == 0 && ( style & UI_NO_BLACK ) ) {
+					trap_R_SetColor( colorTable[CT_DKBROWN1] );
+				} else {
+					trap_R_SetColor( g_color_table[colorI] );
+				}
 				s += 2;
 				continue;
 			}
@@ -612,7 +648,11 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 			if ( Q_IsColorString( s ) )
 			{
 				colorI = ColorIndex( *(s+1) );
-				trap_R_SetColor( g_color_table[colorI] );
+				if ( colorI == 0 && ( style & UI_NO_BLACK ) ) {
+					trap_R_SetColor( colorTable[CT_DKBROWN1] );
+				} else {
+					trap_R_SetColor( g_color_table[colorI] );
+				}
 				s += 2;
 				continue;
 			}
@@ -750,15 +790,15 @@ void UI_DrawProportionalString( int x, int y, const char* str, int style, vec4_t
 
 	if (style & UI_TINYFONT)
 	{
-		UI_DrawProportionalString2( x, y, str, color, charstyle, uis.charsetPropTiny );
+		UI_DrawProportionalString2( x, y, str, color, charstyle | ( style & UI_NO_BLACK ), uis.charsetPropTiny );
 	}
 	else if (style & UI_BIGFONT)
 	{
-		UI_DrawProportionalString2( x, y, str, color, charstyle, uis.charsetPropBig );
+		UI_DrawProportionalString2( x, y, str, color, charstyle | ( style & UI_NO_BLACK ), uis.charsetPropBig );
 	}
 	else
 	{
-		UI_DrawProportionalString2( x, y, str, color, charstyle, uis.charsetProp );
+		UI_DrawProportionalString2( x, y, str, color, charstyle | ( style & UI_NO_BLACK ), uis.charsetProp );
 	}
 }
 
@@ -2026,6 +2066,12 @@ void UI_LoadMenuText()
 	menu_normal_text[MNT_IGNORES_TITLE] = "ELITE FORCE HOLOMATCH : IGNORED PLAYERS";
 	menu_normal_text[MNT_IGNORES] = "IGNORED PLAYERS";
 	menu_normal_text[MNT_IGNORES_PLAYERLIST] = "PLAYERLIST";
+	menu_normal_text[MNT_BROWSER_PLAYER_COUNT] = "PLAYER COUNT";
+	menu_normal_text[MNT_BROWSER_HUMANS_ONLY] = "HUMAN PLAYERS ONLY";
+	menu_normal_text[MNT_BROWSER_BOTS_AND_HUMANS] = "BOTS OR HUMANS";
+	menu_normal_text[MNT_BROWSER_MOD] = "MOD";
+	menu_normal_text[MNT_BROWSER_BOTS] = "BOTS";
+	menu_normal_text[MNT_BROWSER_SCAN_PROGRESS] = "Scanning %d of %d Servers...";
 	menu_normal_text[MNT_ALTSWAP_AUTO] = "AUTO";
 	menu_normal_text[MNT_ALTSWAP_CUSTOM] = "CUSTOM";
 
@@ -2036,6 +2082,11 @@ void UI_LoadMenuText()
 		menu_normal_text[MNT_IGNORES_TITLE] = "ELITE FORCE HOLOMATCH: IGNORIERTE SPIELER";
 		menu_normal_text[MNT_IGNORES] = "IGNORIERTE SPIELER";
 		menu_normal_text[MNT_IGNORES_PLAYERLIST] = "SPIELERLISTE";
+		menu_normal_text[MNT_BROWSER_PLAYER_COUNT] = "SPIELERZAHL";
+		menu_normal_text[MNT_BROWSER_HUMANS_ONLY] = "NUR MENSCHLICHE SPIELER";
+		menu_normal_text[MNT_BROWSER_BOTS_AND_HUMANS] = "BOTS ODER MENSCHEN";
+		menu_normal_text[MNT_BROWSER_MOD] = "MODIFIKATION";
+		menu_normal_text[MNT_BROWSER_SCAN_PROGRESS] = "Scannen von %d von %d Servern...";
 		menu_normal_text[MNT_ALTSWAP_AUTO] = "AUTOMATISCH";
 		menu_normal_text[MNT_ALTSWAP_CUSTOM] = "BENUTZER";
 
@@ -2062,6 +2113,11 @@ void UI_LoadMenuText()
 		menu_normal_text[MNT_IGNORES_TITLE] = "ELITE FORCE HOLOMATCH : JOUEURS IGNOREE";
 		menu_normal_text[MNT_IGNORES] = "JOUEURS IGNOREE";
 		menu_normal_text[MNT_IGNORES_PLAYERLIST] = "LISTE DES JOUEURS";
+		menu_normal_text[MNT_BROWSER_PLAYER_COUNT] = "NOMBRE DE JOUEURS";
+		menu_normal_text[MNT_BROWSER_HUMANS_ONLY] = "JOUEURS HUMAINS UNIQUEMENT";
+		menu_normal_text[MNT_BROWSER_BOTS_AND_HUMANS] = "BOTS OU HUMAINS";
+		menu_normal_text[MNT_BROWSER_MOD] = "MODIF.";
+		menu_normal_text[MNT_BROWSER_SCAN_PROGRESS] = "Analyse de %d des %d serveurs...";
 		menu_normal_text[MNT_ALTSWAP_AUTO] = "AUTO";
 		menu_normal_text[MNT_ALTSWAP_CUSTOM] = "SUR MESURE";
 	}
@@ -2179,6 +2235,7 @@ void UI_LoadButtonText()
 	// add some new definitions not in the text file
 	trap_Cvar_VariableStringBuffer( "g_language", language, 32 );
 
+	menu_button_text[MBT_INGAMESERVERDATA][1] = "SHOW SERVER INFORMATION";
 	menu_button_text[MBT_MOTD][0] = "HOST MOTD :";
 	menu_button_text[MBT_MOTD][1] = "MESSAGE OF THE DAY DURING CONNECTION BUILDUP";
 	menu_button_text[MBT_INGAMEIGNORES][0] = "IGNORES";
@@ -2195,6 +2252,8 @@ void UI_LoadButtonText()
 	menu_button_text[MBT_ASPECTCORRECTION][1] = "ENABLE OR DISABLE ASPECT RATIO CORRECTION";
 	menu_button_text[MBT_CENTERHUD][0] = "CENTER HUD";
 	menu_button_text[MBT_CENTERHUD][1] = "MOVE HUD TOWARDS CENTER OF SCREEN";
+	menu_button_text[MBT_BROWSER_PLAYERTYPE][0] = "PLAYER TYPE";
+	menu_button_text[MBT_BROWSER_PLAYERTYPE][1] = "FILTER BY AMOUNT OF PLAYERS ON SERVER";
 
 	menu_button_text[MBT_ALTSWAP_CONTROL][0] = "ALT FIRE SWAPPING";
 	menu_button_text[MBT_ALTSWAP_CONTROL][1] = "SELECT ALT FIRE BUTTON SWAPPING MODE";
@@ -2220,6 +2279,7 @@ void UI_LoadButtonText()
 	}
 
 	if ( !Q_stricmp( language, "deutsch" ) ) {
+		menu_button_text[MBT_INGAMESERVERDATA][1] = "SERVER-INFORMATION ANZEIGEN";
 		menu_button_text[MBT_MOTD][0] = "HOST MOTD :";
 		menu_button_text[MBT_MOTD][1] = "NACHRICHT DES TAGES WAEHREND DES VERBINDUNGSAUFBAUS";
 		menu_button_text[MBT_INGAMEIGNORES][0] = "IGNORES";
@@ -2236,6 +2296,8 @@ void UI_LoadButtonText()
 		menu_button_text[MBT_ASPECTCORRECTION][1] = "AKTIVIEREN ODER DEAKTIVIEREN DER SEITENVERHÄLTNISKORREKTUR";
 		menu_button_text[MBT_CENTERHUD][0] = "ZENTRUM HUD";
 		menu_button_text[MBT_CENTERHUD][1] = "HUD ZUR MITTE DES BILDSCHIRMS VERSCHIEBEN";
+		menu_button_text[MBT_BROWSER_PLAYERTYPE][0] = "SPIELERTYP";
+		menu_button_text[MBT_BROWSER_PLAYERTYPE][1] = "FILTER NACH ANZAHL DER SPIELER AUF DEM SERVER";
 
 		menu_button_text[MBT_ALTSWAP_CONTROL][0] = "ALT FEUER WECHSELN";
 		menu_button_text[MBT_ALTSWAP_CONTROL][1] = "MODUS FÜR DAS ALTERNATIVE FEUER AUSWÄHLEN";
@@ -2261,6 +2323,7 @@ void UI_LoadButtonText()
 		}
 
 	} else if ( !Q_stricmp( language, "francais" ) ) {
+		menu_button_text[MBT_INGAMESERVERDATA][1] = "AFFICHER INFORMATIONS SERVEUR";
 		menu_button_text[MBT_ASSIMILATION][1] = "JOUEURS TUE JOINDRENT LES BORG";
 		menu_button_text[MBT_SPECIALTIES][1] = "JOUERS DOIVENT SELECTER UNE CLASSE";
 		menu_button_text[MBT_DISINTEGRATION][1] = "UN SEUL COUP REUSSI CAUSE LE MORT IMMEDIATEMENT";
@@ -2288,6 +2351,8 @@ void UI_LoadButtonText()
 		menu_button_text[MBT_ASPECTCORRECTION][1] = "ACTIVER OU DÉSACTIVER LA CORRECTION DU RATIO D'AFFICHAGE";
 		menu_button_text[MBT_CENTERHUD][0] = "HUD CENTRAL";
 		menu_button_text[MBT_CENTERHUD][1] = "DÉPLACER LE HUD VERS LE CENTRE DE L'ÉCRAN";
+		menu_button_text[MBT_BROWSER_PLAYERTYPE][0] = "TYPE DE JOUEUR";
+		menu_button_text[MBT_BROWSER_PLAYERTYPE][1] = "FILTREZ PAR QUANTITÉ DE JOUEURS SUR SERVEUR";
 
 		menu_button_text[MBT_ALTSWAP_CONTROL][0] = "ÉCHANGE DE FEU ALT";
 		menu_button_text[MBT_ALTSWAP_CONTROL][1] = "SÉLECTIONNER LE MODE D'ÉCHANGE DU BOUTON ALT FIRE";

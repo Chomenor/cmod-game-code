@@ -8,6 +8,22 @@
 #include "ui_local.h"
 #include "stv_version.h"
 
+/*
+=================
+UI_GetVersionString
+
+Allow engine to override version string displayed in menu pane.
+=================
+*/
+static void UI_GetVersionString( char *buffer, unsigned int bufSize ) {
+	if ( VMExt_GVCommand( buffer, bufSize, "ui_version_string" ) && *buffer ) {
+		// Got version string from engine
+		return;
+	}
+
+	Q_strncpyz( buffer, Q3_VERSION, bufSize );
+}
+
 uiStatic_t		uis;
 qboolean		m_entersound;		// after a frame, so caching won't disrupt the sound
 static void UI_LanguageFilename(char *baseName,char *baseExtension,char *finalName);
@@ -1857,7 +1873,11 @@ void UI_MenuFrame(menuframework_s *menu)
 	}
 
 	// Print version
-	UI_DrawProportionalString(  371, 445, Q3_VERSION,UI_TINYFONT, colorTable[CT_BLACK]);
+	{
+		char version[64];
+		UI_GetVersionString( version, sizeof( version ) );
+		UI_DrawProportionalString(  371, 445, version, UI_TINYFONT, colorTable[CT_BLACK]);
+	}
 }
 
 /*
@@ -1907,7 +1927,11 @@ void UI_MenuFrame2(menuframework_s *menu)
 	trap_R_SetColor(NULL);
 
 	// Print version
-	UI_DrawProportionalString(  371, 445, Q3_VERSION,UI_TINYFONT, colorTable[CT_BLACK]);
+	{
+		char version[64];
+		UI_GetVersionString( version, sizeof( version ) );
+		UI_DrawProportionalString(  371, 445, version, UI_TINYFONT, colorTable[CT_BLACK]);
+	}
 }
 
 #define MAXMENUTEXT 15000

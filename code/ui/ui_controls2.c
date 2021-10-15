@@ -2135,7 +2135,9 @@ void SetupMenu_TopButtons(menuframework_s *menu,int menuType,menuaction_s *s_vid
 	Menu_AddItem( menu, ( void * )&s_controls_game);
 	Menu_AddItem( menu, ( void * )&s_controls_player);
 	Menu_AddItem( menu, ( void * )&s_controls_default);
-	Menu_AddItem( menu, ( void * )&s_controls_cdkey);
+	if ( !VMExt_GVCommandInt( "ui_no_cd_key", 0 ) ) {
+		Menu_AddItem( menu, ( void * )&s_controls_cdkey);
+	}
 
 	switch (menuType)
 	{

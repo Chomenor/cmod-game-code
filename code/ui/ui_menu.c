@@ -1855,6 +1855,9 @@ void UI_Setup_MenuButtons(void)
 
 	for (i=0;i<max;++i)
 	{
+		if ( i == 6 && VMExt_GVCommandInt( "ui_no_cd_key", 0 ) ) {
+			continue;
+		}
 		UI_DrawHandlePic(setup_menubuttons[i][0] - 14,setup_menubuttons[i][1], MENU_BUTTON_MED_HEIGHT, MENU_BUTTON_MED_HEIGHT, uis.graphicButtonLeftEnd);
 	}
 

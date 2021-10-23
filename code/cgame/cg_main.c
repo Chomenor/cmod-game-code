@@ -13,7 +13,6 @@ void CG_Init( int serverMessageNum, int serverCommandSequence );
 void CG_Shutdown( void );
 void CG_LoadIngameText(void);
 void CG_LoadObjectivesForMap(void);
-void BG_LoadItemNames(void);
 
 extern void FX_InitSinTable(void);
 

@@ -8,9 +8,6 @@
 #include "g_local.h"
 #include "g_groups.h"
 
-extern qboolean BG_BorgTransporting( playerState_t *ps );
-extern void BG_LoadItemNames(void);
-
 level_locals_t	level;
 extern char	races[256];	//this is evil!
 extern qboolean levelExiting;

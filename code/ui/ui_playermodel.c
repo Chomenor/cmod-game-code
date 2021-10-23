@@ -472,7 +472,6 @@ void precacheSpecificGroups(char *race_list)
 	}
 }
 
-extern char* BG_RegisterRace( const char *name );
 /*
 =================
 PlayerModel_BuildList

@@ -3,7 +3,6 @@
 #include "g_local.h"
 #include "g_groups.h"
 
-extern char* BG_RegisterRace( const char *name );
 extern void SetPlayerClassCvar(gentity_t *ent);
 extern void SetClass( gentity_t *ent, char *s, char *teamName );
 extern void BroadcastClassChange( gclient_t *client, pclass_t oldPClass );

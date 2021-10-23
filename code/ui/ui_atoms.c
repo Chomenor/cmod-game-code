@@ -27,7 +27,6 @@ static void UI_GetVersionString( char *buffer, unsigned int bufSize ) {
 uiStatic_t		uis;
 qboolean		m_entersound;		// after a frame, so caching won't disrupt the sound
 static void UI_LanguageFilename(char *baseName,char *baseExtension,char *finalName);
-void BG_LoadItemNames(void);
 
 // these are here so the functions in q_shared.c can link
 #ifndef UI_HARD_LINKED

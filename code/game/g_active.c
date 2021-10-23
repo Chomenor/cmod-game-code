@@ -6,7 +6,6 @@
 extern void SP_misc_ammo_station( gentity_t *ent );
 extern void ammo_station_finish_spawning ( gentity_t *self );
 extern int	borgQueenClientNum;
-extern qboolean BG_BorgTransporting( playerState_t *ps );
 
 /*
 ==============

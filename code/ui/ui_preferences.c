@@ -15,8 +15,6 @@ GAME OPTIONS MENU
 #define NUM_CROSSHAIRS		12
 #define PIC_BUTTON2			"menu/common/full_button2.tga"
 
-extern void BG_LoadItemNames(void);
-
 // Precache stuff for Game Options Menu
 static struct
 {

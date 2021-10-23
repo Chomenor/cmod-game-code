@@ -29,7 +29,6 @@ const char	*cg_customSoundNames[MAX_CUSTOM_SOUNDS] = {
 
 int timeParam;
 int entNum;
-extern char* BG_RegisterRace( const char *name );
 
 
 /*

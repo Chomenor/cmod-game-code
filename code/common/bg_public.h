@@ -670,9 +670,12 @@ gitem_t	*BG_FindItemForWeapon( weapon_t weapon );
 gitem_t	*BG_FindItemForAmmo( weapon_t weapon );
 gitem_t	*BG_FindItemForPowerup( powerup_t pw );
 gitem_t	*BG_FindItemForHoldable( holdable_t pw );
+void BG_LoadItemNames( void );
+char *BG_RegisterRace( const char *name );
 #define	ITEM_INDEX(x) ((x)-bg_itemlist)
 
-qboolean	BG_CanItemBeGrabbed( const entityState_t *ent, const playerState_t *ps );
+qboolean BG_CanItemBeGrabbed( const entityState_t *ent, const playerState_t *ps );
+qboolean BG_BorgTransporting( playerState_t *ps );
 
 
 // g_dmflags->integer flags

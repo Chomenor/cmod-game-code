@@ -856,7 +856,6 @@ void UI_DrawPlayer( float x, float y, float w, float h, playerInfo_t *pi, int ti
 UI_RegisterClientSkin
 ==========================
 */
-extern char* BG_RegisterRace( const char *name );
 static qboolean UI_RegisterClientSkin( playerInfo_t *pi, const char *modelName, const char *skinName ) {
 	char		filename[MAX_QPATH];
 

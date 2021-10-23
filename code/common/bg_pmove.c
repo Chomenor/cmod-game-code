@@ -29,14 +29,6 @@ int		c_pmove = 0;
 
 #define	PHASER_RECHARGE_TIME	100
 
-qboolean BG_BorgTransporting( playerState_t *ps )
-{
-	if ( ps->persistant[PERS_CLASS] == PC_BORG && bg_itemlist[ps->stats[STAT_HOLDABLE_ITEM]].giTag == HI_TRANSPORTER && ps->stats[STAT_USEABLE_PLACED] == 2 )
-	{//A player who has an item and it's set to 2 - meaning flight
-		return qtrue;
-	}
-	return qfalse;
-}
 /*
 ===============
 PM_AddEvent

@@ -1115,12 +1115,14 @@ static int QDECL ArenaServers_Compare( const void *arg1, const void *arg2 ) {
 		if ( x ) {
 			return x;
 		}
+		break;
 
 	case SORT_MAP:
 		x = Q_stricmp( t1->mapname, t2->mapname );
 		if ( x ) {
 			return x;
 		}
+		break;
 
 	case SORT_CLIENTS:
 		f1 = g_arenaservers.statusQueryEnabled ? t1->numhumanclients : t1->numclients;
@@ -1132,6 +1134,7 @@ static int QDECL ArenaServers_Compare( const void *arg1, const void *arg2 ) {
 		if( f1 > f2 ) {
 			return -1;
 		}
+		break;
 
 	case SORT_GAME:
 		if( t1->gametype < t2->gametype ) {
@@ -1140,6 +1143,7 @@ static int QDECL ArenaServers_Compare( const void *arg1, const void *arg2 ) {
 		if( t1->gametype > t2->gametype ) {
 			return 1;
 		}
+		break;
 	}
 
 	if( t1->pingtime < t2->pingtime ) {

@@ -129,3 +129,35 @@ int VMExt_FN_LAN_ServerStatus_Ext( const char *serverAddress, char *serverStatus
 	}
 	return 0;
 }
+
+static vmext_cached_value_t trap_altswap_set_state;
+
+/*
+================
+VMExt_FNAvailable_AltSwap_SetState
+
+Returns qtrue if function is available.
+================
+*/
+qboolean VMExt_FNAvailable_AltSwap_SetState( void ) {
+	VMExt_UpdateCachedValue( "trap_altswap_set_state", &trap_altswap_set_state );
+	return trap_altswap_set_state.value ? qtrue : qfalse;
+}
+
+/*
+================
+VMExt_FN_AltSwap_SetState
+
+Sets whether the engine should swap the alt fire and primary fire buttons.
+================
+*/
+void VMExt_FN_AltSwap_SetState( qboolean swapState ) {
+	VMExt_UpdateCachedValue( "trap_altswap_set_state", &trap_altswap_set_state );
+	if ( trap_altswap_set_state.value ) {
+		SYSCALL( trap_altswap_set_state.value,
+			( qboolean swapState ),
+			( swapState ),
+			( trap_altswap_set_state.value, swapState )
+		);
+	}
+}

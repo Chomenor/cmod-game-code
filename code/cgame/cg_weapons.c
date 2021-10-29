@@ -28,7 +28,7 @@
 // 's' - (swapped) use swapped alt fire configuration
 
 // Current alt swap mode sent to the server.
-static int serverAltSwapActive;
+static int currentServerSwaps;
 
 // Copied from server 'altSwapPrefs' string, but with undefined values replaced with calculated defaults.
 static char serverAltSwapPrefs[WP_NUM_WEAPONS];
@@ -98,7 +98,7 @@ altFireMode_t CG_AltFire_PredictionMode( weapon_t weapon ) {
 	if ( serverPref == 'F' )
 		return ALTMODE_ALT_ONLY;
 
-	if ( serverAltSwapActive & ( 1 << index ) )
+	if ( currentServerSwaps & ( 1 << index ) )
 		return ALTMODE_SWAPPED;
 
 	return ALTMODE_NORMAL;
@@ -106,12 +106,12 @@ altFireMode_t CG_AltFire_PredictionMode( weapon_t weapon ) {
 
 /*
 =================
-CG_AltFire_GetSwapState
+CG_AltFire_GetSwapField
 
-Returns bitmask of weapon swaps that should be enabled according to client/server configuration.
+Returns bitfield of weapon swaps that should be enabled according to client/server configuration.
 =================
 */
-static int CG_AltFire_GetSwapState( void ) {
+static int CG_AltFire_GetSwapField( void ) {
 	int i;
 	int clientPrefLen = strlen( cg_altFireSwap.string );
 	int swaps = 0;
@@ -145,22 +145,32 @@ static int CG_AltFire_GetSwapState( void ) {
 =================
 CG_AltFire_Update
 
-Detect changes to alt fire configuration and send update to server if necessary.
+Determine alt fire configuration, and update either client engine or server to implement swaps
+depending on available support.
 =================
 */
 void CG_AltFire_Update( qboolean init ) {
-	int newServerSwaps = 0;
+	if ( VMExt_FNAvailable_AltSwap_SetState() ) {
+		// Engine-based swap support available - set mode based on current predicted weapon
+		qboolean swapActive = qfalse;
+		if ( cg.snap && !( cg.snap->snapFlags & SNAPFLAG_NOT_ACTIVE ) ) {
+			int wepIndex = (int)cg.predictedPlayerState.weapon - 1;
+			qboolean swapWeapon = wepIndex >= 0 && wepIndex < WP_NUM_WEAPONS - 1 && ( CG_AltFire_GetSwapField() & ( 1 << wepIndex ) );
+			qboolean isSpectator = cg.snap->ps.pm_type == PM_SPECTATOR || ( cg.snap->ps.pm_flags & PMF_FOLLOW ) ||
+					cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR || ( cg.snap->ps.eFlags & EF_ELIMINATED );
+			qboolean isScoreboard = cg.snap->ps.pm_type == PM_DEAD || cg.snap->ps.pm_type == PM_INTERMISSION;
+			swapActive = swapWeapon && !isSpectator && !isScoreboard;
+		}
+		VMExt_FN_AltSwap_SetState( swapActive );
 
-	if ( cgs.modConfig.altSwapSupport ) {
-		newServerSwaps = CG_AltFire_GetSwapState();
-
-		// always send update to server when cgame is started to make sure server is in sync
-		if ( init || serverAltSwapActive != newServerSwaps ) {
+	} else if ( cgs.modConfig.altSwapSupport ) {
+		// Server-based swap support available - see if we need to transmit updated swap flags
+		int newServerSwaps = CG_AltFire_GetSwapField();
+		if ( init || currentServerSwaps != newServerSwaps ) {
 			trap_SendClientCommand( va( "setAltSwap %i", newServerSwaps ) );
+			currentServerSwaps = newServerSwaps;
 		}
 	}
-
-	serverAltSwapActive = newServerSwaps;
 }
 
 // =========================================================================

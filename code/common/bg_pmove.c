@@ -2077,6 +2077,7 @@ void PmoveSingle (pmove_t *pmove) {
 	// set the firing flag for continuous beam weapons
 	if (	!(pm->ps->pm_flags & PMF_RESPAWNED) &&
 			pm->ps->pm_type != PM_INTERMISSION &&
+			!(pm->ps->introTime > pm->cmd.serverTime) &&
 			( (pm->cmd.buttons & BUTTON_ATTACK) || (pm->cmd.buttons & BUTTON_ALT_ATTACK) ) &&
 			(pm->ps->ammo[ pm->ps->weapon ] || pm->ps->weapon == WP_PHASER))
 	{

@@ -1018,6 +1018,7 @@ extern vmCvar_t	ui_spSelection;
 extern vmCvar_t	ui_browserMaster;
 extern vmCvar_t	ui_browserGameType;
 extern vmCvar_t	ui_browserSortKey;
+extern vmCvar_t	ui_browserSortKey2;
 extern vmCvar_t	ui_browserShowEmpty;
 extern vmCvar_t	ui_browserPlayerType;
 

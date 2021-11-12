@@ -238,6 +238,10 @@ typedef struct {
 
 static arenaservers_t	g_arenaservers;
 
+// Use cvar with different default if status query is enabled
+#define SORT_KEY_CVAR ( g_arenaservers.statusQueryEnabled ? &ui_browserSortKey2 : &ui_browserSortKey )
+#define SORT_KEY_CVAR_NAME ( g_arenaservers.statusQueryEnabled ? "ui_browserSortKey2" : "ui_browserSortKey" )
+
 typedef struct
 {
 	menuframework_s		menu;
@@ -2105,7 +2109,7 @@ static void ArenaServers_Event( void* ptr, int event ) {
 		break;
 
 	case ID_SORTKEY:
-		trap_Cvar_SetValue( "ui_browserSortKey", g_arenaservers.sortkey.curvalue );
+		trap_Cvar_SetValue( SORT_KEY_CVAR_NAME, g_arenaservers.sortkey.curvalue );
 		ArenaServers_Sort( g_arenaservers.sortkey.curvalue );
 		ArenaServers_UpdateMenu();
 		break;
@@ -2617,7 +2621,7 @@ static void ArenaServers_MenuInit( void )
 	g_gametype = Com_Clamp( 0, 4, ui_browserGameType.integer );
 	g_arenaservers.gametype.curvalue = g_gametype;
 
-	g_sortkey = Com_Clamp( 0, 4, ui_browserSortKey.integer );
+	g_sortkey = Com_Clamp( 0, 4, SORT_KEY_CVAR->integer );
 	g_arenaservers.sortkey.curvalue = g_sortkey;
 
 	if ( g_arenaservers.statusQueryEnabled ) {

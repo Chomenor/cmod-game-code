@@ -15,6 +15,9 @@ GAME OPTIONS MENU
 #define NUM_CROSSHAIRS		12
 #define PIC_BUTTON2			"menu/common/full_button2.tga"
 
+#define CROSSHAIR_X			450		// originally 438
+#define CROSSHAIR_Y			230		// originally 270
+
 // Precache stuff for Game Options Menu
 static struct
 {
@@ -36,25 +39,11 @@ static struct
 
 extern int s_OffOnNone_Names[];
 
-#define ID_LIGHTFLARES			129
-#define ID_LIGHTFLARES_VALUE	130
-#define ID_WALLMARKS_VALUE		133
-#define ID_DYNAMICLIGHTS_VALUE	135
-#define ID_IDENTIFYTARGET_VALUE	137
-#define ID_SYNCEVERYFRAME_VALUE 139
-
-
-#define PREFERENCES_X_POS		360
-
 #define ID_TEXTLANGUAGE			126
 #define ID_CROSSHAIR			127
-#define ID_SIMPLEITEMS			128
 #define ID_HIGHQUALITYSKY		129
 #define ID_EJECTINGBRASS		130
-#define ID_WALLMARKS			131
-#define ID_DYNAMICLIGHTS		132
 #define ID_IDENTIFYTARGET		133
-#define ID_SYNCEVERYFRAME		134
 #define ID_FORCEMODEL			135
 #define ID_DRAWTEAMOVERLAY		136
 #define ID_ALLOWDOWNLOAD		137
@@ -69,15 +58,10 @@ typedef struct {
 	menubitmap_s		crosshair;
 	menulist_s			textlanguage;
 	menulist_s			voicelanguage;
-	menulist_s			simpleitems;
-	menulist_s			wallmarks;
-	menulist_s			dynamiclights;
 	menulist_s			identifytarget;
-	menulist_s			synceveryframe;
 	menulist_s			forcemodel;
 	menulist_s			drawteamoverlay;
 	menulist_s			allowdownload;
-	menulist_s			flares;
 
 	int					currentcrosshair;
 	qhandle_t			crosshairShader[NUM_CROSSHAIRS];
@@ -115,17 +99,11 @@ static void Preferences_SetMenuItems( void )
 	int *language;
 
 	s_preferences.currentcrosshair		= (int)trap_Cvar_VariableValue( "cg_drawCrosshair" ) % NUM_CROSSHAIRS;
-	s_preferences.simpleitems.curvalue		= trap_Cvar_VariableValue( "cg_simpleItems" ) != 0;
-	s_preferences.wallmarks.curvalue		= trap_Cvar_VariableValue( "cg_marks" ) != 0;
 	s_preferences.identifytarget.curvalue	= trap_Cvar_VariableValue( "cg_drawCrosshairNames" ) != 0;
-	s_preferences.dynamiclights.curvalue	= trap_Cvar_VariableValue( "r_dynamiclight" ) != 0;
 //	s_preferences.highqualitysky.curvalue	= trap_Cvar_VariableValue ( "r_fastsky" ) == 0;
-	s_preferences.synceveryframe.curvalue	= trap_Cvar_VariableValue( "r_finish" ) != 0;
 	s_preferences.forcemodel.curvalue		= trap_Cvar_VariableValue( "cg_forcemodel" ) != 0;
 	s_preferences.drawteamoverlay.curvalue	= Com_Clamp( 0, 3, trap_Cvar_VariableValue( "cg_drawTeamOverlay" ) );
 	s_preferences.allowdownload.curvalue	= trap_Cvar_VariableValue( "cl_allowDownload" ) != 0;
-
-	s_preferences.flares.curvalue			= Com_Clamp( 0, 1, trap_Cvar_VariableValue( "r_flares" ));
 
 	trap_Cvar_VariableStringBuffer( "g_language", buffer, 32 );
 	language = s_textlanguage_Names;
@@ -194,28 +172,8 @@ static void Preferences_Event( void* ptr, int notification )
 		}
 		break;
 
-	case ID_SIMPLEITEMS:
-		trap_Cvar_SetValue( "cg_simpleItems", s_preferences.simpleitems.curvalue );
-		break;
-
-	case ID_LIGHTFLARES:
-		trap_Cvar_SetValue( "r_flares", s_preferences.flares.curvalue );
-		break;
-
-	case ID_WALLMARKS:
-		trap_Cvar_SetValue( "cg_marks", s_preferences.wallmarks.curvalue );
-		break;
-
-	case ID_DYNAMICLIGHTS:
-		trap_Cvar_SetValue( "r_dynamiclight", s_preferences.dynamiclights.curvalue );
-		break;
-
 	case ID_IDENTIFYTARGET:
 		trap_Cvar_SetValue( "cg_drawCrosshairNames", s_preferences.identifytarget.curvalue );
-		break;
-
-	case ID_SYNCEVERYFRAME:
-		trap_Cvar_SetValue( "r_finish", s_preferences.synceveryframe.curvalue );
 		break;
 
 	case ID_FORCEMODEL:
@@ -306,7 +264,6 @@ GameOptions_MenuDraw
 */
 static void GameOptions_MenuDraw( void )
 {
-	int x;
 	qhandle_t hShader;
 
 	hShader = VMExt_GVCommandInt( "crosshair_get_current_shader", -1 );
@@ -334,25 +291,24 @@ static void GameOptions_MenuDraw( void )
 	UI_DrawHandlePic( 104, 408, 436, 12,    uis.whiteShader);	// Bottom
 */
 	trap_R_SetColor( colorTable[CT_DKBLUE1]);
-	UI_DrawHandlePic(387, 245, 8,   87,	uis.whiteShader);		// Lefthand side of CROSSHAIR box
-	UI_DrawHandlePic(513, 245, 8,   87,	uis.whiteShader);		// Righthand side of CROSSHAIR box
-	UI_DrawHandlePic(395, 335, 116, 3,	uis.whiteShader);		// Bottom of CROSSHAIR box
-	UI_DrawHandlePic( 387, 332, 16,  16,s_gameoptions.lswoop);	// lower left hand swoop
-	UI_DrawHandlePic( 510, 332, 16,  16,s_gameoptions.lswoop2);	// lower right hand swoop
+	UI_DrawHandlePic( CROSSHAIR_X - 51, CROSSHAIR_Y - 25, 8,   87,	uis.whiteShader);		// Lefthand side of CROSSHAIR box
+	UI_DrawHandlePic( CROSSHAIR_X + 75, CROSSHAIR_Y - 25, 8,   87,	uis.whiteShader);		// Righthand side of CROSSHAIR box
+	UI_DrawHandlePic( CROSSHAIR_X - 43, CROSSHAIR_Y + 65, 116, 3,	uis.whiteShader);		// Bottom of CROSSHAIR box
+	UI_DrawHandlePic( CROSSHAIR_X - 51, CROSSHAIR_Y + 62, 16,  16,s_gameoptions.lswoop);	// lower left hand swoop
+	UI_DrawHandlePic( CROSSHAIR_X + 72, CROSSHAIR_Y + 62, 16,  16,s_gameoptions.lswoop2);	// lower right hand swoop
 
-	UI_DrawHandlePic( 387, 224, 16,  32,  s_gameoptions.tallswoop);		// upper left hand swoop
-	UI_DrawHandlePic( 507, 224, 16,  32,  s_gameoptions.tallswoop2);	// upper right hand swoop
+	UI_DrawHandlePic( CROSSHAIR_X - 51, CROSSHAIR_Y - 46, 16,  32,  s_gameoptions.tallswoop);		// upper left hand swoop
+	UI_DrawHandlePic( CROSSHAIR_X + 69, CROSSHAIR_Y - 46, 16,  32,  s_gameoptions.tallswoop2);	// upper right hand swoop
 
 	trap_R_SetColor( colorTable[CT_YELLOW]);
-	x = 438;
 
 	if (hShader)
 	{
-		UI_DrawHandlePic(x,270,  32, 32, hShader);	// Draw crosshair
+		UI_DrawHandlePic(CROSSHAIR_X, CROSSHAIR_Y,  32, 32, hShader);	// Draw crosshair
 	}
 	else
 	{
-		UI_DrawProportionalString( 454, 275, menu_normal_text[MNT_CROSSHAIR_NONE],UI_CENTER|UI_SMALLFONT, colorTable[CT_LTGOLD1]);	// No crosshair
+		UI_DrawProportionalString( CROSSHAIR_X + 16, CROSSHAIR_Y + 5, menu_normal_text[MNT_CROSSHAIR_NONE],UI_CENTER|UI_SMALLFONT, colorTable[CT_LTGOLD1]);	// No crosshair
 	}
 
 	// Menu frame numbers
@@ -437,57 +393,6 @@ static void GameOptions_MenuInit( void )
 	y = 170;
 	width = 170;
 
-	s_preferences.flares.generic.type			= MTYPE_SPINCONTROL;
-	s_preferences.flares.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
-	s_preferences.flares.generic.x				= x;
-	s_preferences.flares.generic.y				= y;
-	s_preferences.flares.generic.callback		= Preferences_Event;
-	s_preferences.flares.generic.id				= ID_LIGHTFLARES;
-	s_preferences.flares.textEnum				= MBT_LIGHTFLARES;
-	s_preferences.flares.textcolor				= CT_BLACK;
-	s_preferences.flares.textcolor2				= CT_WHITE;
-	s_preferences.flares.color					= CT_DKPURPLE1;
-	s_preferences.flares.color2					= CT_LTPURPLE1;
-	s_preferences.flares.textX					= MENU_BUTTON_TEXT_X;
-	s_preferences.flares.textY					= MENU_BUTTON_TEXT_Y;
-	s_preferences.flares.listnames				= s_OffOnNone_Names;
-	s_preferences.flares.width					= width;
-
-	y += inc;
-	s_preferences.wallmarks.generic.type			= MTYPE_SPINCONTROL;
-	s_preferences.wallmarks.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
-	s_preferences.wallmarks.generic.x				= x;
-	s_preferences.wallmarks.generic.y				= y;
-	s_preferences.wallmarks.generic.callback		= Preferences_Event;
-	s_preferences.wallmarks.generic.id				= ID_WALLMARKS;
-	s_preferences.wallmarks.textEnum				= MBT_WALLMARKS1;
-	s_preferences.wallmarks.textcolor				= CT_BLACK;
-	s_preferences.wallmarks.textcolor2				= CT_WHITE;
-	s_preferences.wallmarks.color					= CT_DKPURPLE1;
-	s_preferences.wallmarks.color2					= CT_LTPURPLE1;
-	s_preferences.wallmarks.textX					= MENU_BUTTON_TEXT_X;
-	s_preferences.wallmarks.textY					= MENU_BUTTON_TEXT_Y;
-	s_preferences.wallmarks.listnames				= s_OffOnNone_Names;
-	s_preferences.wallmarks.width					= width;
-
-	y += inc;
-	s_preferences.dynamiclights.generic.type			= MTYPE_SPINCONTROL;
-	s_preferences.dynamiclights.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
-	s_preferences.dynamiclights.generic.x				= x;
-	s_preferences.dynamiclights.generic.y				= y;
-	s_preferences.dynamiclights.generic.callback		= Preferences_Event;
-	s_preferences.dynamiclights.generic.id				= ID_DYNAMICLIGHTS;
-	s_preferences.dynamiclights.textEnum				= MBT_DYNAMICLIGHTS1;
-	s_preferences.dynamiclights.textcolor				= CT_BLACK;
-	s_preferences.dynamiclights.textcolor2				= CT_WHITE;
-	s_preferences.dynamiclights.color					= CT_DKPURPLE1;
-	s_preferences.dynamiclights.color2					= CT_LTPURPLE1;
-	s_preferences.dynamiclights.textX					= MENU_BUTTON_TEXT_X;
-	s_preferences.dynamiclights.textY					= MENU_BUTTON_TEXT_Y;
-	s_preferences.dynamiclights.listnames				= s_OffOnNone_Names;
-	s_preferences.dynamiclights.width					= width;
-
-	y += inc;
 	s_preferences.identifytarget.generic.type			= MTYPE_SPINCONTROL;
 	s_preferences.identifytarget.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_preferences.identifytarget.generic.x				= x;
@@ -503,23 +408,6 @@ static void GameOptions_MenuInit( void )
 	s_preferences.identifytarget.textY					= MENU_BUTTON_TEXT_Y;
 	s_preferences.identifytarget.listnames				= s_OffOnNone_Names;
 	s_preferences.identifytarget.width					= width;
-
-	y += inc;
-	s_preferences.synceveryframe.generic.type			= MTYPE_SPINCONTROL;
-	s_preferences.synceveryframe.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
-	s_preferences.synceveryframe.generic.x				= x;
-	s_preferences.synceveryframe.generic.y				= y;
-	s_preferences.synceveryframe.generic.callback		= Preferences_Event;
-	s_preferences.synceveryframe.generic.id				= ID_SYNCEVERYFRAME;
-	s_preferences.synceveryframe.textEnum				= MBT_SYNCEVERYFRAME1;
-	s_preferences.synceveryframe.textcolor				= CT_BLACK;
-	s_preferences.synceveryframe.textcolor2				= CT_WHITE;
-	s_preferences.synceveryframe.color					= CT_DKPURPLE1;
-	s_preferences.synceveryframe.color2					= CT_LTPURPLE1;
-	s_preferences.synceveryframe.textX					= MENU_BUTTON_TEXT_X;
-	s_preferences.synceveryframe.textY					= MENU_BUTTON_TEXT_Y;
-	s_preferences.synceveryframe.listnames				= s_OffOnNone_Names;
-	s_preferences.synceveryframe.width					= width;
 
 	y += inc;
 	s_preferences.forcemodel.generic.type			= MTYPE_SPINCONTROL;
@@ -573,23 +461,6 @@ static void GameOptions_MenuInit( void )
 	s_preferences.allowdownload.width					= width;
 
 	y += inc;
-	s_preferences.simpleitems.generic.type			= MTYPE_SPINCONTROL;
-	s_preferences.simpleitems.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
-	s_preferences.simpleitems.generic.x				= x;
-	s_preferences.simpleitems.generic.y				= y;
-	s_preferences.simpleitems.generic.callback		= Preferences_Event;
-	s_preferences.simpleitems.generic.id			= ID_SIMPLEITEMS;
-	s_preferences.simpleitems.textEnum				= MBT_SIMPLEITEMS;
-	s_preferences.simpleitems.textcolor				= CT_BLACK;
-	s_preferences.simpleitems.textcolor2			= CT_WHITE;
-	s_preferences.simpleitems.color					= CT_DKPURPLE1;
-	s_preferences.simpleitems.color2				= CT_LTPURPLE1;
-	s_preferences.simpleitems.textX					= MENU_BUTTON_TEXT_X;
-	s_preferences.simpleitems.textY					= MENU_BUTTON_TEXT_Y;
-	s_preferences.simpleitems.listnames				= s_OffOnNone_Names;
-	s_preferences.simpleitems.width					= width;
-
-	y += inc;
 	s_preferences.textlanguage.generic.type			= MTYPE_SPINCONTROL;
 	s_preferences.textlanguage.generic.flags		= QMF_HIGHLIGHT_IF_FOCUS;
 	s_preferences.textlanguage.generic.x			= x;
@@ -627,8 +498,8 @@ static void GameOptions_MenuInit( void )
 
 	s_preferences.crosshair.generic.type				= MTYPE_BITMAP;
 	s_preferences.crosshair.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
-	s_preferences.crosshair.generic.x					= 404;
-	s_preferences.crosshair.generic.y					= 224;
+	s_preferences.crosshair.generic.x					= CROSSHAIR_X - 34;
+	s_preferences.crosshair.generic.y					= CROSSHAIR_Y - 46;
 	s_preferences.crosshair.generic.name				= PIC_BUTTON2;
 	s_preferences.crosshair.generic.id					= ID_CROSSHAIR;
 	s_preferences.crosshair.generic.callback			= Preferences_Event;
@@ -642,15 +513,10 @@ static void GameOptions_MenuInit( void )
 	s_preferences.crosshair.textcolor					= CT_BLACK;
 	s_preferences.crosshair.textcolor2					= CT_WHITE;
 
-	Menu_AddItem( &s_gameoptions.menu, &s_preferences.flares );
-	Menu_AddItem( &s_gameoptions.menu, &s_preferences.wallmarks );
-	Menu_AddItem( &s_gameoptions.menu, &s_preferences.dynamiclights );
 	Menu_AddItem( &s_gameoptions.menu, &s_preferences.identifytarget );
-	Menu_AddItem( &s_gameoptions.menu, &s_preferences.synceveryframe );
 	Menu_AddItem( &s_gameoptions.menu, &s_preferences.forcemodel );
 	Menu_AddItem( &s_gameoptions.menu, &s_preferences.drawteamoverlay );
 	Menu_AddItem( &s_gameoptions.menu, &s_preferences.allowdownload );
-	Menu_AddItem( &s_gameoptions.menu, &s_preferences.simpleitems );
 	Menu_AddItem( &s_gameoptions.menu, &s_preferences.textlanguage );
 	Menu_AddItem( &s_gameoptions.menu, &s_preferences.voicelanguage );
 	Menu_AddItem( &s_gameoptions.menu, &s_preferences.crosshair);

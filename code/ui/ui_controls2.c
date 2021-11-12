@@ -3,6 +3,39 @@
 
 #include "ui_local.h"
 
+typedef struct {
+	qboolean supportFreeLook;
+	qboolean supportRawMouse;
+	qboolean supportMouseStrafe;
+} controlsEngineConfig_t;
+
+static controlsEngineConfig_t controlsEngineConfig;
+
+/*
+=================
+UI_InitControlsEngineConfig
+
+Load settings in the soundEngineConfig structure.
+=================
+*/
+static void UI_InitControlsEngineConfig( void ) {
+	memset( &controlsEngineConfig, 0, sizeof( controlsEngineConfig ) );
+
+	if ( !VMExt_GVCommandInt( "ui_suppress_cl_freelook", 0 ) || trap_Cvar_VariableValue( "cl_freelook" ) < 1.0f ) {
+		controlsEngineConfig.supportFreeLook = qtrue;
+	}
+
+	// Currently only enable this if free look is suppressed, due to button space constraints.
+	if ( !controlsEngineConfig.supportFreeLook && VMExt_GVCommandInt( "ui_support_cmd_set_raw_mouse", 0 ) &&
+			VMExt_GVCommandInt( "ui_support_cmd_get_raw_mouse", 0 ) ) {
+		controlsEngineConfig.supportRawMouse = qtrue;
+	}
+
+	if ( !VMExt_GVCommandInt( "ui_skip_strafe", 0 ) ) {
+		controlsEngineConfig.supportMouseStrafe = qtrue;
+	}
+}
+
 /* ----------------------------------------------------------------------- */
 
 // Alt Fire Button Swapping
@@ -208,17 +241,17 @@ static struct {
 } altSwapCustomData;
 
 static int altSwapCustom_WeaponValueNames[] = {
-	MNT_OFF,
+	MNT_ALTSWAP_STANDARD,
 	MNT_ALTSWAP_AUTO,
-	MNT_ON,
+	MNT_ALTSWAP_SWAPPED,
 	MNT_NONE
 };
 
 typedef enum {
 	// Order must match altSwapCustom_WeaponValueNames
-	ALTSWAP_WEAPONBUTTON_OFF,
+	ALTSWAP_WEAPONBUTTON_STANDARD,
 	ALTSWAP_WEAPONBUTTON_AUTO,
-	ALTSWAP_WEAPONBUTTON_ON,
+	ALTSWAP_WEAPONBUTTON_SWAPPED,
 } altSwapCustom_WeaponValueIds_t;
 
 /*
@@ -269,9 +302,9 @@ static void AltSwapCustom_LoadButtonValues( void ) {
 		if ( altSwapData.currentButtons[settingIndex] == 'a' ) {
 			altSwapCustomData.weapons[i].curvalue = ALTSWAP_WEAPONBUTTON_AUTO;
 		} else if ( altSwapData.currentButtons[settingIndex] == 's' ) {
-			altSwapCustomData.weapons[i].curvalue = ALTSWAP_WEAPONBUTTON_ON;
+			altSwapCustomData.weapons[i].curvalue = ALTSWAP_WEAPONBUTTON_SWAPPED;
 		} else {
-			altSwapCustomData.weapons[i].curvalue = ALTSWAP_WEAPONBUTTON_OFF;
+			altSwapCustomData.weapons[i].curvalue = ALTSWAP_WEAPONBUTTON_STANDARD;
 		}
 	}
 }
@@ -311,7 +344,7 @@ static void AltSwapCustom_Event( void *ptr, int event ) {
 
 				if ( button->curvalue == ALTSWAP_WEAPONBUTTON_AUTO ) {
 					altSwapData.currentButtons[settingIndex] = 'a';
-				} else if ( button->curvalue == ALTSWAP_WEAPONBUTTON_ON ) {
+				} else if ( button->curvalue == ALTSWAP_WEAPONBUTTON_SWAPPED ) {
 					altSwapData.currentButtons[settingIndex] = 's';
 				} else {
 					altSwapData.currentButtons[settingIndex] = 'n';
@@ -839,6 +872,7 @@ typedef struct
 	menuaction_s		lookdown;
 	menuaction_s		mouselook;
 	menulist_s			freelook;
+	menulist_s			rawmouse;
 	menuaction_s		centerview;
 	menuaction_s		zoomview;
 	menuaction_s		gesture;
@@ -1528,6 +1562,9 @@ static void Controls_GetConfig( void )
 	s_controls.joyenable.curvalue    = UI_ClampCvar( 0, 1, Controls_GetCvarValue( "in_joystick" ) );
 	s_controls.joythreshold.curvalue = UI_ClampCvar( 0.05, 0.75, Controls_GetCvarValue( "joy_threshold" ) );
 	s_controls.freelook.curvalue     = UI_ClampCvar( 0, 1, Controls_GetCvarValue( "cl_freelook" ) );
+	if ( controlsEngineConfig.supportRawMouse ) {
+		s_controls.rawmouse.curvalue = VMExt_GVCommandInt( "cmd_get_raw_mouse", 0 ) > 0 ? 1 : 0;
+	}
 	s_keyturnspeed_slider.curvalue   = UI_ClampCvar( 1, 5, Controls_GetCvarValue( "cl_anglespeedkey" ) );
 	s_joyxbutton_box.curvalue		 = UI_ClampCvar( 0, 1, Controls_GetCvarValue( "joy_xbutton" ) );
 	s_joyybutton_box.curvalue        = UI_ClampCvar( 0, 1, Controls_GetCvarValue( "joy_ybutton" ) );
@@ -1590,7 +1627,9 @@ static void Controls_SetConfig( void )
 	trap_Cvar_SetValue( "cg_autoswitch", s_controls.autoswitch.curvalue );
 	trap_Cvar_SetValue( "sensitivity", s_controls.sensitivity.curvalue );
 	trap_Cvar_SetValue( "joy_threshold", s_controls.joythreshold.curvalue );
-	trap_Cvar_SetValue( "cl_freelook", s_controls.freelook.curvalue );
+	if ( controlsEngineConfig.supportFreeLook ) {
+		trap_Cvar_SetValue( "cl_freelook", s_controls.freelook.curvalue );
+	}
 	trap_Cvar_SetValue( "cl_anglespeedkey", s_keyturnspeed_slider.curvalue );
 	trap_Cvar_SetValue( "joy_xbutton", s_joyxbutton_box.curvalue );
 	trap_Cvar_SetValue( "joy_ybutton", s_joyybutton_box.curvalue );
@@ -2408,6 +2447,14 @@ static void SetupActionButtons_Init(int section)
 			break;
 		}
 
+		if ( !controlsEngineConfig.supportFreeLook && g_section == C_LOOK && controlptr[i] == &s_look_mouselook_action ) {
+			continue;
+		}
+
+		if ( !controlsEngineConfig.supportMouseStrafe && g_section == C_MOVE && controlptr[i] == &s_move_sidestep_action ) {
+			continue;
+		}
+
 		((menuaction_s*)controlptr[i])->generic.x	= current_menu->listX;
 		((menuaction_s*)controlptr[i])->generic.y	= y;
 		((menuaction_s*)controlptr[i])->textX		= 5;
@@ -3161,7 +3208,9 @@ static void ControlsMove_MenuInit( void )
 	Menu_AddItem( &s_controlsmove_menu, ( void * )&s_move_run_action);
 	Menu_AddItem( &s_controlsmove_menu, ( void * )&s_move_stepleft_action);
 	Menu_AddItem( &s_controlsmove_menu, ( void * )&s_move_stepright_action);
-	Menu_AddItem( &s_controlsmove_menu, ( void * )&s_move_sidestep_action);
+	if ( controlsEngineConfig.supportMouseStrafe ) {
+		Menu_AddItem( &s_controlsmove_menu, ( void * )&s_move_sidestep_action);
+	}
 	Menu_AddItem( &s_controlsmove_menu, ( void * )&s_move_moveup_action);
 	Menu_AddItem( &s_controlsmove_menu, ( void * )&s_move_movedown_action);
 	Menu_AddItem( &s_controlsmove_menu, ( void * )&s_attack_waiting_action);
@@ -3245,6 +3294,8 @@ ControlsAttackLook_MenuInit
 */
 static void ControlsAttackLook_MenuInit( void )
 {
+	UI_InitControlsEngineConfig();
+
 	s_controlslook_menu.nitems					= 0;
 	s_controlslook_menu.wrapAround				= qtrue;
 	s_controlslook_menu.draw					= ControlsAttackLook_MenuDraw;
@@ -3362,7 +3413,9 @@ static void ControlsAttackLook_MenuInit( void )
 
 	Menu_AddItem( &s_controlslook_menu, ( void * )&s_look_lookup_action);
 	Menu_AddItem( &s_controlslook_menu, ( void * )&s_look_lookdown_action);
-	Menu_AddItem( &s_controlslook_menu, ( void * )&s_look_mouselook_action);
+	if ( controlsEngineConfig.supportFreeLook ) {
+		Menu_AddItem( &s_controlslook_menu, ( void * )&s_look_mouselook_action);
+	}
 	Menu_AddItem( &s_controlslook_menu, ( void * )&s_look_centerview_action);
 	Menu_AddItem( &s_controlslook_menu, ( void * )&s_zoomview_action);
 	Menu_AddItem( &s_controlslook_menu, ( void * )&s_attack_waiting_action);
@@ -3478,12 +3531,24 @@ void UI_ControlsMouseJoyStickMenu_Cache(void)
 
 /*
 =================
+Controls_RawMouseEvent
+=================
+*/
+static void Controls_RawMouseEvent (void* ptr, int event)
+{
+	VMExt_GVCommandInt( va( "cmd_set_raw_mouse %i", s_controls.rawmouse.curvalue ), 0 );
+}
+
+/*
+=================
 ControlsMouseJoyStick_MenuInit
 =================
 */
 static void ControlsMouseJoyStick_MenuInit( void )
 {
 	int x,y;
+
+	UI_InitControlsEngineConfig();
 
 	UI_ControlsMouseJoyStickMenu_Cache();
 
@@ -3508,22 +3573,42 @@ static void ControlsMouseJoyStick_MenuInit( void )
 	s_controls_mouse.textcolor2					= CT_LTGOLD1;
 
 	x = 250;
-	y = 193;
+	y = 171;
 
-	s_controls.freelook.generic.type			= MTYPE_SPINCONTROL;
-	s_controls.freelook.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
-	s_controls.freelook.generic.x				= x;
-	s_controls.freelook.generic.y				= y;
-	s_controls.freelook.generic.id 				= ID_FREELOOK;
-	s_controls.freelook.generic.callback		= Controls_MenuEvent;
-	s_controls.freelook.textEnum				= MBT_MOUSEFREELOOK;
-	s_controls.freelook.textcolor				= CT_BLACK;
-	s_controls.freelook.textcolor2				= CT_WHITE;
-	s_controls.freelook.color					= CT_DKPURPLE1;
-	s_controls.freelook.color2					= CT_LTPURPLE1;
-	s_controls.freelook.textX					= MENU_BUTTON_TEXT_X;
-	s_controls.freelook.textY					= MENU_BUTTON_TEXT_Y;
-	s_controls.freelook.listnames				= s_OffOnNone_Names;
+	if ( controlsEngineConfig.supportFreeLook ) {
+		y += 22;
+		s_controls.freelook.generic.type			= MTYPE_SPINCONTROL;
+		s_controls.freelook.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
+		s_controls.freelook.generic.x				= x;
+		s_controls.freelook.generic.y				= y;
+		s_controls.freelook.generic.id 				= ID_FREELOOK;
+		s_controls.freelook.generic.callback		= Controls_MenuEvent;
+		s_controls.freelook.textEnum				= MBT_MOUSEFREELOOK;
+		s_controls.freelook.textcolor				= CT_BLACK;
+		s_controls.freelook.textcolor2				= CT_WHITE;
+		s_controls.freelook.color					= CT_DKPURPLE1;
+		s_controls.freelook.color2					= CT_LTPURPLE1;
+		s_controls.freelook.textX					= MENU_BUTTON_TEXT_X;
+		s_controls.freelook.textY					= MENU_BUTTON_TEXT_Y;
+		s_controls.freelook.listnames				= s_OffOnNone_Names;
+	}
+
+	if ( controlsEngineConfig.supportRawMouse ) {
+		y += 22;
+		s_controls.rawmouse.generic.type			= MTYPE_SPINCONTROL;
+		s_controls.rawmouse.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
+		s_controls.rawmouse.generic.x				= x;
+		s_controls.rawmouse.generic.y				= y;
+		s_controls.rawmouse.generic.callback		= Controls_RawMouseEvent;
+		s_controls.rawmouse.textEnum				= MBT_CONTROLS_RAW_MOUSE;
+		s_controls.rawmouse.textcolor				= CT_BLACK;
+		s_controls.rawmouse.textcolor2				= CT_WHITE;
+		s_controls.rawmouse.color					= CT_DKPURPLE1;
+		s_controls.rawmouse.color2					= CT_LTPURPLE1;
+		s_controls.rawmouse.textX					= MENU_BUTTON_TEXT_X;
+		s_controls.rawmouse.textY					= MENU_BUTTON_TEXT_Y;
+		s_controls.rawmouse.listnames				= s_OffOnNone_Names;
+	}
 
 	y += 22;
 	s_controls.sensitivity.generic.type			= MTYPE_SLIDER;
@@ -3690,7 +3775,12 @@ static void ControlsMouseJoyStick_MenuInit( void )
 	s_joyybutton_box.listnames			= s_OffOnNone_Names;
 
 
-	Menu_AddItem( &s_controlsmouse_menu, ( void * )&s_controls.freelook);
+	if ( controlsEngineConfig.supportFreeLook ) {
+		Menu_AddItem( &s_controlsmouse_menu, ( void * )&s_controls.freelook);
+	}
+	if ( controlsEngineConfig.supportRawMouse ) {
+		Menu_AddItem( &s_controlsmouse_menu, ( void * )&s_controls.rawmouse);
+	}
 	Menu_AddItem( &s_controlsmouse_menu, ( void * )&s_controls.sensitivity);
 	Menu_AddItem( &s_controlsmouse_menu, ( void * )&s_controls.invertmouse);
 	Menu_AddItem( &s_controlsmouse_menu, ( void * )&s_controls.smoothmouse);

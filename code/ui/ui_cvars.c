@@ -75,67 +75,6 @@ void GammaCallback( void *s, int notification )
 
 /*
 =================
-IntensityCallback
-=================
-*/
-void IntensityCallback( void *s, int notification )
-{
-	menuslider_s *slider = ( menuslider_s * ) s;
-
-	if (notification != QM_ACTIVATED)
-		return;
-
-	trap_Cvar_SetValue( "r_intensity", slider->curvalue / 10.0f );
-}
-
-/*
-=================
-FovCallback
-=================
-*/
-void FovCallback( void *s, int notification )
-{
-	menuslider_s *slider = ( menuslider_s * ) s;
-
-	if (notification != QM_ACTIVATED)
-		return;
-
-	// Use asterisk notation to enable horizontal scaling.
-	trap_Cvar_Set( "cg_fov", va( "%f*", slider->curvalue ) );
-}
-
-/*
-=================
-ScreensizeCallback
-=================
-*/
-void ScreensizeCallback( void *s, int notification )
-{
-	menuslider_s *slider = ( menuslider_s * ) s;
-
-	if (notification != QM_ACTIVATED)
-		return;
-
-	trap_Cvar_SetValue( "cg_viewsize", slider->curvalue);
-}
-
-/*
-=================
-CenterHudCallback
-=================
-*/
-void CenterHudCallback( void *s, int notification )
-{
-	menuslider_s *slider = ( menuslider_s * ) s;
-
-	if (notification != QM_ACTIVATED)
-		return;
-
-	trap_Cvar_SetValue( "cg_aspectCorrectCenterHud", slider->curvalue);
-}
-
-/*
-=================
 AlwaysRunCallback
 =================
 */
@@ -165,42 +104,6 @@ void AutoswitchCallback( void *unused, int notification )
 	trap_Cvar_SetValue( "cg_autoswitch", s_autoswitch_box.curvalue );
 }
 
-void VideoData2_EnabledDisableCenterHudSlider( void );
-/*
-=================
-AspectCorrectionCallback
-=================
-*/
-void AspectCorrectionCallback( void *s, int notification )
-{
-	menulist_s *aspectCorrection = ( menulist_s * ) s;
-
-	if (notification != QM_ACTIVATED)
-	{
-		return;
-	}
-
-	trap_Cvar_SetValue( "cg_aspectCorrect", aspectCorrection->curvalue );
-
-	VideoData2_EnabledDisableCenterHudSlider();
-}
-
-/*
-=================
-AnisotropicFilteringCallback
-=================
-*/
-void AnisotropicFilteringCallback( void *s, int notification )
-{
-	menulist_s *anisotropicfiltering = ( menulist_s * ) s;
-
-	if (notification != QM_ACTIVATED)
-	{
-		return;
-	}
-
-	trap_Cvar_SetValue( "r_ext_texture_filter_anisotropic", anisotropicfiltering->curvalue );
-}
 
 /*
 =================

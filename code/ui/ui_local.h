@@ -569,6 +569,17 @@ typedef enum
 	MNT_BROWSER_MOD,
 	MNT_BROWSER_BOTS,
 	MNT_BROWSER_SCAN_PROGRESS,
+	MNT_VIDEO_LOW_QUALITY,
+	MNT_VIDEO_MEDIUM_QUALITY,
+	MNT_VIDEO_HIGHEST_QUALITY,
+	MNT_VIDEO_RENDERER_OPENGL1,
+	MNT_VIDEO_RENDERER_OPENGL2,
+	MNT_VIDEO_2X,
+	MNT_VIDEO_4X,
+	MNT_VIDEO_8X,
+	MNT_VIDEO_16X,
+	MNT_ALTSWAP_STANDARD,
+	MNT_ALTSWAP_SWAPPED,
 	MNT_ALTSWAP_AUTO,
 	MNT_ALTSWAP_CUSTOM,
 
@@ -930,6 +941,18 @@ typedef enum
 	MBT_ASPECTCORRECTION,
 	MBT_CENTERHUD,
 	MBT_BROWSER_PLAYERTYPE,
+	MBT_SOUND_OPENAL,
+	MBT_SOUND_OVERALL_VOLUME,
+	MBT_CONTROLS_RAW_MOUSE,
+	MBT_VIDEO_LIGHTING_LEVEL,
+	MBT_VIDEO_LIGHTING_CONTRAST,
+	MBT_VIDEO_LIGHTING_APPLY,
+	MBT_VIDEO_LIGHTING_RESET,
+	MBT_VIDEO_RENDERER,
+	MBT_VIDEO_WINDOW_SIZE,
+	MBT_VIDEO_ANISOTROPIC_LEVEL,
+	MBT_VIDEO_ANTI_ALIASING,
+	MBT_VIDEO_VERTICAL_SYNC,
 	MBT_ALTSWAP_CONTROL,
 	MBT_ALTSWAP_EDIT,
 	MBT_ALTSWAP_ALL_STANDARD,
@@ -1850,14 +1873,6 @@ void UI_SoundMenu_Cache(void);
 void UI_FontsMenu( void);
 
 //
-// ui_cvars.c
-//
-extern void GammaCallback( void *s, int notification );
-extern void FovCallback( void *s, int notification );
-extern void ScreensizeCallback( void *s, int notification );
-void CenterHudCallback( void *s, int notification );
-
-//
 // ui_network.c
 //
 void UI_NetworkOptionsMenu_Cache( void );
@@ -1914,8 +1929,7 @@ void UI_PrintMenuGraphics(menugraphics_s *menuGraphics,int maxI);
 extern void InvertMouseCallback(void *s, int notification);
 extern void MouseSpeedCallback( void *s, int notification );
 extern void SmoothMouseCallback( void *s, int notification );
-extern void AspectCorrectionCallback( void *s, int notification );
-extern void AnisotropicFilteringCallback( void *s, int notification );
+extern void GammaCallback( void *s, int notification );
 extern void JoyXButtonCallback( void *s, int notification );
 extern void JoyYButtonCallback( void *s, int notification );
 

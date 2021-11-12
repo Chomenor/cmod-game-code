@@ -2,6 +2,152 @@
 //
 #include "ui_local.h"
 
+typedef struct {
+	qboolean initialized;
+
+	// r_mode cvar only applies to windowed mode, not fullscreen
+	qboolean windowed_r_mode;
+
+	// use updated template set
+	qboolean modern_templates;
+
+	// if enabled, anisotropic filtering option is in video menu, otherwise in video additional
+	// this is needed because their sometimes isn't space in video menu...
+	qboolean anisotropicFilteringVideoMenu;
+
+	// normally enabled options, but can be disabled by engine
+	qboolean supportGlDriver;
+	qboolean supportAllowExtensions;
+	qboolean supportColorDepth;
+	qboolean supportTextureBits;
+	qboolean supportSimpleShaders;
+	
+	// new additional options
+	qboolean supportRendererSelect;
+	qboolean supportMultisample;
+	qboolean supportVSync;
+	qboolean supportMaxAnisotropy;
+} videoEngineConfig_t;
+
+static videoEngineConfig_t videoEngineConfig;
+
+/*
+=================
+UI_InitVideoEngineConfig
+
+Load settings in the videoEngineConfig structure.
+=================
+*/
+static void UI_InitVideoEngineConfig( void ) {
+	if ( !videoEngineConfig.initialized ) {
+		int freeSlots = 0;
+
+		videoEngineConfig.initialized = qtrue;
+		videoEngineConfig.windowed_r_mode = VMExt_GVCommandInt( "ui_using_windowed_r_mode", 0 ) ? qtrue : qfalse;
+		videoEngineConfig.modern_templates = VMExt_GVCommandInt( "ui_modern_video_templates", 0 ) ? qtrue : qfalse;
+		videoEngineConfig.supportMaxAnisotropy = VMExt_GVCommandInt( "ui_support_r_ext_max_anisotropy", 0 ) ? qtrue : qfalse;
+
+		if ( !VMExt_GVCommandInt( "ui_skip_r_glDriver", 0 ) ) {
+			videoEngineConfig.supportGlDriver = qtrue;
+		} else {
+			++freeSlots;
+		}
+
+		if ( !VMExt_GVCommandInt( "ui_skip_r_allowExtensions", 0 ) ) {
+			videoEngineConfig.supportAllowExtensions = qtrue;
+		} else {
+			++freeSlots;
+		}
+
+		if ( !( VMExt_GVCommandInt( "ui_skip_r_colorbits", 0 ) && VMExt_GVCommandInt( "ui_skip_r_depthbits", 0 ) &&
+				VMExt_GVCommandInt( "ui_skip_r_stencilbits", 0 ) ) ) {
+			videoEngineConfig.supportColorDepth = qtrue;
+		} else {
+			++freeSlots;
+		}
+
+		if ( !VMExt_GVCommandInt( "ui_skip_r_texturebits", 0 ) ) {
+			videoEngineConfig.supportTextureBits = qtrue;
+		} else {
+			++freeSlots;
+		}
+
+		if ( !VMExt_GVCommandInt( "ui_skip_r_lowEndVideo", 0 ) ) {
+			videoEngineConfig.supportSimpleShaders = qtrue;
+		} else {
+			++freeSlots;
+		}
+
+		if ( freeSlots > 0 && VMExt_GVCommandInt( "ui_support_cl_renderer_opengl1", 0 ) &&
+				VMExt_GVCommandInt( "ui_support_cl_renderer_opengl2", 0 ) ) {
+			videoEngineConfig.supportRendererSelect = qtrue;
+			--freeSlots;
+		}
+
+		if ( freeSlots > 0 && VMExt_GVCommandInt( "ui_support_cmd_set_multisample", 0 ) &&
+				VMExt_GVCommandInt( "ui_support_cmd_get_multisample", 0 ) ) {
+			videoEngineConfig.supportMultisample = qtrue;
+			--freeSlots;
+		}
+
+		if ( freeSlots > 0 && VMExt_GVCommandInt( "ui_support_r_swapInterval", 0 ) ) {
+			videoEngineConfig.supportVSync = qtrue;
+			--freeSlots;
+		}
+
+		if ( freeSlots > 0 ) {
+			videoEngineConfig.anisotropicFilteringVideoMenu = qtrue;
+			--freeSlots;
+		}
+	}
+}
+
+/*
+=================
+UI_SetAnisotropyLevel
+
+Sets anisotropic filtering level on scale from 0 (disabled) to 4 (16x).
+
+UI_InitVideoEngineConfig should already be called.
+=================
+*/
+static void UI_SetAnisotropyLevel( int level ) {
+	if ( level > 0 ) {
+		trap_Cvar_Set( "r_ext_texture_filter_anisotropic", "1" );
+		if ( videoEngineConfig.supportMaxAnisotropy ) {
+			trap_Cvar_Set( "r_ext_max_anisotropy", va( "%i", 1 << level ) );
+		}
+	} else {
+		trap_Cvar_Set( "r_ext_texture_filter_anisotropic", "0" );
+	}
+}
+
+/*
+=================
+UI_GetAnisotropyLevel
+
+Retrieves current anisotropic filtering level on scale from 0 (disabled) to 4 (16x),
+or from 0 (disabled) to 1 (enabled) if videoEngineConfig.supportMaxAnisotropy is false.
+
+UI_InitVideoEngineConfig should already be called.
+=================
+*/
+static int UI_GetAnisotropyLevel( void ) {
+	if ( trap_Cvar_VariableValue( "r_ext_texture_filter_anisotropic" ) ) {
+		if ( videoEngineConfig.supportMaxAnisotropy ) {
+			float level = trap_Cvar_VariableValue( "r_ext_max_anisotropy" );
+			if ( level >= 16.0f )
+				return 4;
+			else if ( level >= 8.0f )
+				return 3;
+			else if ( level >= 4.0f )
+				return 2;
+		}
+		return 1;
+	}
+
+	return 0;
+}
 
 void UI_VideoDriverMenu( void );
 void VideoDriver_Lines(int increment);
@@ -45,23 +191,26 @@ typedef struct
 {
 	menuframework_s	menu;
 
-	menuslider_s	gamma_slider;
+	menulist_s		aspectCorrection;
+	menuslider_s	centerHud_slider;
 	menuslider_s	fov_slider;
 	menuslider_s	screensize_slider;
-	menuslider_s	centerHud_slider;
-	menulist_s		aspectCorrection;
-	menulist_s		anisotropicfiltering;
-	menuaction_s	apply_action2;
+	menulist_s		flares;
+	menulist_s		wallmarks;
+	menulist_s		dynamiclights;
+	menulist_s		simpleitems;
+	menulist_s		synceveryframe;
+	menulist_s		anisotropic;
 
-	qhandle_t	gamma;
 	qhandle_t	top;
 } videodata2_t;
 
 static videodata2_t	s_videodata2;
 
 
+#define NUM_VIDEO_TEMPLATES 4
 
-static int s_graphics_options_Names[] =
+static int s_graphics_options_Names[NUM_VIDEO_TEMPLATES + 2] =
 {
 	MNT_VIDEO_HIGH_QUALITY,
 	MNT_VIDEO_NORMAL,
@@ -71,10 +220,35 @@ static int s_graphics_options_Names[] =
 	MNT_NONE
 };
 
+static int s_graphics_options_modern_Names[NUM_VIDEO_TEMPLATES + 2] =
+{
+	MNT_VIDEO_LOW_QUALITY,
+	MNT_VIDEO_MEDIUM_QUALITY,
+	MNT_VIDEO_HIGH_QUALITY,
+	MNT_VIDEO_HIGHEST_QUALITY,
+	MNT_VIDEO_CUSTOM,
+	MNT_NONE
+};
+
 static int s_driver_Names[] =
 {
 	MNT_VIDEO_DRIVER_DEFAULT,
 	MNT_VIDEO_DRIVER_VOODOO,
+	MNT_NONE
+};
+
+static int s_renderer_Names[] =
+{
+	MNT_VIDEO_RENDERER_OPENGL1,
+	MNT_VIDEO_RENDERER_OPENGL2,
+	MNT_NONE
+};
+
+static int s_renderer_NamesUnknown[] =
+{
+	MNT_VIDEO_RENDERER_OPENGL1,
+	MNT_VIDEO_RENDERER_OPENGL2,
+	MNT_VIDEO_CUSTOM,
 	MNT_NONE
 };
 
@@ -94,8 +268,11 @@ static int s_resolutions[] =
 	MNT_1600X1200,
 	MNT_2048X1536,
 	MNT_856x480WIDE,
+	MNT_VIDEO_CUSTOM,
 	MNT_NONE
 };
+
+#define NUM_RESOLUTIONS ( ( sizeof ( s_resolutions ) / sizeof ( *s_resolutions ) ) - 2 )
 
 static int s_colordepth_Names[] =
 {
@@ -144,11 +321,29 @@ static int s_filter_Names[] =
 	MNT_NONE
 };
 
+static int s_anisotropic_Names[] =
+{
+	MNT_OFF,
+	MNT_VIDEO_2X,
+	MNT_VIDEO_4X,
+	MNT_VIDEO_8X,
+	MNT_VIDEO_16X,
+	MNT_NONE
+};
+
+static int s_multisample_Names[] =
+{
+	MNT_OFF,
+	MNT_VIDEO_2X,
+	MNT_VIDEO_4X,
+	MNT_NONE
+};
 
 
 static menubitmap_s			s_video_drivers;
 static menubitmap_s			s_video_data;
 static menubitmap_s			s_video_data2;
+static menubitmap_s			s_video_brightness;
 
 #define ID_MAINMENU		100
 #define ID_CONTROLS		101
@@ -162,6 +357,7 @@ static menubitmap_s			s_video_data2;
 #define ID_ARROWDWN		113
 #define ID_ARROWUP		114
 #define ID_INGAMEMENU	115
+#define ID_VIDEOBRIGHTNESS	116
 
 // Precache stuff for Video Driver
 #define MAX_VID_DRIVERS 128
@@ -239,16 +435,467 @@ static void* g_videolines[] =
 	NULL,
 };
 
-int video_sidebuttons[3][2] =
+int video_sidebuttons[4][2] =
 {
-	30, 250,	// Video Data Button
-	30, 250 + 6 + (MENU_BUTTON_MED_HEIGHT * 1.5),	// Video Drivers Button
-	30, 250 + (2 * (6 + (MENU_BUTTON_MED_HEIGHT * 1.5))),	// Video Drivers Button
+	30, 240,	// Video Data Button
+	30, 240 + 6 + 24,	// Brightness Button
+	30, 240 + (2 * (6 + 24)),	// Additional Button
+	30, 240 + (3 * (6 + 24)),	// Video Drivers Button
 };
 
 
 void Video_SideButtons(menuframework_s *menu,int menuType);
 static void GraphicsOptions_ApplyChanges( void *unused, int notification );
+
+
+/*
+=======================================================================
+
+BRIGHTNESS MENU
+
+=======================================================================
+*/
+
+struct
+{
+	menuframework_s menu;
+	qboolean supportMapLightingOptions;
+
+	menuslider_s	gamma_slider;
+	menuaction_s	gamma_apply;
+
+	qboolean		defaults_active;	// current running settings equal defaults
+	menuslider_s	lighting_gamma_slider;
+	menuslider_s	lighting_overbright_slider;
+	menubitmap_s	lighting_reset;
+	menuaction_s	lighting_apply;
+
+	qhandle_t	gamma;
+	qhandle_t	top;
+} s_brightness;
+
+/*
+=================
+UI_BrightnessMenu_MenuDraw
+=================
+*/
+static void UI_BrightnessMenu_MenuDraw (void)
+{
+	int y;
+
+	UI_MenuFrame(&s_brightness.menu);
+
+	UI_DrawProportionalString(  74,  66, "815",UI_RIGHT|UI_TINYFONT, colorTable[CT_BLACK]);
+	UI_DrawProportionalString(  74,  84, "9047",UI_RIGHT|UI_TINYFONT, colorTable[CT_BLACK]);
+	UI_DrawProportionalString(  74,  188, "1596",UI_RIGHT|UI_TINYFONT, colorTable[CT_BLACK]);
+	UI_DrawProportionalString(  74,  206, "7088",UI_RIGHT|UI_TINYFONT, colorTable[CT_BLACK]);
+	UI_DrawProportionalString(  74,  395, "2-9831",UI_RIGHT|UI_TINYFONT, colorTable[CT_BLACK]);
+
+	UI_Setup_MenuButtons();
+
+	y = 191;
+	if ( s_brightness.supportMapLightingOptions )
+	{
+		y -= 10;
+	}
+	if (uis.glconfig.deviceSupportsGamma)
+	{
+		trap_R_SetColor( colorTable[CT_DKGREY]);
+		UI_DrawHandlePic(  178, y, 68, 68, uis.whiteShader);	//
+		trap_R_SetColor( colorTable[CT_WHITE]);
+		UI_DrawHandlePic(  180, y+2, 64, 64, s_brightness.gamma);	// Starfleet graphic
+
+		UI_DrawProportionalString( 256,  y + 5, menu_normal_text[MNT_GAMMA_LINE1],UI_SMALLFONT, colorTable[CT_LTGOLD1]);
+		UI_DrawProportionalString( 256,  y + 25, menu_normal_text[MNT_GAMMA_LINE2],UI_SMALLFONT, colorTable[CT_LTGOLD1]);
+		UI_DrawProportionalString( 256,  y + 45, menu_normal_text[MNT_GAMMA_LINE3],UI_SMALLFONT,colorTable[CT_LTGOLD1]);
+	}
+	else
+	{
+		UI_DrawProportionalString( 178,  y + 5, menu_normal_text[MNT_GAMMA2_LINE1],UI_SMALLFONT, colorTable[CT_LTGOLD1]);
+		UI_DrawProportionalString( 178,  y + 25,menu_normal_text[MNT_GAMMA2_LINE2],UI_SMALLFONT, colorTable[CT_LTGOLD1]);
+	}
+
+
+	if ( s_brightness.supportMapLightingOptions ) {
+		int y, h;
+		y = 163;
+		h = 233;
+
+		// Brackets around gamma
+		h = 100;
+		trap_R_SetColor( colorTable[CT_LTPURPLE1]);
+		UI_DrawHandlePic(158,y, 16, 16, uis.graphicBracket1CornerLU);
+		UI_DrawHandlePic(158,y + 16,  8, h, uis.whiteShader);
+		UI_DrawHandlePic(158,y + h + 16, 16, -16, uis.graphicBracket1CornerLU);	//LD
+
+		UI_DrawHandlePic(174,y, 408, 8, uis.whiteShader);	// Top line
+		UI_DrawHandlePic(579,y, 32, 16, s_brightness.top);	// Corner, UR
+		UI_DrawHandlePic(581,y + 16, 30, h, uis.whiteShader);	// Right column
+		UI_DrawHandlePic(579,y + h + 16, 32, -16, s_brightness.top);	// Corner, LR
+		UI_DrawHandlePic(174,y + h + 24, 408, 8, uis.whiteShader);	// Bottom line
+
+		// Brackets around map lighting options
+		y = 300;
+		h = 96;
+		trap_R_SetColor( colorTable[CT_LTPURPLE1]);
+		UI_DrawHandlePic(158,y, 16, 16, uis.graphicBracket1CornerLU);
+		UI_DrawHandlePic(158,y + 16,  8, h, uis.whiteShader);
+		UI_DrawHandlePic(158,y + h + 16, 16, -16, uis.graphicBracket1CornerLU);	//LD
+
+		UI_DrawHandlePic(174,y, 408, 8, uis.whiteShader);	// Top line
+		UI_DrawHandlePic(579,y, 32, 16, s_brightness.top);	// Corner, UR
+		UI_DrawHandlePic(581,y + 16, 30, h, uis.whiteShader);	// Right column
+		UI_DrawHandlePic(579,y + h + 16, 32, -16, s_brightness.top);	// Corner, LR
+		UI_DrawHandlePic(174,y + h + 24, 408, 8, uis.whiteShader);	// Bottom line
+
+		UI_DrawProportionalString( 190, 325, "Map Lighting Options", UI_SMALLFONT, colorTable[CT_LTGOLD1]);
+	} else {
+		// Brackets around gamma
+		trap_R_SetColor( colorTable[CT_LTPURPLE1]);
+		UI_DrawHandlePic(158,163, 16, 16, uis.graphicBracket1CornerLU);
+		UI_DrawHandlePic(158,179,  8, 233, uis.whiteShader);
+		UI_DrawHandlePic(158,412, 16, -16, uis.graphicBracket1CornerLU);	//LD
+
+		UI_DrawHandlePic(174,163, 408, 8, uis.whiteShader);	// Top line
+
+		UI_DrawHandlePic(579,163, 32, 16, s_brightness.top);	// Corner, UR
+		UI_DrawHandlePic(581,179, 30, 121, uis.whiteShader);	// Top right column
+		UI_DrawHandlePic(581,303, 30, 109, uis.whiteShader);	// Bottom right column
+		UI_DrawHandlePic(579,412, 32, -16, s_brightness.top);	// Corner, LR
+
+		UI_DrawHandlePic(174,420, 408, 8, uis.whiteShader);	// Bottom line
+	}
+
+	Menu_Draw( &s_brightness.menu );
+}
+
+/*
+=================
+UI_BrightnessMenu_SetLightingResetButtonEnabled
+
+Enable or disable the lighting reset button.
+=================
+*/
+static void UI_BrightnessMenu_SetLightingResetButtonEnabled( qboolean enable ) {
+	if ( enable ) {
+		s_brightness.lighting_reset.textcolor = CT_BLACK;
+		s_brightness.lighting_reset.textcolor2 = CT_WHITE;
+		s_brightness.lighting_reset.color = CT_DKORANGE;
+		s_brightness.lighting_reset.color2 = CT_LTORANGE;
+		s_brightness.lighting_reset.generic.flags &= ~QMF_INACTIVE;
+	} else {
+		s_brightness.lighting_reset.textcolor = CT_WHITE;
+		s_brightness.lighting_reset.textcolor2 = CT_WHITE;
+		s_brightness.lighting_reset.color = CT_DKGREY;
+		s_brightness.lighting_reset.color2 = CT_DKGREY;
+		s_brightness.lighting_reset.generic.flags |= QMF_INACTIVE;
+	}
+}
+
+/*
+=================
+UI_BrightnessMenu_SetLightingApplyButtonEnabled
+
+Enable or disable the lighting apply button.
+=================
+*/
+static void UI_BrightnessMenu_SetLightingApplyButtonEnabled( qboolean enable ) {
+	if ( enable ) {
+		s_brightness.lighting_apply.generic.flags &= ~QMF_GRAYED;
+		s_brightness.lighting_apply.generic.flags |= QMF_BLINK;
+	} else {
+		s_brightness.lighting_apply.generic.flags |= QMF_GRAYED;
+		s_brightness.lighting_apply.generic.flags &= ~QMF_BLINK;
+	}
+}
+
+/*
+=================
+UI_BrightnessCallback
+=================
+*/
+static void UI_BrightnessCallback( void *s, int notification )
+{
+	if (notification != QM_ACTIVATED)
+		return;
+
+	if ( s == &s_brightness.gamma_apply ) {
+		trap_Cvar_SetValue( "r_gamma", s_brightness.gamma_slider.curvalue / 10.0f );
+		trap_Cmd_ExecuteText( EXEC_APPEND, "vid_restart\n" );
+
+	} else if ( s == &s_brightness.gamma_slider ) {
+		if ( uis.glconfig.deviceSupportsGamma ) {
+			// Update gamma in real time
+			trap_Cvar_SetValue( "r_gamma", s_brightness.gamma_slider.curvalue / 10.0f );
+		} else {
+			// Blink the apply button
+			s_brightness.gamma_apply.generic.flags &= ~QMF_GRAYED;
+			s_brightness.gamma_apply.generic.flags |= QMF_BLINK;
+		}
+
+	} else if ( s == &s_brightness.lighting_apply ) {
+		{
+			// Convert slider value to actual setting value
+			float mlg = s_brightness.lighting_gamma_slider.curvalue / 10.0f;
+			mlg = mlg < 1.0f ? sqrt( mlg ) : ( mlg > 1.5f ? ( mlg - 0.5f ) * ( mlg - 0.5f ) + 0.5f : mlg );
+			trap_Cvar_SetValue( "r_mapLightingGamma", mlg );
+		}
+		trap_Cvar_SetValue( "r_overBrightFactor", s_brightness.lighting_overbright_slider.curvalue / 10.0f );
+
+		// Reset other brightness settings to avoid stacking
+		trap_Cvar_Set( "r_ignorehwgamma", "0" );
+		trap_Cvar_Set( "r_intensity", "1" );
+		trap_Cvar_Set( "r_textureGamma", "1" );
+		trap_Cvar_Set( "r_mapLightingFactor", "2" );
+
+		trap_Cmd_ExecuteText( EXEC_APPEND, "vid_restart\n" );
+
+	} else if ( s == &s_brightness.lighting_reset ) {
+		s_brightness.lighting_gamma_slider.curvalue = 10.0f;
+		s_brightness.lighting_overbright_slider.curvalue = 15.0f;
+		UI_BrightnessMenu_SetLightingApplyButtonEnabled( !s_brightness.defaults_active );
+		UI_BrightnessMenu_SetLightingResetButtonEnabled( qfalse );
+
+	} else if ( s == &s_brightness.lighting_gamma_slider || s == &s_brightness.lighting_overbright_slider ) {
+		UI_BrightnessMenu_SetLightingApplyButtonEnabled( qtrue );
+		UI_BrightnessMenu_SetLightingResetButtonEnabled( qtrue );
+	}
+}
+
+/*
+=================
+UI_BrightnessMenu_Init
+=================
+*/
+void UI_BrightnessMenu_Init( void )
+{
+	int x, y;
+
+	memset( &s_brightness, 0, sizeof( s_brightness ) );
+
+	// Determine engine support for map lighting options
+	s_brightness.supportMapLightingOptions = VMExt_GVCommandInt( "ui_support_r_ext_mapLightingGamma", 0 ) &&
+			VMExt_GVCommandInt( "ui_support_r_ext_overBrightFactor", 0 );
+
+	s_brightness.top = trap_R_RegisterShaderNoMip("menu/common/corner_ur_8_30.tga");
+	s_brightness.gamma = trap_R_RegisterShaderNoMip("menu/special/gamma_test.tga");
+
+	// Menu Data
+	s_brightness.menu.wrapAround					= qtrue;
+	s_brightness.menu.draw							= UI_BrightnessMenu_MenuDraw;
+	s_brightness.menu.fullscreen					= qtrue;
+	s_brightness.menu.descX							= MENU_DESC_X;
+	s_brightness.menu.descY							= MENU_DESC_Y;
+	s_brightness.menu.listX							= 230;
+	s_brightness.menu.listY							= 188;
+	s_brightness.menu.titleX						= MENU_TITLE_X;
+	s_brightness.menu.titleY						= MENU_TITLE_Y;
+	s_brightness.menu.titleI						= MNT_CONTROLSMENU_TITLE;
+	s_brightness.menu.footNoteEnum					= MNT_VIDEOSETUP;
+
+	SetupMenu_TopButtons(&s_brightness.menu,MENU_VIDEO,NULL);
+
+	Video_SideButtons(&s_brightness.menu,ID_VIDEOBRIGHTNESS);
+
+	x = 180;
+	y = s_brightness.supportMapLightingOptions ? 267 - 10 : 267;
+	s_brightness.gamma_slider.generic.type		= MTYPE_SLIDER;
+	s_brightness.gamma_slider.generic.x			= x + 162;
+	s_brightness.gamma_slider.generic.y			= y;
+	s_brightness.gamma_slider.generic.flags		= QMF_SMALLFONT;
+	s_brightness.gamma_slider.generic.callback	= UI_BrightnessCallback;
+	s_brightness.gamma_slider.minvalue			= 5;
+	s_brightness.gamma_slider.maxvalue			= 30;
+	s_brightness.gamma_slider.color				= CT_DKPURPLE1;
+	s_brightness.gamma_slider.color2			= CT_LTPURPLE1;
+	s_brightness.gamma_slider.generic.name		= PIC_MONBAR2;
+	s_brightness.gamma_slider.width				= 256;
+	s_brightness.gamma_slider.height			= 32;
+	s_brightness.gamma_slider.focusWidth		= 145;
+	s_brightness.gamma_slider.focusHeight		= 18;
+	s_brightness.gamma_slider.picName			= GRAPHIC_SQUARE;
+	s_brightness.gamma_slider.picX				= x;
+	s_brightness.gamma_slider.picY				= y;
+	s_brightness.gamma_slider.picWidth			= MENU_BUTTON_MED_WIDTH + 21;
+	s_brightness.gamma_slider.picHeight			= MENU_BUTTON_MED_HEIGHT;
+	s_brightness.gamma_slider.textX				= MENU_BUTTON_TEXT_X;
+	s_brightness.gamma_slider.textY				= MENU_BUTTON_TEXT_Y;
+	s_brightness.gamma_slider.textEnum			= MBT_BRIGHTNESS;
+	s_brightness.gamma_slider.textcolor			= CT_BLACK;
+	s_brightness.gamma_slider.textcolor2		= CT_WHITE;
+	s_brightness.gamma_slider.thumbName			= PIC_SLIDER;
+	s_brightness.gamma_slider.thumbHeight		= 32;
+	s_brightness.gamma_slider.thumbWidth		= 16;
+	s_brightness.gamma_slider.thumbGraphicWidth	= 9;
+	s_brightness.gamma_slider.thumbColor		= CT_DKBLUE1;
+	s_brightness.gamma_slider.thumbColor2		= CT_LTBLUE1;
+
+	s_brightness.gamma_apply.generic.type			= MTYPE_ACTION;
+	s_brightness.gamma_apply.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS|QMF_GRAYED;
+	s_brightness.gamma_apply.generic.x				= 490;
+	s_brightness.gamma_apply.generic.y				= s_brightness.supportMapLightingOptions ? 191 - 10 : 191;
+	s_brightness.gamma_apply.generic.callback		= UI_BrightnessCallback;
+	s_brightness.gamma_apply.textEnum				= MBT_ACCEPT;
+	s_brightness.gamma_apply.textcolor				= CT_BLACK;
+	s_brightness.gamma_apply.textcolor2				= CT_WHITE;
+	s_brightness.gamma_apply.textcolor3				= CT_LTGREY;
+	s_brightness.gamma_apply.color					= CT_DKPURPLE1;
+	s_brightness.gamma_apply.color2					= CT_LTPURPLE1;
+	s_brightness.gamma_apply.color3					= CT_DKGREY;
+	s_brightness.gamma_apply.textX					= 5;
+	s_brightness.gamma_apply.textY					= 30;
+	s_brightness.gamma_apply.width					= 82;
+	s_brightness.gamma_apply.height					= 70;
+
+	y = 350;
+	s_brightness.lighting_gamma_slider.generic.type			= MTYPE_SLIDER;
+	s_brightness.lighting_gamma_slider.generic.x			= x + 162;
+	s_brightness.lighting_gamma_slider.generic.y			= y;
+	s_brightness.lighting_gamma_slider.generic.flags		= QMF_SMALLFONT;
+	s_brightness.lighting_gamma_slider.generic.callback		= UI_BrightnessCallback;
+	s_brightness.lighting_gamma_slider.minvalue				= 5;
+	s_brightness.lighting_gamma_slider.maxvalue				= 25;
+	s_brightness.lighting_gamma_slider.color				= CT_DKPURPLE1;
+	s_brightness.lighting_gamma_slider.color2				= CT_LTPURPLE1;
+	s_brightness.lighting_gamma_slider.generic.name			= PIC_MONBAR2;
+	s_brightness.lighting_gamma_slider.width				= 256;
+	s_brightness.lighting_gamma_slider.height				= 32;
+	s_brightness.lighting_gamma_slider.focusWidth			= 145;
+	s_brightness.lighting_gamma_slider.focusHeight			= 18;
+	s_brightness.lighting_gamma_slider.picName				= GRAPHIC_SQUARE;
+	s_brightness.lighting_gamma_slider.picX					= x;
+	s_brightness.lighting_gamma_slider.picY					= y;
+	s_brightness.lighting_gamma_slider.picWidth				= MENU_BUTTON_MED_WIDTH + 21;
+	s_brightness.lighting_gamma_slider.picHeight			= MENU_BUTTON_MED_HEIGHT;
+	s_brightness.lighting_gamma_slider.textX				= MENU_BUTTON_TEXT_X;
+	s_brightness.lighting_gamma_slider.textY				= MENU_BUTTON_TEXT_Y;
+	s_brightness.lighting_gamma_slider.textEnum				= MBT_VIDEO_LIGHTING_LEVEL;
+	s_brightness.lighting_gamma_slider.textcolor			= CT_BLACK;
+	s_brightness.lighting_gamma_slider.textcolor2			= CT_WHITE;
+	s_brightness.lighting_gamma_slider.thumbName			= PIC_SLIDER;
+	s_brightness.lighting_gamma_slider.thumbHeight			= 32;
+	s_brightness.lighting_gamma_slider.thumbWidth			= 16;
+	s_brightness.lighting_gamma_slider.thumbGraphicWidth	= 9;
+	s_brightness.lighting_gamma_slider.thumbColor			= CT_DKBLUE1;
+	s_brightness.lighting_gamma_slider.thumbColor2			= CT_LTBLUE1;
+
+	y += 25;
+	s_brightness.lighting_overbright_slider.generic.type		= MTYPE_SLIDER;
+	s_brightness.lighting_overbright_slider.generic.x			= x + 162;
+	s_brightness.lighting_overbright_slider.generic.y			= y;
+	s_brightness.lighting_overbright_slider.generic.flags		= QMF_SMALLFONT;
+	s_brightness.lighting_overbright_slider.generic.callback	= UI_BrightnessCallback;
+	s_brightness.lighting_overbright_slider.minvalue			= 10;
+	s_brightness.lighting_overbright_slider.maxvalue			= 20;
+	s_brightness.lighting_overbright_slider.color				= CT_DKPURPLE1;
+	s_brightness.lighting_overbright_slider.color2				= CT_LTPURPLE1;
+	s_brightness.lighting_overbright_slider.generic.name		= PIC_MONBAR2;
+	s_brightness.lighting_overbright_slider.width				= 256;
+	s_brightness.lighting_overbright_slider.height				= 32;
+	s_brightness.lighting_overbright_slider.focusWidth			= 145;
+	s_brightness.lighting_overbright_slider.focusHeight			= 18;
+	s_brightness.lighting_overbright_slider.picName				= GRAPHIC_SQUARE;
+	s_brightness.lighting_overbright_slider.picX				= x;
+	s_brightness.lighting_overbright_slider.picY				= y;
+	s_brightness.lighting_overbright_slider.picWidth			= MENU_BUTTON_MED_WIDTH + 21;
+	s_brightness.lighting_overbright_slider.picHeight			= MENU_BUTTON_MED_HEIGHT;
+	s_brightness.lighting_overbright_slider.textX				= MENU_BUTTON_TEXT_X;
+	s_brightness.lighting_overbright_slider.textY				= MENU_BUTTON_TEXT_Y;
+	s_brightness.lighting_overbright_slider.textEnum			= MBT_VIDEO_LIGHTING_CONTRAST;
+	s_brightness.lighting_overbright_slider.textcolor			= CT_BLACK;
+	s_brightness.lighting_overbright_slider.textcolor2			= CT_WHITE;
+	s_brightness.lighting_overbright_slider.thumbName			= PIC_SLIDER;
+	s_brightness.lighting_overbright_slider.thumbHeight			= 32;
+	s_brightness.lighting_overbright_slider.thumbWidth			= 16;
+	s_brightness.lighting_overbright_slider.thumbGraphicWidth	= 9;
+	s_brightness.lighting_overbright_slider.thumbColor			= CT_DKBLUE1;
+	s_brightness.lighting_overbright_slider.thumbColor2			= CT_LTBLUE1;
+
+	s_brightness.lighting_apply.generic.type			= MTYPE_ACTION;
+	s_brightness.lighting_apply.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS|QMF_GRAYED;
+	s_brightness.lighting_apply.generic.x				= 510;
+	s_brightness.lighting_apply.generic.y				= 320;
+	s_brightness.lighting_apply.generic.callback		= UI_BrightnessCallback;
+	s_brightness.lighting_apply.textEnum				= MBT_VIDEO_LIGHTING_APPLY;
+	s_brightness.lighting_apply.textcolor				= CT_BLACK;
+	s_brightness.lighting_apply.textcolor2				= CT_WHITE;
+	s_brightness.lighting_apply.textcolor3				= CT_LTGREY;
+	s_brightness.lighting_apply.color					= CT_DKPURPLE1;
+	s_brightness.lighting_apply.color2					= CT_LTPURPLE1;
+	s_brightness.lighting_apply.color3					= CT_DKGREY;
+	s_brightness.lighting_apply.textX					= 5;
+	s_brightness.lighting_apply.textY					= 5;
+	s_brightness.lighting_apply.width					= 60;
+	s_brightness.lighting_apply.height					= 40;
+
+	s_brightness.lighting_reset.generic.type			= MTYPE_BITMAP;
+	s_brightness.lighting_reset.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
+	s_brightness.lighting_reset.generic.x				= 510;
+	s_brightness.lighting_reset.generic.y				= 365;
+	s_brightness.lighting_reset.generic.name			= GRAPHIC_SQUARE;
+	s_brightness.lighting_reset.generic.callback		= UI_BrightnessCallback;
+	s_brightness.lighting_reset.textEnum				= MBT_VIDEO_LIGHTING_RESET;
+	s_brightness.lighting_reset.textcolor				= CT_BLACK;
+	s_brightness.lighting_reset.textcolor2				= CT_WHITE;
+	s_brightness.lighting_reset.color					= CT_DKORANGE;
+	s_brightness.lighting_reset.color2					= CT_LTORANGE;
+	s_brightness.lighting_reset.textX					= 5;
+	s_brightness.lighting_reset.textY					= 5;
+	s_brightness.lighting_reset.width					= 60;
+	s_brightness.lighting_reset.height					= 40;
+
+	Menu_AddItem( &s_brightness.menu, ( void * )&s_brightness.gamma_slider);
+	if (!uis.glconfig.deviceSupportsGamma)
+	{
+		Menu_AddItem( &s_brightness.menu, ( void * )&s_brightness.gamma_apply);
+	}
+	s_brightness.gamma_slider.curvalue = trap_Cvar_VariableValue( "r_gamma" ) *  10.0f;
+
+	if ( s_brightness.supportMapLightingOptions )
+	{
+		{
+			// The slider value has some conversions applied to make the scaling correspond to
+			// the visual results more naturally.
+			float mlg = trap_Cvar_VariableValue( "r_mapLightingGamma" );
+			mlg = mlg < 1.0f ? mlg * mlg : ( mlg > 1.5f ? (float)sqrt( mlg - 0.5f ) + 0.5f : mlg );
+			if ( mlg < 0.5f ) {
+				mlg = 0.5f;
+			}
+			if ( mlg > 2.5f ) {
+				mlg = 2.5f;
+			}
+			s_brightness.lighting_gamma_slider.curvalue = mlg * 10.0f;
+		}
+
+		{
+			float obf = trap_Cvar_VariableValue( "r_overBrightFactor" );
+			if ( obf < 1.0f ) {
+				obf = 1.0f;
+			}
+			if ( obf > 2.0f ) {
+				obf = 2.0f;
+			}
+			s_brightness.lighting_overbright_slider.curvalue = obf * 10.0f;
+		}
+
+		// Check if all the lighting settings are already at the defaults
+		s_brightness.defaults_active = s_brightness.lighting_gamma_slider.curvalue == 10.0f &&
+				s_brightness.lighting_overbright_slider.curvalue == 15.0f &&
+				trap_Cvar_VariableValue( "r_ignoreHWGamma" ) == 0.0f &&
+				trap_Cvar_VariableValue( "r_intensity" ) == 1.0f &&
+				trap_Cvar_VariableValue( "r_textureGamma" ) == 1.0f &&
+				trap_Cvar_VariableValue( "r_mapLightingFactor" ) == 2.0f;
+
+		UI_BrightnessMenu_SetLightingResetButtonEnabled( !s_brightness.defaults_active );
+
+		Menu_AddItem( &s_brightness.menu, ( void * )&s_brightness.lighting_gamma_slider);
+		Menu_AddItem( &s_brightness.menu, ( void * )&s_brightness.lighting_overbright_slider);
+		Menu_AddItem( &s_brightness.menu, ( void * )&s_brightness.lighting_apply);
+		Menu_AddItem( &s_brightness.menu, ( void * )&s_brightness.lighting_reset);
+	}
+
+	UI_PushMenu( &s_brightness.menu );
+}
 
 /*
 =======================================================================
@@ -436,18 +1083,10 @@ static const char *s_drivers[] =
 typedef struct {
 	menuframework_s	menu;
 
-	menutext_s		banner;
-	menubitmap_s	framel;
-	menubitmap_s	framer;
-
-	menutext_s		graphics;
-	menutext_s		display;
-	menutext_s		sound;
-	menutext_s		network;
-
 	menulist_s		list;
 	menulist_s		mode;
 	menulist_s		driver;
+	menulist_s		renderer;
 	menulist_s		tq;
 	menulist_s  	fs;
 	menulist_s  	lighting;
@@ -459,6 +1098,9 @@ typedef struct {
 	menutext_s		driverinfo;
 	menulist_s		simpleshaders;
 	menulist_s		compresstextures;
+	menulist_s		anisotropic;
+	menulist_s		multisample;
+	menulist_s		vsync;
 
 	menuaction_s	apply;
 
@@ -479,12 +1121,16 @@ typedef struct
 	qboolean extensions;
 	int simpleshaders;
 	int compresstextures;
+	int anisotropic;
+	int multisample;
+	int renderer;
+	int vsync;
 } InitialVideoOptions_s;
 
 static InitialVideoOptions_s	s_ivo;
 static graphicsoptions_t		s_graphicsoptions;
 
-static InitialVideoOptions_s s_ivo_templates[] =
+static InitialVideoOptions_s s_ivo_templates[NUM_VIDEO_TEMPLATES] =
 {
 	{
 		2, qtrue, 3, 0, 2, 2, 2, 1, 0, qtrue, 0, 0,	// JDC: this was tq 3
@@ -498,12 +1144,29 @@ static InitialVideoOptions_s s_ivo_templates[] =
 	{
 		0, qtrue, 1, 1, 1, 0, 0, 0, 0, qtrue, 1, 0,
 	},
-	{
-		1, qtrue, 1, 0, 0, 0, 1, 0, 0, qtrue, 0, 0,
-	}
+	//{
+	//	1, qtrue, 1, 0, 0, 0, 1, 0, 0, qtrue, 0, 0,
+	//}
 };
 
-#define NUM_IVO_TEMPLATES ( sizeof( s_ivo_templates ) / sizeof( s_ivo_templates[0] ) )
+static InitialVideoOptions_s s_ivo_modern_templates[NUM_VIDEO_TEMPLATES] =
+{
+	{
+		0, qtrue, 1, 0, 1, 0, 1, 0, 0, qtrue, 0, 0, 0, 0,
+	},
+	{
+		1, qtrue, 2, 0, 0, 0, 2, 1, 0, qtrue, 0, 0, 2, 0,
+	},
+	{
+		2, qtrue, 3, 0, 2, 2, 2, 1, 0, qtrue, 0, 0, 4, 0,
+	},
+	{
+		2, qtrue, 3, 0, 2, 2, 2, 1, 0, qtrue, 0, 0,	4, 2,
+	},
+};
+
+// If max anisotropy is unsupported, convert template anisotropy levels to 1 or 0.
+#define ANISOTROPIC_TEMPLATE_VALUE( value ) ( videoEngineConfig.supportMaxAnisotropy ? value : ( value ? 1 : 0 ) )
 
 /*
 =================
@@ -524,8 +1187,87 @@ static void GraphicsOptions_GetInitialVideo( void )
 	s_ivo.texturebits = s_graphicsoptions.texturebits.curvalue;
 	s_ivo.simpleshaders = s_graphicsoptions.simpleshaders.curvalue;
 	s_ivo.compresstextures = s_graphicsoptions.compresstextures.curvalue;
+	s_ivo.renderer    = s_graphicsoptions.renderer.curvalue;
+	s_ivo.anisotropic = s_graphicsoptions.anisotropic.curvalue;
+	s_ivo.multisample = s_graphicsoptions.multisample.curvalue;
+	s_ivo.vsync = s_graphicsoptions.vsync.curvalue;
 }
 
+/*
+=================
+GraphicsOptions_CompareTemplate
+
+Returns qtrue if the config matches the current button configuration.
+=================
+*/
+static qboolean GraphicsOptions_CompareTemplate( InitialVideoOptions_s template ) {
+	// Apply some forced values from GraphicsOptions_UpdateMenuItems to template ahead of comparison
+	// Otherwise in some cases template will never match and template button will get stuck
+	if ( videoEngineConfig.supportGlDriver && s_graphicsoptions.driver.curvalue == 1 ) {
+		template.fullscreen = 1;
+	}
+	if ( s_graphicsoptions.fs.curvalue == 0 || ( videoEngineConfig.supportGlDriver && s_graphicsoptions.driver.curvalue == 1 ) ) {
+		template.colordepth = 0;
+	}
+	if ( videoEngineConfig.supportAllowExtensions && s_graphicsoptions.allow_extensions.curvalue == 0 )
+	{
+		if ( template.texturebits == 0 )
+		{
+			template.texturebits = 1;
+		}
+	}
+
+	if ( !videoEngineConfig.modern_templates && template.mode != s_graphicsoptions.mode.curvalue )
+		return qfalse;
+	if ( !videoEngineConfig.modern_templates && template.fullscreen != s_graphicsoptions.fs.curvalue )
+		return qfalse;
+	if ( template.tq != s_graphicsoptions.tq.curvalue )
+		return qfalse;
+	if ( videoEngineConfig.supportColorDepth && template.colordepth != s_graphicsoptions.colordepth.curvalue )
+		return qfalse;
+	if ( videoEngineConfig.supportTextureBits && template.texturebits != s_graphicsoptions.texturebits.curvalue )
+		return qfalse;
+	if ( template.geometry != s_graphicsoptions.geometry.curvalue )
+		return qfalse;
+	if ( template.filter != s_graphicsoptions.filter.curvalue )
+		return qfalse;
+	if ( videoEngineConfig.supportSimpleShaders && template.simpleshaders != s_graphicsoptions.simpleshaders.curvalue )
+		return qfalse;
+	if ( template.compresstextures != s_graphicsoptions.compresstextures.curvalue )
+		return qfalse;
+	if ( videoEngineConfig.anisotropicFilteringVideoMenu && videoEngineConfig.modern_templates &&
+			ANISOTROPIC_TEMPLATE_VALUE( template.anisotropic ) != s_graphicsoptions.anisotropic.curvalue )
+		return qfalse;
+	if ( videoEngineConfig.supportMultisample && videoEngineConfig.modern_templates &&
+			template.multisample != s_graphicsoptions.multisample.curvalue )
+		return qfalse;
+	return qtrue;
+}
+
+/*
+=================
+GraphicsOptions_ApplyTemplate
+
+Copies values from template to current button configuration.
+=================
+*/
+static void GraphicsOptions_ApplyTemplate( const InitialVideoOptions_s *template ) {
+	if ( !videoEngineConfig.modern_templates )
+		s_graphicsoptions.mode.curvalue			= template->mode;
+	if ( !videoEngineConfig.modern_templates )
+		s_graphicsoptions.fs.curvalue			= template->fullscreen;
+	s_graphicsoptions.tq.curvalue				= template->tq;
+	s_graphicsoptions.colordepth.curvalue		= template->colordepth;
+	s_graphicsoptions.texturebits.curvalue		= template->texturebits;
+	s_graphicsoptions.geometry.curvalue			= template->geometry;
+	s_graphicsoptions.filter.curvalue			= template->filter;
+	s_graphicsoptions.simpleshaders.curvalue	= template->simpleshaders;
+	s_graphicsoptions.compresstextures.curvalue	= template->compresstextures;
+	if ( videoEngineConfig.modern_templates )
+		s_graphicsoptions.anisotropic.curvalue	= ANISOTROPIC_TEMPLATE_VALUE( template->anisotropic );
+	if ( videoEngineConfig.modern_templates )
+		s_graphicsoptions.multisample.curvalue	= template->multisample;
+}
 
 /*
 =================
@@ -535,36 +1277,16 @@ GraphicsOptions_CheckConfig
 static void GraphicsOptions_CheckConfig( void )
 {
 	int i;
+	const InitialVideoOptions_s *template = videoEngineConfig.modern_templates ? s_ivo_modern_templates : s_ivo_templates;
 
-	for ( i = 0; i < NUM_IVO_TEMPLATES; i++ )
+	for ( i = NUM_VIDEO_TEMPLATES - 1; i >= 0; i-- )
 	{
-		if ( s_ivo_templates[i].colordepth != s_graphicsoptions.colordepth.curvalue )
-			continue;
-		if ( s_ivo_templates[i].driver != s_graphicsoptions.driver.curvalue )
-			continue;
-		if ( s_ivo_templates[i].mode != s_graphicsoptions.mode.curvalue )
-			continue;
-		if ( s_ivo_templates[i].fullscreen != s_graphicsoptions.fs.curvalue )
-			continue;
-		if ( s_ivo_templates[i].tq != s_graphicsoptions.tq.curvalue )
-			continue;
-//		if ( s_ivo_templates[i].lighting != s_graphicsoptions.lighting.curvalue )
-//			continue;
-		if ( s_ivo_templates[i].geometry != s_graphicsoptions.geometry.curvalue )
-			continue;
-		if ( s_ivo_templates[i].filter != s_graphicsoptions.filter.curvalue )
-			continue;
-		if ( s_ivo_templates[i].simpleshaders != s_graphicsoptions.simpleshaders.curvalue )
-			continue;
-//		if ( s_ivo_templates[i].compresstextures != s_graphicsoptions.compresstextures.curvalue )
-//			continue;
-
-//		if ( s_ivo_templates[i].texturebits != s_graphicsoptions.texturebits.curvalue )
-//			continue;
-		s_graphicsoptions.list.curvalue = i;
-		return;
+		if ( GraphicsOptions_CompareTemplate( template[i] ) ) {
+			s_graphicsoptions.list.curvalue = i;
+			return;
+		}
 	}
-	s_graphicsoptions.list.curvalue = 4;
+	s_graphicsoptions.list.curvalue = NUM_VIDEO_TEMPLATES;
 }
 
 /*
@@ -574,7 +1296,12 @@ GraphicsOptions_UpdateMenuItems
 */
 static void GraphicsOptions_UpdateMenuItems( void )
 {
-	if ( s_graphicsoptions.driver.curvalue == 1 )
+	if ( s_graphicsoptions.mode.curvalue == NUM_RESOLUTIONS && s_ivo.mode != NUM_RESOLUTIONS ) {
+		// skip custom resolution if initial resolution wasn't custom
+		s_graphicsoptions.mode.curvalue = 0;
+	}
+
+	if ( videoEngineConfig.supportGlDriver && s_graphicsoptions.driver.curvalue == 1 )
 	{
 		s_graphicsoptions.fs.curvalue = 1;
 		s_graphicsoptions.fs.generic.flags |= QMF_GRAYED;
@@ -585,7 +1312,7 @@ static void GraphicsOptions_UpdateMenuItems( void )
 		s_graphicsoptions.fs.generic.flags &= ~QMF_GRAYED;
 	}
 
-	if ( s_graphicsoptions.fs.curvalue == 0 || s_graphicsoptions.driver.curvalue == 1 )
+	if ( s_graphicsoptions.fs.curvalue == 0 || ( videoEngineConfig.supportGlDriver && s_graphicsoptions.driver.curvalue == 1 ) )
 	{
 		s_graphicsoptions.colordepth.curvalue = 0;
 		s_graphicsoptions.colordepth.generic.flags |= QMF_GRAYED;
@@ -595,7 +1322,7 @@ static void GraphicsOptions_UpdateMenuItems( void )
 		s_graphicsoptions.colordepth.generic.flags &= ~QMF_GRAYED;
 	}
 
-	if ( s_graphicsoptions.allow_extensions.curvalue == 0 )
+	if ( videoEngineConfig.supportAllowExtensions && s_graphicsoptions.allow_extensions.curvalue == 0 )
 	{
 		if ( s_graphicsoptions.texturebits.curvalue == 0 )
 		{
@@ -618,7 +1345,7 @@ static void GraphicsOptions_UpdateMenuItems( void )
 		s_graphicsoptions.apply.generic.flags |= QMF_BLINK;
 	}
 
-	if ( s_ivo.extensions != s_graphicsoptions.allow_extensions.curvalue )
+	if ( videoEngineConfig.supportAllowExtensions && s_ivo.extensions != s_graphicsoptions.allow_extensions.curvalue )
 	{
 		s_graphicsoptions.apply.generic.flags &= ~QMF_GRAYED;
 		s_graphicsoptions.apply.generic.flags |= QMF_BLINK;
@@ -635,24 +1362,29 @@ static void GraphicsOptions_UpdateMenuItems( void )
 		s_graphicsoptions.apply.generic.flags |= QMF_BLINK;
 	}
 */
-	if ( s_ivo.colordepth != s_graphicsoptions.colordepth.curvalue )
+	if ( videoEngineConfig.supportColorDepth && s_ivo.colordepth != s_graphicsoptions.colordepth.curvalue )
 	{
 		s_graphicsoptions.apply.generic.flags &= ~QMF_GRAYED;
 		s_graphicsoptions.apply.generic.flags |= QMF_BLINK;
 	}
 
-	if ( s_ivo.driver != s_graphicsoptions.driver.curvalue )
+	if ( videoEngineConfig.supportGlDriver && s_ivo.driver != s_graphicsoptions.driver.curvalue )
 	{
 		s_graphicsoptions.apply.generic.flags &= ~QMF_GRAYED;
 		s_graphicsoptions.apply.generic.flags |= QMF_BLINK;
 	}
-	if ( s_ivo.texturebits != s_graphicsoptions.texturebits.curvalue )
+	if ( videoEngineConfig.supportRendererSelect && s_ivo.renderer != s_graphicsoptions.renderer.curvalue )
+	{
+		s_graphicsoptions.apply.generic.flags &= ~QMF_GRAYED;
+		s_graphicsoptions.apply.generic.flags |= QMF_BLINK;
+	}
+	if ( videoEngineConfig.supportTextureBits && s_ivo.texturebits != s_graphicsoptions.texturebits.curvalue )
 	{
 		s_graphicsoptions.apply.generic.flags &= ~QMF_GRAYED;
 		s_graphicsoptions.apply.generic.flags |= QMF_BLINK;
 	}
 
-	if ( s_ivo.simpleshaders != s_graphicsoptions.simpleshaders.curvalue )
+	if ( videoEngineConfig.supportSimpleShaders && s_ivo.simpleshaders != s_graphicsoptions.simpleshaders.curvalue )
 	{
 		s_graphicsoptions.apply.generic.flags &= ~QMF_GRAYED;
 		s_graphicsoptions.apply.generic.flags |= QMF_BLINK;
@@ -671,6 +1403,24 @@ static void GraphicsOptions_UpdateMenuItems( void )
 	}
 
 	if ( s_ivo.filter != s_graphicsoptions.filter.curvalue )
+	{
+		s_graphicsoptions.apply.generic.flags &= ~QMF_GRAYED;
+		s_graphicsoptions.apply.generic.flags |= QMF_BLINK;
+	}
+
+	if ( videoEngineConfig.anisotropicFilteringVideoMenu && s_ivo.anisotropic != s_graphicsoptions.anisotropic.curvalue )
+	{
+		s_graphicsoptions.apply.generic.flags &= ~QMF_GRAYED;
+		s_graphicsoptions.apply.generic.flags |= QMF_BLINK;
+	}
+
+	if ( videoEngineConfig.supportMultisample && s_ivo.multisample != s_graphicsoptions.multisample.curvalue )
+	{
+		s_graphicsoptions.apply.generic.flags &= ~QMF_GRAYED;
+		s_graphicsoptions.apply.generic.flags |= QMF_BLINK;
+	}
+
+	if ( videoEngineConfig.supportVSync && s_ivo.vsync != s_graphicsoptions.vsync.curvalue )
 	{
 		s_graphicsoptions.apply.generic.flags &= ~QMF_GRAYED;
 		s_graphicsoptions.apply.generic.flags |= QMF_BLINK;
@@ -701,44 +1451,63 @@ static void GraphicsOptions_ApplyChanges( void *unused, int notification )
 	if (notification != QM_ACTIVATED)
 		return;
 
-	switch ( s_graphicsoptions.texturebits.curvalue  )
-	{
-	case 0:
-		trap_Cvar_SetValue( "r_texturebits", 0 );
-		break;
-	case 1:
-		trap_Cvar_SetValue( "r_texturebits", 16 );
-		break;
-	case 2:
-		trap_Cvar_SetValue( "r_texturebits", 32 );
-		break;
+	if ( videoEngineConfig.supportTextureBits ) {
+		switch ( s_graphicsoptions.texturebits.curvalue  )
+		{
+		case 0:
+			trap_Cvar_SetValue( "r_texturebits", 0 );
+			break;
+		case 1:
+			trap_Cvar_SetValue( "r_texturebits", 16 );
+			break;
+		case 2:
+			trap_Cvar_SetValue( "r_texturebits", 32 );
+			break;
+		}
 	}
 	trap_Cvar_SetValue( "r_picmip", 3 - s_graphicsoptions.tq.curvalue );
-	trap_Cvar_SetValue( "r_allowExtensions", s_graphicsoptions.allow_extensions.curvalue );
-	trap_Cvar_SetValue( "r_mode", (s_graphicsoptions.mode.curvalue + 2) );
+	if ( videoEngineConfig.supportAllowExtensions ) {
+		trap_Cvar_SetValue( "r_allowExtensions", s_graphicsoptions.allow_extensions.curvalue );
+	}
+	if ( s_graphicsoptions.mode.curvalue >= 0 && s_graphicsoptions.mode.curvalue < NUM_RESOLUTIONS ) {
+		trap_Cvar_SetValue( "r_mode", (s_graphicsoptions.mode.curvalue + 2) );
+	}
 	trap_Cvar_SetValue( "r_fullscreen", s_graphicsoptions.fs.curvalue );
-	trap_Cvar_Set( "r_glDriver", ( char * ) s_drivers[s_graphicsoptions.driver.curvalue] );
+	if ( videoEngineConfig.supportGlDriver ) {
+		trap_Cvar_Set( "r_glDriver", ( char * ) s_drivers[s_graphicsoptions.driver.curvalue] );
+	}
+	if ( videoEngineConfig.supportRendererSelect ) {
+		if ( s_graphicsoptions.renderer.curvalue == 0 ) {
+			trap_Cvar_Set( "cl_renderer", "opengl1" );
+		} else if ( s_graphicsoptions.renderer.curvalue == 1 ) {
+			trap_Cvar_Set( "cl_renderer", "opengl2" );
+		}
+	}
 
-	trap_Cvar_SetValue( "r_lowEndVideo", s_graphicsoptions.simpleshaders.curvalue );
+	if ( videoEngineConfig.supportSimpleShaders ) {
+		trap_Cvar_SetValue( "r_lowEndVideo", s_graphicsoptions.simpleshaders.curvalue );
+	}
 
 	trap_Cvar_SetValue( "r_ext_compress_textures", s_graphicsoptions.compresstextures.curvalue );
 
-	switch ( s_graphicsoptions.colordepth.curvalue )
-	{
-	case 0:
-		trap_Cvar_SetValue( "r_colorbits", 0 );
-		trap_Cvar_SetValue( "r_depthbits", 0 );
-		trap_Cvar_SetValue( "r_stencilbits", 0 );
-		break;
-	case 1:
-		trap_Cvar_SetValue( "r_colorbits", 16 );
-		trap_Cvar_SetValue( "r_depthbits", 16 );
-		trap_Cvar_SetValue( "r_stencilbits", 0 );
-		break;
-	case 2:
-		trap_Cvar_SetValue( "r_colorbits", 32 );
-		trap_Cvar_SetValue( "r_depthbits", 24 );
-		break;
+	if ( videoEngineConfig.supportColorDepth ) {
+		switch ( s_graphicsoptions.colordepth.curvalue )
+		{
+		case 0:
+			trap_Cvar_SetValue( "r_colorbits", 0 );
+			trap_Cvar_SetValue( "r_depthbits", 0 );
+			trap_Cvar_SetValue( "r_stencilbits", 0 );
+			break;
+		case 1:
+			trap_Cvar_SetValue( "r_colorbits", 16 );
+			trap_Cvar_SetValue( "r_depthbits", 16 );
+			trap_Cvar_SetValue( "r_stencilbits", 0 );
+			break;
+		case 2:
+			trap_Cvar_SetValue( "r_colorbits", 32 );
+			trap_Cvar_SetValue( "r_depthbits", 24 );
+			break;
+		}
 	}
 //	trap_Cvar_SetValue( "r_vertexLight", s_graphicsoptions.lighting.curvalue );
 
@@ -767,6 +1536,19 @@ static void GraphicsOptions_ApplyChanges( void *unused, int notification )
 		trap_Cvar_Set( "r_textureMode", "GL_LINEAR_MIPMAP_NEAREST" );
 	}
 
+	if ( videoEngineConfig.anisotropicFilteringVideoMenu ) {
+		UI_SetAnisotropyLevel( s_graphicsoptions.anisotropic.curvalue );
+	}
+
+	if ( videoEngineConfig.supportMultisample ) {
+		int value = s_graphicsoptions.multisample.curvalue > 0 ? 1 << s_graphicsoptions.multisample.curvalue : 0;
+		VMExt_GVCommandInt( va( "cmd_set_multisample %i", value ), 0 );
+	}
+
+	if ( videoEngineConfig.supportVSync ) {
+		trap_Cvar_Set( "r_swapInterval", s_graphicsoptions.vsync.curvalue ? "1" : "0" );
+	}
+
 	trap_Cmd_ExecuteText( EXEC_APPEND, "vid_restart\n" );
 }
 
@@ -777,8 +1559,6 @@ GraphicsOptions_Event
 */
 static void GraphicsOptions_Event( void* ptr, int event )
 {
-	InitialVideoOptions_s *ivo;
-
 	if( event != QM_ACTIVATED ) {
 		return;
 	}
@@ -796,20 +1576,23 @@ static void GraphicsOptions_Event( void* ptr, int event )
 		break;
 
 	case ID_LIST:
-		ivo = &s_ivo_templates[s_graphicsoptions.list.curvalue];
+		{
+			const InitialVideoOptions_s *template = videoEngineConfig.modern_templates ? s_ivo_modern_templates : s_ivo_templates;
+			if ( s_graphicsoptions.list.curvalue >= NUM_VIDEO_TEMPLATES ) {
+				// Trying to set "custom" - revert to original settings
+				GraphicsOptions_ApplyTemplate( &s_ivo );
 
-		s_graphicsoptions.mode.curvalue				= ivo->mode;
-		s_graphicsoptions.tq.curvalue				= ivo->tq;
-//		s_graphicsoptions.lighting.curvalue			= ivo->lighting;
-		s_graphicsoptions.colordepth.curvalue		= ivo->colordepth;
-		s_graphicsoptions.texturebits.curvalue		= ivo->texturebits;
-		s_graphicsoptions.geometry.curvalue			= ivo->geometry;
-		s_graphicsoptions.filter.curvalue			= ivo->filter;
-		s_graphicsoptions.fs.curvalue				= ivo->fullscreen;
-		s_graphicsoptions.simpleshaders.curvalue	= ivo->simpleshaders;
-		s_graphicsoptions.compresstextures.curvalue	= ivo->compresstextures;
-
-		break;
+				// If original settings match one of the other templates, go to the first template instead
+				GraphicsOptions_CheckConfig();
+				if ( s_graphicsoptions.list.curvalue < NUM_VIDEO_TEMPLATES ) {
+					s_graphicsoptions.list.curvalue = 0;
+					GraphicsOptions_ApplyTemplate( &template[0] );
+				}
+			} else {
+				GraphicsOptions_ApplyTemplate( &template[s_graphicsoptions.list.curvalue] );
+			}
+			break;
+		}
 
 	case ID_DRIVERINFO:
 		UI_DriverInfo_Menu();
@@ -862,15 +1645,14 @@ GraphicsOptions_SetMenuItems
 static void GraphicsOptions_SetMenuItems( void )
 {
 	s_graphicsoptions.mode.curvalue = (trap_Cvar_VariableValue( "r_mode" ) - 2);
-	if ( s_graphicsoptions.mode.curvalue < 0 ||
-			s_graphicsoptions.mode.curvalue >= ( sizeof ( s_resolutions ) / sizeof ( *s_resolutions ) ) )
+	if ( s_graphicsoptions.mode.curvalue < 0 || s_graphicsoptions.mode.curvalue >= NUM_RESOLUTIONS )
 	{
-		s_graphicsoptions.mode.curvalue = 1;
+		s_graphicsoptions.mode.curvalue = NUM_RESOLUTIONS;	// custom
 	}
-	s_graphicsoptions.fs.curvalue = trap_Cvar_VariableValue("r_fullscreen");
-	s_graphicsoptions.allow_extensions.curvalue = trap_Cvar_VariableValue("r_allowExtensions");
-	s_graphicsoptions.simpleshaders.curvalue = trap_Cvar_VariableValue("r_lowEndVideo");
-	s_graphicsoptions.compresstextures.curvalue = trap_Cvar_VariableValue("r_ext_compress_textures");
+	s_graphicsoptions.fs.curvalue = trap_Cvar_VariableValue("r_fullscreen") ? 1 : 0;
+	s_graphicsoptions.allow_extensions.curvalue = trap_Cvar_VariableValue("r_allowExtensions") ? 1 : 0;
+	s_graphicsoptions.simpleshaders.curvalue = trap_Cvar_VariableValue("r_lowEndVideo") ? 1 : 0;
+	s_graphicsoptions.compresstextures.curvalue = trap_Cvar_VariableValue("r_ext_compress_textures") ? 1 : 0;
 
 	s_graphicsoptions.tq.curvalue = 3-trap_Cvar_VariableValue( "r_picmip");
 	if ( s_graphicsoptions.tq.curvalue < 0 )
@@ -934,6 +1716,40 @@ static void GraphicsOptions_SetMenuItems( void )
 	case 32:
 		s_graphicsoptions.colordepth.curvalue = 2;
 		break;
+	}
+
+	if ( videoEngineConfig.supportRendererSelect ) {
+		char buffer[256];
+		trap_Cvar_VariableStringBuffer( "cl_renderer", buffer, sizeof( buffer ) );
+		if ( !Q_stricmp( buffer, "opengl1" ) ) {
+			s_graphicsoptions.renderer.listnames = s_renderer_Names;
+			s_graphicsoptions.renderer.curvalue = 0;
+		} else if ( !Q_stricmp( buffer, "opengl2" ) ) {
+			s_graphicsoptions.renderer.listnames = s_renderer_Names;
+			s_graphicsoptions.renderer.curvalue = 1;
+		} else {
+			// set button to "custom", meaning to leave the existing value unchanged
+			s_graphicsoptions.renderer.listnames = s_renderer_NamesUnknown;
+			s_graphicsoptions.renderer.curvalue = 2;
+		}
+	}
+
+	if ( videoEngineConfig.anisotropicFilteringVideoMenu ) {
+		s_graphicsoptions.anisotropic.curvalue = UI_GetAnisotropyLevel();
+	}
+
+	if ( videoEngineConfig.supportMultisample ) {
+		int level = VMExt_GVCommandInt( "cmd_get_multisample", 0 );
+		if ( level >= 4 )
+			s_graphicsoptions.multisample.curvalue = 2;
+		else if ( level >= 2 )
+			s_graphicsoptions.multisample.curvalue = 1;
+		else
+			s_graphicsoptions.multisample.curvalue = 0;
+	}
+
+	if ( videoEngineConfig.supportVSync ) {
+		s_graphicsoptions.vsync.curvalue = trap_Cvar_VariableValue( "r_swapInterval" ) ? 1 : 0;
 	}
 
 	if ( s_graphicsoptions.fs.curvalue == 0 )
@@ -1028,6 +1844,14 @@ static void Video_MenuEvent (void* ptr, int event)
 			{
 				UI_PopMenu();				// Get rid of whatever is ontop
 				UI_VideoData2SettingsMenu();	// Move to the Controls Menu
+			}
+			break;
+
+		case ID_VIDEOBRIGHTNESS:
+			if (m != &s_brightness.menu)	//	Not already in menu?
+			{
+				UI_PopMenu();				// Get rid of whatever is ontop
+				UI_BrightnessMenu_Init();	// Move to the Brightness Menu
 			}
 			break;
 
@@ -1139,6 +1963,8 @@ static void VideoData_MenuInit( void )
 {
 	int x,y,width,inc;
 
+	UI_InitVideoEngineConfig();
+
 	UI_VideoDataMenu_Cache();
 
 	// Menu Data
@@ -1172,40 +1998,63 @@ static void VideoData_MenuInit( void )
 	s_graphicsoptions.list.color2				= CT_LTPURPLE1;
 	s_graphicsoptions.list.textX				= 5;
 	s_graphicsoptions.list.textY				= 2;
-	s_graphicsoptions.list.listnames			= s_graphics_options_Names;
+	s_graphicsoptions.list.listnames			=
+			videoEngineConfig.modern_templates ? s_graphics_options_modern_Names : s_graphics_options_Names;
 	s_graphicsoptions.list.width				= width;
 
 	inc = 20;
-	y += inc;
-	s_graphicsoptions.driver.generic.type		= MTYPE_SPINCONTROL;
-	s_graphicsoptions.driver.generic.flags		= QMF_HIGHLIGHT_IF_FOCUS;
-	s_graphicsoptions.driver.generic.x			= x;
-	s_graphicsoptions.driver.generic.y			= y;
-	s_graphicsoptions.driver.textEnum			= MBT_VIDEODRIVER;
-	s_graphicsoptions.driver.textcolor			= CT_BLACK;
-	s_graphicsoptions.driver.textcolor2			= CT_WHITE;
-	s_graphicsoptions.driver.color				= CT_DKPURPLE1;
-	s_graphicsoptions.driver.color2				= CT_LTPURPLE1;
-	s_graphicsoptions.driver.textX				= 5;
-	s_graphicsoptions.driver.textY				= 2;
-	s_graphicsoptions.driver.listnames			= s_driver_Names;
-	s_graphicsoptions.driver.curvalue			= (uis.glconfig.driverType == GLDRV_VOODOO);
-	s_graphicsoptions.driver.width				= width;
 
-	y += inc;
-	s_graphicsoptions.allow_extensions.generic.type		= MTYPE_SPINCONTROL;
-	s_graphicsoptions.allow_extensions.generic.flags		= QMF_HIGHLIGHT_IF_FOCUS;
-	s_graphicsoptions.allow_extensions.generic.x			= x;
-	s_graphicsoptions.allow_extensions.generic.y			= y;
-	s_graphicsoptions.allow_extensions.textEnum			= MBT_VIDEOGLEXTENTIONS;
-	s_graphicsoptions.allow_extensions.textcolor			= CT_BLACK;
-	s_graphicsoptions.allow_extensions.textcolor2		= CT_WHITE;
-	s_graphicsoptions.allow_extensions.color				= CT_DKPURPLE1;
-	s_graphicsoptions.allow_extensions.color2			= CT_LTPURPLE1;
-	s_graphicsoptions.allow_extensions.textX				= 5;
-	s_graphicsoptions.allow_extensions.textY				= 2;
-	s_graphicsoptions.allow_extensions.listnames			= s_OffOnNone_Names;
-	s_graphicsoptions.allow_extensions.width				= width;
+	if ( videoEngineConfig.supportGlDriver ) {
+		y += inc;
+		s_graphicsoptions.driver.generic.type		= MTYPE_SPINCONTROL;
+		s_graphicsoptions.driver.generic.flags		= QMF_HIGHLIGHT_IF_FOCUS;
+		s_graphicsoptions.driver.generic.x			= x;
+		s_graphicsoptions.driver.generic.y			= y;
+		s_graphicsoptions.driver.textEnum			= MBT_VIDEODRIVER;
+		s_graphicsoptions.driver.textcolor			= CT_BLACK;
+		s_graphicsoptions.driver.textcolor2			= CT_WHITE;
+		s_graphicsoptions.driver.color				= CT_DKPURPLE1;
+		s_graphicsoptions.driver.color2				= CT_LTPURPLE1;
+		s_graphicsoptions.driver.textX				= 5;
+		s_graphicsoptions.driver.textY				= 2;
+		s_graphicsoptions.driver.listnames			= s_driver_Names;
+		s_graphicsoptions.driver.curvalue			= (uis.glconfig.driverType == GLDRV_VOODOO);
+		s_graphicsoptions.driver.width				= width;
+	}
+
+	if ( videoEngineConfig.supportRendererSelect ) {
+		y += inc;
+		s_graphicsoptions.renderer.generic.type		= MTYPE_SPINCONTROL;
+		s_graphicsoptions.renderer.generic.flags	= QMF_HIGHLIGHT_IF_FOCUS;
+		s_graphicsoptions.renderer.generic.x		= x;
+		s_graphicsoptions.renderer.generic.y		= y;
+		s_graphicsoptions.renderer.textEnum			= MBT_VIDEO_RENDERER;
+		s_graphicsoptions.renderer.textcolor		= CT_BLACK;
+		s_graphicsoptions.renderer.textcolor2		= CT_WHITE;
+		s_graphicsoptions.renderer.color			= CT_DKPURPLE1;
+		s_graphicsoptions.renderer.color2			= CT_LTPURPLE1;
+		s_graphicsoptions.renderer.textX			= 5;
+		s_graphicsoptions.renderer.textY			= 2;
+		s_graphicsoptions.renderer.listnames		= s_renderer_Names;
+		s_graphicsoptions.renderer.width			= width;
+	}
+
+	if ( videoEngineConfig.supportAllowExtensions ) {
+		y += inc;
+		s_graphicsoptions.allow_extensions.generic.type		= MTYPE_SPINCONTROL;
+		s_graphicsoptions.allow_extensions.generic.flags		= QMF_HIGHLIGHT_IF_FOCUS;
+		s_graphicsoptions.allow_extensions.generic.x			= x;
+		s_graphicsoptions.allow_extensions.generic.y			= y;
+		s_graphicsoptions.allow_extensions.textEnum			= MBT_VIDEOGLEXTENTIONS;
+		s_graphicsoptions.allow_extensions.textcolor			= CT_BLACK;
+		s_graphicsoptions.allow_extensions.textcolor2		= CT_WHITE;
+		s_graphicsoptions.allow_extensions.color				= CT_DKPURPLE1;
+		s_graphicsoptions.allow_extensions.color2			= CT_LTPURPLE1;
+		s_graphicsoptions.allow_extensions.textX				= 5;
+		s_graphicsoptions.allow_extensions.textY				= 2;
+		s_graphicsoptions.allow_extensions.listnames			= s_OffOnNone_Names;
+		s_graphicsoptions.allow_extensions.width				= width;
+	}
 
 	y += inc;
 	// references/modifies "r_mode"
@@ -1214,7 +2063,8 @@ static void VideoData_MenuInit( void )
 	s_graphicsoptions.mode.generic.x						= x;
 	s_graphicsoptions.mode.generic.y						= y;
 	s_graphicsoptions.mode.generic.callback				= GraphicsOptions_Event;
-	s_graphicsoptions.mode.textEnum						= MBT_VIDEOMODE;
+	s_graphicsoptions.mode.textEnum						=
+			videoEngineConfig.windowed_r_mode ? MBT_VIDEO_WINDOW_SIZE : MBT_VIDEOMODE;
 	s_graphicsoptions.mode.textcolor						= CT_BLACK;
 	s_graphicsoptions.mode.textcolor2					= CT_WHITE;
 	s_graphicsoptions.mode.color							= CT_DKPURPLE1;
@@ -1224,20 +2074,22 @@ static void VideoData_MenuInit( void )
 	s_graphicsoptions.mode.listnames						= s_resolutions;
 	s_graphicsoptions.mode.width						= width;
 
-	y += inc;
-	s_graphicsoptions.colordepth.generic.type			= MTYPE_SPINCONTROL;
-	s_graphicsoptions.colordepth.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
-	s_graphicsoptions.colordepth.generic.x				= x;
-	s_graphicsoptions.colordepth.generic.y				= y;
-	s_graphicsoptions.colordepth.textEnum				= MBT_VIDEOCOLORDEPTH;
-	s_graphicsoptions.colordepth.textcolor				= CT_BLACK;
-	s_graphicsoptions.colordepth.textcolor2				= CT_WHITE;
-	s_graphicsoptions.colordepth.color					= CT_DKPURPLE1;
-	s_graphicsoptions.colordepth.color2					= CT_LTPURPLE1;
-	s_graphicsoptions.colordepth.textX					= 5;
-	s_graphicsoptions.colordepth.textY					= 2;
-	s_graphicsoptions.colordepth.listnames				= s_colordepth_Names;
-	s_graphicsoptions.colordepth.width						= width;
+	if ( videoEngineConfig.supportColorDepth ) {
+		y += inc;
+		s_graphicsoptions.colordepth.generic.type			= MTYPE_SPINCONTROL;
+		s_graphicsoptions.colordepth.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
+		s_graphicsoptions.colordepth.generic.x				= x;
+		s_graphicsoptions.colordepth.generic.y				= y;
+		s_graphicsoptions.colordepth.textEnum				= MBT_VIDEOCOLORDEPTH;
+		s_graphicsoptions.colordepth.textcolor				= CT_BLACK;
+		s_graphicsoptions.colordepth.textcolor2				= CT_WHITE;
+		s_graphicsoptions.colordepth.color					= CT_DKPURPLE1;
+		s_graphicsoptions.colordepth.color2					= CT_LTPURPLE1;
+		s_graphicsoptions.colordepth.textX					= 5;
+		s_graphicsoptions.colordepth.textY					= 2;
+		s_graphicsoptions.colordepth.listnames				= s_colordepth_Names;
+		s_graphicsoptions.colordepth.width						= width;
+	}
 
 	y += inc;
 	s_graphicsoptions.fs.generic.type			= MTYPE_SPINCONTROL;
@@ -1300,21 +2152,23 @@ static void VideoData_MenuInit( void )
 	s_graphicsoptions.tq.listnames			= s_4quality_Names;
 	s_graphicsoptions.tq.width					= width;
 
-	y += inc;
-	// references/modifies "r_textureBits"
-	s_graphicsoptions.texturebits.generic.type				= MTYPE_SPINCONTROL;
-	s_graphicsoptions.texturebits.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
-	s_graphicsoptions.texturebits.generic.x					= x;
-	s_graphicsoptions.texturebits.generic.y					= y;
-	s_graphicsoptions.texturebits.textEnum					= MBT_VIDEOTEXTUREBITS;
-	s_graphicsoptions.texturebits.textcolor					= CT_BLACK;
-	s_graphicsoptions.texturebits.textcolor2				= CT_WHITE;
-	s_graphicsoptions.texturebits.color						= CT_DKPURPLE1;
-	s_graphicsoptions.texturebits.color2					= CT_LTPURPLE1;
-	s_graphicsoptions.texturebits.textX						= 5;
-	s_graphicsoptions.texturebits.textY						= 2;
-	s_graphicsoptions.texturebits.listnames					= s_tqbits_Names;
-	s_graphicsoptions.texturebits.width					= width;
+	if ( videoEngineConfig.supportTextureBits ) {
+		y += inc;
+		// references/modifies "r_textureBits"
+		s_graphicsoptions.texturebits.generic.type				= MTYPE_SPINCONTROL;
+		s_graphicsoptions.texturebits.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
+		s_graphicsoptions.texturebits.generic.x					= x;
+		s_graphicsoptions.texturebits.generic.y					= y;
+		s_graphicsoptions.texturebits.textEnum					= MBT_VIDEOTEXTUREBITS;
+		s_graphicsoptions.texturebits.textcolor					= CT_BLACK;
+		s_graphicsoptions.texturebits.textcolor2				= CT_WHITE;
+		s_graphicsoptions.texturebits.color						= CT_DKPURPLE1;
+		s_graphicsoptions.texturebits.color2					= CT_LTPURPLE1;
+		s_graphicsoptions.texturebits.textX						= 5;
+		s_graphicsoptions.texturebits.textY						= 2;
+		s_graphicsoptions.texturebits.listnames					= s_tqbits_Names;
+		s_graphicsoptions.texturebits.width					= width;
+	}
 
 	y += inc;
 	// references/modifies "r_textureMode"
@@ -1332,21 +2186,23 @@ static void VideoData_MenuInit( void )
 	s_graphicsoptions.filter.listnames						= s_filter_Names;
 	s_graphicsoptions.filter.width					= width;
 
-	y += inc;
-	// references/modifies "r_lowEndVideo"
-	s_graphicsoptions.simpleshaders.generic.type				= MTYPE_SPINCONTROL;
-	s_graphicsoptions.simpleshaders.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
-	s_graphicsoptions.simpleshaders.generic.x					= x;
-	s_graphicsoptions.simpleshaders.generic.y					= y;
-	s_graphicsoptions.simpleshaders.textEnum					= MBT_SIMPLESHADER;
-	s_graphicsoptions.simpleshaders.textcolor					= CT_BLACK;
-	s_graphicsoptions.simpleshaders.textcolor2				= CT_WHITE;
-	s_graphicsoptions.simpleshaders.color						= CT_DKPURPLE1;
-	s_graphicsoptions.simpleshaders.color2					= CT_LTPURPLE1;
-	s_graphicsoptions.simpleshaders.textX						= 5;
-	s_graphicsoptions.simpleshaders.textY						= 2;
-	s_graphicsoptions.simpleshaders.listnames					= s_OffOnNone_Names;
-	s_graphicsoptions.simpleshaders.width					= width;
+	if ( videoEngineConfig.supportSimpleShaders ) {
+		y += inc;
+		// references/modifies "r_lowEndVideo"
+		s_graphicsoptions.simpleshaders.generic.type				= MTYPE_SPINCONTROL;
+		s_graphicsoptions.simpleshaders.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
+		s_graphicsoptions.simpleshaders.generic.x					= x;
+		s_graphicsoptions.simpleshaders.generic.y					= y;
+		s_graphicsoptions.simpleshaders.textEnum					= MBT_SIMPLESHADER;
+		s_graphicsoptions.simpleshaders.textcolor					= CT_BLACK;
+		s_graphicsoptions.simpleshaders.textcolor2				= CT_WHITE;
+		s_graphicsoptions.simpleshaders.color						= CT_DKPURPLE1;
+		s_graphicsoptions.simpleshaders.color2					= CT_LTPURPLE1;
+		s_graphicsoptions.simpleshaders.textX						= 5;
+		s_graphicsoptions.simpleshaders.textY						= 2;
+		s_graphicsoptions.simpleshaders.listnames					= s_OffOnNone_Names;
+		s_graphicsoptions.simpleshaders.width					= width;
+	}
 
 	y += inc;
 	// references/modifies "r_ext_compress_textures"
@@ -1363,6 +2219,57 @@ static void VideoData_MenuInit( void )
 	s_graphicsoptions.compresstextures.textY					= 2;
 	s_graphicsoptions.compresstextures.listnames				= s_OffOnNone_Names;
 	s_graphicsoptions.compresstextures.width					= width;
+
+	if ( videoEngineConfig.anisotropicFilteringVideoMenu ) {
+		y += inc;
+		s_graphicsoptions.anisotropic.generic.type			= MTYPE_SPINCONTROL;
+		s_graphicsoptions.anisotropic.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
+		s_graphicsoptions.anisotropic.generic.x				= x;
+		s_graphicsoptions.anisotropic.generic.y				= y;
+		s_graphicsoptions.anisotropic.textEnum				= MBT_VIDEO_ANISOTROPIC_LEVEL;
+		s_graphicsoptions.anisotropic.textcolor				= CT_BLACK;
+		s_graphicsoptions.anisotropic.textcolor2			= CT_WHITE;
+		s_graphicsoptions.anisotropic.color					= CT_DKPURPLE1;
+		s_graphicsoptions.anisotropic.color2				= CT_LTPURPLE1;
+		s_graphicsoptions.anisotropic.textX					= 5;
+		s_graphicsoptions.anisotropic.textY					= 2;
+		s_graphicsoptions.anisotropic.listnames				= videoEngineConfig.supportMaxAnisotropy ? s_anisotropic_Names : s_OffOnNone_Names;
+		s_graphicsoptions.anisotropic.width					= width;
+	}
+
+	if ( videoEngineConfig.supportMultisample ) {
+		y += inc;
+		s_graphicsoptions.multisample.generic.type			= MTYPE_SPINCONTROL;
+		s_graphicsoptions.multisample.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
+		s_graphicsoptions.multisample.generic.x				= x;
+		s_graphicsoptions.multisample.generic.y				= y;
+		s_graphicsoptions.multisample.textEnum				= MBT_VIDEO_ANTI_ALIASING;
+		s_graphicsoptions.multisample.textcolor				= CT_BLACK;
+		s_graphicsoptions.multisample.textcolor2			= CT_WHITE;
+		s_graphicsoptions.multisample.color					= CT_DKPURPLE1;
+		s_graphicsoptions.multisample.color2				= CT_LTPURPLE1;
+		s_graphicsoptions.multisample.textX					= 5;
+		s_graphicsoptions.multisample.textY					= 2;
+		s_graphicsoptions.multisample.listnames				= s_multisample_Names;
+		s_graphicsoptions.multisample.width					= width;
+	}
+
+	if ( videoEngineConfig.supportVSync ) {
+		y += inc;
+		s_graphicsoptions.vsync.generic.type			= MTYPE_SPINCONTROL;
+		s_graphicsoptions.vsync.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
+		s_graphicsoptions.vsync.generic.x				= x;
+		s_graphicsoptions.vsync.generic.y				= y;
+		s_graphicsoptions.vsync.textEnum				= MBT_VIDEO_VERTICAL_SYNC;
+		s_graphicsoptions.vsync.textcolor				= CT_BLACK;
+		s_graphicsoptions.vsync.textcolor2				= CT_WHITE;
+		s_graphicsoptions.vsync.color					= CT_DKPURPLE1;
+		s_graphicsoptions.vsync.color2					= CT_LTPURPLE1;
+		s_graphicsoptions.vsync.textX					= 5;
+		s_graphicsoptions.vsync.textY					= 2;
+		s_graphicsoptions.vsync.listnames				= s_OffOnNone_Names;
+		s_graphicsoptions.vsync.width					= width;
+	}
 
 	s_graphicsoptions.apply.generic.type				= MTYPE_ACTION;
 	s_graphicsoptions.apply.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS|QMF_GRAYED;
@@ -1381,28 +2288,50 @@ static void VideoData_MenuInit( void )
 	s_graphicsoptions.apply.width						= 110;
 	s_graphicsoptions.apply.height						= 100;
 
+	GraphicsOptions_SetMenuItems();
+	GraphicsOptions_GetInitialVideo();
+
 	SetupMenu_TopButtons(&s_videodata.menu,MENU_VIDEODATA,&s_graphicsoptions.apply);
 
 	Menu_AddItem( &s_videodata.menu, ( void * )&s_graphicsoptions.list);
-	Menu_AddItem( &s_videodata.menu, ( void * )&s_graphicsoptions.driver);
-	Menu_AddItem( &s_videodata.menu, ( void * )&s_graphicsoptions.allow_extensions);
+	if ( videoEngineConfig.supportGlDriver ) {
+		Menu_AddItem( &s_videodata.menu, ( void * )&s_graphicsoptions.driver);
+	}
+	if ( videoEngineConfig.supportRendererSelect ) {
+		Menu_AddItem( &s_videodata.menu, ( void * )&s_graphicsoptions.renderer);
+	}
+	if ( videoEngineConfig.supportAllowExtensions ) {
+		Menu_AddItem( &s_videodata.menu, ( void * )&s_graphicsoptions.allow_extensions);
+	}
 	Menu_AddItem( &s_videodata.menu, ( void * )&s_graphicsoptions.mode);
-	Menu_AddItem( &s_videodata.menu, ( void * )&s_graphicsoptions.colordepth);
+	if ( videoEngineConfig.supportColorDepth ) {
+		Menu_AddItem( &s_videodata.menu, ( void * )&s_graphicsoptions.colordepth);
+	}
 	Menu_AddItem( &s_videodata.menu, ( void * )&s_graphicsoptions.fs);
 //	Menu_AddItem( &s_videodata.menu, ( void * )&s_graphicsoptions.lighting);
 	Menu_AddItem( &s_videodata.menu, ( void * )&s_graphicsoptions.geometry);
 	Menu_AddItem( &s_videodata.menu, ( void * )&s_graphicsoptions.tq);
-	Menu_AddItem( &s_videodata.menu, ( void * )&s_graphicsoptions.texturebits);
+	if ( videoEngineConfig.supportTextureBits ) {
+		Menu_AddItem( &s_videodata.menu, ( void * )&s_graphicsoptions.texturebits);
+	}
 	Menu_AddItem( &s_videodata.menu, ( void * )&s_graphicsoptions.filter);
-	Menu_AddItem( &s_videodata.menu, ( void * )&s_graphicsoptions.simpleshaders);
+	if ( videoEngineConfig.supportSimpleShaders ) {
+		Menu_AddItem( &s_videodata.menu, ( void * )&s_graphicsoptions.simpleshaders);
+	}
 	Menu_AddItem( &s_videodata.menu, ( void * )&s_graphicsoptions.compresstextures);
+	if ( videoEngineConfig.anisotropicFilteringVideoMenu ) {
+		Menu_AddItem( &s_videodata.menu, ( void * )&s_graphicsoptions.anisotropic);
+	}
+	if ( videoEngineConfig.supportMultisample ) {
+		Menu_AddItem( &s_videodata.menu, ( void * )&s_graphicsoptions.multisample);
+	}
+	if ( videoEngineConfig.supportVSync ) {
+		Menu_AddItem( &s_videodata.menu, ( void * )&s_graphicsoptions.vsync);
+	}
 	Menu_AddItem( &s_videodata.menu, ( void * )&s_graphicsoptions.apply);
 
 
 	Video_SideButtons(&s_videodata.menu,ID_VIDEODATA);
-
-	GraphicsOptions_SetMenuItems();
-	GraphicsOptions_GetInitialVideo();
 
 	if ( uis.glconfig.driverType == GLDRV_ICD &&
 		uis.glconfig.hardwareType == GLHW_3DFX_2D3D )
@@ -1501,10 +2430,45 @@ void Video_SideButtons(menuframework_s *menu,int menuType)
 		s_video_data2.textcolor2			= CT_WHITE;
 	}
 
+	s_video_brightness.generic.type				= MTYPE_BITMAP;
+	s_video_brightness.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
+	s_video_brightness.generic.x				= video_sidebuttons[2][0];
+	s_video_brightness.generic.y				= video_sidebuttons[2][1];
+	s_video_brightness.generic.name				= GRAPHIC_SQUARE;
+	s_video_brightness.generic.id				= ID_VIDEOBRIGHTNESS;
+	if (menuType == ID_VIDEODATA)
+	{
+		s_video_brightness.generic.callback		= VideoSideButtons_MenuEvent;
+	}
+	else
+	{
+		s_video_brightness.generic.callback		= Video_MenuEvent;
+	}
+	s_video_brightness.width					= MENU_BUTTON_MED_WIDTH - 10;
+	s_video_brightness.height					= MENU_BUTTON_MED_HEIGHT;
+	s_video_brightness.color					= CT_DKPURPLE1;
+	s_video_brightness.color2					= CT_LTPURPLE1;
+	s_video_brightness.textX					= 5;
+	s_video_brightness.textY					= 2;
+	s_video_brightness.textEnum					= MBT_BRIGHTNESS;
+	s_video_brightness.textcolor				= CT_WHITE;
+	s_video_brightness.textcolor2				= CT_WHITE;
+	if (menuType == ID_VIDEOBRIGHTNESS)
+	{
+		s_video_brightness.textcolor			= CT_WHITE;
+		s_video_brightness.textcolor2			= CT_WHITE;
+		s_video_brightness.generic.flags		= QMF_GRAYED;
+	}
+	else
+	{
+		s_video_brightness.textcolor			= CT_BLACK;
+		s_video_brightness.textcolor2			= CT_WHITE;
+	}
+
 	s_video_drivers.generic.type			= MTYPE_BITMAP;
 	s_video_drivers.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
-	s_video_drivers.generic.x				= video_sidebuttons[2][0];
-	s_video_drivers.generic.y				= video_sidebuttons[2][1];
+	s_video_drivers.generic.x				= video_sidebuttons[3][0];
+	s_video_drivers.generic.y				= video_sidebuttons[3][1];
 	s_video_drivers.generic.name			= GRAPHIC_SQUARE;
 	s_video_drivers.generic.id				= ID_VIDEODRIVERS;
 	if (menuType == ID_VIDEODATA)
@@ -1536,6 +2500,7 @@ void Video_SideButtons(menuframework_s *menu,int menuType)
 
 	Menu_AddItem( menu, ( void * )&s_video_data);
 	Menu_AddItem( menu, ( void * )&s_video_data2);
+	Menu_AddItem( menu, ( void * )&s_video_brightness);
 	Menu_AddItem( menu, ( void * )&s_video_drivers);
 
 }
@@ -1916,23 +2881,6 @@ void UI_VideoDriverMenu( void )
 	UI_PushMenu( &s_videodriver.menu );
 }
 
-/*
-=================
-GammaCallback2
-=================
-*/
-void GammaCallback2( void *s, int notification )
-{
-	if (notification != QM_ACTIVATED)
-		return;
-
-	s_videodata2.apply_action2.generic.flags &= ~QMF_GRAYED;
-	s_videodata2.apply_action2.generic.flags |= QMF_BLINK;
-
-	GammaCallback(s,notification );
-
-}
-
 
 /*
 =================
@@ -1941,8 +2889,6 @@ M_VideoData2Menu_Graphics
 */
 void M_VideoData2Menu_Graphics (void)
 {
-	int y;
-
 	UI_MenuFrame(&s_videodata2.menu);
 
 	UI_DrawProportionalString(  74,  66, "925",UI_RIGHT|UI_TINYFONT, colorTable[CT_BLACK]);
@@ -1952,25 +2898,6 @@ void M_VideoData2Menu_Graphics (void)
 	UI_DrawProportionalString(  74,  395, "3-679",UI_RIGHT|UI_TINYFONT, colorTable[CT_BLACK]);
 
 	UI_Setup_MenuButtons();
-
-	y = 191;
-	if (uis.glconfig.deviceSupportsGamma)
-	{
-		trap_R_SetColor( colorTable[CT_DKGREY]);
-		UI_DrawHandlePic(  178, y, 68, 68, uis.whiteShader);	//
-		trap_R_SetColor( colorTable[CT_WHITE]);
-		UI_DrawHandlePic(  180, y+2, 64, 64, s_videodata2.gamma);	// Starfleet graphic
-
-		UI_DrawProportionalString( 256,  y + 5, menu_normal_text[MNT_GAMMA_LINE1],UI_SMALLFONT, colorTable[CT_LTGOLD1]);
-		UI_DrawProportionalString( 256,  y + 25, menu_normal_text[MNT_GAMMA_LINE2],UI_SMALLFONT, colorTable[CT_LTGOLD1]);
-		UI_DrawProportionalString( 256,  y + 45, menu_normal_text[MNT_GAMMA_LINE3],UI_SMALLFONT,colorTable[CT_LTGOLD1]);
-	}
-	else
-	{
-		UI_DrawProportionalString( 178,  y + 5, menu_normal_text[MNT_GAMMA2_LINE1],UI_SMALLFONT, colorTable[CT_LTGOLD1]);
-		UI_DrawProportionalString( 178,  y + 25,menu_normal_text[MNT_GAMMA2_LINE2],UI_SMALLFONT, colorTable[CT_LTGOLD1]);
-	}
-
 
 	// Brackets around Video Data
 	trap_R_SetColor( colorTable[CT_LTPURPLE1]);
@@ -2010,7 +2937,6 @@ UI_VideoData2Menu_Cache
 void UI_VideoData2Menu_Cache(void)
 {
 	s_videodata2.top = trap_R_RegisterShaderNoMip("menu/common/corner_ur_8_30.tga");
-	s_videodata2.gamma = trap_R_RegisterShaderNoMip("menu/special/gamma_test.tga");
 	trap_R_RegisterShaderNoMip(PIC_MONBAR2);
 	trap_R_RegisterShaderNoMip(PIC_SLIDER);
 }
@@ -2032,12 +2958,72 @@ void VideoData2_EnabledDisableCenterHudSlider( void ) {
 
 /*
 =================
+VideoData2_Event
+=================
+*/
+static void VideoData2_Event( void* ptr, int notification )
+{
+	if( notification != QM_ACTIVATED )
+	{
+		return;
+	}
+
+	if ( ptr == &s_videodata2.aspectCorrection ) {
+		trap_Cvar_SetValue( "cg_aspectCorrect", s_videodata2.aspectCorrection.curvalue );
+		VideoData2_EnabledDisableCenterHudSlider();
+	}
+
+	else if ( ptr == &s_videodata2.centerHud_slider ) {
+		trap_Cvar_SetValue( "cg_aspectCorrectCenterHud", s_videodata2.centerHud_slider.curvalue / 10.0f );
+	}
+
+	else if ( ptr == &s_videodata2.fov_slider ) {
+		// Use asterisk notation to enable horizontal scaling.
+		trap_Cvar_Set( "cg_fov", va( "%f*", s_videodata2.fov_slider.curvalue ) );
+	}
+
+	else if ( ptr == &s_videodata2.screensize_slider ) {
+		trap_Cvar_SetValue( "cg_viewsize", s_videodata2.screensize_slider.curvalue );
+	}
+
+	else if ( ptr == &s_videodata2.flares ) {
+		trap_Cvar_SetValue( "r_flares", s_videodata2.flares.curvalue );
+	}
+
+	else if ( ptr == &s_videodata2.wallmarks ) {
+		trap_Cvar_SetValue( "cg_marks", s_videodata2.wallmarks.curvalue );
+	}
+
+	else if ( ptr == &s_videodata2.dynamiclights ) {
+		trap_Cvar_SetValue( "r_dynamiclight", s_videodata2.dynamiclights.curvalue );
+	}
+
+	else if ( ptr == &s_videodata2.simpleitems ) {
+		trap_Cvar_SetValue( "cg_simpleItems", s_videodata2.simpleitems.curvalue );
+	}
+
+	else if ( ptr == &s_videodata2.synceveryframe ) {
+		trap_Cvar_SetValue( "r_finish", s_videodata2.synceveryframe.curvalue );
+	}
+
+	else if ( ptr == &s_videodata2.anisotropic ) {
+		UI_SetAnisotropyLevel( s_videodata2.anisotropic.curvalue );
+	}
+}
+
+/*
+=================
 VideoData2_MenuInit
 =================
 */
 static void VideoData2_MenuInit( void )
 {
 	int x,y;
+	int inc = 22;
+	qboolean suppressViewSize = VMExt_GVCommandInt( "ui_suppress_cg_viewsize", 0 )
+			&& trap_Cvar_VariableValue( "cg_viewsize" ) >= 100.0f ? qtrue : qfalse;
+
+	UI_InitVideoEngineConfig();
 
 	UI_VideoData2Menu_Cache();
 
@@ -2061,62 +3047,61 @@ static void VideoData2_MenuInit( void )
 
 	Video_SideButtons(&s_videodata2.menu,ID_VIDEODATA2);
 
-	x = 180;
-	y = 267;
-	s_videodata2.gamma_slider.generic.type		= MTYPE_SLIDER;
-	s_videodata2.gamma_slider.generic.x			= x + 162;
-	s_videodata2.gamma_slider.generic.y			= y;
-	s_videodata2.gamma_slider.generic.flags		= QMF_SMALLFONT;
-	s_videodata2.gamma_slider.generic.callback	= GammaCallback2;
-	s_videodata2.gamma_slider.minvalue			= 5;
-	s_videodata2.gamma_slider.maxvalue			= 30;
-	s_videodata2.gamma_slider.color				= CT_DKPURPLE1;
-	s_videodata2.gamma_slider.color2			= CT_LTPURPLE1;
-	s_videodata2.gamma_slider.generic.name		= PIC_MONBAR2;
-	s_videodata2.gamma_slider.width				= 256;
-	s_videodata2.gamma_slider.height			= 32;
-	s_videodata2.gamma_slider.focusWidth		= 145;
-	s_videodata2.gamma_slider.focusHeight		= 18;
-	s_videodata2.gamma_slider.picName			= GRAPHIC_SQUARE;
-	s_videodata2.gamma_slider.picX				= x;
-	s_videodata2.gamma_slider.picY				= y;
-	s_videodata2.gamma_slider.picWidth			= MENU_BUTTON_MED_WIDTH + 21;
-	s_videodata2.gamma_slider.picHeight			= MENU_BUTTON_MED_HEIGHT;
-	s_videodata2.gamma_slider.textX				= MENU_BUTTON_TEXT_X;
-	s_videodata2.gamma_slider.textY				= MENU_BUTTON_TEXT_Y;
-	s_videodata2.gamma_slider.textEnum			= MBT_BRIGHTNESS;
-	s_videodata2.gamma_slider.textcolor			= CT_BLACK;
-	s_videodata2.gamma_slider.textcolor2		= CT_WHITE;
-	s_videodata2.gamma_slider.thumbName			= PIC_SLIDER;
-	s_videodata2.gamma_slider.thumbHeight		= 32;
-	s_videodata2.gamma_slider.thumbWidth		= 16;
-	s_videodata2.gamma_slider.thumbGraphicWidth	= 9;
-	s_videodata2.gamma_slider.thumbColor		= CT_DKBLUE1;
-	s_videodata2.gamma_slider.thumbColor2		= CT_LTBLUE1;
+	x = 175;
+	y = 183;
+	s_videodata2.aspectCorrection.generic.type			= MTYPE_SPINCONTROL;
+	s_videodata2.aspectCorrection.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
+	s_videodata2.aspectCorrection.generic.x				= x;
+	s_videodata2.aspectCorrection.generic.y				= y;
+	s_videodata2.aspectCorrection.generic.name			= GRAPHIC_BUTTONRIGHT;
+	s_videodata2.aspectCorrection.generic.callback		= VideoData2_Event;
+	s_videodata2.aspectCorrection.color					= CT_DKPURPLE1;
+	s_videodata2.aspectCorrection.color2				= CT_LTPURPLE1;
+	s_videodata2.aspectCorrection.textX					= MENU_BUTTON_TEXT_X;
+	s_videodata2.aspectCorrection.textY					= MENU_BUTTON_TEXT_Y;
+	s_videodata2.aspectCorrection.textEnum				= MBT_ASPECTCORRECTION;
+	s_videodata2.aspectCorrection.textcolor				= CT_BLACK;
+	s_videodata2.aspectCorrection.textcolor2			= CT_WHITE;
+	s_videodata2.aspectCorrection.listnames				= s_OffOnNone_Names;
 
-	s_videodata2.apply_action2.generic.type				= MTYPE_ACTION;
-	s_videodata2.apply_action2.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS|QMF_GRAYED;
-	s_videodata2.apply_action2.generic.x				= 490;
-	s_videodata2.apply_action2.generic.y				= 191;
-	s_videodata2.apply_action2.generic.callback			= ApplyChanges2;
-	s_videodata2.apply_action2.textEnum					= MBT_ACCEPT;
-	s_videodata2.apply_action2.textcolor				= CT_BLACK;
-	s_videodata2.apply_action2.textcolor2				= CT_WHITE;
-	s_videodata2.apply_action2.textcolor3				= CT_LTGREY;
-	s_videodata2.apply_action2.color					= CT_DKPURPLE1;
-	s_videodata2.apply_action2.color2					= CT_LTPURPLE1;
-	s_videodata2.apply_action2.color3					= CT_DKGREY;
-	s_videodata2.apply_action2.textX					= 5;
-	s_videodata2.apply_action2.textY					= 30;
-	s_videodata2.apply_action2.width					= 82;
-	s_videodata2.apply_action2.height					= 70;
+	y += inc;
+	s_videodata2.centerHud_slider.generic.type		= MTYPE_SLIDER;
+	s_videodata2.centerHud_slider.generic.x			= x + 162;
+	s_videodata2.centerHud_slider.generic.y			= y;
+	s_videodata2.centerHud_slider.generic.flags		= QMF_SMALLFONT;
+	s_videodata2.centerHud_slider.generic.callback	= VideoData2_Event;
+	s_videodata2.centerHud_slider.minvalue			= 0;
+	s_videodata2.centerHud_slider.maxvalue			= 10;
+	s_videodata2.centerHud_slider.color				= CT_DKPURPLE1;
+	s_videodata2.centerHud_slider.color2			= CT_LTPURPLE1;
+	s_videodata2.centerHud_slider.generic.name		= PIC_MONBAR2;
+	s_videodata2.centerHud_slider.width				= 256;
+	s_videodata2.centerHud_slider.height			= 32;
+	s_videodata2.centerHud_slider.focusWidth		= 145;
+	s_videodata2.centerHud_slider.focusHeight		= 18;
+	s_videodata2.centerHud_slider.picName			= GRAPHIC_SQUARE;
+	s_videodata2.centerHud_slider.picX				= x;
+	s_videodata2.centerHud_slider.picY				= y;
+	s_videodata2.centerHud_slider.picWidth			= MENU_BUTTON_MED_WIDTH + 21;
+	s_videodata2.centerHud_slider.picHeight			= MENU_BUTTON_MED_HEIGHT;
+	s_videodata2.centerHud_slider.textX				= MENU_BUTTON_TEXT_X;
+	s_videodata2.centerHud_slider.textY				= MENU_BUTTON_TEXT_Y;
+	s_videodata2.centerHud_slider.textEnum			= MBT_CENTERHUD;
+	s_videodata2.centerHud_slider.textcolor			= CT_BLACK;
+	s_videodata2.centerHud_slider.textcolor2		= CT_WHITE;
+	s_videodata2.centerHud_slider.thumbName			= PIC_SLIDER;
+	s_videodata2.centerHud_slider.thumbHeight		= 32;
+	s_videodata2.centerHud_slider.thumbWidth		= 16;
+	s_videodata2.centerHud_slider.thumbGraphicWidth= 9;
+	s_videodata2.centerHud_slider.thumbColor		= CT_DKBLUE1;
+	s_videodata2.centerHud_slider.thumbColor2		= CT_LTBLUE1;
 
-	y += 25;
+	y += inc;
 	s_videodata2.fov_slider.generic.type		= MTYPE_SLIDER;
 	s_videodata2.fov_slider.generic.x			= x + 162;
 	s_videodata2.fov_slider.generic.y			= y;
 	s_videodata2.fov_slider.generic.flags		= QMF_SMALLFONT;
-	s_videodata2.fov_slider.generic.callback	= FovCallback;
+	s_videodata2.fov_slider.generic.callback	= VideoData2_Event;
 	s_videodata2.fov_slider.minvalue			= 60;
 	s_videodata2.fov_slider.maxvalue			= 120;
 	s_videodata2.fov_slider.color				= CT_DKPURPLE1;
@@ -2143,113 +3128,153 @@ static void VideoData2_MenuInit( void )
 	s_videodata2.fov_slider.thumbColor			= CT_DKBLUE1;
 	s_videodata2.fov_slider.thumbColor2			= CT_LTBLUE1;
 
-	y += 25;
-	s_videodata2.screensize_slider.generic.type		= MTYPE_SLIDER;
-	s_videodata2.screensize_slider.generic.x		= x + 162;
-	s_videodata2.screensize_slider.generic.y		= y;
-	s_videodata2.screensize_slider.generic.flags	= QMF_SMALLFONT;
-	s_videodata2.screensize_slider.generic.callback	= ScreensizeCallback;
-	s_videodata2.screensize_slider.minvalue			= 30;
-	s_videodata2.screensize_slider.maxvalue			= 100;
-	s_videodata2.screensize_slider.color			= CT_DKPURPLE1;
-	s_videodata2.screensize_slider.color2			= CT_LTPURPLE1;
-	s_videodata2.screensize_slider.generic.name		= PIC_MONBAR2;
-	s_videodata2.screensize_slider.width			= 256;
-	s_videodata2.screensize_slider.height			= 32;
-	s_videodata2.screensize_slider.focusWidth		= 145;
-	s_videodata2.screensize_slider.focusHeight		= 18;
-	s_videodata2.screensize_slider.picName			= GRAPHIC_SQUARE;
-	s_videodata2.screensize_slider.picX				= x;
-	s_videodata2.screensize_slider.picY				= y;
-	s_videodata2.screensize_slider.picWidth			= MENU_BUTTON_MED_WIDTH + 21;
-	s_videodata2.screensize_slider.picHeight		= MENU_BUTTON_MED_HEIGHT;
-	s_videodata2.screensize_slider.textX			= MENU_BUTTON_TEXT_X;
-	s_videodata2.screensize_slider.textY			= MENU_BUTTON_TEXT_Y;
-	s_videodata2.screensize_slider.textEnum			= MBT_SCREENSIZE;
-	s_videodata2.screensize_slider.textcolor		= CT_BLACK;
-	s_videodata2.screensize_slider.textcolor2		= CT_WHITE;
-	s_videodata2.screensize_slider.thumbName		= PIC_SLIDER;
-	s_videodata2.screensize_slider.thumbHeight		= 32;
-	s_videodata2.screensize_slider.thumbWidth		= 16;
-	s_videodata2.screensize_slider.thumbGraphicWidth= 9;
-	s_videodata2.screensize_slider.thumbColor		= CT_DKBLUE1;
-	s_videodata2.screensize_slider.thumbColor2		= CT_LTBLUE1;
-
-	y += 25;
-	s_videodata2.aspectCorrection.generic.type			= MTYPE_SPINCONTROL;
-	s_videodata2.aspectCorrection.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
-	s_videodata2.aspectCorrection.generic.x				= x;
-	s_videodata2.aspectCorrection.generic.y				= y;
-	s_videodata2.aspectCorrection.generic.name			= GRAPHIC_BUTTONRIGHT;
-	s_videodata2.aspectCorrection.generic.callback		= AspectCorrectionCallback;
-	s_videodata2.aspectCorrection.color					= CT_DKPURPLE1;
-	s_videodata2.aspectCorrection.color2					= CT_LTPURPLE1;
-	s_videodata2.aspectCorrection.textX					= MENU_BUTTON_TEXT_X;
-	s_videodata2.aspectCorrection.textY					= MENU_BUTTON_TEXT_Y;
-	s_videodata2.aspectCorrection.textEnum				= MBT_ASPECTCORRECTION;
-	s_videodata2.aspectCorrection.textcolor				= CT_BLACK;
-	s_videodata2.aspectCorrection.textcolor2				= CT_WHITE;
-	s_videodata2.aspectCorrection.listnames				= s_OffOnNone_Names;
-
-	y += 25;
-	s_videodata2.centerHud_slider.generic.type		= MTYPE_SLIDER;
-	s_videodata2.centerHud_slider.generic.x			= x + 162;
-	s_videodata2.centerHud_slider.generic.y			= y;
-	s_videodata2.centerHud_slider.generic.flags		= QMF_SMALLFONT;
-	s_videodata2.centerHud_slider.generic.callback	= CenterHudCallback;
-	s_videodata2.centerHud_slider.minvalue			= 0;
-	s_videodata2.centerHud_slider.maxvalue			= 1;
-	s_videodata2.centerHud_slider.color				= CT_DKPURPLE1;
-	s_videodata2.centerHud_slider.color2			= CT_LTPURPLE1;
-	s_videodata2.centerHud_slider.generic.name		= PIC_MONBAR2;
-	s_videodata2.centerHud_slider.width				= 256;
-	s_videodata2.centerHud_slider.height			= 32;
-	s_videodata2.centerHud_slider.focusWidth		= 145;
-	s_videodata2.centerHud_slider.focusHeight		= 18;
-	s_videodata2.centerHud_slider.picName			= GRAPHIC_SQUARE;
-	s_videodata2.centerHud_slider.picX				= x;
-	s_videodata2.centerHud_slider.picY				= y;
-	s_videodata2.centerHud_slider.picWidth			= MENU_BUTTON_MED_WIDTH + 21;
-	s_videodata2.centerHud_slider.picHeight			= MENU_BUTTON_MED_HEIGHT;
-	s_videodata2.centerHud_slider.textX				= MENU_BUTTON_TEXT_X;
-	s_videodata2.centerHud_slider.textY				= MENU_BUTTON_TEXT_Y;
-	s_videodata2.centerHud_slider.textEnum			= MBT_CENTERHUD;
-	s_videodata2.centerHud_slider.textcolor			= CT_BLACK;
-	s_videodata2.centerHud_slider.textcolor2		= CT_WHITE;
-	s_videodata2.centerHud_slider.thumbName			= PIC_SLIDER;
-	s_videodata2.centerHud_slider.thumbHeight		= 32;
-	s_videodata2.centerHud_slider.thumbWidth		= 16;
-	s_videodata2.centerHud_slider.thumbGraphicWidth= 9;
-	s_videodata2.centerHud_slider.thumbColor		= CT_DKBLUE1;
-	s_videodata2.centerHud_slider.thumbColor2		= CT_LTBLUE1;
-
-	y += 25;
-	s_videodata2.anisotropicfiltering.generic.type			= MTYPE_SPINCONTROL;
-	s_videodata2.anisotropicfiltering.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
-	s_videodata2.anisotropicfiltering.generic.x				= x;
-	s_videodata2.anisotropicfiltering.generic.y				= y;
-	s_videodata2.anisotropicfiltering.generic.name			= GRAPHIC_BUTTONRIGHT;
-	s_videodata2.anisotropicfiltering.generic.callback		= AnisotropicFilteringCallback;
-	s_videodata2.anisotropicfiltering.color					= CT_DKPURPLE1;
-	s_videodata2.anisotropicfiltering.color2					= CT_LTPURPLE1;
-	s_videodata2.anisotropicfiltering.textX					= MENU_BUTTON_TEXT_X;
-	s_videodata2.anisotropicfiltering.textY					= MENU_BUTTON_TEXT_Y;
-	s_videodata2.anisotropicfiltering.textEnum				= MBT_ANISOTROPICFILTERING;
-	s_videodata2.anisotropicfiltering.textcolor				= CT_BLACK;
-	s_videodata2.anisotropicfiltering.textcolor2				= CT_WHITE;
-	s_videodata2.anisotropicfiltering.listnames				= s_OffOnNone_Names;
-
-
-	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.gamma_slider);
-	if (!uis.glconfig.deviceSupportsGamma)
-	{
-		Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.apply_action2);
+	if ( !suppressViewSize ) {
+		y += inc;
+		s_videodata2.screensize_slider.generic.type		= MTYPE_SLIDER;
+		s_videodata2.screensize_slider.generic.x		= x + 162;
+		s_videodata2.screensize_slider.generic.y		= y;
+		s_videodata2.screensize_slider.generic.flags	= QMF_SMALLFONT;
+		s_videodata2.screensize_slider.generic.callback	= VideoData2_Event;
+		s_videodata2.screensize_slider.minvalue			= 30;
+		s_videodata2.screensize_slider.maxvalue			= 100;
+		s_videodata2.screensize_slider.color			= CT_DKPURPLE1;
+		s_videodata2.screensize_slider.color2			= CT_LTPURPLE1;
+		s_videodata2.screensize_slider.generic.name		= PIC_MONBAR2;
+		s_videodata2.screensize_slider.width			= 256;
+		s_videodata2.screensize_slider.height			= 32;
+		s_videodata2.screensize_slider.focusWidth		= 145;
+		s_videodata2.screensize_slider.focusHeight		= 18;
+		s_videodata2.screensize_slider.picName			= GRAPHIC_SQUARE;
+		s_videodata2.screensize_slider.picX				= x;
+		s_videodata2.screensize_slider.picY				= y;
+		s_videodata2.screensize_slider.picWidth			= MENU_BUTTON_MED_WIDTH + 21;
+		s_videodata2.screensize_slider.picHeight		= MENU_BUTTON_MED_HEIGHT;
+		s_videodata2.screensize_slider.textX			= MENU_BUTTON_TEXT_X;
+		s_videodata2.screensize_slider.textY			= MENU_BUTTON_TEXT_Y;
+		s_videodata2.screensize_slider.textEnum			= MBT_SCREENSIZE;
+		s_videodata2.screensize_slider.textcolor		= CT_BLACK;
+		s_videodata2.screensize_slider.textcolor2		= CT_WHITE;
+		s_videodata2.screensize_slider.thumbName		= PIC_SLIDER;
+		s_videodata2.screensize_slider.thumbHeight		= 32;
+		s_videodata2.screensize_slider.thumbWidth		= 16;
+		s_videodata2.screensize_slider.thumbGraphicWidth= 9;
+		s_videodata2.screensize_slider.thumbColor		= CT_DKBLUE1;
+		s_videodata2.screensize_slider.thumbColor2		= CT_LTBLUE1;
 	}
-	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.fov_slider);
-	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.screensize_slider);
-	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.centerHud_slider);
-	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.anisotropicfiltering);
+
+	y += inc;
+	s_videodata2.flares.generic.type			= MTYPE_SPINCONTROL;
+	s_videodata2.flares.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
+	s_videodata2.flares.generic.x				= x;
+	s_videodata2.flares.generic.y				= y;
+	s_videodata2.flares.generic.name			= GRAPHIC_BUTTONRIGHT;
+	s_videodata2.flares.generic.callback		= VideoData2_Event;
+	s_videodata2.flares.color					= CT_DKPURPLE1;
+	s_videodata2.flares.color2					= CT_LTPURPLE1;
+	s_videodata2.flares.textX					= MENU_BUTTON_TEXT_X;
+	s_videodata2.flares.textY					= MENU_BUTTON_TEXT_Y;
+	s_videodata2.flares.textEnum				= MBT_LIGHTFLARES;
+	s_videodata2.flares.textcolor				= CT_BLACK;
+	s_videodata2.flares.textcolor2				= CT_WHITE;
+	s_videodata2.flares.listnames				= s_OffOnNone_Names;
+
+	y += inc;
+	s_videodata2.wallmarks.generic.type			= MTYPE_SPINCONTROL;
+	s_videodata2.wallmarks.generic.flags		= QMF_HIGHLIGHT_IF_FOCUS;
+	s_videodata2.wallmarks.generic.x			= x;
+	s_videodata2.wallmarks.generic.y			= y;
+	s_videodata2.wallmarks.generic.name			= GRAPHIC_BUTTONRIGHT;
+	s_videodata2.wallmarks.generic.callback		= VideoData2_Event;
+	s_videodata2.wallmarks.color				= CT_DKPURPLE1;
+	s_videodata2.wallmarks.color2				= CT_LTPURPLE1;
+	s_videodata2.wallmarks.textX				= MENU_BUTTON_TEXT_X;
+	s_videodata2.wallmarks.textY				= MENU_BUTTON_TEXT_Y;
+	s_videodata2.wallmarks.textEnum				= MBT_WALLMARKS1;
+	s_videodata2.wallmarks.textcolor			= CT_BLACK;
+	s_videodata2.wallmarks.textcolor2			= CT_WHITE;
+	s_videodata2.wallmarks.listnames			= s_OffOnNone_Names;
+
+	y += inc;
+	s_videodata2.dynamiclights.generic.type			= MTYPE_SPINCONTROL;
+	s_videodata2.dynamiclights.generic.flags		= QMF_HIGHLIGHT_IF_FOCUS;
+	s_videodata2.dynamiclights.generic.x			= x;
+	s_videodata2.dynamiclights.generic.y			= y;
+	s_videodata2.dynamiclights.generic.name			= GRAPHIC_BUTTONRIGHT;
+	s_videodata2.dynamiclights.generic.callback		= VideoData2_Event;
+	s_videodata2.dynamiclights.color				= CT_DKPURPLE1;
+	s_videodata2.dynamiclights.color2				= CT_LTPURPLE1;
+	s_videodata2.dynamiclights.textX				= MENU_BUTTON_TEXT_X;
+	s_videodata2.dynamiclights.textY				= MENU_BUTTON_TEXT_Y;
+	s_videodata2.dynamiclights.textEnum				= MBT_DYNAMICLIGHTS1;
+	s_videodata2.dynamiclights.textcolor			= CT_BLACK;
+	s_videodata2.dynamiclights.textcolor2			= CT_WHITE;
+	s_videodata2.dynamiclights.listnames			= s_OffOnNone_Names;
+	
+	y += inc;
+	s_videodata2.simpleitems.generic.type			= MTYPE_SPINCONTROL;
+	s_videodata2.simpleitems.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
+	s_videodata2.simpleitems.generic.x				= x;
+	s_videodata2.simpleitems.generic.y				= y;
+	s_videodata2.simpleitems.generic.name			= GRAPHIC_BUTTONRIGHT;
+	s_videodata2.simpleitems.generic.callback		= VideoData2_Event;
+	s_videodata2.simpleitems.color					= CT_DKPURPLE1;
+	s_videodata2.simpleitems.color2					= CT_LTPURPLE1;
+	s_videodata2.simpleitems.textX					= MENU_BUTTON_TEXT_X;
+	s_videodata2.simpleitems.textY					= MENU_BUTTON_TEXT_Y;
+	s_videodata2.simpleitems.textEnum				= MBT_SIMPLEITEMS;
+	s_videodata2.simpleitems.textcolor				= CT_BLACK;
+	s_videodata2.simpleitems.textcolor2				= CT_WHITE;
+	s_videodata2.simpleitems.listnames				= s_OffOnNone_Names;
+
+	y += inc;
+	s_videodata2.synceveryframe.generic.type		= MTYPE_SPINCONTROL;
+	s_videodata2.synceveryframe.generic.flags		= QMF_HIGHLIGHT_IF_FOCUS;
+	s_videodata2.synceveryframe.generic.x			= x;
+	s_videodata2.synceveryframe.generic.y			= y;
+	s_videodata2.synceveryframe.generic.name		= GRAPHIC_BUTTONRIGHT;
+	s_videodata2.synceveryframe.generic.callback	= VideoData2_Event;
+	s_videodata2.synceveryframe.color				= CT_DKPURPLE1;
+	s_videodata2.synceveryframe.color2				= CT_LTPURPLE1;
+	s_videodata2.synceveryframe.textX				= MENU_BUTTON_TEXT_X;
+	s_videodata2.synceveryframe.textY				= MENU_BUTTON_TEXT_Y;
+	s_videodata2.synceveryframe.textEnum			= MBT_SYNCEVERYFRAME1;
+	s_videodata2.synceveryframe.textcolor			= CT_BLACK;
+	s_videodata2.synceveryframe.textcolor2			= CT_WHITE;
+	s_videodata2.synceveryframe.listnames			= s_OffOnNone_Names;
+
+	if ( !videoEngineConfig.anisotropicFilteringVideoMenu ) {
+		y += inc;
+		s_videodata2.anisotropic.generic.type			= MTYPE_SPINCONTROL;
+		s_videodata2.anisotropic.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
+		s_videodata2.anisotropic.generic.x				= x;
+		s_videodata2.anisotropic.generic.y				= y;
+		s_videodata2.anisotropic.generic.name			= GRAPHIC_BUTTONRIGHT;
+		s_videodata2.anisotropic.generic.callback		= VideoData2_Event;
+		s_videodata2.anisotropic.color					= CT_DKPURPLE1;
+		s_videodata2.anisotropic.color2					= CT_LTPURPLE1;
+		s_videodata2.anisotropic.textX					= MENU_BUTTON_TEXT_X;
+		s_videodata2.anisotropic.textY					= MENU_BUTTON_TEXT_Y;
+		s_videodata2.anisotropic.textEnum				= MBT_VIDEO_ANISOTROPIC_LEVEL;
+		s_videodata2.anisotropic.textcolor				= CT_BLACK;
+		s_videodata2.anisotropic.textcolor2				= CT_WHITE;
+		s_videodata2.anisotropic.listnames				= videoEngineConfig.supportMaxAnisotropy ? s_anisotropic_Names : s_OffOnNone_Names;
+	}
+
+
 	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.aspectCorrection);
+	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.centerHud_slider);
+	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.fov_slider);
+	if ( !suppressViewSize ) {
+		Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.screensize_slider);
+	}
+	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.flares);
+	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.wallmarks);
+	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.dynamiclights);
+	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.simpleitems);
+	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.synceveryframe);
+	if ( !videoEngineConfig.anisotropicFilteringVideoMenu ) {
+		Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.anisotropic);
+	}
 
 }
 
@@ -2323,12 +3348,16 @@ UI_VideoData2SettingsGetCvars
 */
 static void	UI_VideoData2SettingsGetCvars()
 {
-	s_videodata2.gamma_slider.curvalue = trap_Cvar_VariableValue( "r_gamma" ) *  10.0f;
+	s_videodata2.aspectCorrection.curvalue = trap_Cvar_VariableValue( "cg_aspectCorrect" ) ? 1 : 0;
+	s_videodata2.centerHud_slider.curvalue = UI_VideoData2SettingsGetCurrentCenterHud() * 10.0f;
 	s_videodata2.fov_slider.curvalue = UI_VideoData2SettingsGetCurrentFov();
 	s_videodata2.screensize_slider.curvalue = trap_Cvar_VariableValue( "cg_viewsize" );
-	s_videodata2.aspectCorrection.curvalue = trap_Cvar_VariableValue( "cg_aspectCorrect" ) ? 1 : 0;
-	s_videodata2.centerHud_slider.curvalue = UI_VideoData2SettingsGetCurrentCenterHud();
-	s_videodata2.anisotropicfiltering.curvalue = trap_Cvar_VariableValue( "r_ext_texture_filter_anisotropic" );
+	s_videodata2.flares.curvalue = trap_Cvar_VariableValue( "r_flares" ) ? 1 : 0;
+	s_videodata2.wallmarks.curvalue = trap_Cvar_VariableValue( "cg_marks" ) ? 1 : 0;
+	s_videodata2.dynamiclights.curvalue = trap_Cvar_VariableValue( "r_dynamiclight" ) ? 1 : 0;
+	s_videodata2.simpleitems.curvalue = trap_Cvar_VariableValue( "cg_simpleItems" ) ? 1 : 0;
+	s_videodata2.synceveryframe.curvalue = trap_Cvar_VariableValue( "r_finish" ) ? 1 : 0;
+	s_videodata2.anisotropic.curvalue = UI_GetAnisotropyLevel();
 }
 
 /*

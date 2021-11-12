@@ -2,6 +2,63 @@
 //
 #include "ui_local.h"
 
+typedef struct {
+	qboolean initialized;
+	qboolean global_s_volume;
+	qboolean support_s_khz;
+	qboolean support_a3d;
+	qboolean supportOpenAL;
+} soundEngineConfig_t;
+
+static soundEngineConfig_t soundEngineConfig;
+
+/*
+=================
+UI_InitSoundEngineConfig
+
+Load settings in the soundEngineConfig structure.
+=================
+*/
+static void UI_InitSoundEngineConfig( void ) {
+	if ( !soundEngineConfig.initialized ) {
+		soundEngineConfig.initialized = qtrue;
+		soundEngineConfig.global_s_volume = VMExt_GVCommandInt( "ui_using_global_s_volume", 0 ) ? qtrue : qfalse;
+		soundEngineConfig.support_s_khz = !VMExt_GVCommandInt( "ui_skip_s_khz", 0 ) ? qtrue : qfalse;
+
+		// determine if a3d is supported
+		{
+			int result = VMExt_GVCommandInt( "ui_no_a3d", -1 );
+			if ( result == -1 ) {
+				// try to estimate support by testing whether cvar is non-empty
+				char buffer[256];
+				trap_Cvar_VariableStringBuffer( "s_usingA3D", buffer, sizeof( buffer ) );
+				if ( !*buffer ) {
+					result = 1;
+				}
+			}
+			if ( result <= 0 ) {
+				soundEngineConfig.support_a3d = qtrue;
+			}
+		}
+
+		// only look for openAL support if there is no a3d support, because currently no client
+		// supports both and the way the menu is currently set up there is only space for one button
+		if ( !soundEngineConfig.support_a3d ) {
+			int result = VMExt_GVCommandInt( "ui_support_s_useOpenAL", -1 );
+			if ( result == -1 ) {
+				// try to estimate support by testing whether cvar is non-empty
+				char buffer[256];
+				trap_Cvar_VariableStringBuffer( "s_useOpenAL", buffer, sizeof( buffer ) );
+				if ( *buffer ) {
+					result = 1;
+				}
+			}
+			if ( result > 0 ) {
+				soundEngineConfig.supportOpenAL = qtrue;
+			}
+		}
+	}
+}
 
 extern int rate_items[];
 
@@ -11,6 +68,7 @@ extern int rate_items[];
 #define ID_QUALITY			16
 #define ID_A3D				17
 #define ID_RATE				18
+#define ID_OPENAL			19
 
 static int s_sndquality_Names[] =
 {
@@ -44,6 +102,7 @@ typedef struct
 	menuslider_s		musicvolume;
 	menulist_s			quality;
 	menulist_s			a3d;
+	menulist_s			openAL;
 
 	menubitmap_s		back;
 	int					holdSoundQuality;
@@ -144,6 +203,11 @@ static void UI_SoundOptionsMenu_Event( void* ptr, int event )
 		}
 		soundOptionsInfo.a3d.curvalue = holdCurvalue;
 
+		break;
+
+	case ID_OPENAL:
+		trap_Cvar_Set( "s_useOpenAL", soundOptionsInfo.openAL.curvalue ? "1" : "0" );
+		trap_Cmd_ExecuteText( EXEC_APPEND, "snd_restart\n" );
 		break;
 	}
 }
@@ -266,6 +330,8 @@ void SoundMenu_Init(void)
 	int x,y;
 	int	rate;
 
+	UI_InitSoundEngineConfig();
+
 	UI_SoundMenu_Cache();
 
 	soundOptionsInfo.menu.nitems					= 0;
@@ -318,7 +384,7 @@ void SoundMenu_Init(void)
 	soundOptionsInfo.sfxvolume.picY					= y;
 	soundOptionsInfo.sfxvolume.picWidth				= MENU_BUTTON_MED_WIDTH;
 	soundOptionsInfo.sfxvolume.picHeight			= MENU_BUTTON_MED_HEIGHT;
-	soundOptionsInfo.sfxvolume.textEnum				= MBT_EFFECTSVOLUME;
+	soundOptionsInfo.sfxvolume.textEnum				= soundEngineConfig.global_s_volume ? MBT_SOUND_OVERALL_VOLUME : MBT_EFFECTSVOLUME;
 	soundOptionsInfo.sfxvolume.textX				= 5;
 	soundOptionsInfo.sfxvolume.textY				= 1;
 	soundOptionsInfo.sfxvolume.textcolor			= CT_BLACK;
@@ -393,19 +459,49 @@ void SoundMenu_Init(void)
 	soundOptionsInfo.a3d.textY						= 2;
 	soundOptionsInfo.a3d.listnames					= s_OffOnNone_Names;
 
+	soundOptionsInfo.openAL.generic.type				= MTYPE_SPINCONTROL;
+	soundOptionsInfo.openAL.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS;
+	soundOptionsInfo.openAL.generic.x					= soundEngineConfig.support_s_khz ? 416 : 120;
+	soundOptionsInfo.openAL.generic.y					= 322;
+	soundOptionsInfo.openAL.generic.callback			= UI_SoundOptionsMenu_Event;
+	soundOptionsInfo.openAL.generic.id					= ID_OPENAL;
+	soundOptionsInfo.openAL.textEnum					= MBT_SOUND_OPENAL;
+	soundOptionsInfo.openAL.textcolor					= CT_BLACK;
+	soundOptionsInfo.openAL.textcolor2					= CT_WHITE;
+	soundOptionsInfo.openAL.color						= CT_DKPURPLE1;
+	soundOptionsInfo.openAL.color2						= CT_LTPURPLE1;
+	soundOptionsInfo.openAL.textX						= 5;
+	soundOptionsInfo.openAL.textY						= 2;
+	soundOptionsInfo.openAL.listnames					= s_OffOnNone_Names;
+
 	SetupMenu_TopButtons(&soundOptionsInfo.menu,MENU_SOUND,NULL);
 
 	Menu_AddItem( &soundOptionsInfo.menu, ( void * )&soundOptionsInfo.rate );
 	Menu_AddItem( &soundOptionsInfo.menu, ( void * )&soundOptionsInfo.sfxvolume);
 	Menu_AddItem( &soundOptionsInfo.menu, ( void * )&soundOptionsInfo.musicvolume);
-	Menu_AddItem( &soundOptionsInfo.menu, ( void * )&soundOptionsInfo.quality);
-	Menu_AddItem( &soundOptionsInfo.menu, ( void * )&soundOptionsInfo.a3d);
+	if ( soundEngineConfig.support_s_khz ) {
+		Menu_AddItem( &soundOptionsInfo.menu, ( void * )&soundOptionsInfo.quality);
+	}
+	if ( soundEngineConfig.support_a3d ) {
+		Menu_AddItem( &soundOptionsInfo.menu, ( void * )&soundOptionsInfo.a3d);
+	}
+	if ( soundEngineConfig.supportOpenAL ) {
+		// Currently this is just a basic enable/disable toggle, not the full device
+		// selection capability from the original ioEF implementation. Hopefully this
+		// will correctly use the default device and be adequate for now.
+		Menu_AddItem( &soundOptionsInfo.menu, ( void * )&soundOptionsInfo.openAL);
+	}
 
 	soundOptionsInfo.sfxvolume.curvalue = trap_Cvar_VariableValue( "s_volume" ) * 10;
 	soundOptionsInfo.musicvolume.curvalue = trap_Cvar_VariableValue( "s_musicvolume" ) * 10;
 	soundOptionsInfo.quality.curvalue = trap_Cvar_VariableValue( "s_khz" ) != 11;
 	soundOptionsInfo.holdSoundQuality = soundOptionsInfo.quality.curvalue;
-	soundOptionsInfo.a3d.curvalue = (int)trap_Cvar_VariableValue( "s_usingA3D" );
+	if ( soundEngineConfig.support_a3d ) {
+		soundOptionsInfo.a3d.curvalue = trap_Cvar_VariableValue( "s_usingA3D" ) ? 1 : 0;
+	}
+	if ( soundEngineConfig.supportOpenAL ) {
+		soundOptionsInfo.openAL.curvalue = trap_Cvar_VariableValue( "s_useOpenAL" ) ? 1 : 0;
+	}
 
 	soundOptionsInfo.menu.initialized = qtrue;
 

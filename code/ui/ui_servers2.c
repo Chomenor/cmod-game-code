@@ -968,7 +968,7 @@ static void StatusQuery_Refresh( void )
 	int		time;
 	int		maxPing;
 	char	adrstr[MAX_ADDRESSLENGTH];
-	char	info[MAX_INFO_STRING];
+	char	info[2048];
 
 	// process ping results
 	maxPing = ArenaServers_MaxPing();

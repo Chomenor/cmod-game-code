@@ -459,20 +459,65 @@ BRIGHTNESS MENU
 struct
 {
 	menuframework_s menu;
-	qboolean supportMapLightingOptions;
+	qboolean supportMapLightingGamma;
+	qboolean supportOverBrightFactor;
+	qboolean supportIntensity;
 
 	menuslider_s	gamma_slider;
 	menuaction_s	gamma_apply;
 
 	qboolean		defaults_active;	// current running settings equal defaults
 	menuslider_s	lighting_gamma_slider;
-	menuslider_s	lighting_overbright_slider;
-	menubitmap_s	lighting_reset;
-	menuaction_s	lighting_apply;
+	menuslider_s	overbright_slider;
+	menuslider_s	intensity_slider;
+	menubitmap_s	additional_reset;
+	menuaction_s	additional_apply;
 
 	qhandle_t	gamma;
 	qhandle_t	top;
 } s_brightness;
+
+// Display additional brightness options in a box below gamma settings
+#define SUPPORT_BRIGHTNESS_ADDITIONAL ( s_brightness.supportMapLightingGamma || s_brightness.supportOverBrightFactor || s_brightness.supportIntensity )
+
+/*
+=================
+UI_BrightnessEncodeMLG
+
+Convert r_mapLightingGamma actual value to slider value. The conversion is intended to make
+the slider positions more closely correspond to useful values.
+=================
+*/
+static float UI_BrightnessEncodeMLG( float x ) {
+	if ( x >= 10.0f )
+		return 20.0f;
+	if ( x >= 3.5f )
+		return 15.0f + ( x - 3.5f ) / 1.3f;
+	if ( x >= 1.75f )
+		return 10.0f + ( x - 1.75f ) / 0.35f;
+	if ( x >= 1.0f )
+		return 5.0f + ( x - 1.0f ) / 0.15f;
+	if ( x >= 0.7f )
+		return ( x - 0.7f ) / 0.06f;
+	return 0.0f;
+}
+
+/*
+=================
+UI_BrightnessDecodeMLG
+
+Convert r_mapLightingGamma slider value to actual value.
+=================
+*/
+static float UI_BrightnessDecodeMLG( float x ) {
+	if ( x >= 15.0f )
+		return 3.5f + ( x - 15.0f ) * 1.3f;
+	if ( x >= 10.0f )
+		return 1.75f + ( x - 10.0f ) * 0.35f;
+	if ( x >= 5.0f )
+		return 1.0f + ( x - 5.0f ) * 0.15f;
+	return 0.7f + x * 0.06f;
+}
 
 /*
 =================
@@ -494,7 +539,7 @@ static void UI_BrightnessMenu_MenuDraw (void)
 	UI_Setup_MenuButtons();
 
 	y = 191;
-	if ( s_brightness.supportMapLightingOptions )
+	if ( SUPPORT_BRIGHTNESS_ADDITIONAL )
 	{
 		y -= 10;
 	}
@@ -516,7 +561,7 @@ static void UI_BrightnessMenu_MenuDraw (void)
 	}
 
 
-	if ( s_brightness.supportMapLightingOptions ) {
+	if ( SUPPORT_BRIGHTNESS_ADDITIONAL ) {
 		int y, h;
 		y = 163;
 		h = 233;
@@ -548,7 +593,7 @@ static void UI_BrightnessMenu_MenuDraw (void)
 		UI_DrawHandlePic(579,y + h + 16, 32, -16, s_brightness.top);	// Corner, LR
 		UI_DrawHandlePic(174,y + h + 24, 408, 8, uis.whiteShader);	// Bottom line
 
-		UI_DrawProportionalString( 190, 325, "Map Lighting Options", UI_SMALLFONT, colorTable[CT_LTGOLD1]);
+		UI_DrawProportionalString( 190, 317, menu_normal_text[MNT_VIDEO_ADDITIONAL_OPTIONS], UI_SMALLFONT, colorTable[CT_LTGOLD1]);
 	} else {
 		// Brackets around gamma
 		trap_R_SetColor( colorTable[CT_LTPURPLE1]);
@@ -578,17 +623,17 @@ Enable or disable the lighting reset button.
 */
 static void UI_BrightnessMenu_SetLightingResetButtonEnabled( qboolean enable ) {
 	if ( enable ) {
-		s_brightness.lighting_reset.textcolor = CT_BLACK;
-		s_brightness.lighting_reset.textcolor2 = CT_WHITE;
-		s_brightness.lighting_reset.color = CT_DKORANGE;
-		s_brightness.lighting_reset.color2 = CT_LTORANGE;
-		s_brightness.lighting_reset.generic.flags &= ~QMF_INACTIVE;
+		s_brightness.additional_reset.textcolor = CT_BLACK;
+		s_brightness.additional_reset.textcolor2 = CT_WHITE;
+		s_brightness.additional_reset.color = CT_DKORANGE;
+		s_brightness.additional_reset.color2 = CT_LTORANGE;
+		s_brightness.additional_reset.generic.flags &= ~QMF_INACTIVE;
 	} else {
-		s_brightness.lighting_reset.textcolor = CT_WHITE;
-		s_brightness.lighting_reset.textcolor2 = CT_WHITE;
-		s_brightness.lighting_reset.color = CT_DKGREY;
-		s_brightness.lighting_reset.color2 = CT_DKGREY;
-		s_brightness.lighting_reset.generic.flags |= QMF_INACTIVE;
+		s_brightness.additional_reset.textcolor = CT_WHITE;
+		s_brightness.additional_reset.textcolor2 = CT_WHITE;
+		s_brightness.additional_reset.color = CT_DKGREY;
+		s_brightness.additional_reset.color2 = CT_DKGREY;
+		s_brightness.additional_reset.generic.flags |= QMF_INACTIVE;
 	}
 }
 
@@ -601,11 +646,11 @@ Enable or disable the lighting apply button.
 */
 static void UI_BrightnessMenu_SetLightingApplyButtonEnabled( qboolean enable ) {
 	if ( enable ) {
-		s_brightness.lighting_apply.generic.flags &= ~QMF_GRAYED;
-		s_brightness.lighting_apply.generic.flags |= QMF_BLINK;
+		s_brightness.additional_apply.generic.flags &= ~QMF_GRAYED;
+		s_brightness.additional_apply.generic.flags |= QMF_BLINK;
 	} else {
-		s_brightness.lighting_apply.generic.flags |= QMF_GRAYED;
-		s_brightness.lighting_apply.generic.flags &= ~QMF_BLINK;
+		s_brightness.additional_apply.generic.flags |= QMF_GRAYED;
+		s_brightness.additional_apply.generic.flags &= ~QMF_BLINK;
 	}
 }
 
@@ -633,30 +678,32 @@ static void UI_BrightnessCallback( void *s, int notification )
 			s_brightness.gamma_apply.generic.flags |= QMF_BLINK;
 		}
 
-	} else if ( s == &s_brightness.lighting_apply ) {
-		{
-			// Convert slider value to actual setting value
-			float mlg = s_brightness.lighting_gamma_slider.curvalue / 10.0f;
-			mlg = mlg < 1.0f ? sqrt( mlg ) : ( mlg > 1.5f ? ( mlg - 0.5f ) * ( mlg - 0.5f ) + 0.5f : mlg );
-			trap_Cvar_SetValue( "r_mapLightingGamma", mlg );
+	} else if ( s == &s_brightness.additional_apply ) {
+		if ( s_brightness.supportMapLightingGamma ) {
+			trap_Cvar_SetValue( "r_mapLightingGamma", UI_BrightnessDecodeMLG( s_brightness.lighting_gamma_slider.curvalue ) );
 		}
-		trap_Cvar_SetValue( "r_overBrightFactor", s_brightness.lighting_overbright_slider.curvalue / 10.0f );
+		if ( s_brightness.supportOverBrightFactor ) {
+			trap_Cvar_SetValue( "r_overBrightFactor", s_brightness.overbright_slider.curvalue / 10.0f );
+		}
+		if ( s_brightness.supportIntensity ) {
+			trap_Cvar_SetValue( "r_intensity", s_brightness.intensity_slider.curvalue / 20.0f + 1.0f );
+		}
 
 		// Reset other brightness settings to avoid stacking
 		trap_Cvar_Set( "r_ignorehwgamma", "0" );
-		trap_Cvar_Set( "r_intensity", "1" );
 		trap_Cvar_Set( "r_textureGamma", "1" );
 		trap_Cvar_Set( "r_mapLightingFactor", "2" );
 
 		trap_Cmd_ExecuteText( EXEC_APPEND, "vid_restart\n" );
 
-	} else if ( s == &s_brightness.lighting_reset ) {
-		s_brightness.lighting_gamma_slider.curvalue = 10.0f;
-		s_brightness.lighting_overbright_slider.curvalue = 15.0f;
+	} else if ( s == &s_brightness.additional_reset ) {
+		s_brightness.lighting_gamma_slider.curvalue = 5.0f;
+		s_brightness.overbright_slider.curvalue = 15.0f;
+		s_brightness.intensity_slider.curvalue = 0.0f;
 		UI_BrightnessMenu_SetLightingApplyButtonEnabled( !s_brightness.defaults_active );
 		UI_BrightnessMenu_SetLightingResetButtonEnabled( qfalse );
 
-	} else if ( s == &s_brightness.lighting_gamma_slider || s == &s_brightness.lighting_overbright_slider ) {
+	} else if ( s == &s_brightness.lighting_gamma_slider || s == &s_brightness.overbright_slider || s == &s_brightness.intensity_slider ) {
 		UI_BrightnessMenu_SetLightingApplyButtonEnabled( qtrue );
 		UI_BrightnessMenu_SetLightingResetButtonEnabled( qtrue );
 	}
@@ -674,8 +721,9 @@ void UI_BrightnessMenu_Init( void )
 	memset( &s_brightness, 0, sizeof( s_brightness ) );
 
 	// Determine engine support for map lighting options
-	s_brightness.supportMapLightingOptions = VMExt_GVCommandInt( "ui_support_r_ext_mapLightingGamma", 0 ) &&
-			VMExt_GVCommandInt( "ui_support_r_ext_overBrightFactor", 0 );
+	s_brightness.supportMapLightingGamma = VMExt_GVCommandInt( "ui_support_r_ext_mapLightingGamma", 0 ) ? qtrue : qfalse;
+	s_brightness.supportOverBrightFactor = VMExt_GVCommandInt( "ui_support_r_ext_overBrightFactor", 0 ) ? qtrue : qfalse;
+	s_brightness.supportIntensity = VMExt_GVCommandInt( "ui_support_r_intensity", 1 ) ? qtrue : qfalse;
 
 	s_brightness.top = trap_R_RegisterShaderNoMip("menu/common/corner_ur_8_30.tga");
 	s_brightness.gamma = trap_R_RegisterShaderNoMip("menu/special/gamma_test.tga");
@@ -698,7 +746,7 @@ void UI_BrightnessMenu_Init( void )
 	Video_SideButtons(&s_brightness.menu,ID_VIDEOBRIGHTNESS);
 
 	x = 180;
-	y = s_brightness.supportMapLightingOptions ? 267 - 10 : 267;
+	y = SUPPORT_BRIGHTNESS_ADDITIONAL ? 267 - 10 : 267;
 	s_brightness.gamma_slider.generic.type		= MTYPE_SLIDER;
 	s_brightness.gamma_slider.generic.x			= x + 162;
 	s_brightness.gamma_slider.generic.y			= y;
@@ -733,7 +781,7 @@ void UI_BrightnessMenu_Init( void )
 	s_brightness.gamma_apply.generic.type			= MTYPE_ACTION;
 	s_brightness.gamma_apply.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS|QMF_GRAYED;
 	s_brightness.gamma_apply.generic.x				= 490;
-	s_brightness.gamma_apply.generic.y				= s_brightness.supportMapLightingOptions ? 191 - 10 : 191;
+	s_brightness.gamma_apply.generic.y				= SUPPORT_BRIGHTNESS_ADDITIONAL ? 191 - 10 : 191;
 	s_brightness.gamma_apply.generic.callback		= UI_BrightnessCallback;
 	s_brightness.gamma_apply.textEnum				= MBT_ACCEPT;
 	s_brightness.gamma_apply.textcolor				= CT_BLACK;
@@ -747,125 +795,76 @@ void UI_BrightnessMenu_Init( void )
 	s_brightness.gamma_apply.width					= 82;
 	s_brightness.gamma_apply.height					= 70;
 
-	y = 350;
-	s_brightness.lighting_gamma_slider.generic.type			= MTYPE_SLIDER;
-	s_brightness.lighting_gamma_slider.generic.x			= x + 162;
-	s_brightness.lighting_gamma_slider.generic.y			= y;
-	s_brightness.lighting_gamma_slider.generic.flags		= QMF_SMALLFONT;
-	s_brightness.lighting_gamma_slider.generic.callback		= UI_BrightnessCallback;
-	s_brightness.lighting_gamma_slider.minvalue				= 5;
-	s_brightness.lighting_gamma_slider.maxvalue				= 25;
-	s_brightness.lighting_gamma_slider.color				= CT_DKPURPLE1;
-	s_brightness.lighting_gamma_slider.color2				= CT_LTPURPLE1;
-	s_brightness.lighting_gamma_slider.generic.name			= PIC_MONBAR2;
-	s_brightness.lighting_gamma_slider.width				= 256;
-	s_brightness.lighting_gamma_slider.height				= 32;
-	s_brightness.lighting_gamma_slider.focusWidth			= 145;
-	s_brightness.lighting_gamma_slider.focusHeight			= 18;
-	s_brightness.lighting_gamma_slider.picName				= GRAPHIC_SQUARE;
-	s_brightness.lighting_gamma_slider.picX					= x;
-	s_brightness.lighting_gamma_slider.picY					= y;
-	s_brightness.lighting_gamma_slider.picWidth				= MENU_BUTTON_MED_WIDTH + 21;
-	s_brightness.lighting_gamma_slider.picHeight			= MENU_BUTTON_MED_HEIGHT;
-	s_brightness.lighting_gamma_slider.textX				= MENU_BUTTON_TEXT_X;
-	s_brightness.lighting_gamma_slider.textY				= MENU_BUTTON_TEXT_Y;
-	s_brightness.lighting_gamma_slider.textEnum				= MBT_VIDEO_LIGHTING_LEVEL;
-	s_brightness.lighting_gamma_slider.textcolor			= CT_BLACK;
-	s_brightness.lighting_gamma_slider.textcolor2			= CT_WHITE;
-	s_brightness.lighting_gamma_slider.thumbName			= PIC_SLIDER;
-	s_brightness.lighting_gamma_slider.thumbHeight			= 32;
-	s_brightness.lighting_gamma_slider.thumbWidth			= 16;
-	s_brightness.lighting_gamma_slider.thumbGraphicWidth	= 9;
-	s_brightness.lighting_gamma_slider.thumbColor			= CT_DKBLUE1;
-	s_brightness.lighting_gamma_slider.thumbColor2			= CT_LTBLUE1;
+	y = 318;
 
-	y += 25;
-	s_brightness.lighting_overbright_slider.generic.type		= MTYPE_SLIDER;
-	s_brightness.lighting_overbright_slider.generic.x			= x + 162;
-	s_brightness.lighting_overbright_slider.generic.y			= y;
-	s_brightness.lighting_overbright_slider.generic.flags		= QMF_SMALLFONT;
-	s_brightness.lighting_overbright_slider.generic.callback	= UI_BrightnessCallback;
-	s_brightness.lighting_overbright_slider.minvalue			= 10;
-	s_brightness.lighting_overbright_slider.maxvalue			= 20;
-	s_brightness.lighting_overbright_slider.color				= CT_DKPURPLE1;
-	s_brightness.lighting_overbright_slider.color2				= CT_LTPURPLE1;
-	s_brightness.lighting_overbright_slider.generic.name		= PIC_MONBAR2;
-	s_brightness.lighting_overbright_slider.width				= 256;
-	s_brightness.lighting_overbright_slider.height				= 32;
-	s_brightness.lighting_overbright_slider.focusWidth			= 145;
-	s_brightness.lighting_overbright_slider.focusHeight			= 18;
-	s_brightness.lighting_overbright_slider.picName				= GRAPHIC_SQUARE;
-	s_brightness.lighting_overbright_slider.picX				= x;
-	s_brightness.lighting_overbright_slider.picY				= y;
-	s_brightness.lighting_overbright_slider.picWidth			= MENU_BUTTON_MED_WIDTH + 21;
-	s_brightness.lighting_overbright_slider.picHeight			= MENU_BUTTON_MED_HEIGHT;
-	s_brightness.lighting_overbright_slider.textX				= MENU_BUTTON_TEXT_X;
-	s_brightness.lighting_overbright_slider.textY				= MENU_BUTTON_TEXT_Y;
-	s_brightness.lighting_overbright_slider.textEnum			= MBT_VIDEO_LIGHTING_CONTRAST;
-	s_brightness.lighting_overbright_slider.textcolor			= CT_BLACK;
-	s_brightness.lighting_overbright_slider.textcolor2			= CT_WHITE;
-	s_brightness.lighting_overbright_slider.thumbName			= PIC_SLIDER;
-	s_brightness.lighting_overbright_slider.thumbHeight			= 32;
-	s_brightness.lighting_overbright_slider.thumbWidth			= 16;
-	s_brightness.lighting_overbright_slider.thumbGraphicWidth	= 9;
-	s_brightness.lighting_overbright_slider.thumbColor			= CT_DKBLUE1;
-	s_brightness.lighting_overbright_slider.thumbColor2			= CT_LTBLUE1;
+	if ( s_brightness.supportMapLightingGamma ) {
+		y += 24;
+		s_brightness.lighting_gamma_slider.generic.type			= MTYPE_SLIDER;
+		s_brightness.lighting_gamma_slider.generic.x			= x + 162;
+		s_brightness.lighting_gamma_slider.generic.y			= y;
+		s_brightness.lighting_gamma_slider.generic.flags		= QMF_SMALLFONT;
+		s_brightness.lighting_gamma_slider.generic.callback		= UI_BrightnessCallback;
+		s_brightness.lighting_gamma_slider.minvalue				= 0;
+		s_brightness.lighting_gamma_slider.maxvalue				= 20;
+		s_brightness.lighting_gamma_slider.color				= CT_DKPURPLE1;
+		s_brightness.lighting_gamma_slider.color2				= CT_LTPURPLE1;
+		s_brightness.lighting_gamma_slider.generic.name			= PIC_MONBAR2;
+		s_brightness.lighting_gamma_slider.width				= 256;
+		s_brightness.lighting_gamma_slider.height				= 32;
+		s_brightness.lighting_gamma_slider.focusWidth			= 145;
+		s_brightness.lighting_gamma_slider.focusHeight			= 18;
+		s_brightness.lighting_gamma_slider.picName				= GRAPHIC_SQUARE;
+		s_brightness.lighting_gamma_slider.picX					= x;
+		s_brightness.lighting_gamma_slider.picY					= y;
+		s_brightness.lighting_gamma_slider.picWidth				= MENU_BUTTON_MED_WIDTH + 21;
+		s_brightness.lighting_gamma_slider.picHeight			= MENU_BUTTON_MED_HEIGHT;
+		s_brightness.lighting_gamma_slider.textX				= MENU_BUTTON_TEXT_X;
+		s_brightness.lighting_gamma_slider.textY				= MENU_BUTTON_TEXT_Y;
+		s_brightness.lighting_gamma_slider.textEnum				= MBT_VIDEO_LIGHTING_LEVEL;
+		s_brightness.lighting_gamma_slider.textcolor			= CT_BLACK;
+		s_brightness.lighting_gamma_slider.textcolor2			= CT_WHITE;
+		s_brightness.lighting_gamma_slider.thumbName			= PIC_SLIDER;
+		s_brightness.lighting_gamma_slider.thumbHeight			= 32;
+		s_brightness.lighting_gamma_slider.thumbWidth			= 16;
+		s_brightness.lighting_gamma_slider.thumbGraphicWidth	= 9;
+		s_brightness.lighting_gamma_slider.thumbColor			= CT_DKBLUE1;
+		s_brightness.lighting_gamma_slider.thumbColor2			= CT_LTBLUE1;
 
-	s_brightness.lighting_apply.generic.type			= MTYPE_ACTION;
-	s_brightness.lighting_apply.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS|QMF_GRAYED;
-	s_brightness.lighting_apply.generic.x				= 510;
-	s_brightness.lighting_apply.generic.y				= 320;
-	s_brightness.lighting_apply.generic.callback		= UI_BrightnessCallback;
-	s_brightness.lighting_apply.textEnum				= MBT_VIDEO_LIGHTING_APPLY;
-	s_brightness.lighting_apply.textcolor				= CT_BLACK;
-	s_brightness.lighting_apply.textcolor2				= CT_WHITE;
-	s_brightness.lighting_apply.textcolor3				= CT_LTGREY;
-	s_brightness.lighting_apply.color					= CT_DKPURPLE1;
-	s_brightness.lighting_apply.color2					= CT_LTPURPLE1;
-	s_brightness.lighting_apply.color3					= CT_DKGREY;
-	s_brightness.lighting_apply.textX					= 5;
-	s_brightness.lighting_apply.textY					= 5;
-	s_brightness.lighting_apply.width					= 60;
-	s_brightness.lighting_apply.height					= 40;
-
-	s_brightness.lighting_reset.generic.type			= MTYPE_BITMAP;
-	s_brightness.lighting_reset.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
-	s_brightness.lighting_reset.generic.x				= 510;
-	s_brightness.lighting_reset.generic.y				= 365;
-	s_brightness.lighting_reset.generic.name			= GRAPHIC_SQUARE;
-	s_brightness.lighting_reset.generic.callback		= UI_BrightnessCallback;
-	s_brightness.lighting_reset.textEnum				= MBT_VIDEO_LIGHTING_RESET;
-	s_brightness.lighting_reset.textcolor				= CT_BLACK;
-	s_brightness.lighting_reset.textcolor2				= CT_WHITE;
-	s_brightness.lighting_reset.color					= CT_DKORANGE;
-	s_brightness.lighting_reset.color2					= CT_LTORANGE;
-	s_brightness.lighting_reset.textX					= 5;
-	s_brightness.lighting_reset.textY					= 5;
-	s_brightness.lighting_reset.width					= 60;
-	s_brightness.lighting_reset.height					= 40;
-
-	Menu_AddItem( &s_brightness.menu, ( void * )&s_brightness.gamma_slider);
-	if (!uis.glconfig.deviceSupportsGamma)
-	{
-		Menu_AddItem( &s_brightness.menu, ( void * )&s_brightness.gamma_apply);
+		s_brightness.lighting_gamma_slider.curvalue = UI_BrightnessEncodeMLG( trap_Cvar_VariableValue( "r_mapLightingGamma" ) );
 	}
-	s_brightness.gamma_slider.curvalue = trap_Cvar_VariableValue( "r_gamma" ) *  10.0f;
 
-	if ( s_brightness.supportMapLightingOptions )
-	{
-		{
-			// The slider value has some conversions applied to make the scaling correspond to
-			// the visual results more naturally.
-			float mlg = trap_Cvar_VariableValue( "r_mapLightingGamma" );
-			mlg = mlg < 1.0f ? mlg * mlg : ( mlg > 1.5f ? (float)sqrt( mlg - 0.5f ) + 0.5f : mlg );
-			if ( mlg < 0.5f ) {
-				mlg = 0.5f;
-			}
-			if ( mlg > 2.5f ) {
-				mlg = 2.5f;
-			}
-			s_brightness.lighting_gamma_slider.curvalue = mlg * 10.0f;
-		}
+	if ( s_brightness.supportOverBrightFactor ) {
+		y += 24;
+		s_brightness.overbright_slider.generic.type			= MTYPE_SLIDER;
+		s_brightness.overbright_slider.generic.x			= x + 162;
+		s_brightness.overbright_slider.generic.y			= y;
+		s_brightness.overbright_slider.generic.flags		= QMF_SMALLFONT;
+		s_brightness.overbright_slider.generic.callback		= UI_BrightnessCallback;
+		s_brightness.overbright_slider.minvalue				= 10;
+		s_brightness.overbright_slider.maxvalue				= 20;
+		s_brightness.overbright_slider.color				= CT_DKPURPLE1;
+		s_brightness.overbright_slider.color2				= CT_LTPURPLE1;
+		s_brightness.overbright_slider.generic.name			= PIC_MONBAR2;
+		s_brightness.overbright_slider.width				= 256;
+		s_brightness.overbright_slider.height				= 32;
+		s_brightness.overbright_slider.focusWidth			= 145;
+		s_brightness.overbright_slider.focusHeight			= 18;
+		s_brightness.overbright_slider.picName				= GRAPHIC_SQUARE;
+		s_brightness.overbright_slider.picX					= x;
+		s_brightness.overbright_slider.picY					= y;
+		s_brightness.overbright_slider.picWidth				= MENU_BUTTON_MED_WIDTH + 21;
+		s_brightness.overbright_slider.picHeight			= MENU_BUTTON_MED_HEIGHT;
+		s_brightness.overbright_slider.textX				= MENU_BUTTON_TEXT_X;
+		s_brightness.overbright_slider.textY				= MENU_BUTTON_TEXT_Y;
+		s_brightness.overbright_slider.textEnum				= MBT_VIDEO_LIGHTING_CONTRAST;
+		s_brightness.overbright_slider.textcolor			= CT_BLACK;
+		s_brightness.overbright_slider.textcolor2			= CT_WHITE;
+		s_brightness.overbright_slider.thumbName			= PIC_SLIDER;
+		s_brightness.overbright_slider.thumbHeight			= 32;
+		s_brightness.overbright_slider.thumbWidth			= 16;
+		s_brightness.overbright_slider.thumbGraphicWidth	= 9;
+		s_brightness.overbright_slider.thumbColor			= CT_DKBLUE1;
+		s_brightness.overbright_slider.thumbColor2			= CT_LTBLUE1;
 
 		{
 			float obf = trap_Cvar_VariableValue( "r_overBrightFactor" );
@@ -875,23 +874,116 @@ void UI_BrightnessMenu_Init( void )
 			if ( obf > 2.0f ) {
 				obf = 2.0f;
 			}
-			s_brightness.lighting_overbright_slider.curvalue = obf * 10.0f;
+			s_brightness.overbright_slider.curvalue = obf * 10.0f;
 		}
+	}
 
+	if ( s_brightness.supportIntensity ) {
+		y += 24;
+		s_brightness.intensity_slider.generic.type			= MTYPE_SLIDER;
+		s_brightness.intensity_slider.generic.x				= x + 162;
+		s_brightness.intensity_slider.generic.y				= y;
+		s_brightness.intensity_slider.generic.flags			= QMF_SMALLFONT;
+		s_brightness.intensity_slider.generic.callback		= UI_BrightnessCallback;
+		s_brightness.intensity_slider.minvalue				= 0;
+		s_brightness.intensity_slider.maxvalue				= 10;
+		s_brightness.intensity_slider.color					= CT_DKPURPLE1;
+		s_brightness.intensity_slider.color2				= CT_LTPURPLE1;
+		s_brightness.intensity_slider.generic.name			= PIC_MONBAR2;
+		s_brightness.intensity_slider.width					= 256;
+		s_brightness.intensity_slider.height				= 32;
+		s_brightness.intensity_slider.focusWidth			= 145;
+		s_brightness.intensity_slider.focusHeight			= 18;
+		s_brightness.intensity_slider.picName				= GRAPHIC_SQUARE;
+		s_brightness.intensity_slider.picX					= x;
+		s_brightness.intensity_slider.picY					= y;
+		s_brightness.intensity_slider.picWidth				= MENU_BUTTON_MED_WIDTH + 21;
+		s_brightness.intensity_slider.picHeight				= MENU_BUTTON_MED_HEIGHT;
+		s_brightness.intensity_slider.textX					= MENU_BUTTON_TEXT_X;
+		s_brightness.intensity_slider.textY					= MENU_BUTTON_TEXT_Y;
+		s_brightness.intensity_slider.textEnum				= MBT_VIDEO_INTENSITY;
+		s_brightness.intensity_slider.textcolor				= CT_BLACK;
+		s_brightness.intensity_slider.textcolor2			= CT_WHITE;
+		s_brightness.intensity_slider.thumbName				= PIC_SLIDER;
+		s_brightness.intensity_slider.thumbHeight			= 32;
+		s_brightness.intensity_slider.thumbWidth			= 16;
+		s_brightness.intensity_slider.thumbGraphicWidth		= 9;
+		s_brightness.intensity_slider.thumbColor			= CT_DKBLUE1;
+		s_brightness.intensity_slider.thumbColor2			= CT_LTBLUE1;
+
+		{
+			float intensity = trap_Cvar_VariableValue( "r_intensity" );
+			if ( intensity < 1.0f ) {
+				intensity = 1.0f;
+			}
+			if ( intensity > 1.5f ) {
+				intensity = 1.5f;
+			}
+			s_brightness.intensity_slider.curvalue = ( intensity - 1.0f ) * 20.0f;
+		}
+	}
+
+	s_brightness.additional_apply.generic.type			= MTYPE_ACTION;
+	s_brightness.additional_apply.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS|QMF_GRAYED;
+	s_brightness.additional_apply.generic.x				= 510;
+	s_brightness.additional_apply.generic.y				= 320;
+	s_brightness.additional_apply.generic.callback		= UI_BrightnessCallback;
+	s_brightness.additional_apply.textEnum				= MBT_VIDEO_LIGHTING_APPLY;
+	s_brightness.additional_apply.textcolor				= CT_BLACK;
+	s_brightness.additional_apply.textcolor2			= CT_WHITE;
+	s_brightness.additional_apply.textcolor3			= CT_LTGREY;
+	s_brightness.additional_apply.color					= CT_DKPURPLE1;
+	s_brightness.additional_apply.color2				= CT_LTPURPLE1;
+	s_brightness.additional_apply.color3				= CT_DKGREY;
+	s_brightness.additional_apply.textX					= 5;
+	s_brightness.additional_apply.textY					= 5;
+	s_brightness.additional_apply.width					= 60;
+	s_brightness.additional_apply.height				= 40;
+
+	s_brightness.additional_reset.generic.type			= MTYPE_BITMAP;
+	s_brightness.additional_reset.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
+	s_brightness.additional_reset.generic.x				= 510;
+	s_brightness.additional_reset.generic.y				= 365;
+	s_brightness.additional_reset.generic.name			= GRAPHIC_SQUARE;
+	s_brightness.additional_reset.generic.callback		= UI_BrightnessCallback;
+	s_brightness.additional_reset.textEnum				= MBT_VIDEO_LIGHTING_RESET;
+	s_brightness.additional_reset.textcolor				= CT_BLACK;
+	s_brightness.additional_reset.textcolor2			= CT_WHITE;
+	s_brightness.additional_reset.color					= CT_DKORANGE;
+	s_brightness.additional_reset.color2				= CT_LTORANGE;
+	s_brightness.additional_reset.textX					= 5;
+	s_brightness.additional_reset.textY					= 5;
+	s_brightness.additional_reset.width					= 60;
+	s_brightness.additional_reset.height				= 40;
+
+	Menu_AddItem( &s_brightness.menu, ( void * )&s_brightness.gamma_slider);
+	if (!uis.glconfig.deviceSupportsGamma)
+	{
+		Menu_AddItem( &s_brightness.menu, ( void * )&s_brightness.gamma_apply);
+	}
+	s_brightness.gamma_slider.curvalue = trap_Cvar_VariableValue( "r_gamma" ) *  10.0f;
+
+	if ( SUPPORT_BRIGHTNESS_ADDITIONAL )
+	{
 		// Check if all the lighting settings are already at the defaults
-		s_brightness.defaults_active = s_brightness.lighting_gamma_slider.curvalue == 10.0f &&
-				s_brightness.lighting_overbright_slider.curvalue == 15.0f &&
-				trap_Cvar_VariableValue( "r_ignoreHWGamma" ) == 0.0f &&
-				trap_Cvar_VariableValue( "r_intensity" ) == 1.0f &&
-				trap_Cvar_VariableValue( "r_textureGamma" ) == 1.0f &&
-				trap_Cvar_VariableValue( "r_mapLightingFactor" ) == 2.0f;
+		s_brightness.defaults_active =
+				( !s_brightness.supportMapLightingGamma || s_brightness.lighting_gamma_slider.curvalue == 5.0f ) &&
+				( !s_brightness.supportOverBrightFactor || s_brightness.overbright_slider.curvalue == 15.0f ) &&
+				( !s_brightness.supportIntensity || s_brightness.intensity_slider.curvalue == 0.0f );
 
 		UI_BrightnessMenu_SetLightingResetButtonEnabled( !s_brightness.defaults_active );
 
-		Menu_AddItem( &s_brightness.menu, ( void * )&s_brightness.lighting_gamma_slider);
-		Menu_AddItem( &s_brightness.menu, ( void * )&s_brightness.lighting_overbright_slider);
-		Menu_AddItem( &s_brightness.menu, ( void * )&s_brightness.lighting_apply);
-		Menu_AddItem( &s_brightness.menu, ( void * )&s_brightness.lighting_reset);
+		if ( s_brightness.supportMapLightingGamma ) {
+			Menu_AddItem( &s_brightness.menu, ( void * )&s_brightness.lighting_gamma_slider);
+		}
+		if ( s_brightness.supportOverBrightFactor ) {
+			Menu_AddItem( &s_brightness.menu, ( void * )&s_brightness.overbright_slider);
+		}
+		if ( s_brightness.supportIntensity ) {
+			Menu_AddItem( &s_brightness.menu, ( void * )&s_brightness.intensity_slider);
+		}
+		Menu_AddItem( &s_brightness.menu, ( void * )&s_brightness.additional_apply);
+		Menu_AddItem( &s_brightness.menu, ( void * )&s_brightness.additional_reset);
 	}
 
 	UI_PushMenu( &s_brightness.menu );

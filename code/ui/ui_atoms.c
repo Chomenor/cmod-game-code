@@ -2071,6 +2071,7 @@ void UI_LoadMenuText()
 	menu_normal_text[MNT_BROWSER_MOD] = "MOD";
 	menu_normal_text[MNT_BROWSER_BOTS] = "BOTS";
 	menu_normal_text[MNT_BROWSER_SCAN_PROGRESS] = "Scanning %d of %d Servers...";
+	menu_normal_text[MNT_VIDEO_ADDITIONAL_OPTIONS] = "Additional Options";
 	menu_normal_text[MNT_VIDEO_LOW_QUALITY] = "LOW QUALITY";
 	menu_normal_text[MNT_VIDEO_MEDIUM_QUALITY] = "MEDIUM QUALITY";
 	menu_normal_text[MNT_VIDEO_HIGHEST_QUALITY] = "HIGHEST QUALITY";
@@ -2097,6 +2098,7 @@ void UI_LoadMenuText()
 		menu_normal_text[MNT_BROWSER_BOTS_AND_HUMANS] = "BOTS ODER MENSCHEN";
 		menu_normal_text[MNT_BROWSER_MOD] = "MODIFIKATION";
 		menu_normal_text[MNT_BROWSER_SCAN_PROGRESS] = "Scannen von %d von %d Servern...";
+		menu_normal_text[MNT_VIDEO_ADDITIONAL_OPTIONS] = "Zusätzliche Optionen";
 		menu_normal_text[MNT_VIDEO_LOW_QUALITY] = "GERINGE QUALITÄT";
 		menu_normal_text[MNT_VIDEO_MEDIUM_QUALITY] = "MITTLERE QUALITÄT";
 		menu_normal_text[MNT_VIDEO_HIGHEST_QUALITY] = "HÖCHSTE QUALITÄT";
@@ -2132,6 +2134,7 @@ void UI_LoadMenuText()
 		menu_normal_text[MNT_BROWSER_BOTS_AND_HUMANS] = "BOTS OU HUMAINS";
 		menu_normal_text[MNT_BROWSER_MOD] = "MODIF.";
 		menu_normal_text[MNT_BROWSER_SCAN_PROGRESS] = "Analyse de %d des %d serveurs...";
+		menu_normal_text[MNT_VIDEO_ADDITIONAL_OPTIONS] = "Options supplémentaires";
 		menu_normal_text[MNT_VIDEO_LOW_QUALITY] = "BASSE QUALITÉ";
 		menu_normal_text[MNT_VIDEO_MEDIUM_QUALITY] = "QUALITÉ MOYENNE";
 		menu_normal_text[MNT_VIDEO_HIGHEST_QUALITY] = "MEILLEURE QUALITÉ";
@@ -2283,6 +2286,8 @@ void UI_LoadButtonText()
 	menu_button_text[MBT_VIDEO_LIGHTING_LEVEL][1] = "ADJUST OVERALL LIGHTING INTENSITY";
 	menu_button_text[MBT_VIDEO_LIGHTING_CONTRAST][0] = "LIGHTING CONTRAST";
 	menu_button_text[MBT_VIDEO_LIGHTING_CONTRAST][1] = "ADJUST MAXIMUM LIGHTING INTENSITY";
+	menu_button_text[MBT_VIDEO_INTENSITY][0] = "INTENSITY";
+	menu_button_text[MBT_VIDEO_INTENSITY][1] = "SCALES IMAGE COLORS TO MAKE BRIGHT AREAS BRIGHTER";
 	menu_button_text[MBT_VIDEO_LIGHTING_APPLY][0] = "APPLY";
 	menu_button_text[MBT_VIDEO_LIGHTING_APPLY][1] = "APPLY LIGHTING CHANGES";
 	menu_button_text[MBT_VIDEO_LIGHTING_RESET][0] = "RESET";
@@ -2349,6 +2354,8 @@ void UI_LoadButtonText()
 		menu_button_text[MBT_VIDEO_LIGHTING_LEVEL][1] = "GESAMTLICHTINTENSITÄT EINSTELLEN";
 		menu_button_text[MBT_VIDEO_LIGHTING_CONTRAST][0] = "BELEUCHTUNGSKONTRAST";
 		menu_button_text[MBT_VIDEO_LIGHTING_CONTRAST][1] = "MAXIMALE BELEUCHTUNGSINTENSITÄT EINSTELLEN";
+		menu_button_text[MBT_VIDEO_INTENSITY][0] = "INTENSITÄT";
+		menu_button_text[MBT_VIDEO_INTENSITY][1] = "SKALIERT BILDFARBEN, UM HELLE BEREICHE HELLER ZU MACHEN";
 		menu_button_text[MBT_VIDEO_LIGHTING_APPLY][0] = "ANWENDEN";
 		menu_button_text[MBT_VIDEO_LIGHTING_APPLY][1] = "ÄNDERUNGEN DER BELEUCHTUNG ANWENDEN";
 		menu_button_text[MBT_VIDEO_LIGHTING_RESET][0] = "ZURÜCKSETZEN";
@@ -2425,6 +2432,8 @@ void UI_LoadButtonText()
 		menu_button_text[MBT_VIDEO_LIGHTING_LEVEL][1] = "AJUSTER L'INTENSITÉ DE L'ÉCLAIRAGE GÉNÉRAL";
 		menu_button_text[MBT_VIDEO_LIGHTING_CONTRAST][0] = "CONTRASTE D'ÉCLAIRAGE";
 		menu_button_text[MBT_VIDEO_LIGHTING_CONTRAST][1] = "AJUSTER L'INTENSITÉ MAXIMALE DE L'ÉCLAIRAGE";
+		menu_button_text[MBT_VIDEO_INTENSITY][0] = "INTENSITÉ";
+		menu_button_text[MBT_VIDEO_INTENSITY][1] = "RENDRE LES ZONES CLAIRES PLUS LUMINEUSES";
 		menu_button_text[MBT_VIDEO_LIGHTING_APPLY][0] = "APPLIQUER";
 		menu_button_text[MBT_VIDEO_LIGHTING_APPLY][1] = "APPLIQUER DES CHANGEMENTS D'ÉCLAIRAGE";
 		menu_button_text[MBT_VIDEO_LIGHTING_RESET][0] = "RÉINITIALISER";

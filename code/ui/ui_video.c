@@ -456,21 +456,37 @@ BRIGHTNESS MENU
 =======================================================================
 */
 
+typedef struct {
+	float gamma;
+	float lighting_gamma;
+	float overbright_factor;
+	float intensity;
+} brightnessTemplate_t;
+
+const brightnessTemplate_t brightnessTemplatePlain = { 14.0f, 5.0f, 15.0f, 0.0f };
+const brightnessTemplate_t brightnessTemplateFullContrast = { 13.0f, 5.0f, 20.0f, 0.0f };
+const brightnessTemplate_t brightnessTemplateExtraBright = { 14.0f, 10.0f, 15.0f, 4.0f };
+const brightnessTemplate_t brightnessTemplateFullBright = { 11.0f, 20.0f, 10.0f, 16.0f };
+
 struct
 {
 	menuframework_s menu;
 	qboolean supportMapLightingGamma;
 	qboolean supportOverBrightFactor;
 	qboolean supportIntensity;
+	qboolean supportIntensityFractional;
 
 	menuslider_s	gamma_slider;
 	menuaction_s	gamma_apply;
 
-	qboolean		defaults_active;	// current running settings equal defaults
+	brightnessTemplate_t	current_loaded_values;
 	menuslider_s	lighting_gamma_slider;
 	menuslider_s	overbright_slider;
 	menuslider_s	intensity_slider;
-	menubitmap_s	additional_reset;
+	menubitmap_s	template_plain;
+	menubitmap_s	template_full_contrast;
+	menubitmap_s	template_extra_bright;
+	menubitmap_s	template_full_bright;
 	menuaction_s	additional_apply;
 
 	qhandle_t	gamma;
@@ -478,7 +494,7 @@ struct
 } s_brightness;
 
 // Display additional brightness options in a box below gamma settings
-#define SUPPORT_BRIGHTNESS_ADDITIONAL ( s_brightness.supportMapLightingGamma || s_brightness.supportOverBrightFactor || s_brightness.supportIntensity )
+#define SUPPORT_BRIGHTNESS_ADDITIONAL ( s_brightness.supportMapLightingGamma && s_brightness.supportOverBrightFactor )
 
 /*
 =================
@@ -541,7 +557,7 @@ static void UI_BrightnessMenu_MenuDraw (void)
 	y = 191;
 	if ( SUPPORT_BRIGHTNESS_ADDITIONAL )
 	{
-		y -= 10;
+		y -= 12;
 	}
 	if (uis.glconfig.deviceSupportsGamma)
 	{
@@ -564,10 +580,9 @@ static void UI_BrightnessMenu_MenuDraw (void)
 	if ( SUPPORT_BRIGHTNESS_ADDITIONAL ) {
 		int y, h;
 		y = 163;
-		h = 233;
 
 		// Brackets around gamma
-		h = 100;
+		h = 92;
 		trap_R_SetColor( colorTable[CT_LTPURPLE1]);
 		UI_DrawHandlePic(158,y, 16, 16, uis.graphicBracket1CornerLU);
 		UI_DrawHandlePic(158,y + 16,  8, h, uis.whiteShader);
@@ -580,8 +595,8 @@ static void UI_BrightnessMenu_MenuDraw (void)
 		UI_DrawHandlePic(174,y + h + 24, 408, 8, uis.whiteShader);	// Bottom line
 
 		// Brackets around map lighting options
-		y = 300;
-		h = 96;
+		y = 292;
+		h = 104;
 		trap_R_SetColor( colorTable[CT_LTPURPLE1]);
 		UI_DrawHandlePic(158,y, 16, 16, uis.graphicBracket1CornerLU);
 		UI_DrawHandlePic(158,y + 16,  8, h, uis.whiteShader);
@@ -593,7 +608,7 @@ static void UI_BrightnessMenu_MenuDraw (void)
 		UI_DrawHandlePic(579,y + h + 16, 32, -16, s_brightness.top);	// Corner, LR
 		UI_DrawHandlePic(174,y + h + 24, 408, 8, uis.whiteShader);	// Bottom line
 
-		UI_DrawProportionalString( 190, 317, menu_normal_text[MNT_VIDEO_ADDITIONAL_OPTIONS], UI_SMALLFONT, colorTable[CT_LTGOLD1]);
+		UI_DrawProportionalString( 190, 304, menu_normal_text[MNT_VIDEO_ADDITIONAL_OPTIONS], UI_SMALLFONT, colorTable[CT_LTGOLD1]);
 	} else {
 		// Brackets around gamma
 		trap_R_SetColor( colorTable[CT_LTPURPLE1]);
@@ -616,42 +631,91 @@ static void UI_BrightnessMenu_MenuDraw (void)
 
 /*
 =================
-UI_BrightnessMenu_SetLightingResetButtonEnabled
+UI_BrightnessMenu_TemplateMatchesCurrent
 
-Enable or disable the lighting reset button.
+Returns qtrue if template matches current settings.
 =================
 */
-static void UI_BrightnessMenu_SetLightingResetButtonEnabled( qboolean enable ) {
-	if ( enable ) {
-		s_brightness.additional_reset.textcolor = CT_BLACK;
-		s_brightness.additional_reset.textcolor2 = CT_WHITE;
-		s_brightness.additional_reset.color = CT_DKORANGE;
-		s_brightness.additional_reset.color2 = CT_LTORANGE;
-		s_brightness.additional_reset.generic.flags &= ~QMF_INACTIVE;
+static qboolean UI_BrightnessMenu_TemplateMatchesCurrent( const brightnessTemplate_t *template ) {
+	if ( fabs( s_brightness.gamma_slider.curvalue - template->gamma ) > 0.01 )
+		return qfalse;
+	if ( s_brightness.supportMapLightingGamma && fabs( s_brightness.lighting_gamma_slider.curvalue - template->lighting_gamma ) > 0.01 )
+		return qfalse;
+	if ( s_brightness.supportOverBrightFactor && fabs( s_brightness.overbright_slider.curvalue - template->overbright_factor ) > 0.01 )
+		return qfalse;
+	if ( s_brightness.supportIntensity && fabs( s_brightness.intensity_slider.curvalue - template->intensity ) > 0.01 )
+		return qfalse;
+	return qtrue;
+}
+
+/*
+=================
+UI_BrightnessMenu_CheckTemplateButtonEnabled
+
+Enable or disable the template button depending on whether it already matches the current settings.
+=================
+*/
+static void UI_BrightnessMenu_CheckTemplateButtonEnabled( const brightnessTemplate_t *template, menubitmap_s *button ) {
+	if ( UI_BrightnessMenu_TemplateMatchesCurrent( template ) ) {
+		button->textcolor = CT_WHITE;
+		button->textcolor2 = CT_WHITE;
+		button->color = CT_DKGREY;
+		button->color2 = CT_DKGREY;
+		button->generic.flags |= QMF_INACTIVE;
 	} else {
-		s_brightness.additional_reset.textcolor = CT_WHITE;
-		s_brightness.additional_reset.textcolor2 = CT_WHITE;
-		s_brightness.additional_reset.color = CT_DKGREY;
-		s_brightness.additional_reset.color2 = CT_DKGREY;
-		s_brightness.additional_reset.generic.flags |= QMF_INACTIVE;
+		button->textcolor = CT_BLACK;
+		button->textcolor2 = CT_WHITE;
+		button->color = CT_DKORANGE;
+		button->color2 = CT_LTORANGE;
+		button->generic.flags &= ~QMF_INACTIVE;
 	}
 }
 
 /*
 =================
-UI_BrightnessMenu_SetLightingApplyButtonEnabled
+UI_BrightnessMenu_CheckAdditionalApplyButtonEnabled
 
-Enable or disable the lighting apply button.
+Enable or disable the additional options apply button.
 =================
 */
-static void UI_BrightnessMenu_SetLightingApplyButtonEnabled( qboolean enable ) {
-	if ( enable ) {
-		s_brightness.additional_apply.generic.flags &= ~QMF_GRAYED;
-		s_brightness.additional_apply.generic.flags |= QMF_BLINK;
-	} else {
+static void UI_BrightnessMenu_CheckAdditionalApplyButtonEnabled( void ) {
+	if ( UI_BrightnessMenu_TemplateMatchesCurrent( &s_brightness.current_loaded_values ) ) {
 		s_brightness.additional_apply.generic.flags |= QMF_GRAYED;
 		s_brightness.additional_apply.generic.flags &= ~QMF_BLINK;
+	} else {
+		s_brightness.additional_apply.generic.flags &= ~QMF_GRAYED;
+		s_brightness.additional_apply.generic.flags |= QMF_BLINK;
 	}
+}
+
+/*
+=================
+UI_BrightnessMenu_CheckButtonsEnabled
+
+Enable or disable template and apply buttons depending on whether they already match the current settings.
+=================
+*/
+static void UI_BrightnessMenu_CheckButtonsEnabled( void ) {
+	UI_BrightnessMenu_CheckTemplateButtonEnabled( &brightnessTemplatePlain, &s_brightness.template_plain );
+	UI_BrightnessMenu_CheckTemplateButtonEnabled( &brightnessTemplateFullContrast, &s_brightness.template_full_contrast );
+	UI_BrightnessMenu_CheckTemplateButtonEnabled( &brightnessTemplateExtraBright, &s_brightness.template_extra_bright );
+	UI_BrightnessMenu_CheckTemplateButtonEnabled( &brightnessTemplateFullBright, &s_brightness.template_full_bright );
+	UI_BrightnessMenu_CheckAdditionalApplyButtonEnabled();
+}
+
+/*
+=================
+UI_BrightnessMenu_ApplyTemplate
+=================
+*/
+static void UI_BrightnessMenu_ApplyTemplate( const brightnessTemplate_t *template ) {
+	// Set the gamma slider position, but don't actually apply it yet, so if the user cancels
+	// it doesn't leave a situation where gamma is modified but not the other template settings.
+	s_brightness.gamma_slider.curvalue = template->gamma;
+	s_brightness.lighting_gamma_slider.curvalue = template->lighting_gamma;
+	s_brightness.overbright_slider.curvalue = template->overbright_factor;
+	s_brightness.intensity_slider.curvalue = template->intensity;
+	UI_BrightnessMenu_CheckButtonsEnabled();
 }
 
 /*
@@ -672,40 +736,68 @@ static void UI_BrightnessCallback( void *s, int notification )
 		if ( uis.glconfig.deviceSupportsGamma ) {
 			// Update gamma in real time
 			trap_Cvar_SetValue( "r_gamma", s_brightness.gamma_slider.curvalue / 10.0f );
+			s_brightness.current_loaded_values.gamma = s_brightness.gamma_slider.curvalue;
 		} else {
 			// Blink the apply button
 			s_brightness.gamma_apply.generic.flags &= ~QMF_GRAYED;
 			s_brightness.gamma_apply.generic.flags |= QMF_BLINK;
 		}
+		UI_BrightnessMenu_CheckButtonsEnabled();
 
 	} else if ( s == &s_brightness.additional_apply ) {
+		trap_Cvar_SetValue( "r_gamma", s_brightness.gamma_slider.curvalue / 10.0f );
 		if ( s_brightness.supportMapLightingGamma ) {
-			trap_Cvar_SetValue( "r_mapLightingGamma", UI_BrightnessDecodeMLG( s_brightness.lighting_gamma_slider.curvalue ) );
+			// Also set min clamp value along with high r_mapLightingGamma values
+			float value = UI_BrightnessDecodeMLG( s_brightness.lighting_gamma_slider.curvalue );
+			float min = ( value - 2.0f ) * 0.125f;
+			if ( min < 0.0f )
+				min = 0.0f;
+			if ( min > 1.0f )
+				min = 1.0f;
+			trap_Cvar_SetValue( "r_mapLightingGamma", value );
+			trap_Cvar_SetValue( "r_mapLightingClampMin", min );
 		}
 		if ( s_brightness.supportOverBrightFactor ) {
 			trap_Cvar_SetValue( "r_overBrightFactor", s_brightness.overbright_slider.curvalue / 10.0f );
 		}
 		if ( s_brightness.supportIntensity ) {
-			trap_Cvar_SetValue( "r_intensity", s_brightness.intensity_slider.curvalue / 20.0f + 1.0f );
+			float value = s_brightness.intensity_slider.curvalue / 40.0f + 1.0f;
+			if ( value != 1.0f && s_brightness.supportIntensityFractional ) {
+				// Set fractional 0.5 value which helps reduce overbrightening, if supported by engine
+				char buffer[256];
+				int frac = value * 1000;
+				Com_sprintf( buffer, sizeof( buffer ), "%i.%i:0.5", frac / 1000, frac % 1000 );
+				trap_Cvar_Set( "r_intensity", buffer );
+			} else {
+				trap_Cvar_SetValue( "r_intensity", value );
+			}
 		}
 
 		// Reset other brightness settings to avoid stacking
+		if ( !s_brightness.supportMapLightingGamma ) {
+			trap_Cvar_Set( "r_mapLightingClampMin", "0" );
+		}
+		trap_Cvar_Set( "r_mapLightingClampMax", "1" );
 		trap_Cvar_Set( "r_ignorehwgamma", "0" );
 		trap_Cvar_Set( "r_textureGamma", "1" );
 		trap_Cvar_Set( "r_mapLightingFactor", "2" );
 
 		trap_Cmd_ExecuteText( EXEC_APPEND, "vid_restart\n" );
 
-	} else if ( s == &s_brightness.additional_reset ) {
-		s_brightness.lighting_gamma_slider.curvalue = 5.0f;
-		s_brightness.overbright_slider.curvalue = 15.0f;
-		s_brightness.intensity_slider.curvalue = 0.0f;
-		UI_BrightnessMenu_SetLightingApplyButtonEnabled( !s_brightness.defaults_active );
-		UI_BrightnessMenu_SetLightingResetButtonEnabled( qfalse );
+	} else if ( s == &s_brightness.template_plain ) {
+		UI_BrightnessMenu_ApplyTemplate( &brightnessTemplatePlain );
+
+	} else if ( s == &s_brightness.template_full_contrast ) {
+		UI_BrightnessMenu_ApplyTemplate( &brightnessTemplateFullContrast );
+
+	} else if ( s == &s_brightness.template_extra_bright ) {
+		UI_BrightnessMenu_ApplyTemplate( &brightnessTemplateExtraBright );
+
+	} else if ( s == &s_brightness.template_full_bright ) {
+		UI_BrightnessMenu_ApplyTemplate( &brightnessTemplateFullBright );
 
 	} else if ( s == &s_brightness.lighting_gamma_slider || s == &s_brightness.overbright_slider || s == &s_brightness.intensity_slider ) {
-		UI_BrightnessMenu_SetLightingApplyButtonEnabled( qtrue );
-		UI_BrightnessMenu_SetLightingResetButtonEnabled( qtrue );
+		UI_BrightnessMenu_CheckButtonsEnabled();
 	}
 }
 
@@ -724,6 +816,7 @@ void UI_BrightnessMenu_Init( void )
 	s_brightness.supportMapLightingGamma = VMExt_GVCommandInt( "ui_support_r_ext_mapLightingGamma", 0 ) ? qtrue : qfalse;
 	s_brightness.supportOverBrightFactor = VMExt_GVCommandInt( "ui_support_r_ext_overBrightFactor", 0 ) ? qtrue : qfalse;
 	s_brightness.supportIntensity = VMExt_GVCommandInt( "ui_support_r_intensity", 1 ) ? qtrue : qfalse;
+	s_brightness.supportIntensityFractional = VMExt_GVCommandInt( "ui_support_r_intensity_fractional", 0 ) ? qtrue : qfalse;
 
 	s_brightness.top = trap_R_RegisterShaderNoMip("menu/common/corner_ur_8_30.tga");
 	s_brightness.gamma = trap_R_RegisterShaderNoMip("menu/special/gamma_test.tga");
@@ -746,7 +839,7 @@ void UI_BrightnessMenu_Init( void )
 	Video_SideButtons(&s_brightness.menu,ID_VIDEOBRIGHTNESS);
 
 	x = 180;
-	y = SUPPORT_BRIGHTNESS_ADDITIONAL ? 267 - 10 : 267;
+	y = SUPPORT_BRIGHTNESS_ADDITIONAL ? 267 - 14 : 267;
 	s_brightness.gamma_slider.generic.type		= MTYPE_SLIDER;
 	s_brightness.gamma_slider.generic.x			= x + 162;
 	s_brightness.gamma_slider.generic.y			= y;
@@ -795,7 +888,7 @@ void UI_BrightnessMenu_Init( void )
 	s_brightness.gamma_apply.width					= 82;
 	s_brightness.gamma_apply.height					= 70;
 
-	y = 318;
+	y = 324;
 
 	if ( s_brightness.supportMapLightingGamma ) {
 		y += 24;
@@ -886,7 +979,7 @@ void UI_BrightnessMenu_Init( void )
 		s_brightness.intensity_slider.generic.flags			= QMF_SMALLFONT;
 		s_brightness.intensity_slider.generic.callback		= UI_BrightnessCallback;
 		s_brightness.intensity_slider.minvalue				= 0;
-		s_brightness.intensity_slider.maxvalue				= 10;
+		s_brightness.intensity_slider.maxvalue				= 16;
 		s_brightness.intensity_slider.color					= CT_DKPURPLE1;
 		s_brightness.intensity_slider.color2				= CT_LTPURPLE1;
 		s_brightness.intensity_slider.generic.name			= PIC_MONBAR2;
@@ -916,17 +1009,81 @@ void UI_BrightnessMenu_Init( void )
 			if ( intensity < 1.0f ) {
 				intensity = 1.0f;
 			}
-			if ( intensity > 1.5f ) {
-				intensity = 1.5f;
+			if ( intensity > 1.4f ) {
+				intensity = 1.4f;
 			}
-			s_brightness.intensity_slider.curvalue = ( intensity - 1.0f ) * 20.0f;
+			s_brightness.intensity_slider.curvalue = ( intensity - 1.0f ) * 40.0f;
 		}
 	}
 
+	s_brightness.template_plain.generic.type			= MTYPE_BITMAP;
+	s_brightness.template_plain.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
+	s_brightness.template_plain.generic.x				= x - 8;
+	s_brightness.template_plain.generic.y				= 324;
+	s_brightness.template_plain.generic.name			= GRAPHIC_SQUARE;
+	s_brightness.template_plain.generic.callback		= UI_BrightnessCallback;
+	s_brightness.template_plain.textEnum				= MBT_VIDEO_LIGHTING_PLAIN;
+	s_brightness.template_plain.textcolor				= CT_BLACK;
+	s_brightness.template_plain.textcolor2				= CT_WHITE;
+	s_brightness.template_plain.color					= CT_DKORANGE;
+	s_brightness.template_plain.color2					= CT_LTORANGE;
+	s_brightness.template_plain.textX					= 2;
+	s_brightness.template_plain.textY					= 2;
+	s_brightness.template_plain.width					= 60;
+	s_brightness.template_plain.height					= 18;
+
+	s_brightness.template_full_contrast.generic.type		= MTYPE_BITMAP;
+	s_brightness.template_full_contrast.generic.flags		= QMF_HIGHLIGHT_IF_FOCUS;
+	s_brightness.template_full_contrast.generic.x			= s_brightness.template_plain.generic.x + s_brightness.template_plain.width + 5;
+	s_brightness.template_full_contrast.generic.y			= s_brightness.template_plain.generic.y;
+	s_brightness.template_full_contrast.generic.name		= GRAPHIC_SQUARE;
+	s_brightness.template_full_contrast.generic.callback	= UI_BrightnessCallback;
+	s_brightness.template_full_contrast.textEnum			= MBT_VIDEO_LIGHTING_FULL_CONTRAST;
+	s_brightness.template_full_contrast.textcolor			= CT_BLACK;
+	s_brightness.template_full_contrast.textcolor2			= CT_WHITE;
+	s_brightness.template_full_contrast.color				= CT_DKORANGE;
+	s_brightness.template_full_contrast.color2				= CT_LTORANGE;
+	s_brightness.template_full_contrast.textX				= 2;
+	s_brightness.template_full_contrast.textY				= 2;
+	s_brightness.template_full_contrast.width				= 108;
+	s_brightness.template_full_contrast.height				= 18;
+
+	s_brightness.template_extra_bright.generic.type			= MTYPE_BITMAP;
+	s_brightness.template_extra_bright.generic.flags		= QMF_HIGHLIGHT_IF_FOCUS;
+	s_brightness.template_extra_bright.generic.x			= s_brightness.template_full_contrast.generic.x + s_brightness.template_full_contrast.width + 5;
+	s_brightness.template_extra_bright.generic.y			= s_brightness.template_full_contrast.generic.y;
+	s_brightness.template_extra_bright.generic.name			= GRAPHIC_SQUARE;
+	s_brightness.template_extra_bright.generic.callback		= UI_BrightnessCallback;
+	s_brightness.template_extra_bright.textEnum				= MBT_VIDEO_LIGHTING_EXTRA_BRIGHT;
+	s_brightness.template_extra_bright.textcolor			= CT_BLACK;
+	s_brightness.template_extra_bright.textcolor2			= CT_WHITE;
+	s_brightness.template_extra_bright.color				= CT_DKORANGE;
+	s_brightness.template_extra_bright.color2				= CT_LTORANGE;
+	s_brightness.template_extra_bright.textX				= 2;
+	s_brightness.template_extra_bright.textY				= 2;
+	s_brightness.template_extra_bright.width				= 105;
+	s_brightness.template_extra_bright.height				= 18;
+
+	s_brightness.template_full_bright.generic.type			= MTYPE_BITMAP;
+	s_brightness.template_full_bright.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
+	s_brightness.template_full_bright.generic.x				= s_brightness.template_extra_bright.generic.x + s_brightness.template_extra_bright.width + 5;
+	s_brightness.template_full_bright.generic.y				= s_brightness.template_extra_bright.generic.y;
+	s_brightness.template_full_bright.generic.name			= GRAPHIC_SQUARE;
+	s_brightness.template_full_bright.generic.callback		= UI_BrightnessCallback;
+	s_brightness.template_full_bright.textEnum				= MBT_VIDEO_LIGHTING_FULL_BRIGHT;
+	s_brightness.template_full_bright.textcolor				= CT_BLACK;
+	s_brightness.template_full_bright.textcolor2			= CT_WHITE;
+	s_brightness.template_full_bright.color					= CT_DKORANGE;
+	s_brightness.template_full_bright.color2				= CT_LTORANGE;
+	s_brightness.template_full_bright.textX					= 2;
+	s_brightness.template_full_bright.textY					= 2;
+	s_brightness.template_full_bright.width					= 115;
+	s_brightness.template_full_bright.height				= 18;
+
 	s_brightness.additional_apply.generic.type			= MTYPE_ACTION;
 	s_brightness.additional_apply.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS|QMF_GRAYED;
-	s_brightness.additional_apply.generic.x				= 510;
-	s_brightness.additional_apply.generic.y				= 320;
+	s_brightness.additional_apply.generic.x				= 503;
+	s_brightness.additional_apply.generic.y				= 350;
 	s_brightness.additional_apply.generic.callback		= UI_BrightnessCallback;
 	s_brightness.additional_apply.textEnum				= MBT_VIDEO_LIGHTING_APPLY;
 	s_brightness.additional_apply.textcolor				= CT_BLACK;
@@ -937,41 +1094,22 @@ void UI_BrightnessMenu_Init( void )
 	s_brightness.additional_apply.color3				= CT_DKGREY;
 	s_brightness.additional_apply.textX					= 5;
 	s_brightness.additional_apply.textY					= 5;
-	s_brightness.additional_apply.width					= 60;
-	s_brightness.additional_apply.height				= 40;
-
-	s_brightness.additional_reset.generic.type			= MTYPE_BITMAP;
-	s_brightness.additional_reset.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
-	s_brightness.additional_reset.generic.x				= 510;
-	s_brightness.additional_reset.generic.y				= 365;
-	s_brightness.additional_reset.generic.name			= GRAPHIC_SQUARE;
-	s_brightness.additional_reset.generic.callback		= UI_BrightnessCallback;
-	s_brightness.additional_reset.textEnum				= MBT_VIDEO_LIGHTING_RESET;
-	s_brightness.additional_reset.textcolor				= CT_BLACK;
-	s_brightness.additional_reset.textcolor2			= CT_WHITE;
-	s_brightness.additional_reset.color					= CT_DKORANGE;
-	s_brightness.additional_reset.color2				= CT_LTORANGE;
-	s_brightness.additional_reset.textX					= 5;
-	s_brightness.additional_reset.textY					= 5;
-	s_brightness.additional_reset.width					= 60;
-	s_brightness.additional_reset.height				= 40;
+	s_brightness.additional_apply.width					= 68;
+	s_brightness.additional_apply.height				= 60;
 
 	Menu_AddItem( &s_brightness.menu, ( void * )&s_brightness.gamma_slider);
 	if (!uis.glconfig.deviceSupportsGamma)
 	{
 		Menu_AddItem( &s_brightness.menu, ( void * )&s_brightness.gamma_apply);
 	}
-	s_brightness.gamma_slider.curvalue = trap_Cvar_VariableValue( "r_gamma" ) *  10.0f;
+	s_brightness.gamma_slider.curvalue = trap_Cvar_VariableValue( "r_gamma" ) * 10.0f;
 
 	if ( SUPPORT_BRIGHTNESS_ADDITIONAL )
 	{
-		// Check if all the lighting settings are already at the defaults
-		s_brightness.defaults_active =
-				( !s_brightness.supportMapLightingGamma || s_brightness.lighting_gamma_slider.curvalue == 5.0f ) &&
-				( !s_brightness.supportOverBrightFactor || s_brightness.overbright_slider.curvalue == 15.0f ) &&
-				( !s_brightness.supportIntensity || s_brightness.intensity_slider.curvalue == 0.0f );
-
-		UI_BrightnessMenu_SetLightingResetButtonEnabled( !s_brightness.defaults_active );
+		s_brightness.current_loaded_values.gamma = s_brightness.gamma_slider.curvalue;
+		s_brightness.current_loaded_values.lighting_gamma = s_brightness.lighting_gamma_slider.curvalue;
+		s_brightness.current_loaded_values.overbright_factor = s_brightness.overbright_slider.curvalue;
+		s_brightness.current_loaded_values.intensity = s_brightness.intensity_slider.curvalue;
 
 		if ( s_brightness.supportMapLightingGamma ) {
 			Menu_AddItem( &s_brightness.menu, ( void * )&s_brightness.lighting_gamma_slider);
@@ -982,8 +1120,13 @@ void UI_BrightnessMenu_Init( void )
 		if ( s_brightness.supportIntensity ) {
 			Menu_AddItem( &s_brightness.menu, ( void * )&s_brightness.intensity_slider);
 		}
+		Menu_AddItem( &s_brightness.menu, ( void * )&s_brightness.template_plain);
+		Menu_AddItem( &s_brightness.menu, ( void * )&s_brightness.template_full_contrast);
+		Menu_AddItem( &s_brightness.menu, ( void * )&s_brightness.template_extra_bright);
+		Menu_AddItem( &s_brightness.menu, ( void * )&s_brightness.template_full_bright);
 		Menu_AddItem( &s_brightness.menu, ( void * )&s_brightness.additional_apply);
-		Menu_AddItem( &s_brightness.menu, ( void * )&s_brightness.additional_reset);
+
+		UI_BrightnessMenu_CheckButtonsEnabled();
 	}
 
 	UI_PushMenu( &s_brightness.menu );

@@ -4,6 +4,7 @@
 #include "ui_local.h"
 
 typedef struct {
+	qboolean supportMinimize;
 	qboolean supportFreeLook;
 	qboolean supportRawMouse;
 	qboolean supportMouseStrafe;
@@ -20,6 +21,10 @@ Load settings in the soundEngineConfig structure.
 */
 static void UI_InitControlsEngineConfig( void ) {
 	memset( &controlsEngineConfig, 0, sizeof( controlsEngineConfig ) );
+
+	if ( VMExt_GVCommandInt( "ui_support_minimize", 0 ) ) {
+		controlsEngineConfig.supportMinimize = qtrue;
+	}
 
 	if ( !VMExt_GVCommandInt( "ui_suppress_cl_freelook", 0 ) || trap_Cvar_VariableValue( "cl_freelook" ) < 1.0f ) {
 		controlsEngineConfig.supportFreeLook = qtrue;
@@ -798,6 +803,8 @@ typedef struct
 #define ID_OBJECTIVES	36
 #define ID_IGNORE		37
 #define ID_UNIGNORE		38
+#define ID_QUIT			39
+#define ID_MINIMIZE		40
 
 #define ID_USE			1
 
@@ -891,6 +898,8 @@ typedef struct
 	menuaction_s		chat4;
 	menuaction_s		ignore;
 	menuaction_s		unignore;
+	menuaction_s		quit;
+	menuaction_s		minimize;
 	menulist_s			joyenable;
 	menuslider_s		joythreshold;
 	int					section;
@@ -952,6 +961,8 @@ static bind_t g_bindings[] =
 	{"+analysis",		MNT_SHORTCUT_OBJECTIVES,	ID_OBJECTIVES,	ANIM_IDLE,		-1,				-1,		-1, -1,MNT_SHORTCUT_KEY},
 	{"ignore",			MNT_SHORTCUT_IGNORE,			ID_IGNORE,		ANIM_IDLE,		-1,			-1,		-1, -1,MNT_SHORTCUT_KEY},
 	{"unignore",		MNT_SHORTCUT_UNIGNORE,			ID_UNIGNORE,		ANIM_IDLE,		-1,			-1,		-1, -1,MNT_SHORTCUT_KEY},
+	{"quit",			MNT_SHORTCUT_QUIT,			ID_QUIT,		ANIM_IDLE,		-1,			-1,		-1, -1,MNT_SHORTCUT_KEY},
+	{"minimize",		MNT_SHORTCUT_MINIMIZE,		ID_MINIMIZE,	ANIM_IDLE,		-1,			-1,		-1, -1,MNT_SHORTCUT_KEY},
 	{(char*)NULL,		0,							0,				0,				-1,				-1,		-1,	-1,0},
 };
 
@@ -1015,6 +1026,8 @@ static void* g_command_controls[] =
 	&s_controls.gesture,
 	&s_controls.ignore,
 	&s_controls.unignore,
+	&s_controls.quit,
+	&s_controls.minimize,
 	NULL,
 };
 
@@ -2447,6 +2460,10 @@ static void SetupActionButtons_Init(int section)
 			break;
 		}
 
+		if ( !controlsEngineConfig.supportMinimize && g_section == C_COMMAND && controlptr[i] == &s_controls.minimize ) {
+			continue;
+		}
+
 		if ( !controlsEngineConfig.supportFreeLook && g_section == C_LOOK && controlptr[i] == &s_look_mouselook_action ) {
 			continue;
 		}
@@ -2642,6 +2659,9 @@ UI_SetupWeaponsMenu
 */
 void UI_SetupWeaponsMenu( void )
 {
+	// Entering the controls menu should always pass through this function, so perform the init here.
+	UI_InitControlsEngineConfig();
+
 //	if (!s_weapons_menu.initialized)
 //	{
 		Weapons_MenuInit();
@@ -2729,7 +2749,7 @@ static void SetupMenu_SideButtons(menuframework_s *menu,int menuType)
 	s_controls_command.color2				= CT_LTPURPLE1;
 	s_controls_command.textX				= 5;
 	s_controls_command.textY				= 1;
-	s_controls_command.textEnum				= MBT_COMMANDKEYS;
+	s_controls_command.textEnum				= MBT_CONTROLS_MISC;
 	s_controls_command.textcolor			= CT_BLACK;
 	s_controls_command.textcolor2			= CT_WHITE;
 
@@ -3294,8 +3314,6 @@ ControlsAttackLook_MenuInit
 */
 static void ControlsAttackLook_MenuInit( void )
 {
-	UI_InitControlsEngineConfig();
-
 	s_controlslook_menu.nitems					= 0;
 	s_controlslook_menu.wrapAround				= qtrue;
 	s_controlslook_menu.draw					= ControlsAttackLook_MenuDraw;
@@ -3547,8 +3565,6 @@ ControlsMouseJoyStick_MenuInit
 static void ControlsMouseJoyStick_MenuInit( void )
 {
 	int x,y;
-
-	UI_InitControlsEngineConfig();
 
 	UI_ControlsMouseJoyStickMenu_Cache();
 
@@ -4365,6 +4381,18 @@ static void ControlsCommand_MenuInit( void )
 	s_controls.unignore.generic.ownerdraw	= Controls_DrawKeyBinding;
 	s_controls.unignore.generic.id 			= ID_UNIGNORE;
 
+	s_controls.quit.generic.type			= MTYPE_ACTION;
+	s_controls.quit.generic.flags			= QMF_LEFT_JUSTIFY|QMF_HIGHLIGHT_IF_FOCUS;
+	s_controls.quit.generic.callback		= Controls_ActionEvent;
+	s_controls.quit.generic.ownerdraw		= Controls_DrawKeyBinding;
+	s_controls.quit.generic.id 				= ID_QUIT;
+
+	s_controls.minimize.generic.type		= MTYPE_ACTION;
+	s_controls.minimize.generic.flags		= QMF_LEFT_JUSTIFY|QMF_HIGHLIGHT_IF_FOCUS;
+	s_controls.minimize.generic.callback	= Controls_ActionEvent;
+	s_controls.minimize.generic.ownerdraw	= Controls_DrawKeyBinding;
+	s_controls.minimize.generic.id 			= ID_MINIMIZE;
+
 	s_attack_waiting_action.generic.type			= MTYPE_ACTION;
 	s_attack_waiting_action.generic.flags			= QMF_HIDDEN;
 	s_attack_waiting_action.generic.x				= 202;
@@ -4392,6 +4420,10 @@ static void ControlsCommand_MenuInit( void )
 	Menu_AddItem( &s_controlscommand_menu, ( void * )&s_controls.gesture);
 	Menu_AddItem( &s_controlscommand_menu, ( void * )&s_controls.ignore);
 	Menu_AddItem( &s_controlscommand_menu, ( void * )&s_controls.unignore);
+	Menu_AddItem( &s_controlscommand_menu, ( void * )&s_controls.quit);
+	if ( controlsEngineConfig.supportMinimize ) {
+		Menu_AddItem( &s_controlscommand_menu, ( void * )&s_controls.minimize);
+	}
 	Menu_AddItem( &s_controlscommand_menu, ( void * )&s_attack_waiting_action);
 
 	// initialize the configurable cvars

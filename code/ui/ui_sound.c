@@ -384,7 +384,7 @@ void SoundMenu_Init(void)
 	soundOptionsInfo.sfxvolume.picY					= y;
 	soundOptionsInfo.sfxvolume.picWidth				= MENU_BUTTON_MED_WIDTH;
 	soundOptionsInfo.sfxvolume.picHeight			= MENU_BUTTON_MED_HEIGHT;
-	soundOptionsInfo.sfxvolume.textEnum				= soundEngineConfig.global_s_volume ? MBT_SOUND_OVERALL_VOLUME : MBT_EFFECTSVOLUME;
+	soundOptionsInfo.sfxvolume.textEnum				= soundEngineConfig.global_s_volume ? MBT_SOUND_GENERAL_VOLUME : MBT_EFFECTSVOLUME;
 	soundOptionsInfo.sfxvolume.textX				= 5;
 	soundOptionsInfo.sfxvolume.textY				= 1;
 	soundOptionsInfo.sfxvolume.textcolor			= CT_BLACK;

@@ -49,6 +49,8 @@ extern int s_OffOnNone_Names[];
 #define ID_ALLOWDOWNLOAD		137
 #define ID_BACK					138
 #define ID_VOICELANGUAGE		139
+#define ID_DRAWTIMER			140
+#define ID_DRAWFPS				141
 
 
 
@@ -61,6 +63,8 @@ typedef struct {
 	menulist_s			identifytarget;
 	menulist_s			forcemodel;
 	menulist_s			drawteamoverlay;
+	menulist_s			drawtimer;
+	menulist_s			drawfps;
 	menulist_s			allowdownload;
 
 	int					currentcrosshair;
@@ -103,6 +107,8 @@ static void Preferences_SetMenuItems( void )
 //	s_preferences.highqualitysky.curvalue	= trap_Cvar_VariableValue ( "r_fastsky" ) == 0;
 	s_preferences.forcemodel.curvalue		= trap_Cvar_VariableValue( "cg_forcemodel" ) != 0;
 	s_preferences.drawteamoverlay.curvalue	= Com_Clamp( 0, 3, trap_Cvar_VariableValue( "cg_drawTeamOverlay" ) );
+	s_preferences.drawtimer.curvalue		= trap_Cvar_VariableValue( "cg_drawTimer" ) != 0;
+	s_preferences.drawfps.curvalue			= trap_Cvar_VariableValue( "cg_drawFPS" ) != 0;
 	s_preferences.allowdownload.curvalue	= trap_Cvar_VariableValue( "cl_allowDownload" ) != 0;
 
 	trap_Cvar_VariableStringBuffer( "g_language", buffer, 32 );
@@ -182,6 +188,14 @@ static void Preferences_Event( void* ptr, int notification )
 
 	case ID_DRAWTEAMOVERLAY:
 		trap_Cvar_SetValue( "cg_drawTeamOverlay", s_preferences.drawteamoverlay.curvalue );
+		break;
+
+	case ID_DRAWTIMER:
+		trap_Cvar_SetValue( "cg_drawTimer", s_preferences.drawtimer.curvalue );
+		break;
+
+	case ID_DRAWFPS:
+		trap_Cvar_SetValue( "cg_drawFPS", s_preferences.drawfps.curvalue );
 		break;
 
 	case ID_ALLOWDOWNLOAD:
@@ -444,6 +458,40 @@ static void GameOptions_MenuInit( void )
 	s_preferences.drawteamoverlay.width					= width;
 
 	y += inc;
+	s_preferences.drawtimer.generic.type			= MTYPE_SPINCONTROL;
+	s_preferences.drawtimer.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
+	s_preferences.drawtimer.generic.x				= x;
+	s_preferences.drawtimer.generic.y				= y;
+	s_preferences.drawtimer.generic.callback		= Preferences_Event;
+	s_preferences.drawtimer.generic.id				= ID_DRAWTIMER;
+	s_preferences.drawtimer.textEnum				= MBT_DRAW_TIMER;
+	s_preferences.drawtimer.textcolor				= CT_BLACK;
+	s_preferences.drawtimer.textcolor2				= CT_WHITE;
+	s_preferences.drawtimer.color					= CT_DKPURPLE1;
+	s_preferences.drawtimer.color2					= CT_LTPURPLE1;
+	s_preferences.drawtimer.textX					= MENU_BUTTON_TEXT_X;
+	s_preferences.drawtimer.textY					= MENU_BUTTON_TEXT_Y;
+	s_preferences.drawtimer.listnames				= s_OffOnNone_Names;
+	s_preferences.drawtimer.width					= width;
+
+	y += inc;
+	s_preferences.drawfps.generic.type			= MTYPE_SPINCONTROL;
+	s_preferences.drawfps.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
+	s_preferences.drawfps.generic.x				= x;
+	s_preferences.drawfps.generic.y				= y;
+	s_preferences.drawfps.generic.callback		= Preferences_Event;
+	s_preferences.drawfps.generic.id			= ID_DRAWFPS;
+	s_preferences.drawfps.textEnum				= MBT_DRAW_FPS;
+	s_preferences.drawfps.textcolor				= CT_BLACK;
+	s_preferences.drawfps.textcolor2			= CT_WHITE;
+	s_preferences.drawfps.color					= CT_DKPURPLE1;
+	s_preferences.drawfps.color2				= CT_LTPURPLE1;
+	s_preferences.drawfps.textX					= MENU_BUTTON_TEXT_X;
+	s_preferences.drawfps.textY					= MENU_BUTTON_TEXT_Y;
+	s_preferences.drawfps.listnames				= s_OffOnNone_Names;
+	s_preferences.drawfps.width					= width;
+
+	y += inc;
 	s_preferences.allowdownload.generic.type			= MTYPE_SPINCONTROL;
 	s_preferences.allowdownload.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_preferences.allowdownload.generic.x				= x;
@@ -517,6 +565,8 @@ static void GameOptions_MenuInit( void )
 	Menu_AddItem( &s_gameoptions.menu, &s_preferences.forcemodel );
 	Menu_AddItem( &s_gameoptions.menu, &s_preferences.drawteamoverlay );
 	Menu_AddItem( &s_gameoptions.menu, &s_preferences.allowdownload );
+	Menu_AddItem( &s_gameoptions.menu, &s_preferences.drawtimer );
+	Menu_AddItem( &s_gameoptions.menu, &s_preferences.drawfps );
 	Menu_AddItem( &s_gameoptions.menu, &s_preferences.textlanguage );
 	Menu_AddItem( &s_gameoptions.menu, &s_preferences.voicelanguage );
 	Menu_AddItem( &s_gameoptions.menu, &s_preferences.crosshair);

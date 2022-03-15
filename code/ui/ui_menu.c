@@ -735,7 +735,9 @@ static void InitialSetupMenu_Init( void )
 	Menu_AddItem( &s_initialsetup.menu, &s_initialsetup.gamma );
 	Menu_AddItem( &s_initialsetup.menu, &s_initialsetup.textlanguage );
 	Menu_AddItem( &s_initialsetup.menu, &s_initialsetup.voicelanguage );
-	Menu_AddItem( &s_initialsetup.menu, &s_initialsetup.keyboardlanguage );
+	if ( !VMExt_GVCommandInt( "ui_skip_k_language", 0 ) ) {
+		Menu_AddItem( &s_initialsetup.menu, &s_initialsetup.keyboardlanguage );
+	}
 	Menu_AddItem( &s_initialsetup.menu, &s_initialsetup.apply );
 
 	InitialSetup_SetValues();

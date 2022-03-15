@@ -15,8 +15,16 @@ GAME OPTIONS MENU
 #define NUM_CROSSHAIRS		12
 #define PIC_BUTTON2			"menu/common/full_button2.tga"
 
-#define CROSSHAIR_X			450		// originally 438
-#define CROSSHAIR_Y			230		// originally 270
+#define CROSSHAIR_X			438
+#define CROSSHAIR_Y			270
+
+// should match values in cg_main.c
+#define BOB_UP_DEFAULT			0.005f
+#define BOB_UP_DEFAULT_STR		"0.005"
+#define BOB_PITCH_DEFAULT		0.002f
+#define BOB_PITCH_DEFAULT_STR	"0.002"
+#define BOB_ROLL_DEFAULT		0.002f
+#define BOB_ROLL_DEFAULT_STR	"0.002"
 
 // Precache stuff for Game Options Menu
 static struct
@@ -39,9 +47,16 @@ static struct
 
 extern int s_OffOnNone_Names[];
 
+static int Preferences_OffOnCustomNone_Names[] =
+{
+	MNT_OFF,
+	MNT_ON,
+	MNT_VIDEO_CUSTOM,
+	MNT_NONE
+};
+
 #define ID_TEXTLANGUAGE			126
 #define ID_CROSSHAIR			127
-#define ID_HIGHQUALITYSKY		129
 #define ID_EJECTINGBRASS		130
 #define ID_IDENTIFYTARGET		133
 #define ID_FORCEMODEL			135
@@ -51,6 +66,9 @@ extern int s_OffOnNone_Names[];
 #define ID_VOICELANGUAGE		139
 #define ID_DRAWTIMER			140
 #define ID_DRAWFPS				141
+#define ID_DRAWGUN				142
+#define ID_MOTIONBOB			143
+#define ID_SIMPLESKY			144
 
 
 
@@ -61,11 +79,18 @@ typedef struct {
 	menulist_s			textlanguage;
 	menulist_s			voicelanguage;
 	menulist_s			identifytarget;
+	menulist_s			simplesky;
 	menulist_s			forcemodel;
 	menulist_s			drawteamoverlay;
 	menulist_s			drawtimer;
 	menulist_s			drawfps;
+	menulist_s			drawgun;
+	menulist_s			motionbob;
 	menulist_s			allowdownload;
+
+	float				old_bobup;
+	float				old_bobpitch;
+	float				old_bobroll;
 
 	int					currentcrosshair;
 	qhandle_t			crosshairShader[NUM_CROSSHAIRS];
@@ -102,13 +127,20 @@ static void Preferences_SetMenuItems( void )
 	char buffer[32];
 	int *language;
 
+	// register certain defaults in case cgame isn't loaded yet
+	trap_Cvar_Register( NULL, "cg_drawGun", "1", CVAR_ARCHIVE );
+	trap_Cvar_Register( NULL, "cg_bobup", BOB_UP_DEFAULT_STR, CVAR_ARCHIVE );
+	trap_Cvar_Register( NULL, "cg_bobpitch", BOB_PITCH_DEFAULT_STR, CVAR_ARCHIVE );
+	trap_Cvar_Register( NULL, "cg_bobroll", BOB_ROLL_DEFAULT_STR, CVAR_ARCHIVE );
+
 	s_preferences.currentcrosshair		= (int)trap_Cvar_VariableValue( "cg_drawCrosshair" ) % NUM_CROSSHAIRS;
 	s_preferences.identifytarget.curvalue	= trap_Cvar_VariableValue( "cg_drawCrosshairNames" ) != 0;
-//	s_preferences.highqualitysky.curvalue	= trap_Cvar_VariableValue ( "r_fastsky" ) == 0;
+	s_preferences.simplesky.curvalue		= trap_Cvar_VariableValue ( "r_fastsky" ) != 0;
 	s_preferences.forcemodel.curvalue		= trap_Cvar_VariableValue( "cg_forcemodel" ) != 0;
 	s_preferences.drawteamoverlay.curvalue	= Com_Clamp( 0, 3, trap_Cvar_VariableValue( "cg_drawTeamOverlay" ) );
 	s_preferences.drawtimer.curvalue		= trap_Cvar_VariableValue( "cg_drawTimer" ) != 0;
 	s_preferences.drawfps.curvalue			= trap_Cvar_VariableValue( "cg_drawFPS" ) != 0;
+	s_preferences.drawgun.curvalue			= trap_Cvar_VariableValue( "cg_drawGun" ) != 0;
 	s_preferences.allowdownload.curvalue	= trap_Cvar_VariableValue( "cl_allowDownload" ) != 0;
 
 	trap_Cvar_VariableStringBuffer( "g_language", buffer, 32 );
@@ -152,6 +184,20 @@ static void Preferences_SetMenuItems( void )
 			s_preferences.voicelanguage.curvalue = 0;
 		}
 	}
+
+	s_preferences.old_bobup = trap_Cvar_VariableValue( "cg_bobup" );
+	s_preferences.old_bobpitch = trap_Cvar_VariableValue( "cg_bobpitch" );
+	s_preferences.old_bobroll = trap_Cvar_VariableValue( "cg_bobroll" );
+	if ( s_preferences.old_bobup == 0.0f && s_preferences.old_bobpitch == 0.0f && s_preferences.old_bobroll == 0.0f ) {
+		s_preferences.motionbob.curvalue = 0;
+	} else if ( s_preferences.old_bobup == BOB_UP_DEFAULT && s_preferences.old_bobpitch == BOB_PITCH_DEFAULT &&
+			s_preferences.old_bobroll == BOB_ROLL_DEFAULT ) {
+		s_preferences.motionbob.curvalue = 1;
+	} else {
+		// enable "custom" option to keep existing values
+		s_preferences.motionbob.listnames = Preferences_OffOnCustomNone_Names;
+		s_preferences.motionbob.curvalue = 2;
+	}
 }
 
 
@@ -182,6 +228,10 @@ static void Preferences_Event( void* ptr, int notification )
 		trap_Cvar_SetValue( "cg_drawCrosshairNames", s_preferences.identifytarget.curvalue );
 		break;
 
+	case ID_SIMPLESKY:
+		trap_Cvar_SetValue( "r_fastsky", s_preferences.simplesky.curvalue );
+		break;
+
 	case ID_FORCEMODEL:
 		trap_Cvar_SetValue( "cg_forcemodel", s_preferences.forcemodel.curvalue );
 		break;
@@ -196,6 +246,26 @@ static void Preferences_Event( void* ptr, int notification )
 
 	case ID_DRAWFPS:
 		trap_Cvar_SetValue( "cg_drawFPS", s_preferences.drawfps.curvalue );
+		break;
+
+	case ID_DRAWGUN:
+		trap_Cvar_SetValue( "cg_drawGun", s_preferences.drawgun.curvalue );
+		break;
+
+	case ID_MOTIONBOB:
+		if ( s_preferences.motionbob.curvalue == 0 ) {
+			trap_Cvar_SetValue( "cg_bobup", 0.0f );
+			trap_Cvar_SetValue( "cg_bobpitch", 0.0f );
+			trap_Cvar_SetValue( "cg_bobroll", 0.0f );
+		} else if ( s_preferences.motionbob.curvalue == 1 ) {
+			trap_Cvar_SetValue( "cg_bobup", BOB_UP_DEFAULT );
+			trap_Cvar_SetValue( "cg_bobpitch", BOB_PITCH_DEFAULT );
+			trap_Cvar_SetValue( "cg_bobroll", BOB_ROLL_DEFAULT );
+		} else {
+			trap_Cvar_SetValue( "cg_bobup", s_preferences.old_bobup );
+			trap_Cvar_SetValue( "cg_bobpitch", s_preferences.old_bobpitch );
+			trap_Cvar_SetValue( "cg_bobroll", s_preferences.old_bobroll );
+		}
 		break;
 
 	case ID_ALLOWDOWNLOAD:
@@ -424,6 +494,23 @@ static void GameOptions_MenuInit( void )
 	s_preferences.identifytarget.width					= width;
 
 	y += inc;
+	s_preferences.simplesky.generic.type			= MTYPE_SPINCONTROL;
+	s_preferences.simplesky.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
+	s_preferences.simplesky.generic.x				= x;
+	s_preferences.simplesky.generic.y				= y;
+	s_preferences.simplesky.generic.callback		= Preferences_Event;
+	s_preferences.simplesky.generic.id				= ID_SIMPLESKY;
+	s_preferences.simplesky.textEnum				= MBT_SIMPLE_SKY;
+	s_preferences.simplesky.textcolor				= CT_BLACK;
+	s_preferences.simplesky.textcolor2				= CT_WHITE;
+	s_preferences.simplesky.color					= CT_DKPURPLE1;
+	s_preferences.simplesky.color2					= CT_LTPURPLE1;
+	s_preferences.simplesky.textX					= MENU_BUTTON_TEXT_X;
+	s_preferences.simplesky.textY					= MENU_BUTTON_TEXT_Y;
+	s_preferences.simplesky.listnames				= s_OffOnNone_Names;
+	s_preferences.simplesky.width					= width;
+
+	y += inc;
 	s_preferences.forcemodel.generic.type			= MTYPE_SPINCONTROL;
 	s_preferences.forcemodel.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_preferences.forcemodel.generic.x				= x;
@@ -490,6 +577,40 @@ static void GameOptions_MenuInit( void )
 	s_preferences.drawfps.textY					= MENU_BUTTON_TEXT_Y;
 	s_preferences.drawfps.listnames				= s_OffOnNone_Names;
 	s_preferences.drawfps.width					= width;
+
+	y += inc;
+	s_preferences.drawgun.generic.type			= MTYPE_SPINCONTROL;
+	s_preferences.drawgun.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
+	s_preferences.drawgun.generic.x				= x;
+	s_preferences.drawgun.generic.y				= y;
+	s_preferences.drawgun.generic.callback		= Preferences_Event;
+	s_preferences.drawgun.generic.id			= ID_DRAWGUN;
+	s_preferences.drawgun.textEnum				= MBT_DRAW_GUN;
+	s_preferences.drawgun.textcolor				= CT_BLACK;
+	s_preferences.drawgun.textcolor2			= CT_WHITE;
+	s_preferences.drawgun.color					= CT_DKPURPLE1;
+	s_preferences.drawgun.color2				= CT_LTPURPLE1;
+	s_preferences.drawgun.textX					= MENU_BUTTON_TEXT_X;
+	s_preferences.drawgun.textY					= MENU_BUTTON_TEXT_Y;
+	s_preferences.drawgun.listnames				= s_OffOnNone_Names;
+	s_preferences.drawgun.width					= width;
+
+	y += inc;
+	s_preferences.motionbob.generic.type		= MTYPE_SPINCONTROL;
+	s_preferences.motionbob.generic.flags		= QMF_HIGHLIGHT_IF_FOCUS;
+	s_preferences.motionbob.generic.x			= x;
+	s_preferences.motionbob.generic.y			= y;
+	s_preferences.motionbob.generic.callback	= Preferences_Event;
+	s_preferences.motionbob.generic.id			= ID_MOTIONBOB;
+	s_preferences.motionbob.textEnum			= MBT_MOTION_BOBBING;
+	s_preferences.motionbob.textcolor			= CT_BLACK;
+	s_preferences.motionbob.textcolor2			= CT_WHITE;
+	s_preferences.motionbob.color				= CT_DKPURPLE1;
+	s_preferences.motionbob.color2				= CT_LTPURPLE1;
+	s_preferences.motionbob.textX				= MENU_BUTTON_TEXT_X;
+	s_preferences.motionbob.textY				= MENU_BUTTON_TEXT_Y;
+	s_preferences.motionbob.listnames			= s_OffOnNone_Names;
+	s_preferences.motionbob.width				= width;
 
 	y += inc;
 	s_preferences.allowdownload.generic.type			= MTYPE_SPINCONTROL;
@@ -561,19 +682,22 @@ static void GameOptions_MenuInit( void )
 	s_preferences.crosshair.textcolor					= CT_BLACK;
 	s_preferences.crosshair.textcolor2					= CT_WHITE;
 
+	Preferences_SetMenuItems();
+
 	Menu_AddItem( &s_gameoptions.menu, &s_preferences.identifytarget );
+	Menu_AddItem( &s_gameoptions.menu, &s_preferences.simplesky );
 	Menu_AddItem( &s_gameoptions.menu, &s_preferences.forcemodel );
 	Menu_AddItem( &s_gameoptions.menu, &s_preferences.drawteamoverlay );
 	Menu_AddItem( &s_gameoptions.menu, &s_preferences.allowdownload );
 	Menu_AddItem( &s_gameoptions.menu, &s_preferences.drawtimer );
 	Menu_AddItem( &s_gameoptions.menu, &s_preferences.drawfps );
+	Menu_AddItem( &s_gameoptions.menu, &s_preferences.drawgun );
+	Menu_AddItem( &s_gameoptions.menu, &s_preferences.motionbob );
 	Menu_AddItem( &s_gameoptions.menu, &s_preferences.textlanguage );
 	Menu_AddItem( &s_gameoptions.menu, &s_preferences.voicelanguage );
 	Menu_AddItem( &s_gameoptions.menu, &s_preferences.crosshair);
 
 	s_gameoptions.menu.initialized = qtrue;		// Show we've been here
-
-	Preferences_SetMenuItems();
 }
 
 /*

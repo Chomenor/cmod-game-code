@@ -86,7 +86,16 @@ static void UI_DisplayDownloadInfo( const char *downloadName ) {
 	UI_DrawProportionalString( 8, xferYpos, xferText, style, color_white );
 
 	if (downloadSize > 0) {
-		s = va( "%s (%d%%)", downloadName, downloadCount * 100 / downloadSize );
+		int dc = downloadCount;
+		int ds = downloadSize;
+
+		// ensure room to multiply by 100
+		while ( dc > 21474836 ) {
+			dc /= 2;
+			ds /= 2;
+		}
+
+		s = va( "%s (%d%%)", downloadName, ds > 0 ? dc * 100 / ds : 100 );
 	} else {
 		s = downloadName;
 	}

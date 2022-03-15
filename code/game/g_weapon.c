@@ -1633,6 +1633,12 @@ void DreadnoughtBurstThink(gentity_t *ent)
 	float dot;
 	static qboolean recursion=qfalse;
 
+	ent->nextthink2 = ent->nextthink2 + DN_ALT_THINK_TIME;
+	if ( ent->nextthink2 <= level.time ) {
+		ent->nextthink2 = level.time + DN_ALT_THINK_TIME;
+	}
+	ent->nextthink = ent->nextthink2;
+
 	VectorCopy(ent->s.origin, startpos);
 
 	// Search in a 3-way arc in front of it.
@@ -1672,8 +1678,6 @@ void DreadnoughtBurstThink(gentity_t *ent)
 		SnapVector(ent->s.origin);
 		SnapVector(ent->s.origin2);
 
-		ent->nextthink = level.time + 100;
-
 		// yes. We are done.
 		ent->think = G_FreeEntity;
 
@@ -1695,7 +1699,6 @@ void DreadnoughtBurstThink(gentity_t *ent)
 		VectorCopy(traceEnt->r.currentOrigin, ent->s.origin);
 		trap_LinkEntity(ent);
 		VectorNormalize(ent->movedir);
-		ent->nextthink = level.time + DN_ALT_THINK_TIME;
 		G_Damage( traceEnt, ent, &g_entities[ent->r.ownerNum], forward, tr.endpos, ent->damage,
 					DAMAGE_NOT_ARMOR_PIERCING, MOD_DREADNOUGHT_ALT);
 		// log hit
@@ -1736,9 +1739,11 @@ void DreadnoughtBurstThink(gentity_t *ent)
 
 				if (!recursion)
 				{	// NOTE RECURSION HERE.
+					int oldThink = ent->nextthink;
 					recursion=qtrue;
 					DreadnoughtBurstThink(ent);
 					recursion=qfalse;
+					ent->nextthink = oldThink;
 				}
 
 				return;
@@ -1782,8 +1787,6 @@ void DreadnoughtBurstThink(gentity_t *ent)
 		SnapVector(ent->s.origin);
 		SnapVector(ent->s.origin2);
 
-		ent->nextthink = level.time + 100;
-
 		ent->think = G_FreeEntity;
 		tent = G_TempEntity( tr.endpos, EV_DREADNOUGHT_MISS );
 		// Stash origins, etc. so that the effects can have access to them
@@ -1802,7 +1805,6 @@ void DreadnoughtBurstThink(gentity_t *ent)
 		VectorCopy(traceEnt->r.currentOrigin, ent->s.origin);
 		trap_LinkEntity(ent);
 		VectorNormalize(ent->movedir);
-		ent->nextthink = level.time + DN_ALT_THINK_TIME;
 		G_Damage( traceEnt, ent, &g_entities[ent->r.ownerNum], forward, tr.endpos, ent->damage,
 					DAMAGE_NOT_ARMOR_PIERCING, MOD_DREADNOUGHT_ALT);
 
@@ -1833,8 +1835,6 @@ void DreadnoughtBurstThink(gentity_t *ent)
 		SnapVector(ent->s.origin);
 		SnapVector(ent->s.origin2);
 
-		ent->nextthink = level.time + 100;
-
 		// yes. We are done.
 		ent->think = G_FreeEntity;
 
@@ -1855,7 +1855,6 @@ void DreadnoughtBurstThink(gentity_t *ent)
 		VectorCopy(traceEnt->r.currentOrigin, ent->s.origin);
 		trap_LinkEntity(ent);
 		VectorNormalize(ent->movedir);
-		ent->nextthink = level.time + DN_ALT_THINK_TIME;
 		G_Damage( traceEnt, ent, &g_entities[ent->r.ownerNum], forward, tr.endpos, ent->damage,
 					DAMAGE_NOT_ARMOR_PIERCING, MOD_DREADNOUGHT_ALT);
 		// log hit
@@ -1873,7 +1872,6 @@ void DreadnoughtBurstThink(gentity_t *ent)
 	VectorCopy(dest, ent->s.pos.trBase);
 	SnapVector(ent->s.origin2);
 	trap_LinkEntity(ent);
-	ent->nextthink = level.time + DN_ALT_THINK_TIME;
 
 	return;
 }

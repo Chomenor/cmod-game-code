@@ -162,6 +162,7 @@ struct gentity_s {
 	// timing variables
 	float		wait;
 	float		random;
+	int			nextthink2;		// not cleared by G_RunThink (for welder projectile)
 
 	gitem_t		*item;			// for bonus items
 

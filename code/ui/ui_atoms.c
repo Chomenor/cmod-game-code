@@ -2074,6 +2074,7 @@ void UI_LoadMenuText()
 	menu_normal_text[MNT_BROWSER_MOD] = "MOD";
 	menu_normal_text[MNT_BROWSER_BOTS] = "BOTS";
 	menu_normal_text[MNT_BROWSER_SCAN_PROGRESS] = "Scanning %d of %d Servers...";
+	menu_normal_text[MNT_BROWSER_INTERNET_ALL] = "INTERNET-ALL";
 	menu_normal_text[MNT_VIDEO_ADDITIONAL_OPTIONS] = "Additional Options";
 	menu_normal_text[MNT_VIDEO_LOW_QUALITY] = "LOW QUALITY";
 	menu_normal_text[MNT_VIDEO_MEDIUM_QUALITY] = "MEDIUM QUALITY";
@@ -2104,6 +2105,7 @@ void UI_LoadMenuText()
 		menu_normal_text[MNT_BROWSER_BOTS_AND_HUMANS] = "BOTS ODER MENSCHEN";
 		menu_normal_text[MNT_BROWSER_MOD] = "MODIFIKATION";
 		menu_normal_text[MNT_BROWSER_SCAN_PROGRESS] = "Scannen von %d von %d Servern...";
+		menu_normal_text[MNT_BROWSER_INTERNET_ALL] = "INTERNET-ALLES";
 		menu_normal_text[MNT_VIDEO_ADDITIONAL_OPTIONS] = "Zusätzliche Optionen";
 		menu_normal_text[MNT_VIDEO_LOW_QUALITY] = "GERINGE QUALITÄT";
 		menu_normal_text[MNT_VIDEO_MEDIUM_QUALITY] = "MITTLERE QUALITÄT";
@@ -2143,6 +2145,7 @@ void UI_LoadMenuText()
 		menu_normal_text[MNT_BROWSER_BOTS_AND_HUMANS] = "BOTS OU HUMAINS";
 		menu_normal_text[MNT_BROWSER_MOD] = "MODIF.";
 		menu_normal_text[MNT_BROWSER_SCAN_PROGRESS] = "Analyse de %d des %d serveurs...";
+		menu_normal_text[MNT_BROWSER_INTERNET_ALL] = "INTERNET-TOUT";
 		menu_normal_text[MNT_VIDEO_ADDITIONAL_OPTIONS] = "Options supplémentaires";
 		menu_normal_text[MNT_VIDEO_LOW_QUALITY] = "BASSE QUALITÉ";
 		menu_normal_text[MNT_VIDEO_MEDIUM_QUALITY] = "QUALITÉ MOYENNE";

@@ -97,6 +97,8 @@ static const char *sortkey_items[] = {
 };
 */
 
+#define MASTER_MULTI_FETCH_ACTIVE VMExt_GVCommandInt( "ui_support_globalservers_multi_fetch", 0 )
+
 static int master_items[] =
 {
 	MNT_MASTER_ITEMS_LOCAL,
@@ -106,6 +108,18 @@ static int master_items[] =
 	MNT_MASTER_ITEMS_INTERNET3,
 	MNT_MASTER_ITEMS_INTERNET4,
 	MNT_MASTER_ITEMS_INTERNET5,
+	MNT_MASTER_ITEMS_FAVORITES,
+	0
+};
+
+static int master_items_multi_fetch[] =
+{
+	MNT_MASTER_ITEMS_LOCAL,
+	MNT_BROWSER_INTERNET_ALL,
+	MNT_MASTER_ITEMS_INTERNET1,
+	MNT_MASTER_ITEMS_INTERNET2,
+	MNT_MASTER_ITEMS_INTERNET3,
+	MNT_MASTER_ITEMS_INTERNET4,
 	MNT_MASTER_ITEMS_FAVORITES,
 	0
 };
@@ -1911,6 +1925,7 @@ ArenaServers_SetType
 */
 void ArenaServers_SetType( int type )
 {
+	qboolean multi_fetch = MASTER_MULTI_FETCH_ACTIVE ? qtrue : qfalse;
 	char IP[128];
 
 	if (g_servertype == type)
@@ -1918,8 +1933,11 @@ void ArenaServers_SetType( int type )
 
 	if (type == AS_GLOBAL1)
 	{
-		trap_Cvar_VariableStringBuffer( "sv_master1", IP, 128);
-		if (!IP[0])
+		if (!multi_fetch)
+		{
+			trap_Cvar_VariableStringBuffer( "sv_master1", IP, 128);
+		}
+		if (!multi_fetch && !IP[0])
 		{
 			type= AS_GLOBAL2;
 		}
@@ -1930,7 +1948,7 @@ void ArenaServers_SetType( int type )
 	}
 	if (type == AS_GLOBAL2)
 	{
-		trap_Cvar_VariableStringBuffer( "sv_master2", IP, 128);
+		trap_Cvar_VariableStringBuffer( multi_fetch ? "sv_master1" : "sv_master2", IP, 128);
 		if (!IP[0])
 		{
 			type= AS_GLOBAL3;
@@ -1942,7 +1960,7 @@ void ArenaServers_SetType( int type )
 	}
 	if (type == AS_GLOBAL3)
 	{
-		trap_Cvar_VariableStringBuffer( "sv_master3", IP, 128);
+		trap_Cvar_VariableStringBuffer( multi_fetch ? "sv_master2" : "sv_master3", IP, 128);
 		if (!IP[0])
 		{
 			type= AS_GLOBAL4;
@@ -1954,7 +1972,7 @@ void ArenaServers_SetType( int type )
 	}
 	if (type == AS_GLOBAL4)
 	{
-		trap_Cvar_VariableStringBuffer( "sv_master4", IP, 128);
+		trap_Cvar_VariableStringBuffer( multi_fetch ? "sv_master3" : "sv_master4", IP, 128);
 		if (!IP[0])
 		{
 			type= AS_GLOBAL5;
@@ -1966,7 +1984,7 @@ void ArenaServers_SetType( int type )
 	}
 	if (type == AS_GLOBAL5)
 	{
-		trap_Cvar_VariableStringBuffer( "sv_master5", IP, 128);
+		trap_Cvar_VariableStringBuffer( multi_fetch ? "sv_master4" : "sv_master5", IP, 128);
 		if (!IP[0])
 		{
 			type= AS_FAVORITES;
@@ -2379,7 +2397,7 @@ static void ArenaServers_MenuInit( void )
 	g_arenaservers.master.width						= 80;
 	g_arenaservers.master.textX						= 5;
 	g_arenaservers.master.textY						= 2;
-	g_arenaservers.master.listnames					= master_items;
+	g_arenaservers.master.listnames					= MASTER_MULTI_FETCH_ACTIVE ? master_items_multi_fetch : master_items;
 
 	g_arenaservers.gametype.generic.type			= MTYPE_SPINCONTROL;
 	g_arenaservers.gametype.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;

@@ -21,7 +21,7 @@ static menubitmap_s			s_create_server;
 #define MAX_PINGREQUESTS		16
 #define MAX_ADDRESSLENGTH		64
 #define MAX_HOSTNAMELENGTH		22
-#define MAX_MAPNAMELENGTH		16
+#define MAX_MAPNAMELENGTH		128
 #define MAX_LISTBOXITEMS		128
 #define MAX_LOCALSERVERS		128
 #define MAX_STATUSLENGTH		64
@@ -458,7 +458,7 @@ typedef struct
 	char			info[2048];
 
 	// map pic
-	char			mapPicName[128];
+	char			mapPicName[MAX_MAPNAMELENGTH];
 	qhandle_t		mapPicShader;
 	qboolean		mapPicUnknownRegistered;
 	qhandle_t		mapPicUnknownShader;

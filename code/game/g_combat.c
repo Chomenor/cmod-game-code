@@ -1139,7 +1139,8 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		//if non-armor-piercing display full shields
 		if (asave)
 		{
-			evEnt = G_TempEntity(vec3_origin, EV_SHIELD_HIT);
+			evEnt = G_TempEntity(targ->client->ps.origin, EV_SHIELD_HIT);
+			VectorClear(evEnt->s.pos.trBase);	// save a bit of bandwidth
 			evEnt->s.otherEntityNum = targ->s.number;
 			evEnt->s.eventParm = DirToByte(dir);
 			evEnt->s.time2=asave;

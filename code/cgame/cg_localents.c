@@ -38,7 +38,8 @@ CG_FreeLocalEntity
 */
 void CG_FreeLocalEntity( localEntity_t *le ) {
 	if ( !le->prev ) {
-		CG_Error( "CG_FreeLocalEntity: not active" );
+		CG_Printf( "CG_FreeLocalEntity: not active\n" );
+		return;
 	}
 
 	// remove from the doubly linked active list
@@ -48,6 +49,7 @@ void CG_FreeLocalEntity( localEntity_t *le ) {
 	// the free list is only singly linked
 	le->next = cg_freeLocalEntities;
 	cg_freeLocalEntities = le;
+	le->prev = NULL;
 }
 
 /*

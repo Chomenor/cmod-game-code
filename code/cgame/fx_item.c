@@ -243,8 +243,26 @@ void FX_DrawPortableShield(centity_t *cent)
 		}
 	}
 
-	le = FX_AddOrientedLine(start, end, normal, 1.0f, height, 0.0f, 1.0f, 1.0f, 50.0, shader);
-//	le->leFlags |= LEF_ONE_FRAME;
+	// draw overlapping rectangles at simulated 125 fps
+	{
+		int i;
+		int time = cg.time - cg.time % 8;
+
+		for ( i = 0; i < 6 && time >= 0; ++i ) {
+			le = FX_AddOrientedLine(start, end, normal, 1.0f, height, 0.0f, 1.0f, 1.0f, 50.0, shader);
+			le->startTime = time;
+			le->endTime = time + 50;
+			CG_AddOLine( le );
+
+			// CG_AddOLine can free under certain conditions, so check if already freed
+			// Note: This depends on CG_FreeLocalEntity being updated to set le->prev to NULL.
+			if ( le->prev ) {
+				CG_FreeLocalEntity( le );
+			}
+
+			time -= 8;
+		}
+	}
 }
 
 

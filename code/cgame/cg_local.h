@@ -1472,6 +1472,7 @@ void	CG_ImpactMark( qhandle_t markShader,
 // cg_localents.c
 //
 void	CG_InitLocalEntities( void );
+void	CG_FreeLocalEntity( localEntity_t *le );
 localEntity_t	*CG_AllocLocalEntity( void );
 localEntity_t	CG_GetActiveList( void );
 void	CG_AddLocalEntities( void );

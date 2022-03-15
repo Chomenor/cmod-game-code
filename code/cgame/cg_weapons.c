@@ -147,11 +147,28 @@ CG_AltFire_Update
 
 Determine alt fire configuration, and update either client engine or server to implement swaps
 depending on available support.
+
+Server support is currently preferred because the client method sometimes has issues with
+selecting the right attack type immediately after respawns.
 =================
 */
 void CG_AltFire_Update( qboolean init ) {
-	if ( VMExt_FNAvailable_AltSwap_SetState() ) {
-		// Engine-based swap support available - set mode based on current predicted weapon
+	if ( cgs.modConfig.altSwapSupport ) {
+		// Server-based swap support available - see if we need to transmit updated swap flags
+		int newServerSwaps = CG_AltFire_GetSwapField();
+		if ( init || currentServerSwaps != newServerSwaps ) {
+			trap_SendClientCommand( va( "setAltSwap %i", newServerSwaps ) );
+			currentServerSwaps = newServerSwaps;
+		}
+
+		// Make sure client swapping is disabled
+		if ( VMExt_FNAvailable_AltSwap_SetState() ) {
+			VMExt_FN_AltSwap_SetState( qfalse );
+		}
+	}
+
+	else if ( VMExt_FNAvailable_AltSwap_SetState() ) {
+		// Client-based swap support available - set mode based on current predicted weapon
 		qboolean swapActive = qfalse;
 		if ( cg.snap && !( cg.snap->snapFlags & SNAPFLAG_NOT_ACTIVE ) ) {
 			int wepIndex = (int)cg.predictedPlayerState.weapon - 1;
@@ -162,14 +179,6 @@ void CG_AltFire_Update( qboolean init ) {
 			swapActive = swapWeapon && !isSpectator && !isScoreboard;
 		}
 		VMExt_FN_AltSwap_SetState( swapActive );
-
-	} else if ( cgs.modConfig.altSwapSupport ) {
-		// Server-based swap support available - see if we need to transmit updated swap flags
-		int newServerSwaps = CG_AltFire_GetSwapField();
-		if ( init || currentServerSwaps != newServerSwaps ) {
-			trap_SendClientCommand( va( "setAltSwap %i", newServerSwaps ) );
-			currentServerSwaps = newServerSwaps;
-		}
 	}
 }
 

@@ -2749,7 +2749,7 @@ static void SetupMenu_SideButtons(menuframework_s *menu,int menuType)
 	s_controls_command.color2				= CT_LTPURPLE1;
 	s_controls_command.textX				= 5;
 	s_controls_command.textY				= 1;
-	s_controls_command.textEnum				= MBT_CONTROLS_MISC;
+	s_controls_command.textEnum				= MBT_CONTROLS_OTHER_KEYS;
 	s_controls_command.textcolor			= CT_BLACK;
 	s_controls_command.textcolor2			= CT_WHITE;
 
@@ -4329,7 +4329,7 @@ static void ControlsCommand_MenuInit( void )
 	s_controlscommand_menu.titleX				= MENU_TITLE_X;
 	s_controlscommand_menu.titleY				= MENU_TITLE_Y;
 	s_controlscommand_menu.titleI				= MNT_CONTROLSMENU_TITLE;
-	s_controlscommand_menu.footNoteEnum			= MNT_COMMANDKEYS_SETUP;
+	s_controlscommand_menu.footNoteEnum			= MNT_OTHER_KEYS_SETUP;
 
 	Playermodel_MenuInit();
 

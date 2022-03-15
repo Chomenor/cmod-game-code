@@ -2065,6 +2065,7 @@ void UI_LoadMenuText()
 	menu_normal_text[MNT_IGNORES_TITLE] = "ELITE FORCE HOLOMATCH : IGNORED PLAYERS";
 	menu_normal_text[MNT_IGNORES] = "IGNORED PLAYERS";
 	menu_normal_text[MNT_IGNORES_PLAYERLIST] = "PLAYERLIST";
+	menu_normal_text[MNT_OTHER_KEYS_SETUP] = "OTHER KEYS CONFIGURE";
 	menu_normal_text[MNT_SHORTCUT_QUIT] = "QUIT";
 	menu_normal_text[MNT_SHORTCUT_MINIMIZE] = "MINIMIZE";
 	menu_normal_text[MNT_BROWSER_PLAYER_COUNT] = "PLAYER COUNT";
@@ -2095,6 +2096,7 @@ void UI_LoadMenuText()
 		menu_normal_text[MNT_IGNORES_TITLE] = "ELITE FORCE HOLOMATCH: IGNORIERTE SPIELER";
 		menu_normal_text[MNT_IGNORES] = "IGNORIERTE SPIELER";
 		menu_normal_text[MNT_IGNORES_PLAYERLIST] = "SPIELERLISTE";
+		menu_normal_text[MNT_OTHER_KEYS_SETUP] = "ANDERE TASTEN-SETUP";
 		menu_normal_text[MNT_SHORTCUT_QUIT] = "VERLASSEN";
 		menu_normal_text[MNT_SHORTCUT_MINIMIZE] = "MINIMIEREN";
 		menu_normal_text[MNT_BROWSER_PLAYER_COUNT] = "SPIELERZAHL";
@@ -2133,6 +2135,7 @@ void UI_LoadMenuText()
 		menu_normal_text[MNT_IGNORES_TITLE] = "ELITE FORCE HOLOMATCH : JOUEURS IGNOREE";
 		menu_normal_text[MNT_IGNORES] = "JOUEURS IGNOREE";
 		menu_normal_text[MNT_IGNORES_PLAYERLIST] = "LISTE DES JOUEURS";
+		menu_normal_text[MNT_OTHER_KEYS_SETUP] = "CONFIG. AUTRES CLÉS";
 		menu_normal_text[MNT_SHORTCUT_QUIT] = "QUITTER";
 		menu_normal_text[MNT_SHORTCUT_MINIMIZE] = "MINIMISER";
 		menu_normal_text[MNT_BROWSER_PLAYER_COUNT] = "NOMBRE DE JOUEURS";
@@ -2290,8 +2293,8 @@ void UI_LoadButtonText()
 	menu_button_text[MBT_SOUND_OPENAL][1] = "OPENAL SOUND ON/OFF.";
 	menu_button_text[MBT_SOUND_GENERAL_VOLUME][0] = "GENERAL VOLUME";
 	menu_button_text[MBT_SOUND_GENERAL_VOLUME][1] = "VOLUME FOR ALL IN-GAME AUDIO.";
-	menu_button_text[MBT_CONTROLS_MISC][0] = "MISC";
-	menu_button_text[MBT_CONTROLS_MISC][1] = "CONFIGURE COMMAND KEYS";
+	menu_button_text[MBT_CONTROLS_OTHER_KEYS][0] = "OTHER KEYS";
+	menu_button_text[MBT_CONTROLS_OTHER_KEYS][1] = "CONFIGURE OTHER KEYS";
 	menu_button_text[MBT_CONTROLS_RAW_MOUSE][0] = "RAW MOUSE";
 	menu_button_text[MBT_CONTROLS_RAW_MOUSE][1] = "RAW MOUSE INPUT (ON/OFF)";
 	menu_button_text[MBT_VIDEO_LIGHTING_LEVEL][0] = "LIGHTING LEVEL";
@@ -2372,8 +2375,8 @@ void UI_LoadButtonText()
 		menu_button_text[MBT_SOUND_OPENAL][1] = "OPENAL-SOUND EIN/AUS";
 		menu_button_text[MBT_SOUND_GENERAL_VOLUME][0] = "GESAMTLAUTSTÄRKE";
 		menu_button_text[MBT_SOUND_GENERAL_VOLUME][1] = "LAUTSTÄRKE FÜR ALLE IN-GAME-AUDIO.";
-		menu_button_text[MBT_CONTROLS_MISC][0] = "SONSTIGES";
-		menu_button_text[MBT_CONTROLS_MISC][1] = "STEUERUNGSTASTEN KONFIGURIEREN";
+		menu_button_text[MBT_CONTROLS_OTHER_KEYS][0] = "ANDERE TASTEN";
+		menu_button_text[MBT_CONTROLS_OTHER_KEYS][1] = "ANDERE TASTEN KONFIGURIEREN";
 		menu_button_text[MBT_CONTROLS_RAW_MOUSE][0] = "ROHE MAUS";
 		menu_button_text[MBT_CONTROLS_RAW_MOUSE][1] = "ROHE MAUSEINGABE (EIN/AUS)";
 		menu_button_text[MBT_VIDEO_LIGHTING_LEVEL][0] = "BELEUCHTUNGSNIVEAU";
@@ -2464,8 +2467,8 @@ void UI_LoadButtonText()
 		menu_button_text[MBT_SOUND_OPENAL][1] = "SON OPENAL ON/OFF";
 		menu_button_text[MBT_SOUND_GENERAL_VOLUME][0] = "VOLUME GÉNÉRAL";
 		menu_button_text[MBT_SOUND_GENERAL_VOLUME][1] = "VOLUME POUR TOUS LES AUDIO DU JEU.";
-		menu_button_text[MBT_CONTROLS_MISC][0] = "DIVERS";
-		menu_button_text[MBT_CONTROLS_MISC][1] = "CONFIGURER TOUCHES DE COMMANDE";
+		menu_button_text[MBT_CONTROLS_OTHER_KEYS][0] = "AUTRES CLÉS";
+		menu_button_text[MBT_CONTROLS_OTHER_KEYS][1] = "CONFIGURER D'AUTRES CLÉS";
 		menu_button_text[MBT_CONTROLS_RAW_MOUSE][0] = "SOURIS RAW";
 		menu_button_text[MBT_CONTROLS_RAW_MOUSE][1] = "ENTREE RAW SOURIS (ON/OFF)";
 		menu_button_text[MBT_VIDEO_LIGHTING_LEVEL][0] = "NIVEAU D'ÉCLAIRAGE";

@@ -121,7 +121,11 @@ void InGame_Event( void *ptr, int notification )
 
 	case ID_SCREENSHOT:
 		UI_ForceMenuOff();
-		trap_Cmd_ExecuteText( EXEC_APPEND, "wait; wait; wait; wait; screenshot\n" );
+		if ( VMExt_GVCommandInt( "ui_support_screenshotJPEG", 0 ) ) {
+			trap_Cmd_ExecuteText( EXEC_APPEND, "wait; wait; wait; wait; screenshotJPEG\n" );
+		} else {
+			trap_Cmd_ExecuteText( EXEC_APPEND, "wait; wait; wait; wait; screenshot\n" );
+		}
 		break;
 
 	case ID_LEAVEARENA:

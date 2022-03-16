@@ -167,18 +167,23 @@ void CG_AltFire_Update( qboolean init ) {
 		}
 	}
 
-	else if ( VMExt_FNAvailable_AltSwap_SetState() ) {
-		// Client-based swap support available - set mode based on current predicted weapon
-		qboolean swapActive = qfalse;
-		if ( cg.snap && !( cg.snap->snapFlags & SNAPFLAG_NOT_ACTIVE ) ) {
-			int wepIndex = (int)cg.predictedPlayerState.weapon - 1;
-			qboolean swapWeapon = wepIndex >= 0 && wepIndex < WP_NUM_WEAPONS - 1 && ( CG_AltFire_GetSwapField() & ( 1 << wepIndex ) );
-			qboolean isSpectator = cg.snap->ps.pm_type == PM_SPECTATOR || ( cg.snap->ps.pm_flags & PMF_FOLLOW ) ||
-					cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR || ( cg.snap->ps.eFlags & EF_ELIMINATED );
-			qboolean isScoreboard = cg.snap->ps.pm_type == PM_DEAD || cg.snap->ps.pm_type == PM_INTERMISSION;
-			swapActive = swapWeapon && !isSpectator && !isScoreboard;
+	else {
+		if ( VMExt_FNAvailable_AltSwap_SetState() ) {
+			// Client-based swap support available - set mode based on current predicted weapon
+			qboolean swapActive = qfalse;
+			if ( cg.snap && !( cg.snap->snapFlags & SNAPFLAG_NOT_ACTIVE ) ) {
+				int wepIndex = (int)cg.predictedPlayerState.weapon - 1;
+				qboolean swapWeapon = wepIndex >= 0 && wepIndex < WP_NUM_WEAPONS - 1 && ( CG_AltFire_GetSwapField() & ( 1 << wepIndex ) );
+				qboolean isSpectator = cg.snap->ps.pm_type == PM_SPECTATOR || ( cg.snap->ps.pm_flags & PMF_FOLLOW ) ||
+						cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR || ( cg.snap->ps.eFlags & EF_ELIMINATED );
+				qboolean isScoreboard = cg.snap->ps.pm_type == PM_DEAD || cg.snap->ps.pm_type == PM_INTERMISSION;
+				swapActive = swapWeapon && !isSpectator && !isScoreboard;
+			}
+			VMExt_FN_AltSwap_SetState( swapActive );
 		}
-		VMExt_FN_AltSwap_SetState( swapActive );
+
+		// Make sure server swap prediction is disabled
+		currentServerSwaps = 0;
 	}
 }
 

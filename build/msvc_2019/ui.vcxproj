@@ -191,6 +191,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\code\common\aspect_correct.c" />
     <ClCompile Include="..\..\code\common\bg_misc.c" />
+    <ClCompile Include="..\..\code\common\logging.c" />
     <ClCompile Include="..\..\code\common\q_math.c" />
     <ClCompile Include="..\..\code\common\q_shared.c" />
     <ClCompile Include="..\..\code\common\vm_extensions.c" />

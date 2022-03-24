@@ -44,6 +44,9 @@
     <ClCompile Include="..\..\code\common\bg_misc.c">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\code\common\logging.c">
+      <Filter>common</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\code\common\q_math.c">
       <Filter>common</Filter>
     </ClCompile>

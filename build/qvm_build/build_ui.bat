@@ -63,6 +63,7 @@ set src=common&set name=bg_lib&call :compile
 set src=common&set name=q_math&call :compile
 set src=common&set name=q_shared&call :compile
 set src=common&set name=aspect_correct&call :compile
+set src=common&set name=logging&call :compile
 set src=common&set name=vm_extensions&call :compile
 
 echo Creating the UI.QVM file...

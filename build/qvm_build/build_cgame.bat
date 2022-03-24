@@ -64,6 +64,7 @@ set src=cgame&set name=fx_stasis&call :compile
 set src=cgame&set name=fx_tetrion&call :compile
 set src=cgame&set name=fx_transporter&call :compile
 set src=common&set name=aspect_correct&call :compile
+set src=common&set name=logging&call :compile
 set src=common&set name=vm_extensions&call :compile
 
 echo Creating the CGAME.QVM file...

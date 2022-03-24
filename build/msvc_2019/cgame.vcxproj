@@ -231,6 +231,7 @@
     <ClCompile Include="..\..\code\common\bg_misc.c" />
     <ClCompile Include="..\..\code\common\bg_pmove.c" />
     <ClCompile Include="..\..\code\common\bg_slidemove.c" />
+    <ClCompile Include="..\..\code\common\logging.c" />
     <ClCompile Include="..\..\code\common\q_math.c" />
     <ClCompile Include="..\..\code\common\q_shared.c" />
     <ClCompile Include="..\..\code\common\vm_extensions.c" />

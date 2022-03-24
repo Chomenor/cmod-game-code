@@ -15,4 +15,14 @@ int VMExt_FN_LAN_ServerStatus_Ext( const char *serverAddress, char *serverStatus
 qboolean VMExt_FNAvailable_AltSwap_SetState( void );
 void VMExt_FN_AltSwap_SetState( qboolean swapState );
 
+//
+// logging.c
+//
+
+int Logging_Assertion( intptr_t result, const char *expression, qboolean error );
+
+// Generates a warning/error if "expression" is false.
+#define EF_WARN_ASSERT( expression ) Logging_Assertion( (intptr_t)( expression ), #expression, qfalse )
+#define EF_ERR_ASSERT( expression ) Logging_Assertion( (intptr_t)( expression ), #expression, qtrue )
+
 #endif	// __VM_COMMON_H__

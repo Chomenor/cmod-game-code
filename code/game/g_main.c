@@ -17,178 +17,16 @@ group_list_t	group_list[MAX_GROUP_MEMBERS];
 int 			group_count;
 int numKilled;
 
-typedef struct {
-	vmCvar_t	*vmCvar;
-	char		*cvarName;
-	char		*defaultString;
-	int			cvarFlags;
-	int			modificationCount;  // for tracking changes
-	qboolean	trackChange;	// track this variable, and announce if changed
-} cvarTable_t;
-
 gentity_t		g_entities[MAX_GENTITIES];
 gclient_t		g_clients[MAX_CLIENTS];
 
-vmCvar_t	g_pModAssimilation;
-vmCvar_t	g_pModDisintegration;
-vmCvar_t	g_pModActionHero;
-vmCvar_t	g_pModSpecialties;
-vmCvar_t	g_pModElimination;
+#define MAX_TRACKED_CVARS 1024
+static trackedCvar_t *trackedCvars[MAX_TRACKED_CVARS];
+static int trackedCvarCount = 0;
 
-vmCvar_t	g_gametype;
-vmCvar_t	g_dmflags;
-vmCvar_t	g_fraglimit;
-vmCvar_t	g_timelimit;
-vmCvar_t	g_timelimitWinningTeam;
-vmCvar_t	g_capturelimit;
-vmCvar_t	g_friendlyFire;
-vmCvar_t	g_password;
-vmCvar_t	g_needpass;
-vmCvar_t	g_maxclients;
-vmCvar_t	g_maxGameClients;
-vmCvar_t	g_dedicated;
-vmCvar_t	g_speed;
-vmCvar_t	g_gravity;
-vmCvar_t	g_cheats;
-vmCvar_t	g_knockback;
-vmCvar_t	g_dmgmult;
-vmCvar_t	g_forcerespawn;
-vmCvar_t	g_inactivity;
-vmCvar_t	g_debugMove;
-vmCvar_t	g_debugDamage;
-vmCvar_t	g_debugAlloc;
-vmCvar_t	g_weaponRespawn;
-vmCvar_t	g_adaptRespawn;
-vmCvar_t	g_motd;
-vmCvar_t	g_synchronousClients;
-vmCvar_t	g_warmup;
-vmCvar_t	g_doWarmup;
-vmCvar_t	g_restarted;
-vmCvar_t	g_log;
-vmCvar_t	g_logSync;
-vmCvar_t	g_podiumDist;
-vmCvar_t	g_podiumDrop;
-vmCvar_t	g_allowVote;
-vmCvar_t	g_teamAutoJoin;
-vmCvar_t	g_teamForceBalance;
-vmCvar_t	g_banIPs;
-vmCvar_t	g_filterBan;
-vmCvar_t	g_debugForward;
-vmCvar_t	g_debugRight;
-vmCvar_t	g_debugUp;
-vmCvar_t	g_language;
-vmCvar_t	g_holoIntro;
-vmCvar_t	g_ghostRespawn;
-vmCvar_t    g_intermissionTime;
-vmCvar_t	g_team_group_red;
-vmCvar_t	g_team_group_blue;
-vmCvar_t	g_random_skin_limit;
-vmCvar_t	g_noJoinTimeout;
-vmCvar_t	g_classChangeDebounceTime;
-vmCvar_t	ui_playerclass;
-
-vmCvar_t	g_pMoveFixed;
-vmCvar_t	g_pMoveMsec;
-vmCvar_t	g_noJumpKeySlowdown;
-vmCvar_t	g_infilJumpFactor;
-vmCvar_t	g_infilAirAccelFactor;
-vmCvar_t	g_altSwapSupport;
-
-cvarTable_t		gameCvarTable[] = {
-	// don't override the cheat state set by the system
-	{ &g_cheats, "sv_cheats", "", 0, 0, qfalse },
-
-	// noset vars
-	{ NULL, "gamename", GAMEVERSION , CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
-	{ NULL, "gamedate", __DATE__ , CVAR_ROM, 0, qfalse  },
-	{ &g_restarted, "g_restarted", "0", CVAR_ROM, 0, qfalse  },
-	{ NULL, "sv_mapname", "", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse  },
-
-	// latched vars
-	{ &g_gametype, "g_gametype", "0", CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse  },
-	{ &g_pModAssimilation, "g_pModAssimilation", "0", CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse  },
-	{ &g_pModDisintegration, "g_pModDisintegration", "0", CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse  },
-	{ &g_pModActionHero, "g_pModActionHero", "0", CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse  },
-	{ &g_pModSpecialties, "g_pModSpecialties", "0", CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse  },
-	{ &g_pModElimination, "g_pModElimination", "0", CVAR_SERVERINFO | CVAR_LATCH, 0, qfalse  },
-
-	{ &g_maxclients, "sv_maxclients", "8", CVAR_SERVERINFO | CVAR_LATCH | CVAR_ARCHIVE, 0, qfalse  },
-	{ &g_maxGameClients, "g_maxGameClients", "0", CVAR_SERVERINFO | CVAR_LATCH | CVAR_ARCHIVE, 0, qfalse  },
-
-	// change anytime vars
-	{ &g_dmflags, "dmflags", "0", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qtrue  },
-	{ &g_fraglimit, "fraglimit", "20", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_NORESTART, 0, qtrue },
-	{ &g_timelimit, "timelimit", "0", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_NORESTART, 0, qtrue },
-	{ &g_timelimitWinningTeam, "timelimitWinningTeam", "", CVAR_NORESTART, 0, qtrue },
-	{ &g_capturelimit, "capturelimit", "8", CVAR_SERVERINFO | CVAR_ARCHIVE | CVAR_NORESTART, 0, qtrue },
-
-	{ &g_synchronousClients, "g_synchronousClients", "0", CVAR_SYSTEMINFO, 0, qfalse  },
-
-	{ &g_friendlyFire, "g_friendlyFire", "0", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qtrue },
-
-	{ &g_teamAutoJoin, "g_teamAutoJoin", "0", CVAR_ARCHIVE, 0, qfalse },
-	{ &g_teamForceBalance, "g_teamForceBalance", "1", CVAR_ARCHIVE, 0, qfalse },
-
-	{ &g_intermissionTime, "g_intermissionTime", "20", CVAR_ARCHIVE, 0, qtrue },
-	{ &g_warmup, "g_warmup", "20", CVAR_ARCHIVE, 0, qtrue  },
-	{ &g_doWarmup, "g_doWarmup", "0", CVAR_ARCHIVE, 0, qtrue  },
-	{ &g_log, "g_log", "games.log", CVAR_ARCHIVE, 0, qfalse  },
-	{ &g_logSync, "g_logSync", "0", CVAR_ARCHIVE, 0, qfalse  },
-
-	{ &g_password, "g_password", "", CVAR_USERINFO, 0, qfalse  },
-
-	{ &g_banIPs, "g_banIPs", "", CVAR_ARCHIVE, 0, qfalse  },
-	{ &g_filterBan, "g_filterBan", "1", CVAR_ARCHIVE, 0, qfalse  },
-
-	{ &g_needpass, "g_needpass", "0", CVAR_SERVERINFO | CVAR_ROM, 0, qfalse },
-
-	{ &g_dedicated, "dedicated", "0", 0, 0, qfalse  },
-
-	{ &g_speed, "g_speed", "250", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qtrue  },				// Quake 3 default was 320.
-	{ &g_gravity, "g_gravity", "800", CVAR_SERVERINFO | CVAR_ARCHIVE, 0, qtrue  },
-	{ &g_knockback, "g_knockback", "500", 0, 0, qtrue  },
-	{ &g_dmgmult, "g_dmgmult", "1", 0, 0, qtrue  },
-	{ &g_weaponRespawn, "g_weaponrespawn", "5", 0, 0, qtrue  },		// Quake 3 default (with 1 ammo weapons) was 5.
-	{ &g_adaptRespawn, "g_adaptrespawn", "1", 0, 0, qtrue  },		// Make weapons respawn faster with a lot of players.
-	{ &g_forcerespawn, "g_forcerespawn", "0", 0, 0, qtrue },		// Quake 3 default was 20.  This is more "user friendly".
-	{ &g_inactivity, "g_inactivity", "0", 0, 0, qtrue },
-	{ &g_debugMove, "g_debugMove", "0", 0, 0, qfalse },
-	{ &g_debugDamage, "g_debugDamage", "0", 0, 0, qfalse },
-	{ &g_debugAlloc, "g_debugAlloc", "0", 0, 0, qfalse },
-	{ &g_motd, "g_motd", "", 0, 0, qfalse },
-
-	{ &g_podiumDist, "g_podiumDist", "80", 0, 0, qfalse },
-	{ &g_podiumDrop, "g_podiumDrop", "70", 0, 0, qfalse },
-
-	{ &g_allowVote, "g_allowVote", "1", CVAR_SERVERINFO, 0, qfalse },
-
-#if 0
-	{ &g_debugForward, "g_debugForward", "0", 0, 0, qfalse },
-	{ &g_debugRight, "g_debugRight", "0", 0, 0, qfalse },
-	{ &g_debugUp, "g_debugUp", "0", 0, 0, qfalse },
-#endif
-
-	{ &g_language, "g_language", "", CVAR_ARCHIVE, 0, qfalse  },
-
-	{ &g_holoIntro, "g_holoIntro", "1", CVAR_ARCHIVE, 0, qfalse},
-	{ &g_ghostRespawn, "g_ghostRespawn", "5", CVAR_ARCHIVE, 0, qfalse},		// How long the player is ghosted, in seconds.
-	{ &g_team_group_red, "g_team_group_red", "", CVAR_LATCH, 0, qfalse  },		// Used to have CVAR_ARCHIVE
-	{ &g_team_group_blue, "g_team_group_blue", "", CVAR_LATCH, 0, qfalse  },		// Used to have CVAR_ARCHIVE
-	{ &g_random_skin_limit, "g_random_skin_limit", "4", CVAR_ARCHIVE, 0, qfalse },
-	{ &g_noJoinTimeout, "g_noJoinTimeout", "120", CVAR_ARCHIVE, 0, qfalse  },
-	{ &g_classChangeDebounceTime, "g_classChangeDebounceTime", "180", CVAR_ARCHIVE, 0, qfalse },
-
-	{ &ui_playerclass, "ui_playerclass", "", CVAR_ARCHIVE, 0, qfalse },
-
-	{ &g_pMoveFixed, "g_pMoveFixed", "1", CVAR_ARCHIVE, 0, qfalse },
-	{ &g_pMoveMsec, "g_pMoveMsec", "8", CVAR_ARCHIVE, 0, qfalse },
-	{ &g_noJumpKeySlowdown, "g_noJumpKeySlowdown", "0", CVAR_ARCHIVE, 0, qfalse },
-	{ &g_infilJumpFactor, "g_infilJumpFactor", "0", CVAR_ARCHIVE, 0, qfalse },
-	{ &g_infilAirAccelFactor, "g_infilAirAccelFactor", "0", CVAR_ARCHIVE, 0, qfalse },
-	{ &g_altSwapSupport, "g_altSwapSupport", "1", CVAR_ARCHIVE, 0, qfalse },
-};
-
-int		gameCvarTableSize = sizeof( gameCvarTable ) / sizeof( gameCvarTable[0] );
+#define CVAR_DEF( vmcvar, name, def, flags, announce ) trackedCvar_t vmcvar;
+#include "g_cvar_defs.h"
+#undef CVAR_DEF
 
 void G_InitGame( int levelTime, int randomSeed, int restart );
 void G_RunFrame( int levelTime );
@@ -486,28 +324,103 @@ static void G_UpdateModConfigInfo( void ) {
 
 /*
 =================
+G_UpdateNeedPass
+
+Update the g_needpass serverinfo cvar when g_password changes.
+=================
+*/
+static void G_UpdateNeedPass( trackedCvar_t *cv ) {
+	if ( *g_password.string && Q_stricmp( g_password.string, "none" ) ) {
+		trap_Cvar_Set( "g_needpass", "1" );
+	} else {
+		trap_Cvar_Set( "g_needpass", "0" );
+	}
+}
+
+/*
+=================
+G_RegisterTrackedCvar
+
+Registers a cvar which is automatically synchronized with the engine once per frame.
+cvarName parameter should be a static string.
+=================
+*/
+void G_RegisterTrackedCvar( trackedCvar_t *tc, const char *cvarName, const char *defaultValue, int flags, qboolean announceChanges ) {
+	memset( tc, 0, sizeof( *tc ) );
+
+	tc->cvarName = cvarName;
+	tc->announceChanges = announceChanges;
+
+	trap_Cvar_Register( (vmCvar_t *)tc, cvarName, defaultValue, flags );
+	trap_Cvar_Update( (vmCvar_t *)tc );		// just to be safe...
+
+	EF_ERR_ASSERT( trackedCvarCount < MAX_TRACKED_CVARS );
+	trackedCvars[trackedCvarCount++] = tc;
+}
+
+/*
+=================
+G_RegisterCvarCallback
+
+Registers a callback function to a tracked cvar which is invoked whenever the cvar is changed.
+=================
+*/
+void G_RegisterCvarCallback( trackedCvar_t *tc, void ( *callback )( trackedCvar_t *tc ), qboolean callNow ) {
+	cvarCallback_t *callbackObj = (cvarCallback_t *)G_Alloc( sizeof( cvarCallback_t ) );
+	callbackObj->callback = callback;
+	callbackObj->next = tc->callbackObj;
+	tc->callbackObj = (void *)callbackObj;
+
+	if ( callNow ) {
+		callback( tc );
+	}
+}
+
+/*
+=================
+G_UpdateTrackedCvar
+=================
+*/
+void G_UpdateTrackedCvar( trackedCvar_t *tc ) {
+	int oldModificationCount = tc->modificationCount;
+	trap_Cvar_Update( (vmCvar_t *)tc );
+
+	if ( tc->modificationCount != oldModificationCount ) {
+		cvarCallback_t *callbackObj = (cvarCallback_t *)tc->callbackObj;
+
+		// Print announcements
+		if ( tc->announceChanges && !levelExiting )
+			trap_SendServerCommand( -1, va( "print \"Server: %s changed to %s\n\"", tc->cvarName, tc->string ) );
+
+		// Run callbacks
+		while( callbackObj ) {
+			callbackObj->callback( tc );
+			callbackObj = (cvarCallback_t *)callbackObj->next;
+		}
+	}
+}
+
+/*
+=================
 G_RegisterCvars
 =================
 */
-void G_RegisterCvars( void ) {
-	int			i;
-	cvarTable_t	*cv;
+static void G_RegisterCvars( void ) {
+	// import from g_cvar_defs.h
+	#define CVAR_DEF( vmcvar, name, def, flags, announce ) \
+		G_RegisterTrackedCvar( &vmcvar, name, def, flags, announce );
+	#include "g_cvar_defs.h"
+	#undef CVAR_DEF
 
-	for ( i = 0, cv = gameCvarTable ; i < gameCvarTableSize ; i++, cv++ ) {
-		trap_Cvar_Register( cv->vmCvar, cv->cvarName,
-			cv->defaultString, cv->cvarFlags );
-		if ( cv->vmCvar )
-			cv->modificationCount = cv->vmCvar->modificationCount;
-	}
-
-	// check some things
-
+	// check g_gametype range
 	if ( g_gametype.integer < 0 || g_gametype.integer >= GT_MAX_GAME_TYPE ) {
 		G_Printf( "g_gametype %i is out of range, defaulting to 0\n", g_gametype.integer );
 		trap_Cvar_Set( "g_gametype", "0" );
+		G_UpdateTrackedCvar( &g_gametype );
 	}
 
-	level.warmupModificationCount = g_warmup.modificationCount;
+	// configure g_needpass auto update
+	G_RegisterCvarCallback( &g_password, G_UpdateNeedPass, qtrue );
 }
 
 /*
@@ -515,31 +428,10 @@ void G_RegisterCvars( void ) {
 G_UpdateCvars
 =================
 */
-void G_UpdateCvars( void ) {
-	int			i;
-	cvarTable_t	*cv;
-
-	for ( i = 0, cv = gameCvarTable ; i < gameCvarTableSize ; i++, cv++ ) {
-		if ( cv->vmCvar ) {
-			trap_Cvar_Update( cv->vmCvar );
-
-			if ( cv->modificationCount != cv->vmCvar->modificationCount ) {
-				cv->modificationCount = cv->vmCvar->modificationCount;
-
-				if ( cv->trackChange ) {
-					if ( !levelExiting )
-					{//no need to do this during level changes
-						trap_SendServerCommand( -1, va("print \"Server: %s changed to %s\n\"",
-							cv->cvarName, cv->vmCvar->string ) );
-					}
-				}
-
-				if ( cv->vmCvar == &g_pMoveFixed || cv->vmCvar == &g_pMoveMsec || cv->vmCvar == &g_noJumpKeySlowdown ||
-						cv->vmCvar == &g_infilJumpFactor || cv->vmCvar == &g_infilAirAccelFactor || cv->vmCvar == &g_altSwapSupport ) {
-					G_UpdateModConfigInfo();
-				}
-			}
-		}
+static void G_UpdateCvars( void ) {
+	int i;
+	for ( i = 0; i < trackedCvarCount; ++i ) {
+		G_UpdateTrackedCvar( trackedCvars[i] );
 	}
 }
 
@@ -1811,24 +1703,6 @@ void CheckVote( void ) {
 
 
 /*
-==================
-CheckCvars
-==================
-*/
-void CheckCvars( void ) {
-	static int lastMod = -1;
-
-	if ( g_password.modificationCount != lastMod ) {
-		lastMod = g_password.modificationCount;
-		if ( *g_password.string && Q_stricmp( g_password.string, "none" ) ) {
-			trap_Cvar_Set( "g_needpass", "1" );
-		} else {
-			trap_Cvar_Set( "g_needpass", "0" );
-		}
-	}
-}
-
-/*
 =============
 G_RunThink
 
@@ -1982,9 +1856,6 @@ end = trap_Milliseconds();
 
 	// cancel vote if timed out
 	CheckVote();
-
-	// for tracking changes
-	CheckCvars();
 
 	if ( !levelExiting )
 	{

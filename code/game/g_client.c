@@ -1411,8 +1411,7 @@ void ClientUserinfoChanged( int clientNum ) {
 					// so reset it to starfleet and try it again
 					Com_Printf("WARNING! - Red Group %s is unknown - resetting Red Group to Allow Any Group\n", g_team_group_red.string);
 					trap_Cvar_Set("g_team_group_red", "");
-					trap_Cvar_Register( &g_team_group_red, "g_team_group_red",
-						"", CVAR_LATCH);
+					G_UpdateTrackedCvar( &g_team_group_red );
 
 					// Since we are allow any group now, just get his normal model and carry on
 					Q_strncpyz( model, Info_ValueForKey (userinfo, "model"), sizeof( model ) );
@@ -1472,8 +1471,7 @@ void ClientUserinfoChanged( int clientNum ) {
 					// so reset it to klingon and try it again
 					Com_Printf("WARNING! - Blue Group %s is unknown - resetting Blue Group to Allow Any Group\n", g_team_group_blue.string);
 					trap_Cvar_Set("g_team_group_blue", "");
-					trap_Cvar_Register( &g_team_group_blue, "g_team_group_blue",
-						"", CVAR_LATCH );
+					G_UpdateTrackedCvar( &g_team_group_blue );
 
 					// Since we are allow any group now, just get his normal model and carry on
 					Q_strncpyz( model, Info_ValueForKey (userinfo, "model"), sizeof( model ) );

@@ -36,6 +36,24 @@
 #define FL_NO_BOTS				0x00002000	// spawn point not for bot use
 #define FL_NO_HUMANS			0x00004000	// spawn point just for bots
 
+typedef struct {
+	// this part must match vmCvar_t exactly
+	cvarHandle_t	handle;
+	int				modificationCount;
+	float			value;
+	int				integer;
+	char			string[MAX_CVAR_VALUE_STRING];
+
+	const char		*cvarName;
+	qboolean		announceChanges;
+	void			*callbackObj;		// cvarCallback_t
+} trackedCvar_t;
+
+typedef struct {
+	void *next;		// cvarCallback_t
+	void ( *callback )( trackedCvar_t *tc );
+} cvarCallback_t;
+
 // tpType
 typedef enum
 {
@@ -576,6 +594,9 @@ static void G_SayTo( gentity_t *ent, gentity_t *other, int mode, int color, cons
 // g_main.c
 //
 int G_PmoveFixedValue( void );
+void G_RegisterTrackedCvar( trackedCvar_t *tc, const char *cvarName, const char *defaultValue, int flags, qboolean announceChanges );
+void G_RegisterCvarCallback( trackedCvar_t *tc, void ( *callback )( trackedCvar_t *tc ), qboolean callNow );
+void G_UpdateTrackedCvar( trackedCvar_t *tc );
 void FindIntermissionPoint( void );
 void G_RunThink (gentity_t *ent);
 void SendScoreboardMessageToAllClients( void );
@@ -744,65 +765,9 @@ extern	gentity_t		g_entities[MAX_GENTITIES];
 
 #define	FOFS(x) ((int)&(((gentity_t *)0)->x))
 
-extern	vmCvar_t	g_pModAssimilation;
-extern	vmCvar_t	g_pModDisintegration;
-extern	vmCvar_t	g_pModActionHero;
-extern	vmCvar_t	g_pModSpecialties;
-extern	vmCvar_t	g_pModElimination;
-
-extern	vmCvar_t	g_gametype;
-extern	vmCvar_t	g_dedicated;
-extern	vmCvar_t	g_cheats;
-extern	vmCvar_t	g_maxclients;			// allow this many total, including spectators
-extern	vmCvar_t	g_maxGameClients;		// allow this many active
-extern	vmCvar_t	g_restarted;
-extern	vmCvar_t	g_language;
-
-extern	vmCvar_t	g_dmflags;
-extern	vmCvar_t	g_fraglimit;
-extern	vmCvar_t	g_timelimit;
-extern	vmCvar_t	g_timelimitWinningTeam;
-extern	vmCvar_t	g_capturelimit;
-extern	vmCvar_t	g_friendlyFire;
-extern	vmCvar_t	g_password;
-extern	vmCvar_t	g_needpass;
-extern	vmCvar_t	g_gravity;
-extern	vmCvar_t	g_speed;
-extern	vmCvar_t	g_knockback;
-extern	vmCvar_t	g_dmgmult;
-extern	vmCvar_t	g_forcerespawn;
-extern	vmCvar_t	g_inactivity;
-extern	vmCvar_t	g_debugMove;
-extern	vmCvar_t	g_debugAlloc;
-extern	vmCvar_t	g_debugDamage;
-extern	vmCvar_t	g_weaponRespawn;
-extern	vmCvar_t	g_adaptRespawn;
-extern	vmCvar_t	g_synchronousClients;
-extern	vmCvar_t	g_motd;
-extern	vmCvar_t	g_warmup;
-extern	vmCvar_t	g_doWarmup;
-extern	vmCvar_t	g_allowVote;
-extern	vmCvar_t	g_teamAutoJoin;
-extern	vmCvar_t	g_teamForceBalance;
-extern	vmCvar_t	g_banIPs;
-extern	vmCvar_t	g_filterBan;
-extern	vmCvar_t	g_debugForward;
-extern	vmCvar_t	g_debugRight;
-extern	vmCvar_t	g_debugUp;
-extern	vmCvar_t	g_holoIntro;
-extern	vmCvar_t	g_ghostRespawn;
-extern  vmCvar_t	g_team_group_red;
-extern  vmCvar_t	g_team_group_blue;
-extern	vmCvar_t	g_random_skin_limit;
-extern	vmCvar_t	g_noJoinTimeout;
-extern	vmCvar_t	g_classChangeDebounceTime;
-
-extern	vmCvar_t	g_pMoveFixed;
-extern	vmCvar_t	g_pMoveMsec;
-extern	vmCvar_t	g_noJumpKeySlowdown;
-extern	vmCvar_t	g_infilJumpFactor;
-extern	vmCvar_t	g_infilAirAccelFactor;
-extern	vmCvar_t	g_altSwapSupport;
+#define CVAR_DEF( vmcvar, name, def, flags, announce ) extern trackedCvar_t vmcvar;
+#include "g_cvar_defs.h"
+#undef CVAR_DEF
 
 void	trap_Printf( const char *fmt );
 void	trap_Error( const char *fmt );

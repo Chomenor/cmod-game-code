@@ -592,8 +592,6 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 
 	G_ProcessIPBans();
 
-	G_InitMemory();
-
 	G_initGroupsList();
 
 	BG_LoadItemNames();

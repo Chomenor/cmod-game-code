@@ -324,6 +324,17 @@ static void G_UpdateModConfigInfo( void ) {
 
 /*
 =================
+G_UpdateModConfigCvar
+
+Called when a cvar linked to a mod config value has changed.
+=================
+*/
+static void G_UpdateModConfigCvar( trackedCvar_t *cv ) {
+	G_UpdateModConfigInfo();
+}
+
+/*
+=================
 G_UpdateNeedPass
 
 Update the g_needpass serverinfo cvar when g_password changes.
@@ -421,6 +432,14 @@ static void G_RegisterCvars( void ) {
 
 	// configure g_needpass auto update
 	G_RegisterCvarCallback( &g_password, G_UpdateNeedPass, qtrue );
+
+	// handle mod config cvar changes
+	G_RegisterCvarCallback( &g_pMoveFixed, G_UpdateModConfigCvar, qfalse );
+	G_RegisterCvarCallback( &g_pMoveMsec, G_UpdateModConfigCvar, qfalse );
+	G_RegisterCvarCallback( &g_noJumpKeySlowdown, G_UpdateModConfigCvar, qfalse );
+	G_RegisterCvarCallback( &g_infilJumpFactor, G_UpdateModConfigCvar, qfalse );
+	G_RegisterCvarCallback( &g_infilAirAccelFactor, G_UpdateModConfigCvar, qfalse );
+	G_RegisterCvarCallback( &g_altSwapSupport, G_UpdateModConfigCvar, qfalse );
 }
 
 /*

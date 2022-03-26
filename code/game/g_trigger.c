@@ -352,7 +352,7 @@ void trigger_teleporter_touch (gentity_t *self, gentity_t *other, trace_t *trace
 
 	if (self->health)
 	{
-		TransportPlayer(other, destPoint, dest->s.angles, (self->health == -1)?0:self->health);
+		TeleportPlayer2(other, destPoint, dest->s.angles, TP_NORMAL, (self->health == -1)?0:self->health);
 	}
 	else
 	{

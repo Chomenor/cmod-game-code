@@ -321,6 +321,13 @@ void trigger_teleporter_touch (gentity_t *self, gentity_t *other, trace_t *trace
 		return;
 	}
 
+	// don't trigger more than one teleport within 50ms
+	// this prevents duplicate teleports both in case of simultaneous hits in G_TouchTriggers,
+	// and from teleport triggers encountered at the end of previous teleport due to bad map placement
+	if ( other->client->ps.commandTime < other->client->lastTeleportTime + 50 ) {
+		return;
+	}
+	other->client->lastTeleportTime = other->client->ps.commandTime;
 
 	if (self->spawnflags & SF_RANDOM)
 	{

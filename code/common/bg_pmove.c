@@ -2051,8 +2051,30 @@ void PmoveSingle (pmove_t *pmove) {
 	// set the talk balloon flag
 	if ( pm->cmd.buttons & BUTTON_TALK ) {
 		pm->ps->eFlags |= EF_TALK;
+
+		// dissallow all other input to prevent possible fake talk balloons
+		pmove->cmd.buttons = 0;
+		pmove->cmd.forwardmove = 0;
+		pmove->cmd.rightmove = 0;
+		if (pmove->cmd.upmove)
+		{
+			if (pmove->cmd.upmove > 0)
+			{
+				pmove->cmd.upmove = 1;
+			}
+			else
+			{
+				pmove->cmd.upmove = -1;//allow a tiny bit to keep the duck anim
+			}
+		}
 	} else {
 		pm->ps->eFlags &= ~EF_TALK;
+	}
+
+	// clear the respawned flag if attack and use are cleared
+	if ( pm->ps->stats[STAT_HEALTH] > 0 &&
+		!( pm->cmd.buttons & (BUTTON_ATTACK | BUTTON_USE_HOLDABLE) ) ) {
+		pm->ps->pm_flags &= ~PMF_RESPAWNED;
 	}
 
 	// perform alt attack modification
@@ -2107,33 +2129,6 @@ void PmoveSingle (pmove_t *pmove) {
 	{
 		pm->ps->eFlags &= ~EF_FIRING;
 		pm->ps->eFlags &= ~EF_ALT_FIRING;
-	}
-
-	// clear the respawned flag if attack and use are cleared
-	if ( pm->ps->stats[STAT_HEALTH] > 0 &&
-		!( pm->cmd.buttons & (BUTTON_ATTACK | BUTTON_USE_HOLDABLE) ) ) {
-		pm->ps->pm_flags &= ~PMF_RESPAWNED;
-	}
-
-	// if talk button is down, dissallow all other input
-	// this is to prevent any possible intercept proxy from
-	// adding fake talk balloons
-	if ( pmove->cmd.buttons & BUTTON_TALK )
-	{
-		pmove->cmd.buttons = 0;
-		pmove->cmd.forwardmove = 0;
-		pmove->cmd.rightmove = 0;
-		if (pmove->cmd.upmove)
-		{
-			if (pmove->cmd.upmove > 0)
-			{
-				pmove->cmd.upmove = 1;
-			}
-			else
-			{
-				pmove->cmd.upmove = -1;//allow a tiny bit to keep the duck anim
-			}
-		}
 	}
 
 	// clear all pmove local vars

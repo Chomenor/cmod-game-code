@@ -595,6 +595,7 @@ static void G_SayTo( gentity_t *ent, gentity_t *other, int mode, int color, cons
 // g_main.c
 //
 int G_PmoveFixedValue( void );
+void G_UpdateModConfigInfo( void );
 void G_RegisterTrackedCvar( trackedCvar_t *tc, const char *cvarName, const char *defaultValue, int flags, qboolean announceChanges );
 void G_RegisterCvarCallback( trackedCvar_t *tc, void ( *callback )( trackedCvar_t *tc ), qboolean callNow );
 void G_UpdateTrackedCvar( trackedCvar_t *tc );
@@ -961,3 +962,5 @@ void	trap_BotFreeWeaponState(int weaponstate);
 void	trap_BotResetWeaponState(int weaponstate);
 
 int		trap_GeneticParentsAndChildSelection(int numranks, float *ranks, int *parent1, int *parent2, int *child);
+
+#include "mods/g_mod_public.h"

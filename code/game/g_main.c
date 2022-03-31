@@ -274,51 +274,57 @@ int G_PmoveFixedValue( void ) {
 	return 0;
 }
 
+// Only set mod config after initialization is complete to avoid unnecessary configstring updates.
+static qboolean modConfigReady = qfalse;
+
 /*
 =================
 G_UpdateModConfigInfo
 
-Updates mod config configstring. Called on game startup and any time the value
-might have changed.
+Updates mod config configstring. Called on game startup and any time the value might have changed.
 =================
 */
-static void G_UpdateModConfigInfo( void ) {
-	char buffer[BIG_INFO_STRING + 8];
-	char *info = buffer + 8;
-	Q_strncpyz( buffer, "!modcfg ", sizeof( buffer ) );
+void G_UpdateModConfigInfo( void ) {
+	if ( modConfigReady ) {
+		char buffer[BIG_INFO_STRING + 8];
+		char *info = buffer + 8;
+		Q_strncpyz( buffer, "!modcfg ", sizeof( buffer ) );
 
-	{
-		int pMoveFixed = G_PmoveFixedValue();
-		if ( pMoveFixed ) {
-			Info_SetValueForKey( info, "pMoveFixed", va( "%i", pMoveFixed ) );
+		modfn.AddModConfigInfo( info );
+
+		{
+			int pMoveFixed = G_PmoveFixedValue();
+			if ( pMoveFixed ) {
+				Info_SetValueForKey( info, "pMoveFixed", va( "%i", pMoveFixed ) );
+			}
 		}
-	}
 
-	if ( g_noJumpKeySlowdown.integer ) {
-		Info_SetValueForKey( info, "noJumpKeySlowdown", "1" );
-	}
+		if ( g_noJumpKeySlowdown.integer ) {
+			Info_SetValueForKey( info, "noJumpKeySlowdown", "1" );
+		}
 
-	if ( g_infilJumpFactor.value > 0.0f ) {
-		Info_SetValueForKey( info, "infilJumpFactor", va( "%f", g_infilJumpFactor.value ) );
-	}
+		if ( g_infilJumpFactor.value > 0.0f ) {
+			Info_SetValueForKey( info, "infilJumpFactor", va( "%f", g_infilJumpFactor.value ) );
+		}
 
-	if ( g_infilAirAccelFactor.value > 0.0f ) {
-		Info_SetValueForKey( info, "infilAirAccelFactor", va( "%f", g_infilAirAccelFactor.value ) );
-	}
+		if ( g_infilAirAccelFactor.value > 0.0f ) {
+			Info_SetValueForKey( info, "infilAirAccelFactor", va( "%f", g_infilAirAccelFactor.value ) );
+		}
 
-	// general stuff that is just automatically enabled
-	Info_SetValueForKey( info, "bounceFix", "1" );
-	Info_SetValueForKey( info, "snapVectorGravLimit", SNAPVECTOR_GRAV_LIMIT_STR );
-	Info_SetValueForKey( info, "noFlyingDrift", "1" );
+		// general stuff that is just automatically enabled
+		Info_SetValueForKey( info, "bounceFix", "1" );
+		Info_SetValueForKey( info, "snapVectorGravLimit", SNAPVECTOR_GRAV_LIMIT_STR );
+		Info_SetValueForKey( info, "noFlyingDrift", "1" );
 
-	if ( g_altSwapSupport.integer ) {
-		Info_SetValueForKey( info, "altSwapSupport", "1" );
-	}
+		if ( g_altSwapSupport.integer ) {
+			Info_SetValueForKey( info, "altSwapSupport", "1" );
+		}
 
-	if ( *info ) {
-		trap_SetConfigstring( CS_MOD_CONFIG, buffer );
-	} else {
-		trap_SetConfigstring( CS_MOD_CONFIG, "" );
+		if ( *info ) {
+			trap_SetConfigstring( CS_MOD_CONFIG, buffer );
+		} else {
+			trap_SetConfigstring( CS_MOD_CONFIG, "" );
+		}
 	}
 }
 
@@ -499,6 +505,8 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 		lastKillTime[i] = level.time-30000;
 	}
 
+	G_ModsInit();
+
 	G_RegisterCvars();
 
 	G_ProcessIPBans();
@@ -600,7 +608,11 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	G_InitModRules();
 
 	// set mod config string
+	modConfigReady = qtrue;
 	G_UpdateModConfigInfo();
+
+	// additional mod init
+	modfn.GeneralInit();
 
 	levelExiting = qfalse;
 }
@@ -1888,6 +1900,9 @@ end = trap_Milliseconds();
 		{
 			INeedAHero();
 		}
+
+		// run general mod activities
+		modfn.PostRunFrame();
 	}
 }
 

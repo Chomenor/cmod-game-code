@@ -60,6 +60,9 @@ set src=game&set name=g_turrets&call :compile
 set src=game&set name=g_usable&call :compile
 set src=game&set name=g_utils&call :compile
 set src=game&set name=g_weapon&call :compile
+set src=game\mods&set name=g_mod_main&call :compile
+set src=game\mods&set name=g_mod_stubs&call :compile
+set src=game\mods&set name=g_mod_utils&call :compile
 set src=common&set name=logging&call :compile
 set src=common&set name=vm_extensions&call :compile
 

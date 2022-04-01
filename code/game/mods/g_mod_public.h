@@ -7,6 +7,12 @@
 void G_ModCoreInit( void );
 void G_ModsInit( void );
 
+typedef enum {
+	PMC_NONE,
+	PMC_FIXED_LENGTH,	// subdivide moves into this frame length (0 = disabled)
+	PMC_PARTIAL_MOVE_TRIGGERS,	// if 1, process triggers after each subdivided move fragment
+} pmoveConstant_t;
+
 //
 // mod functions (modfn.*)
 //

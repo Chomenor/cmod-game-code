@@ -459,55 +459,6 @@ void	G_TouchTriggers( gentity_t *ent ) {
 	}
 }
 
-/*
-=================
-SpectatorThink
-=================
-*/
-void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
-	pmove_t	pm;
-	gclient_t	*client;
-
-	client = ent->client;
-
-	if ( client->sess.spectatorState != SPECTATOR_FOLLOW ) {
-		client->ps.pm_type = PM_SPECTATOR;
-		client->ps.speed = 400;	// faster than normal
-
-		// set up for pmove
-		memset (&pm, 0, sizeof(pm));
-		pm.ps = &client->ps;
-		pm.cmd = *ucmd;
-		pm.tracemask = MASK_PLAYERSOLID & ~CONTENTS_BODY;	// spectators can fly through bodies
-		pm.trace = trap_Trace;
-		pm.pointcontents = trap_PointContents;
-		pm.noSpectatorDrift = qtrue;
-
-		// perform a pmove
-		Pmove (&pm, G_PmoveFixedValue());
-
-		// save results of pmove
-		VectorCopy( client->ps.origin, ent->s.origin );
-
-		G_TouchTriggers( ent );
-		trap_UnlinkEntity( ent );
-	}
-
-	client->oldbuttons = client->buttons;
-	client->buttons = ucmd->buttons;
-
-	// attack button cycles through spectators
-	if ( ( client->buttons & BUTTON_ATTACK ) && ! ( client->oldbuttons & BUTTON_ATTACK ) ) {
-		Cmd_FollowCycle_f( ent, 1 );
-	}
-	else if ( ( client->buttons & BUTTON_ALT_ATTACK ) && ! ( client->oldbuttons & BUTTON_ALT_ATTACK ) )
-	{
-		if ( ent->client->sess.spectatorState == SPECTATOR_FOLLOW ) {
-			StopFollowing( ent );
-		}
-	}
-}
-
 
 
 /*
@@ -640,12 +591,9 @@ void ClientIntermissionThink( gclient_t *client ) {
 
 	// the level will exit when everyone wants to or after timeouts
 
-	// swap and latch button actions
-	client->oldbuttons = client->buttons;
-	client->buttons = client->pers.cmd.buttons;
 	if (g_gametype.integer != GT_SINGLE_PLAYER)
 	{
-		if ( client->buttons & ( BUTTON_ATTACK | BUTTON_USE_HOLDABLE ) & ( client->oldbuttons ^ client->buttons ) ) {
+		if ( client->pers.cmd.buttons & ( BUTTON_ATTACK | BUTTON_USE_HOLDABLE ) & ( client->pers.oldbuttons ^ client->pers.cmd.buttons ) ) {
 			client->readyToExit ^= 1;
 		}
 	}
@@ -1626,6 +1574,161 @@ void SendPendingPredictableEvents( playerState_t *ps ) {
 
 /*
 ==============
+(ModFN) PmoveInit
+==============
+*/
+LOGFUNCTION_VOID( ModFNDefault_PmoveInit, ( int clientNum, pmove_t *pmove ), ( clientNum, pmove ), "G_MODFN_PMOVEINIT" ) {
+	gclient_t *client = &level.clients[clientNum];
+
+	memset( pmove, 0, sizeof( *pmove ) );
+
+	pmove->ps = &client->ps;
+	pmove->cmd = client->pers.cmd;
+	if ( pmove->ps->pm_type == PM_DEAD || pmove->ps->pm_type == PM_SPECTATOR ) {
+		pmove->tracemask = MASK_PLAYERSOLID & ~CONTENTS_BODY;
+	} else {
+		pmove->tracemask = MASK_PLAYERSOLID;
+	}
+	pmove->trace = trap_Trace;
+	pmove->pointcontents = trap_PointContents;
+	pmove->debugLevel = g_debugMove.integer;
+	pmove->noFootsteps = ( g_dmflags.integer & DF_NO_FOOTSTEPS ) > 0;
+
+	if ( client->ps.weapon >= 1 && client->ps.weapon < WP_NUM_WEAPONS ) {
+		if ( client->sess.altSwapFlags & ( 1 << ( client->ps.weapon - 1 ) ) ) {
+			pmove->altFireMode = ALTMODE_SWAPPED;
+		}
+	}
+}
+
+/*
+==============
+(ModFN) PostPmoveActions
+
+Process triggers and other operations after player move(s) have completed.
+This may be called 0, 1, or multiple times per input usercmd depending on move partitioning.
+==============
+*/
+LOGFUNCTION_VOID( ModFNDefault_PostPmoveActions, ( pmove_t *pmove, int clientNum, int oldEventSequence ),
+		( pmove, clientNum, oldEventSequence ), "G_MODFN_POSTPMOVEACTIONS" ) {
+	gentity_t *ent = &g_entities[clientNum];
+	gclient_t *client = &level.clients[clientNum];
+
+	if ( client->ps.pm_type == PM_SPECTATOR ) {
+		// save results of pmove
+		VectorCopy( client->ps.origin, ent->s.origin );
+
+		G_TouchTriggers( ent );
+		trap_UnlinkEntity( ent );
+
+		return;
+	}
+
+	// save results of pmove
+	BG_PlayerStateToEntityState( &ent->client->ps, &ent->s, qtrue );
+
+	// use the snapped origin for linking so it matches client predicted versions
+	VectorCopy( ent->s.pos.trBase, ent->r.currentOrigin );
+
+	VectorCopy( pmove->mins, ent->r.mins );
+	VectorCopy( pmove->maxs, ent->r.maxs );
+
+	ent->waterlevel = pmove->waterlevel;
+	ent->watertype = pmove->watertype;
+
+	// execute client events
+	ClientEvents( ent, oldEventSequence );
+
+	if ( pmove->useEvent ) {
+		TryUse( ent );
+	}
+
+	// link entity now, after any personal teleporters have been used
+	trap_LinkEntity( ent );
+	if ( !ent->client->noclip ) {
+		G_TouchTriggers( ent );
+	}
+
+	// NOTE: now copy the exact origin over otherwise clients can be snapped into solid
+	VectorCopy( ent->client->ps.origin, ent->r.currentOrigin );
+
+	//test for solid areas in the AAS file
+	BotTestSolid( ent->r.currentOrigin );
+
+	// touch other objects
+	ClientImpacts( ent, pmove );
+}
+
+typedef struct {
+	int clientNum;
+	int oldEventSequence;
+} postMoveContext_t;
+
+/*
+==============
+G_PostPmoveCallback
+==============
+*/
+LOGFUNCTION_SVOID( G_PostPmoveCallback, ( pmove_t *pmove, qboolean finalFragment, void *context ),
+		( pmove, finalFragment, context ), "" ) {
+	if ( finalFragment || modfn.AdjustPmoveConstant( PMC_PARTIAL_MOVE_TRIGGERS, 0 ) ) {
+		postMoveContext_t *pmc = (postMoveContext_t *)context;
+		modfn.PostPmoveActions( pmove, pmc->clientNum, pmc->oldEventSequence );
+		pmc->oldEventSequence = level.clients[pmc->clientNum].ps.eventSequence;
+	}
+}
+
+/*
+==============
+(ModFN) RunPlayerMove
+
+Performs player movement corresponding to a single input usercmd from the client.
+==============
+*/
+LOGFUNCTION_VOID( ModFNDefault_RunPlayerMove, ( int clientNum ), ( clientNum ), "G_MODFN_RUNPLAYERMOVE" ) {
+	gclient_t *client = &level.clients[clientNum];
+	playerState_t *ps = &client->ps;
+	pmove_t pmove;
+	postMoveContext_t pmc = { 0 };
+
+	pmc.clientNum = clientNum;
+	pmc.oldEventSequence = ps->eventSequence;
+
+	modfn.PmoveInit( clientNum, &pmove );
+	Pmove( &pmove, modfn.AdjustPmoveConstant( PMC_FIXED_LENGTH, 0 ), G_PostPmoveCallback, &pmc );
+}
+
+/*
+=================
+SpectatorThink
+=================
+*/
+void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
+	gclient_t	*client;
+
+	client = ent->client;
+
+	if ( client->sess.spectatorState != SPECTATOR_FOLLOW ) {
+		client->ps.pm_type = PM_SPECTATOR;
+		client->ps.speed = 400;	// faster than normal
+
+		modfn.RunPlayerMove( ent - g_entities );
+	}
+
+	// attack button cycles through spectators
+	if ( ( ucmd->buttons & BUTTON_ATTACK ) && ! ( client->pers.oldbuttons & BUTTON_ATTACK ) ) {
+		Cmd_FollowCycle_f( ent, 1 );
+	}
+	else if ( ( ucmd->buttons & BUTTON_ALT_ATTACK ) && ! ( client->pers.oldbuttons & BUTTON_ALT_ATTACK ) )
+	{
+		if ( ent->client->sess.spectatorState == SPECTATOR_FOLLOW ) {
+			StopFollowing( ent );
+		}
+	}
+}
+
+/*
+==============
 ClientThink
 
 This will be called once for each client frame, which will
@@ -1636,34 +1739,28 @@ once for each server frame, which makes for smooth demo recording.
 ==============
 */
 void ClientThink_real( gentity_t *ent ) {
-	int			oldCommandTime = ent->client->ps.commandTime;
-	gclient_t	*client;
-	pmove_t		pm;
-	vec3_t		oldOrigin;
-	int			oldEventSequence;
+	int			clientNum = ent - g_entities;
+	gclient_t	*client = &level.clients[clientNum];
+	int			oldCommandTime = client->ps.commandTime;
 	int			msec;
 	usercmd_t	*ucmd;
-
-	client = ent->client;
 
 	// don't think if the client is not yet connected (and thus not yet spawned in)
 	if (client->pers.connected != CON_CONNECTED) {
 		return;
 	}
-	// mark the time, so the connection sprite can be removed
+
 	ucmd = &ent->client->pers.cmd;
 
 	// sanity check the command time to prevent speedup cheating
 	if ( ucmd->serverTime > level.time + 200 ) {
 		ucmd->serverTime = level.time + 200;
-//		G_Printf("serverTime <<<<<\n" );
 	}
 	if ( ucmd->serverTime < level.time - 1000 ) {
 		ucmd->serverTime = level.time - 1000;
-//		G_Printf("serverTime >>>>>\n" );
 	}
 
-	if ( !PM_IsMoveNeeded( client->ps.commandTime, ucmd->serverTime, G_PmoveFixedValue() ) &&
+	if ( !PM_IsMoveNeeded( client->ps.commandTime, ucmd->serverTime, modfn.AdjustPmoveConstant( PMC_FIXED_LENGTH, 0 ) ) &&
 			// following others may result in bad times, but we still want
 			// to check for follow toggles
 			client->sess.spectatorState != SPECTATOR_FOLLOW ) {
@@ -1678,16 +1775,9 @@ void ClientThink_real( gentity_t *ent ) {
 		return;
 	}
 
-	// Don't move while under intro sequence.
-	if (client->ps.introTime > level.time)
-	{	// Don't be visible either.
-		ent->s.eFlags |= EF_NODRAW;
+	// cancel out view angle changes during holodeck intro sequence
+	if ( client->ps.introTime > level.time ) {
 		SetClientViewAngle( ent, ent->s.angles );
-		ucmd->buttons = 0;
-		ucmd->weapon = 0;
-//		ucmd->angles[0] = ucmd->angles[1] = ucmd->angles[2] = 0;
-		ucmd->forwardmove = ucmd->rightmove = ucmd->upmove = 0;
-//		return;
 	}
 
 	// spectators don't do much
@@ -1737,90 +1827,7 @@ void ClientThink_real( gentity_t *ent ) {
 		client->ps.speed *= 0.75;
 	}
 
-	// set up for pmove
-	oldEventSequence = client->ps.eventSequence;
-
-	memset (&pm, 0, sizeof(pm));
-
-	pm.ps = &client->ps;
-	pm.cmd = *ucmd;
-	if ( pm.ps->pm_type == PM_DEAD ) {
-		pm.tracemask = MASK_PLAYERSOLID & ~CONTENTS_BODY;
-	}
-	else {
-		pm.tracemask = MASK_PLAYERSOLID;
-	}
-	pm.trace = trap_Trace;
-	pm.pointcontents = trap_PointContents;
-	pm.debugLevel = g_debugMove.integer;
-	pm.noFootsteps = ( g_dmflags.integer & DF_NO_FOOTSTEPS ) > 0;
-	pm.pModDisintegration = g_pModDisintegration.integer > 0;
-	pm.noJumpKeySlowdown = g_noJumpKeySlowdown.integer ? qtrue : qfalse;
-	pm.bounceFix = qtrue;
-	pm.snapVectorGravLimit = SNAPVECTOR_GRAV_LIMIT;
-	pm.noFlyingDrift = qtrue;
-	pm.infilJumpFactor = g_infilJumpFactor.value;
-	pm.infilAirAccelFactor = g_infilAirAccelFactor.value;
-	if ( client->ps.weapon >= 1 && client->ps.weapon < WP_NUM_WEAPONS ) {
-		if ( client->sess.altSwapFlags & ( 1 << ( client->ps.weapon - 1 ) ) ) {
-			pm.altFireMode = ALTMODE_SWAPPED;
-		}
-	}
-
-	VectorCopy( client->ps.origin, oldOrigin );
-
-	// perform a pmove
-	Pmove (&pm, G_PmoveFixedValue());
-
-	// save results of pmove
-	if ( ent->client->ps.eventSequence != oldEventSequence ) {
-		ent->eventTime = level.time;
-	}
-	BG_PlayerStateToEntityState( &ent->client->ps, &ent->s, qtrue );
-
-	SendPendingPredictableEvents( &ent->client->ps );
-
-	// use the snapped origin for linking so it matches client predicted versions
-	VectorCopy( ent->s.pos.trBase, ent->r.currentOrigin );
-
-	VectorCopy (pm.mins, ent->r.mins);
-	VectorCopy (pm.maxs, ent->r.maxs);
-
-	ent->waterlevel = pm.waterlevel;
-	ent->watertype = pm.watertype;
-
-	// execute client events
-	ClientEvents( ent, oldEventSequence );
-
-	if ( pm.useEvent )
-	{		//TODO: Use
-		TryUse( ent );
-	}
-
-	// link entity now, after any personal teleporters have been used
-	trap_LinkEntity (ent);
-	if ( !ent->client->noclip ) {
-		G_TouchTriggers( ent );
-	}
-
-	// NOTE: now copy the exact origin over otherwise clients can be snapped into solid
-	VectorCopy( ent->client->ps.origin, ent->r.currentOrigin );
-
-	//test for solid areas in the AAS file
-	BotTestSolid(ent->r.currentOrigin);
-
-	// touch other objects
-	ClientImpacts( ent, &pm );
-
-	// save results of triggers and client events
-	if (ent->client->ps.eventSequence != oldEventSequence) {
-		ent->eventTime = level.time;
-	}
-
-	// swap and latch button actions
-	client->oldbuttons = client->buttons;
-	client->buttons = ucmd->buttons;
-	client->latched_buttons |= client->buttons & ~client->oldbuttons;
+	modfn.RunPlayerMove( clientNum );
 
 	// check for respawning
 	if ( client->ps.stats[STAT_HEALTH] <= 0 ) {
@@ -1891,6 +1898,7 @@ void ClientThink( int clientNum ) {
 	gentity_t *ent;
 
 	ent = g_entities + clientNum;
+	ent->client->pers.oldbuttons = ent->client->pers.cmd.buttons;
 	trap_GetUsercmd( clientNum, &ent->client->pers.cmd );
 
 	// mark the time we got info, so we can display the

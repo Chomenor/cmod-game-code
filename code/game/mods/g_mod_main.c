@@ -26,4 +26,9 @@ LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 	if ( modsEnabled <= 0 ) {
 		return;
 	}
+
+	if ( modsEnabled >= 2 ) {
+		// Default mods
+		ModPlayerMove_Init();
+	}
 }

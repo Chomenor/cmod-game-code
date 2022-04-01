@@ -2332,7 +2332,8 @@ Pmove
 Can be called by either the server or the client
 ================
 */
-void Pmove( pmove_t *pmove, int pMoveFixed ) {
+void Pmove( pmove_t *pmove, int pMoveFixed,
+		void ( *postMove )( pmove_t *pmove, qboolean finalFragment, void *context ), void *postMoveContext ) {
 	usercmd_t inputCmd = pmove->cmd;
 
 	if ( inputCmd.serverTime > pmove->ps->commandTime + 1000 ) {
@@ -2350,5 +2351,10 @@ void Pmove( pmove_t *pmove, int pMoveFixed ) {
 
 		// reset any changes to command during move
 		pmove->cmd = inputCmd;
+
+		if ( postMove ) {
+			qboolean finalFragment = !PM_IsMoveNeeded( pmove->ps->commandTime,inputCmd.serverTime, pMoveFixed );
+			postMove( pmove, finalFragment, postMoveContext );
+		}
 	}
 }

@@ -24,6 +24,23 @@ MOD_FUNCTION_DEF( GeneralInit, void, ( void ) )
 MOD_FUNCTION_DEF( PostRunFrame, void, ( void ) )
 
 //////////////////////////
+// player movement
+//////////////////////////
+
+// Support modifying pmove-related integer constants.
+MOD_FUNCTION_DEF( AdjustPmoveConstant, int, ( pmoveConstant_t pmcType, int defaultValue ) )
+
+// Initialize pmove_t structure ahead of player move.
+MOD_FUNCTION_DEF( PmoveInit, void, ( int clientNum, pmove_t *pmove ) )
+
+// Performs player movement corresponding to a single input usercmd from the client.
+MOD_FUNCTION_DEF( RunPlayerMove, void, ( int clientNum ) )
+
+// Process triggers and other operations after player move(s) have completed.
+// This may be called 0, 1, or multiple times per input usercmd depending on move partitioning.
+MOD_FUNCTION_DEF( PostPmoveActions, void, ( pmove_t *pmove, int clientNum, int oldEventSequence ) )
+
+//////////////////////////
 // misc
 //////////////////////////
 

@@ -8,3 +8,6 @@
 
 // Utils
 int G_ModUtils_GetLatchedValue( const char *cvar_name, const char *default_value, int flags );
+
+// Feature Initialization
+void ModPlayerMove_Init( void );

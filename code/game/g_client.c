@@ -2239,7 +2239,6 @@ void ClientSpawn(gentity_t *ent) {
 
 	client->respawnTime = level.time;
 	client->inactivityTime = level.time + g_inactivity.integer * 1000;
-	client->latched_buttons = 0;
 
 	// set default animations
 	client->ps.torsoAnim = TORSO_STAND;

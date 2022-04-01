@@ -15,6 +15,11 @@ LOGFUNCTION_VOID( ModFNDefault_PostRunFrame, ( void ),
 		(), "G_MODFN_POSTRUNFRAME" ) {
 }
 
+LOGFUNCTION_RET( int, ModFNDefault_AdjustPmoveConstant, ( pmoveConstant_t pmcType, int defaultValue ),
+		( pmcType, defaultValue ), "G_MODFN_ADJUSTPMOVECONSTANT" ) {
+	return defaultValue;
+}
+
 LOGFUNCTION_VOID( ModFNDefault_AddModConfigInfo, ( char *info ),
 		( info ), "G_MODFN_ADDMODCONFIGINFO" ) {
 }

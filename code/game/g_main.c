@@ -259,21 +259,6 @@ void G_FindTeams( void ) {
 	G_Printf ("%i teams with %i entities\n", c, c2);
 }
 
-/*
-=================
-G_PmoveFixedValue
-
-Returns fixed frame length control value used by pmove and shared with clients via configstring.
-=================
-*/
-int G_PmoveFixedValue( void ) {
-	if ( g_pMoveFixed.integer && g_pMoveMsec.integer > 0 && g_pMoveMsec.integer < 35 ) {
-		return g_pMoveMsec.integer;
-	}
-
-	return 0;
-}
-
 // Only set mod config after initialization is complete to avoid unnecessary configstring updates.
 static qboolean modConfigReady = qfalse;
 
@@ -291,30 +276,6 @@ void G_UpdateModConfigInfo( void ) {
 		Q_strncpyz( buffer, "!modcfg ", sizeof( buffer ) );
 
 		modfn.AddModConfigInfo( info );
-
-		{
-			int pMoveFixed = G_PmoveFixedValue();
-			if ( pMoveFixed ) {
-				Info_SetValueForKey( info, "pMoveFixed", va( "%i", pMoveFixed ) );
-			}
-		}
-
-		if ( g_noJumpKeySlowdown.integer ) {
-			Info_SetValueForKey( info, "noJumpKeySlowdown", "1" );
-		}
-
-		if ( g_infilJumpFactor.value > 0.0f ) {
-			Info_SetValueForKey( info, "infilJumpFactor", va( "%f", g_infilJumpFactor.value ) );
-		}
-
-		if ( g_infilAirAccelFactor.value > 0.0f ) {
-			Info_SetValueForKey( info, "infilAirAccelFactor", va( "%f", g_infilAirAccelFactor.value ) );
-		}
-
-		// general stuff that is just automatically enabled
-		Info_SetValueForKey( info, "bounceFix", "1" );
-		Info_SetValueForKey( info, "snapVectorGravLimit", SNAPVECTOR_GRAV_LIMIT_STR );
-		Info_SetValueForKey( info, "noFlyingDrift", "1" );
 
 		if ( g_altSwapSupport.integer ) {
 			Info_SetValueForKey( info, "altSwapSupport", "1" );
@@ -440,11 +401,6 @@ static void G_RegisterCvars( void ) {
 	G_RegisterCvarCallback( &g_password, G_UpdateNeedPass, qtrue );
 
 	// handle mod config cvar changes
-	G_RegisterCvarCallback( &g_pMoveFixed, G_UpdateModConfigCvar, qfalse );
-	G_RegisterCvarCallback( &g_pMoveMsec, G_UpdateModConfigCvar, qfalse );
-	G_RegisterCvarCallback( &g_noJumpKeySlowdown, G_UpdateModConfigCvar, qfalse );
-	G_RegisterCvarCallback( &g_infilJumpFactor, G_UpdateModConfigCvar, qfalse );
-	G_RegisterCvarCallback( &g_infilAirAccelFactor, G_UpdateModConfigCvar, qfalse );
 	G_RegisterCvarCallback( &g_altSwapSupport, G_UpdateModConfigCvar, qfalse );
 }
 

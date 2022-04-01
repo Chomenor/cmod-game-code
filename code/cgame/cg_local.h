@@ -1069,6 +1069,7 @@ typedef struct {
 typedef struct {
 	// player movement
 	int pMoveFixed;
+	int pMoveTriggerMode;
 	qboolean noJumpKeySlowdown;
 	qboolean bounceFix;
 	int snapVectorGravLimit;

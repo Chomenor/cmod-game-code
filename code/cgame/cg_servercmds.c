@@ -161,6 +161,8 @@ void CG_ParseModConfig( void ) {
 					break;
 				if ( !Q_stricmp( key, "pMoveFixed" ) )
 					cgs.modConfig.pMoveFixed = atoi( value );
+				if ( !Q_stricmp( key, "pMoveTriggerMode" ) )
+					cgs.modConfig.pMoveTriggerMode = atoi( value );
 				if ( !Q_stricmp( key, "noJumpKeySlowdown" ) )
 					cgs.modConfig.noJumpKeySlowdown = atoi( value ) ? qtrue : qfalse;
 				if ( !Q_stricmp( key, "bounceFix" ) )

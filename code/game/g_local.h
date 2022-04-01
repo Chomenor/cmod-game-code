@@ -255,6 +255,7 @@ typedef struct {
 typedef struct {
 	clientConnected_t	connected;
 	usercmd_t	cmd;				// we would lose angles if not persistant
+	int			oldbuttons;			// buttons from previous command
 	qboolean	localClient;		// true if "ip" info key is "localhost"
 	qboolean	initialSpawn;		// the first spawn should be at a cool location
 	qboolean	predictItemPickup;	// based on cg_predictItems userinfo
@@ -283,9 +284,6 @@ struct gclient_s {
 	int			lastCmdTime;		// level.time of last usercmd_t, for EF_CONNECTION
 									// we can't just use pers.lastCommand.time, because
 									// of the g_sycronousclients case
-	int			buttons;
-	int			oldbuttons;
-	int			latched_buttons;
 
 	// sum up damage over an entire frame, so
 	// shotgun blasts give a single big kick
@@ -594,7 +592,6 @@ static void G_SayTo( gentity_t *ent, gentity_t *other, int mode, int color, cons
 //
 // g_main.c
 //
-int G_PmoveFixedValue( void );
 void G_UpdateModConfigInfo( void );
 void G_RegisterTrackedCvar( trackedCvar_t *tc, const char *cvarName, const char *defaultValue, int flags, qboolean announceChanges );
 void G_RegisterCvarCallback( trackedCvar_t *tc, void ( *callback )( trackedCvar_t *tc ), qboolean callNow );

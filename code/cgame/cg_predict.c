@@ -264,6 +264,12 @@ void CG_FilterPredictableEvent( entity_event_t event, int eventParm, playerState
 
 			debounceTable[i].lastCommandTime = ps->commandTime;
 			debounceTable[i].lastClientTime = cg.time;
+
+			// Make sure predicted playerstate is up to date in case any event handling code accesses it
+			if ( !serverEvent ) {
+				cg.predictedPlayerState = *ps;
+			}
+
 			CG_ExecutePredictableEvent( event, eventParm );
 			return;
 		}
@@ -943,7 +949,7 @@ static void CG_FinalPredict( playerState_t *ps, usercmd_t *cmd ) {
 	temp.eventSequence = 0;
 
 	CG_InitPmove( &temp, cmd );
-	Pmove( &cg_pmove, 0 );
+	Pmove( &cg_pmove, 0, NULL, NULL );
 
 	ps->origin[0] = temp.origin[0];
 	ps->origin[1] = temp.origin[1];
@@ -953,6 +959,31 @@ static void CG_FinalPredict( playerState_t *ps, usercmd_t *cmd ) {
 
 	VectorCopy( temp.viewangles, ps->viewangles );
 	ps->bobCycle = temp.bobCycle;
+}
+
+/*
+=================
+CG_PostPmove
+=================
+*/
+static void CG_PostPmove( pmove_t *pmove, qboolean finalFragment, void *context) {
+	predictionFrame_t *frame = (predictionFrame_t *)context;
+	if ( finalFragment || cgs.modConfig.pMoveTriggerMode ) {
+		int i;
+
+		CG_TouchTriggerPrediction( &frame->ps, &frame->predictedTeleport );
+
+		// Note that running events here means that CG_FilterPredictableEvent won't be called for cached
+		// frames. This should be fine since cached frames should only contain duplicate events that would
+		// filtered anyway, but it might have implications for testing/debug purposes.
+		for ( i = frame->ps.eventSequence - MAX_PS_EVENTS; i < frame->ps.eventSequence; ++i ) {
+			if ( i >= 0 ) {
+				CG_FilterPredictableEvent( frame->ps.events[ i & (MAX_PS_EVENTS-1) ],
+						frame->ps.eventParms[ i & (MAX_PS_EVENTS-1) ], &frame->ps, qfalse );
+			}
+		}
+		frame->ps.eventSequence = 0;
+	}
 }
 
 /*
@@ -978,7 +1009,6 @@ to ease the jerk.
 =================
 */
 void CG_PredictPlayerState( void ) {
-	int i;
 	snapshot_t	*snap = PREDICTION_SNAPSHOT;
 	playerState_t	oldPlayerState;
 	usercmd_t	*latestCmd;
@@ -1125,23 +1155,15 @@ void CG_PredictPlayerState( void ) {
 
 				// perform the move
 				CG_InitPmove( &frame->ps, cmd );
-				Pmove( &cg_pmove, cgs.modConfig.pMoveFixed );
-				CG_TouchTriggerPrediction( &frame->ps, &frame->predictedTeleport );
+				Pmove( &cg_pmove, cgs.modConfig.pMoveFixed, CG_PostPmove, frame );
 				CG_PatchWeaponAutoswitch( &frame->ps );
 
 				predictCache.latest = frameNum;
 			}
 
-			// check for predicted events...
+			// check for predicted teleport...
 			if ( frame->predictedTeleport ) {
 				cg.hyperspace = qtrue;
-			}
-
-			for ( i = frame->ps.eventSequence - MAX_PS_EVENTS; i < frame->ps.eventSequence; ++i ) {
-				if ( i >= 0 ) {
-					CG_FilterPredictableEvent( frame->ps.events[ i & (MAX_PS_EVENTS-1) ],
-							frame->ps.eventParms[ i & (MAX_PS_EVENTS-1) ], &frame->ps, qfalse );
-				}
 			}
 		}
 	}

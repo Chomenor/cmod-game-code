@@ -13,9 +13,50 @@ and tournament restarts.
 =======================================================================
 */
 
+// Random identifier to prevent loading data from incompatible mods, in case
+// server uses mod switching.
+#define SESSION_VERSION "hszK3I2I"
+
 extern int	borgQueenClientNum;
 extern int	noJoinLimit;
 extern int	numKilled;
+
+/*
+================
+(ModFN) InitClientSession
+================
+*/
+LOGFUNCTION_VOID( ModFNDefault_InitClientSession, ( int clientNum, qboolean initialConnect, const info_string_t *info ),
+		( clientNum, initialConnect, info ), "G_MODFN_INITCLIENTSESSION" ) {
+}
+
+/*
+================
+(ModFN) GenerateClientSessionInfo
+================
+*/
+LOGFUNCTION_VOID( ModFNDefault_GenerateClientSessionInfo, ( int clientNum, info_string_t *info ),
+		( clientNum, info ), "G_MODFN_GENERATECLIENTSESSIONINFO" ) {
+}
+
+/*
+================
+G_VerifySessionVersion
+
+Returns qtrue if session data was written by compatible mod.
+================
+*/
+static qboolean G_VerifySessionVersion( void ) {
+	char buffer[256];
+	char *version;
+	trap_Cvar_VariableStringBuffer( "session", buffer, sizeof( buffer ) );
+	version = strchr( buffer, '*' );
+	if ( version && !strcmp( &version[1], SESSION_VERSION ) ) {
+		return qtrue;
+	}
+
+	return qfalse;
+}
 
 /*
 ================
@@ -25,8 +66,10 @@ Called on game shutdown
 ================
 */
 void G_WriteClientSessionData( gclient_t *client ) {
+	int clientNum = client - level.clients;
 	const char	*s;
 	const char	*var;
+	info_string_t info;
 
 	s = va("%i %i %i %i %i %i %i %i",
 		client->sess.sessionTeam,
@@ -39,9 +82,35 @@ void G_WriteClientSessionData( gclient_t *client ) {
 		client->sess.altSwapFlags
 		);
 
-	var = va( "session%i", client - level.clients );
+	var = va( "session%i", clientNum );
 
 	trap_Cvar_Set( var, s );
+
+	// Write session info
+	info.s[0] = '\0';
+	modfn.GenerateClientSessionInfo( clientNum, &info );
+	var = va( "session_info%i", clientNum );
+	trap_Cvar_Set( var, info.s );
+}
+
+/*
+==================
+G_RetrieveSessionInfo
+
+Retrieves client session info segment in session_info* cvars.
+
+This should only be called for clients that are reconnecting with firstTime=false,
+otherwise invalid info may be returned.
+==================
+*/
+void G_RetrieveSessionInfo( int clientNum, info_string_t *output ) {
+	output->s[0] = '\0';
+
+	if ( G_VerifySessionVersion() ) {
+		char buffer[256];
+		Com_sprintf( buffer, sizeof( buffer ), "session_info%i", clientNum );
+		trap_Cvar_VariableStringBuffer( buffer, output->s, sizeof( output->s ) );
+	}
 }
 
 /*
@@ -52,10 +121,11 @@ Called on a reconnect
 ================
 */
 void G_ReadSessionData( gclient_t *client ) {
+	int clientNum = client - level.clients;
 	char	s[MAX_STRING_CHARS];
 	const char	*var;
 
-	var = va( "session%i", client - level.clients );
+	var = va( "session%i", clientNum );
 	trap_Cvar_VariableStringBuffer( var, s, sizeof(s) );
 
 	sscanf( s, "%i %i %i %i %i %i %i %i",
@@ -68,6 +138,13 @@ void G_ReadSessionData( gclient_t *client ) {
 		&client->sess.losses,
 		&client->sess.altSwapFlags
 		);
+
+	// Call mod initialization
+	{
+		info_string_t info;
+		G_RetrieveSessionInfo( clientNum, &info );
+		modfn.InitClientSession( clientNum, qfalse, &info );
+	}
 }
 
 
@@ -79,6 +156,7 @@ Called on a first-time connect
 ================
 */
 void G_InitSessionData( gclient_t *client, char *userinfo ) {
+	int clientNum = client - level.clients;
 	clientSession_t	*sess;
 	const char		*value;
 
@@ -147,7 +225,12 @@ void G_InitSessionData( gclient_t *client, char *userinfo ) {
 	sess->spectatorState = SPECTATOR_FREE;
 	sess->spectatorTime = level.time;
 
-	G_WriteClientSessionData( client );
+	// Call mod initialization
+	{
+		info_string_t info;
+		*info.s = '\0';
+		modfn.InitClientSession( clientNum, qtrue, &info );
+	}
 }
 
 
@@ -181,10 +264,10 @@ G_WriteSessionData
 void G_WriteSessionData( void ) {
 	int		i;
 
-	trap_Cvar_Set( "session", va("%i", g_gametype.integer) );
+	trap_Cvar_Set( "session", va("%i*" SESSION_VERSION, g_gametype.integer) );
 
 	for ( i = 0 ; i < level.maxclients ; i++ ) {
-		if ( level.clients[i].pers.connected == CON_CONNECTED ) {
+		if ( level.clients[i].pers.connected >= CON_CONNECTING ) {
 			G_WriteClientSessionData( &level.clients[i] );
 		}
 	}

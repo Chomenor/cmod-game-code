@@ -24,6 +24,17 @@ MOD_FUNCTION_DEF( GeneralInit, void, ( void ) )
 MOD_FUNCTION_DEF( PostRunFrame, void, ( void ) )
 
 //////////////////////////
+// session related
+//////////////////////////
+
+// Called to initialize client state when client is initially connecting, or to load saved client data
+// when client is being reconnected from a map change/restart. Info string will be empty when initialConnect is true.
+MOD_FUNCTION_DEF( InitClientSession, void, ( int clientNum, qboolean initialConnect, const info_string_t *info ) )
+
+// Generates client info string data to be written to cvar on match exit.
+MOD_FUNCTION_DEF( GenerateClientSessionInfo, void, ( int clientNum, info_string_t *info ) )
+
+//////////////////////////
 // player movement
 //////////////////////////
 

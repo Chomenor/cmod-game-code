@@ -54,6 +54,10 @@ typedef struct {
 	void ( *callback )( trackedCvar_t *tc );
 } cvarCallback_t;
 
+typedef struct {
+	char s[BIG_INFO_STRING];
+} info_string_t;
+
 // tpType
 typedef enum
 {

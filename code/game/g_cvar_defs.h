@@ -84,5 +84,3 @@ CVAR_DEF( g_team_group_blue, "g_team_group_blue", "", CVAR_LATCH, qfalse )		// U
 CVAR_DEF( g_random_skin_limit, "g_random_skin_limit", "4", CVAR_ARCHIVE, qfalse )
 CVAR_DEF( g_noJoinTimeout, "g_noJoinTimeout", "120", CVAR_ARCHIVE, qfalse )
 CVAR_DEF( g_classChangeDebounceTime, "g_classChangeDebounceTime", "180", CVAR_ARCHIVE, qfalse )
-
-CVAR_DEF( g_altSwapSupport, "g_altSwapSupport", "1", CVAR_ARCHIVE, qfalse )

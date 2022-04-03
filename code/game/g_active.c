@@ -1593,12 +1593,6 @@ LOGFUNCTION_VOID( ModFNDefault_PmoveInit, ( int clientNum, pmove_t *pmove ), ( c
 	pmove->pointcontents = trap_PointContents;
 	pmove->debugLevel = g_debugMove.integer;
 	pmove->noFootsteps = ( g_dmflags.integer & DF_NO_FOOTSTEPS ) > 0;
-
-	if ( client->ps.weapon >= 1 && client->ps.weapon < WP_NUM_WEAPONS ) {
-		if ( client->sess.altSwapFlags & ( 1 << ( client->ps.weapon - 1 ) ) ) {
-			pmove->altFireMode = ALTMODE_SWAPPED;
-		}
-	}
 }
 
 /*

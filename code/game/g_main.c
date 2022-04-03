@@ -277,27 +277,12 @@ void G_UpdateModConfigInfo( void ) {
 
 		modfn.AddModConfigInfo( info );
 
-		if ( g_altSwapSupport.integer ) {
-			Info_SetValueForKey( info, "altSwapSupport", "1" );
-		}
-
 		if ( *info ) {
 			trap_SetConfigstring( CS_MOD_CONFIG, buffer );
 		} else {
 			trap_SetConfigstring( CS_MOD_CONFIG, "" );
 		}
 	}
-}
-
-/*
-=================
-G_UpdateModConfigCvar
-
-Called when a cvar linked to a mod config value has changed.
-=================
-*/
-static void G_UpdateModConfigCvar( trackedCvar_t *cv ) {
-	G_UpdateModConfigInfo();
 }
 
 /*
@@ -399,9 +384,6 @@ static void G_RegisterCvars( void ) {
 
 	// configure g_needpass auto update
 	G_RegisterCvarCallback( &g_password, G_UpdateNeedPass, qtrue );
-
-	// handle mod config cvar changes
-	G_RegisterCvarCallback( &g_altSwapSupport, G_UpdateModConfigCvar, qfalse );
 }
 
 /*
@@ -476,6 +458,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	level.time = levelTime;
 	level.startTime = levelTime;
 	level.restarted = restart;
+	level.hasRestarted = restart;
 
 	level.snd_fry = G_SoundIndex("sound/player/fry.wav");	// FIXME standing in lava / slime
 

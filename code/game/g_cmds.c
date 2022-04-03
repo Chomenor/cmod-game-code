@@ -1643,17 +1643,6 @@ void Cmd_SetViewpos_f( gentity_t *ent ) {
 	TeleportPlayer( ent, origin, angles, TP_NORMAL );
 }
 
-/*
-=================
-Cmd_SetAltSwap_f
-=================
-*/
-void Cmd_SetAltSwap_f( gentity_t *ent ) {
-	char		buffer[MAX_TOKEN_CHARS];
-	trap_Argv( 1, buffer, sizeof( buffer ) );
-	ent->client->sess.altSwapFlags = atoi( buffer );
-}
-
 
 /*
 =================
@@ -1671,6 +1660,11 @@ void ClientCommand( int clientNum ) {
 
 
 	trap_Argv( 0, cmd, sizeof( cmd ) );
+
+	// Check if any mods have special handling of this command
+	if ( modfn.ModClientCommand( clientNum, cmd ) ) {
+		return;
+	}
 
 	if (Q_stricmp (cmd, "say") == 0) {
 		Cmd_Say_f (ent, SAY_ALL, qfalse);
@@ -1732,8 +1726,6 @@ void ClientCommand( int clientNum ) {
 		Cmd_GameCommand_f( ent );
 	else if (Q_stricmp (cmd, "setviewpos") == 0)
 		Cmd_SetViewpos_f( ent );
-	else if (Q_stricmp (cmd, "setaltswap") == 0)
-		Cmd_SetAltSwap_f( ent );
 	else
 		trap_SendServerCommand( clientNum, va("print \"unknown cmd %s\n\"", cmd ) );
 }

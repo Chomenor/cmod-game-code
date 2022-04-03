@@ -11,3 +11,4 @@ int G_ModUtils_GetLatchedValue( const char *cvar_name, const char *default_value
 
 // Feature Initialization
 void ModPlayerMove_Init( void );
+void ModAltSwapHandler_Init( void );

@@ -201,12 +201,16 @@
     <ClInclude Include="..\..\code\game\botai.h" />
     <ClInclude Include="..\..\code\game\botlib.h" />
     <ClInclude Include="..\..\code\game\chars.h" />
+    <ClInclude Include="..\..\code\game\g_cvar_defs.h" />
     <ClInclude Include="..\..\code\game\g_groups.h" />
     <ClInclude Include="..\..\code\game\g_local.h" />
     <ClInclude Include="..\..\code\game\g_public.h" />
     <ClInclude Include="..\..\code\game\g_team.h" />
     <ClInclude Include="..\..\code\game\inv.h" />
     <ClInclude Include="..\..\code\game\match.h" />
+    <ClInclude Include="..\..\code\game\mods\g_mod_defs.h" />
+    <ClInclude Include="..\..\code\game\mods\g_mod_local.h" />
+    <ClInclude Include="..\..\code\game\mods\g_mod_public.h" />
     <ClInclude Include="..\..\code\game\syn.h" />
   </ItemGroup>
   <ItemGroup>
@@ -249,6 +253,11 @@
     <ClCompile Include="..\..\code\game\g_usable.c" />
     <ClCompile Include="..\..\code\game\g_utils.c" />
     <ClCompile Include="..\..\code\game\g_weapon.c" />
+    <ClCompile Include="..\..\code\game\mods\features\feature_altswap_handler.c" />
+    <ClCompile Include="..\..\code\game\mods\features\feature_player_move.c" />
+    <ClCompile Include="..\..\code\game\mods\g_mod_main.c" />
+    <ClCompile Include="..\..\code\game\mods\g_mod_stubs.c" />
+    <ClCompile Include="..\..\code\game\mods\g_mod_utils.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

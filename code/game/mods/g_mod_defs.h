@@ -55,5 +55,8 @@ MOD_FUNCTION_DEF( PostPmoveActions, void, ( pmove_t *pmove, int clientNum, int o
 // misc
 //////////////////////////
 
+// Allows mods to handle client commands. Returns qtrue to suspend normal handling of command.
+MOD_FUNCTION_DEF( ModClientCommand, qboolean, ( int clientNum, const char *cmd ) )
+
 // Allows mods to add values to the mod config configstring.
 MOD_FUNCTION_DEF( AddModConfigInfo, void, ( char *info ) )

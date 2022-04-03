@@ -249,7 +249,6 @@ typedef struct {
 	spectatorState_t	spectatorState;
 	int			spectatorClient;	// for chasecam and follow mode
 	int			wins, losses;		// tournament stats
-	int			altSwapFlags;		// for alt-fire swapping
 } clientSession_t;
 
 #define	MAX_VOTE_COUNT		3
@@ -362,6 +361,7 @@ typedef struct {
 										// we changed gametype
 
 	qboolean	restarted;				// waiting for a map_restart to fire
+	qboolean	hasRestarted;			// whether any map_restart has been done since map was loaded
 
 	int			numConnectedClients;
 	int			numNonSpectatorClients;	// includes connecting clients

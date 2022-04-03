@@ -20,6 +20,11 @@ LOGFUNCTION_RET( int, ModFNDefault_AdjustPmoveConstant, ( pmoveConstant_t pmcTyp
 	return defaultValue;
 }
 
+LOGFUNCTION_RET( qboolean, ModFNDefault_ModClientCommand, ( int clientNum, const char *cmd ),
+		( clientNum, cmd ), "G_MODFN_MODCLIENTCOMMAND" ) {
+	return qfalse;
+}
+
 LOGFUNCTION_VOID( ModFNDefault_AddModConfigInfo, ( char *info ),
 		( info ), "G_MODFN_ADDMODCONFIGINFO" ) {
 }

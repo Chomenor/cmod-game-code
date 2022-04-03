@@ -71,15 +71,14 @@ void G_WriteClientSessionData( gclient_t *client ) {
 	const char	*var;
 	info_string_t info;
 
-	s = va("%i %i %i %i %i %i %i %i",
+	s = va("%i %i %i %i %i %i %i",
 		client->sess.sessionTeam,
 		client->sess.sessionClass,
 		client->sess.spectatorTime,
 		client->sess.spectatorState,
 		client->sess.spectatorClient,
 		client->sess.wins,
-		client->sess.losses,
-		client->sess.altSwapFlags
+		client->sess.losses
 		);
 
 	var = va( "session%i", clientNum );
@@ -128,15 +127,14 @@ void G_ReadSessionData( gclient_t *client ) {
 	var = va( "session%i", clientNum );
 	trap_Cvar_VariableStringBuffer( var, s, sizeof(s) );
 
-	sscanf( s, "%i %i %i %i %i %i %i %i",
+	sscanf( s, "%i %i %i %i %i %i %i",
 		&client->sess.sessionTeam,
 		&client->sess.sessionClass,
 		&client->sess.spectatorTime,
 		&client->sess.spectatorState,
 		&client->sess.spectatorClient,
 		&client->sess.wins,
-		&client->sess.losses,
-		&client->sess.altSwapFlags
+		&client->sess.losses
 		);
 
 	// Call mod initialization

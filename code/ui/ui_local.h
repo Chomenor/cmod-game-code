@@ -4,7 +4,6 @@
 #define __UI_LOCAL_H__
 
 #include "q_shared.h"
-#include "vm_common.h"
 #include "aspect_correct.h"
 #include "tr_types.h"
 #include "ui_public.h"

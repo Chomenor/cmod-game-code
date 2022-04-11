@@ -183,7 +183,6 @@
     <ClInclude Include="..\..\code\common\q_shared.h" />
     <ClInclude Include="..\..\code\common\surfaceflags.h" />
     <ClInclude Include="..\..\code\common\tr_types.h" />
-    <ClInclude Include="..\..\code\common\vm_common.h" />
     <ClInclude Include="..\..\code\game\ai_chat.h" />
     <ClInclude Include="..\..\code\game\ai_cmd.h" />
     <ClInclude Include="..\..\code\game\ai_dmnet.h" />

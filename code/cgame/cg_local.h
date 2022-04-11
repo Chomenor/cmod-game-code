@@ -1,7 +1,6 @@
 // Copyright (C) 1999-2000 Id Software, Inc.
 //
 #include "q_shared.h"
-#include "vm_common.h"
 #include "aspect_correct.h"
 #include "tr_types.h"
 #include "bg_public.h"

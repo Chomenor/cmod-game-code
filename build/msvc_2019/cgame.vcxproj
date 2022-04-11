@@ -189,7 +189,6 @@
     <ClInclude Include="..\..\code\common\q_shared.h" />
     <ClInclude Include="..\..\code\common\surfaceflags.h" />
     <ClInclude Include="..\..\code\common\tr_types.h" />
-    <ClInclude Include="..\..\code\common\vm_common.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\code\cgame\cg_consolecmds.c" />

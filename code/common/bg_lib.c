@@ -642,6 +642,22 @@ void AddInt( char **buf_p, int val, int width, int flags ) {
 	*buf_p = buf;
 }
 
+// Round-towards-zero float cast (e.g. both 0.9 and -0.9 round to 0)
+// Compensates for different float casting behavior between EF and Q3 engines
+static int RTZFloatToInt( float val ) {
+	int cast = (int)val;
+	if ( val > 0.0f ) {
+		if ( (float)cast > val ) {
+			--cast;
+		}
+	} else if ( val < 0.0f ) {
+		if ( (float)cast < val ) {
+			++cast;
+		}
+	}
+	return cast;
+}
+
 void AddFloat( char **buf_p, float fval, int width, int prec ) {
 	char	text[32];
 	int		digits;
@@ -649,15 +665,13 @@ void AddFloat( char **buf_p, float fval, int width, int prec ) {
 	char	*buf;
 	int		val;
 
-	// FIXME!!!! handle fractions
-
 	digits = 0;
 	signedVal = fval;
 	if ( fval < 0 ) {
 		fval = -fval;
 	}
 
-	val = (int)fval;
+	val = RTZFloatToInt( fval );
 	do {
 		text[digits++] = '0' + val % 10;
 		val /= 10;
@@ -679,6 +693,26 @@ void AddFloat( char **buf_p, float fval, int width, int prec ) {
 	}
 
 	*buf_p = buf;
+
+	if (prec < 0)
+		prec = 6;
+	// write the fraction
+	digits = 0;
+	while (digits < prec) {
+		fval -= RTZFloatToInt( fval );
+		fval *= 10.0;
+		val = RTZFloatToInt( fval );
+		text[digits++] = '0' + val % 10;
+	}
+
+	if (digits > 0) {
+		buf = *buf_p;
+		*buf++ = '.';
+		for (prec = 0; prec < digits; prec++) {
+			*buf++ = text[prec];
+		}
+		*buf_p = buf;
+	}
 }
 
 

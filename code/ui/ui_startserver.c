@@ -4512,7 +4512,7 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	Com_sprintf( s_advancedserver.runspeed.field.buffer, 5, "%i", (int)Com_Clamp( 150, 1000, trap_Cvar_VariableValue( "g_speed" ) ) );
 	Com_sprintf( s_advancedserver.gravity.field.buffer, 5, "%i", (int)Com_Clamp( 0, 5000, trap_Cvar_VariableValue( "g_gravity" ) ) );
 	Com_sprintf( s_advancedserver.knockback.field.buffer, 6, "%i", (int)Com_Clamp( 0, 10000, trap_Cvar_VariableValue( "g_knockback" ) ) );
-	Com_sprintf( s_advancedserver.dmgmult.field.buffer, 12, "%f", (float)Com_Clamp( 0.0, 100.0, trap_Cvar_VariableValue( "g_dmgmult" ) ) );
+	Com_sprintf( s_advancedserver.dmgmult.field.buffer, 12, "%.2f", (float)Com_Clamp( 0.0, 100.0, trap_Cvar_VariableValue( "g_dmgmult" ) ) );
 	Com_sprintf( s_advancedserver.bot_minplayers.field.buffer, 3, "%i", (int)Com_Clamp( 0, 64, trap_Cvar_VariableValue( "bot_minplayers" ) ) );
 	Com_sprintf( s_advancedserver.forceplayerrespawn.field.buffer, 3, "%i", (int)Com_Clamp( 0, 120, trap_Cvar_VariableValue( "g_forcerespawn" ) ) );
 	Com_sprintf( s_advancedserver.respawninvulnerability.field.buffer, 3, "%i", (int)Com_Clamp( 0, 30, trap_Cvar_VariableValue( "g_ghostRespawn" ) ) );

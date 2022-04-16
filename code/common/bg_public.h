@@ -761,6 +761,7 @@ void VMExt_FN_AltSwap_SetState( qboolean swapState );
 // logging.c
 //
 
+void Logging_AssertionWarning( const char *expression );
 int Logging_Assertion( intptr_t result, const char *expression, qboolean error );
 
 // Generates a warning/error if "expression" is false.

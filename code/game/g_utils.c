@@ -5,6 +5,45 @@
 #include "g_local.h"
 
 /*
+=================================================================================
+
+connected client checks
+
+=================================================================================
+*/
+
+/*
+================
+G_AssertConnectedClient
+
+Checks a client number that is supposed to be valid and connected to ensure it is actually valid.
+Returns qtrue if client is valid and connected, otherwise returns qfalse and logs warning.
+================
+*/
+qboolean G_AssertConnectedClient( int clientNum ) {
+	if ( clientNum >= 0 && clientNum < level.maxclients && level.clients[clientNum].pers.connected >= CON_CONNECTING ) {
+		return qtrue;
+	}
+
+	Logging_AssertionWarning( "G_AssertConnectedClient" );
+	return qfalse;
+}
+
+/*
+================
+G_IsConnectedClient
+
+Returns qtrue if client is valid and connected, otherwise returns qfalse.
+================
+*/
+qboolean G_IsConnectedClient( int clientNum ) {
+	if ( clientNum >= 0 && clientNum < level.maxclients && level.clients[clientNum].pers.connected >= CON_CONNECTING ) {
+		return qtrue;
+	}
+	return qfalse;
+}
+
+/*
 =========================================================================
 
 model / sound configstring indexes

@@ -22,7 +22,7 @@ Current generate only one warning per session, to avoid potential console floodi
 warning is triggered repeatedly.
 =================
 */
-static void Logging_AssertionWarning( const char *expression ) {
+void Logging_AssertionWarning( const char *expression ) {
 	static qboolean warned = qfalse;
 	if ( !warned ) {
 		char buffer[1024];

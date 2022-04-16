@@ -455,6 +455,9 @@ void SaveRegisteredItems( void );
 //
 // g_utils.c
 //
+qboolean G_AssertConnectedClient( int clientNum );
+qboolean G_IsConnectedClient( int clientNum );
+
 int G_ModelIndex( char *name );
 int		G_SoundIndex( char *name );
 void	G_TeamCommand( team_t team, char *cmd );

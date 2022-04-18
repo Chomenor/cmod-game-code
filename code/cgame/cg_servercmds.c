@@ -147,6 +147,8 @@ void CG_ParseModConfig( void ) {
 	memset( &cgs.modConfig, 0, sizeof( cgs.modConfig ) );
 	memset( cgs.modConfigSet, 0, sizeof( cgs.modConfigSet ) );
 
+	CG_WeaponPredict_ResetConfig();
+
 	// look for any configstring matching "!modcfg " prefix
 	for ( i = 0; i < MAX_CONFIGSTRINGS; ++i ) {
 		const char *str = CG_ConfigString( i );
@@ -179,6 +181,8 @@ void CG_ParseModConfig( void ) {
 					cgs.modConfig.altSwapSupport = atoi( value ) ? qtrue : qfalse;
 				if ( !Q_stricmp( key, "altSwapPrefs" ) )
 					Q_strncpyz( cgs.modConfig.altSwapPrefs, value, sizeof( cgs.modConfig.altSwapPrefs ) );
+				if ( !Q_stricmp( key, "weaponPredict" ) )
+					CG_WeaponPredict_LoadConfig( value );
 			}
 
 			cgs.modConfigSet[i] = qtrue;

@@ -480,13 +480,14 @@ void BodyRezOut( gentity_t *ent )
 
 /*
 =============
-CopyToBodyQue
+(ModFN) CopyToBodyQue
 
 A player is respawning, so make an entity that looks
 just like the existing corpse to leave behind.
 =============
 */
-void CopyToBodyQue( gentity_t *ent ) {
+LOGFUNCTION_RET( gentity_t *, ModFNDefault_CopyToBodyQue, ( int clientNum ), ( clientNum ), "G_MODFN_COPYTOBODYQUE" ) {
+	gentity_t *ent = &g_entities[clientNum];
 	gentity_t		*body;
 	int			contents;
 
@@ -496,7 +497,7 @@ void CopyToBodyQue( gentity_t *ent ) {
 	contents = trap_PointContents( ent->s.origin, -1 );
 	if ( contents & CONTENTS_NODROP ) {
 	//	ent->s.eFlags &= ~EF_NODRAW;	// Just in case we died from a bottomless pit, reset EF_NODRAW
-		return;
+		return NULL;
 	}
 
 	// grab a body que and cycle to the next one
@@ -573,6 +574,7 @@ void CopyToBodyQue( gentity_t *ent ) {
 
 	VectorCopy ( body->s.pos.trBase, body->r.currentOrigin );
 	trap_LinkEntity (body);
+	return body;
 }
 
 //======================================================================
@@ -618,7 +620,7 @@ void EliminationRespawn( gentity_t *ent, char *team )
 
 void EliminationSpectate( gentity_t *ent )
 {
-	CopyToBodyQue (ent);
+	modfn.CopyToBodyQue (ent - g_entities);
 
 	ClientSpawn(ent);
 	ent->takedamage = qfalse;
@@ -696,7 +698,7 @@ void respawn( gentity_t *ent ) {
 	}
 	else
 	{//assimilated players don't leave corpses
-		CopyToBodyQue (ent);
+		modfn.CopyToBodyQue (ent - g_entities);
 	}
 
 	ClientSpawn(ent);

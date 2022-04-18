@@ -86,6 +86,7 @@ vmCvar_t	cg_animSpeed;
 vmCvar_t	cg_debugAnim;
 vmCvar_t	cg_debugPosition;
 vmCvar_t	cg_debugEvents;
+vmCvar_t	cg_debugPredictWeapons;
 vmCvar_t	cg_errorDecay;
 vmCvar_t	cg_nopredict;
 vmCvar_t	cg_predictCache;
@@ -120,6 +121,7 @@ vmCvar_t 	cg_forceModel;
 vmCvar_t	cg_paused;
 vmCvar_t	cg_blood;
 vmCvar_t	cg_predictItems;
+vmCvar_t	cg_predictWeapons;
 vmCvar_t	cg_deferPlayers;
 vmCvar_t	cg_drawTeamOverlay;
 vmCvar_t	cg_teamOverlayUserinfo;
@@ -176,6 +178,7 @@ cvarTable_t		cvarTable[] = {
 	{ &cg_debugAnim, "cg_debuganim", "0", CVAR_CHEAT },
 	{ &cg_debugPosition, "cg_debugposition", "0", CVAR_CHEAT },
 	{ &cg_debugEvents, "cg_debugevents", "0", CVAR_CHEAT },
+	{ &cg_debugPredictWeapons, "cg_debugPredictWeapons", "0", 0 },
 	{ &cg_errorDecay, "cg_errordecay", "100", 0 },
 	{ &cg_nopredict, "cg_nopredict", "0", 0 },
 	{ &cg_predictCache, "cg_predictCache", "1", 0 },
@@ -189,6 +192,7 @@ cvarTable_t		cvarTable[] = {
 	{ &cg_teamChatHeight, "cg_teamChatHeight", "0", CVAR_ARCHIVE  },
 	{ &cg_forceModel, "cg_forceModel", "0", CVAR_ARCHIVE  },
 	{ &cg_predictItems, "cg_predictItems", "1", CVAR_ARCHIVE },
+	{ &cg_predictWeapons, "cg_predictWeapons", "1", CVAR_ARCHIVE },
 	{ &cg_deferPlayers, "cg_deferPlayers", "1", CVAR_ARCHIVE },
 	{ &cg_drawTeamOverlay, "cg_drawTeamOverlay", "0", CVAR_ARCHIVE },
 	{ &cg_teamOverlayUserinfo, "teamoverlay", "0", CVAR_ROM | CVAR_USERINFO },

@@ -207,6 +207,7 @@
     <ClInclude Include="..\..\code\game\g_team.h" />
     <ClInclude Include="..\..\code\game\inv.h" />
     <ClInclude Include="..\..\code\game\match.h" />
+    <ClInclude Include="..\..\code\game\mods\features\pingcomp\pc_local.h" />
     <ClInclude Include="..\..\code\game\mods\g_mod_defs.h" />
     <ClInclude Include="..\..\code\game\mods\g_mod_local.h" />
     <ClInclude Include="..\..\code\game\mods\g_mod_public.h" />
@@ -254,6 +255,16 @@
     <ClCompile Include="..\..\code\game\g_weapon.c" />
     <ClCompile Include="..\..\code\game\mods\features\feature_altswap_handler.c" />
     <ClCompile Include="..\..\code\game\mods\features\feature_player_move.c" />
+    <ClCompile Include="..\..\code\game\mods\features\pingcomp\pc_client_predict.c" />
+    <ClCompile Include="..\..\code\game\mods\features\pingcomp\pc_dead_move.c" />
+    <ClCompile Include="..\..\code\game\mods\features\pingcomp\pc_instant_weapons.c" />
+    <ClCompile Include="..\..\code\game\mods\features\pingcomp\pc_main.c" />
+    <ClCompile Include="..\..\code\game\mods\features\pingcomp\pc_position_shift.c" />
+    <ClCompile Include="..\..\code\game\mods\features\pingcomp\pc_projectile_impact.c" />
+    <ClCompile Include="..\..\code\game\mods\features\pingcomp\pc_projectile_launch.c" />
+    <ClCompile Include="..\..\code\game\mods\features\pingcomp\pc_smoothing.c" />
+    <ClCompile Include="..\..\code\game\mods\features\pingcomp\pc_smoothing_debug.c" />
+    <ClCompile Include="..\..\code\game\mods\features\pingcomp\pc_smoothing_offset.c" />
     <ClCompile Include="..\..\code\game\mods\g_mod_main.c" />
     <ClCompile Include="..\..\code\game\mods\g_mod_stubs.c" />
     <ClCompile Include="..\..\code\game\mods\g_mod_utils.c" />

@@ -24,6 +24,31 @@ MOD_FUNCTION_DEF( GeneralInit, void, ( void ) )
 MOD_FUNCTION_DEF( PostRunFrame, void, ( void ) )
 
 //////////////////////////
+// weapon related
+//////////////////////////
+
+// Support modifying weapon-related constants in g_weapon.c.
+MOD_FUNCTION_DEF( AdjustWeaponConstant, int, ( weaponConstant_t wcType, int defaultValue ) )
+
+// Called after weapon projectile has been created.
+MOD_FUNCTION_DEF( PostFireProjectile, void, ( gentity_t *projectile ) )
+
+// Generate random number for weapon shot variation that can be predicted on client.
+MOD_FUNCTION_DEF( WeaponPredictableRNG, unsigned int, ( int clientNum ) )
+
+//////////////////////////
+// combat related
+// (damage, knockback, death, scoring, etc.)
+//////////////////////////
+
+// Deals damage from explosion-type sources.
+MOD_FUNCTION_DEF( RadiusDamage, qboolean, ( vec3_t origin, gentity_t *attacker, float damage, float radius,
+		gentity_t *ignore, int dflags, int mod ) )
+
+// Creates a corpse entity for dead player. Returns body if created, null otherwise.
+MOD_FUNCTION_DEF( CopyToBodyQue, gentity_t *, ( int clientNum ) )
+
+//////////////////////////
 // session related
 //////////////////////////
 
@@ -55,8 +80,19 @@ MOD_FUNCTION_DEF( PostPmoveActions, void, ( pmove_t *pmove, int clientNum, int o
 // misc
 //////////////////////////
 
-// Allows mods to handle client commands. Returns qtrue to suspend normal handling of command.
+// Support modifying integer constants anywhere in the game code.
+// Intended for simple cases that don't justify a separate mod function.
+MOD_FUNCTION_DEF( AdjustGeneralConstant, int, ( generalConstant_t gcType, int defaultValue ) )
+
+// Allow mods to handle custom console commands. Returns qtrue to suppress normal handling of command.
+MOD_FUNCTION_DEF( ModConsoleCommand, qboolean, ( const char *cmd ) )
+
+// Allows mods to handle client commands. Returns qtrue to suppress normal handling of command.
 MOD_FUNCTION_DEF( ModClientCommand, qboolean, ( int clientNum, const char *cmd ) )
 
 // Allows mods to add values to the mod config configstring.
 MOD_FUNCTION_DEF( AddModConfigInfo, void, ( char *info ) )
+
+// Wrapper to trap_Trace function allowing mod overrides.
+MOD_FUNCTION_DEF( TrapTrace, void, ( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs,
+		const vec3_t end, int passEntityNum, int contentmask, int modFlags ) )

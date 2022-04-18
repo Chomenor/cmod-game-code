@@ -1036,6 +1036,11 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 		nonPredictedCent = cent;
 	}
 
+	// if weapon prediction is active, do use predicted entity
+	if ( CG_WeaponPredict_IsActive() ) {
+		nonPredictedCent = cent;
+	}
+
 	// add the flash
 	if ( (	weaponNum == WP_PHASER ||
 			weaponNum == WP_DREADNOUGHT)

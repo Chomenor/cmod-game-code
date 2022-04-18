@@ -1713,6 +1713,7 @@ void G_RunFrame( int levelTime ) {
 	int			i;
 	gentity_t	*ent;
 	int			msec;
+	qboolean	skipRunMissile = modfn.AdjustGeneralConstant( GC_SKIP_RUN_MISSILE, 0 ) ? qtrue : qfalse;
 int start, end;
 
 	// if we are waiting for the level to restart, do nothing
@@ -1779,7 +1780,9 @@ start = trap_Milliseconds();
 		}
 
 		if ( (ent->s.eType == ET_MISSILE) || (ent->s.eType == ET_ALT_MISSILE) ) {
-			G_RunMissile( ent );
+			if ( !skipRunMissile ) {
+				G_RunMissile( ent );
+			}
 			continue;
 		}
 

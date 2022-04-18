@@ -1599,4 +1599,41 @@ char* BG_RegisterRace( const char *name ) {
 }
 
 
+#if defined( MODULE_GAME ) || defined( MODULE_CGAME )
+#define PREDICTABLE_RNG_WINDOW 135
 
+/*
+================
+BG_HashInt
+================
+*/
+static unsigned int BG_HashInt( unsigned int x ) {
+	// from https://github.com/skeeto/hash-prospector
+	x ^= x >> 16;
+	x *= 0x7feb352d;
+	x ^= x >> 15;
+	x *= 0x846ca68b;
+	x ^= x >> 16;
+	return x;
+}
+
+/*
+================
+BG_PredictableRNG_Rand
+================
+*/
+unsigned int BG_PredictableRNG_Rand( predictableRNG_t *rng, int time ) {
+	unsigned int window = (unsigned int)time / PREDICTABLE_RNG_WINDOW;
+
+	if ( rng->currentWindow != window ) {
+		// Generate new seed
+		rng->seed = BG_HashInt( window );
+		rng->currentWindow = window;
+	} else {
+		// Advance seed
+		rng->seed = rng->seed * 214013U + 2531011U;
+	}
+
+	return ( rng->seed >> 16 ) | ( rng->seed << 16 );
+}
+#endif

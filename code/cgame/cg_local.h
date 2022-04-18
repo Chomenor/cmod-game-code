@@ -1189,6 +1189,7 @@ extern	vmCvar_t		cg_animSpeed;
 extern	vmCvar_t		cg_debugAnim;
 extern	vmCvar_t		cg_debugPosition;
 extern	vmCvar_t		cg_debugEvents;
+extern	vmCvar_t		cg_debugPredictWeapons;
 extern	vmCvar_t		cg_errorDecay;
 extern	vmCvar_t		cg_nopredict;
 extern	vmCvar_t		cg_predictCache;
@@ -1223,6 +1224,7 @@ extern	vmCvar_t 		cg_buildScript;
 extern	vmCvar_t		cg_paused;
 extern	vmCvar_t		cg_blood;
 extern	vmCvar_t		cg_predictItems;
+extern	vmCvar_t		cg_predictWeapons;
 extern	vmCvar_t		cg_deferPlayers;
 extern	vmCvar_t		cg_altFireSwap;
 
@@ -1398,6 +1400,17 @@ void CG_LoadDeferredPlayers( void );
 
 
 //
+// cg_predict_weapons.c
+//
+void CG_WeaponPredict_ResetConfig( void );
+void CG_WeaponPredict_LoadConfig( const char *configStr );
+qboolean CG_WeaponPredict_IsActive( void );
+void CG_WeaponPredict_DrawPredictedProjectiles( void );
+void CG_WeaponPredict_TransitionSnapshot( void );
+void CG_WeaponPredict_HandleEvent( centity_t *cent );
+
+
+//
 // cg_events.c
 //
 void CG_CheckEvents( centity_t *cent );
@@ -1410,6 +1423,7 @@ void CG_PainEvent( centity_t *cent, int health );
 // cg_ents.c
 //
 void CG_SetEntitySoundPosition( centity_t *cent );
+void CG_Missile( centity_t *cent, qboolean altfire );
 void CG_AddPacketEntities( void );
 void CG_Beam( centity_t *cent );
 void CG_AdjustPositionForMover( const vec3_t in, int moverNum, int fromTime, int toTime, vec3_t out );

@@ -545,6 +545,7 @@ void TeleportPlayer( gentity_t *player, vec3_t origin, vec3_t angles, tpType_t t
 qboolean LogAccuracyHit( gentity_t *target, gentity_t *attacker );
 void CalcMuzzlePoint ( gentity_t *ent, vec3_t forward, vec3_t right, vec3_t up, vec3_t muzzlePoint, float projsize);
 void SnapVectorTowards( vec3_t v, vec3_t to );
+void DreadnoughtBurstThink(gentity_t *ent);
 qboolean SeekerAcquiresTarget ( gentity_t *ent, vec3_t pos );
 void FireSeeker( gentity_t *owner, gentity_t *target, vec3_t origin);
 

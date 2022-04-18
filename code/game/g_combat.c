@@ -1261,14 +1261,16 @@ qboolean CanDamage (gentity_t *targ, vec3_t origin) {
 }
 
 
+extern void tripwireThink ( gentity_t *ent );
+
 /*
 ============
-G_RadiusDamage
+(ModFN) RadiusDamage
 ============
 */
-extern void tripwireThink ( gentity_t *ent );
-qboolean G_RadiusDamage ( vec3_t origin, gentity_t *attacker, float damage, float radius,
-					gentity_t *ignore, int dflags, int mod) {
+LOGFUNCTION_RET( qboolean, ModFNDefault_RadiusDamage,
+		( vec3_t origin, gentity_t *attacker, float damage, float radius, gentity_t *ignore, int dflags, int mod ),
+		( origin, attacker, damage, radius, ignore, dflags, mod ), "G_MODFN_RADIUSDAMAGE" ) {
 	float		points, dist;
 	gentity_t	*ent;
 	int			entityList[MAX_GENTITIES];
@@ -1345,4 +1347,15 @@ qboolean G_RadiusDamage ( vec3_t origin, gentity_t *attacker, float damage, floa
 	}
 
 	return hitClient;
+}
+
+/*
+============
+G_RadiusDamage
+============
+*/
+extern void tripwireThink ( gentity_t *ent );
+qboolean G_RadiusDamage ( vec3_t origin, gentity_t *attacker, float damage, float radius,
+					gentity_t *ignore, int dflags, int mod) {
+	return modfn.RadiusDamage( origin, attacker, damage, radius, ignore, dflags, mod );
 }

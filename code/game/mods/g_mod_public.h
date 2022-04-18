@@ -8,10 +8,24 @@ void G_ModCoreInit( void );
 void G_ModsInit( void );
 
 typedef enum {
+	GC_NONE,
+	GC_SKIP_RUN_MISSILE,
+	GC_EVENT_TIME_OFFSET,
+} generalConstant_t;
+
+typedef enum {
+	WC_NONE,
+	WC_WELDER_SKIP_INITIAL_THINK,
+} weaponConstant_t;
+
+typedef enum {
 	PMC_NONE,
 	PMC_FIXED_LENGTH,	// subdivide moves into this frame length (0 = disabled)
 	PMC_PARTIAL_MOVE_TRIGGERS,	// if 1, process triggers after each subdivided move fragment
 } pmoveConstant_t;
+
+// Mod trace flags
+#define MOD_TRACE_WEAPON 1
 
 //
 // mod functions (modfn.*)

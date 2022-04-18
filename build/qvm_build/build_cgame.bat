@@ -37,6 +37,7 @@ set src=cgame&set name=cg_marks&call :compile
 set src=cgame&set name=cg_players&call :compile
 set src=cgame&set name=cg_playerstate&call :compile
 set src=cgame&set name=cg_predict&call :compile
+set src=cgame&set name=cg_predict_weapons&call :compile
 set src=cgame&set name=cg_scoreboard&call :compile
 set src=cgame&set name=cg_screenfx&call :compile
 set src=cgame&set name=cg_servercmds&call :compile

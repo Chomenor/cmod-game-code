@@ -62,8 +62,11 @@ static void CG_TransitionEntity( centity_t *cent )
 	// clear the next state.  if will be set by the next CG_SetNextSnap
 	cent->interpolate = qfalse;
 
-	// check for events
-	CG_CheckEvents( cent );
+	// weapon prediction handles events separately
+	if ( !CG_WeaponPredict_IsActive() ) {
+		// check for events
+		CG_CheckEvents( cent );
+	}
 }
 
 
@@ -180,6 +183,7 @@ static void CG_TransitionSnapshot( void ) {
 
 	}
 
+	CG_WeaponPredict_TransitionSnapshot();
 }
 
 

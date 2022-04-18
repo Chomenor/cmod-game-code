@@ -458,6 +458,8 @@ void CG_EntityEvent( centity_t *cent, vec3_t position ) {
 	clientInfo_t	*ci;
 	vec3_t		normal = { 0, 0, 1 };
 
+	CG_WeaponPredict_HandleEvent( cent );
+
 	es = &cent->currentState;
 	event = es->event & ~EV_EVENT_BITS;
 

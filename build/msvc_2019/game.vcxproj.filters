@@ -13,6 +13,9 @@
     <Filter Include="game\mods\features">
       <UniqueIdentifier>{CF5F3109-BB43-F25E-24A4-ECB110A7DCE0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="game\mods\features\pingcomp">
+      <UniqueIdentifier>{BBE6177B-27F4-4561-B0DA-414C1CE71118}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\code\common\bg_local.h">
@@ -101,6 +104,9 @@
     </ClInclude>
     <ClInclude Include="..\..\code\game\match.h">
       <Filter>game</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\game\mods\features\pingcomp\pc_local.h">
+      <Filter>game\mods\features\pingcomp</Filter>
     </ClInclude>
     <ClInclude Include="..\..\code\game\mods\g_mod_defs.h">
       <Filter>game\mods</Filter>
@@ -238,6 +244,36 @@
     </ClCompile>
     <ClCompile Include="..\..\code\game\mods\features\feature_player_move.c">
       <Filter>game\mods\features</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\features\pingcomp\pc_client_predict.c">
+      <Filter>game\mods\features\pingcomp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\features\pingcomp\pc_dead_move.c">
+      <Filter>game\mods\features\pingcomp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\features\pingcomp\pc_instant_weapons.c">
+      <Filter>game\mods\features\pingcomp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\features\pingcomp\pc_main.c">
+      <Filter>game\mods\features\pingcomp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\features\pingcomp\pc_position_shift.c">
+      <Filter>game\mods\features\pingcomp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\features\pingcomp\pc_projectile_impact.c">
+      <Filter>game\mods\features\pingcomp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\features\pingcomp\pc_projectile_launch.c">
+      <Filter>game\mods\features\pingcomp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\features\pingcomp\pc_smoothing.c">
+      <Filter>game\mods\features\pingcomp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\features\pingcomp\pc_smoothing_debug.c">
+      <Filter>game\mods\features\pingcomp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\features\pingcomp\pc_smoothing_offset.c">
+      <Filter>game\mods\features\pingcomp</Filter>
     </ClCompile>
     <ClCompile Include="..\..\code\game\mods\g_mod_main.c">
       <Filter>game\mods</Filter>

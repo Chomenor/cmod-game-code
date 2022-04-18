@@ -205,6 +205,7 @@
     <ClCompile Include="..\..\code\cgame\cg_players.c" />
     <ClCompile Include="..\..\code\cgame\cg_playerstate.c" />
     <ClCompile Include="..\..\code\cgame\cg_predict.c" />
+    <ClCompile Include="..\..\code\cgame\cg_predict_weapons.c" />
     <ClCompile Include="..\..\code\cgame\cg_scoreboard.c" />
     <ClCompile Include="..\..\code\cgame\cg_screenfx.c" />
     <ClCompile Include="..\..\code\cgame\cg_servercmds.c" />

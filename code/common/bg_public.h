@@ -269,6 +269,9 @@ typedef enum {
 #define EF_AWARD_STREAK_MASK (EF_AWARD_ACE|EF_AWARD_EXPERT|EF_AWARD_MASTER|EF_AWARD_CHAMPION)
 #define EF_AWARD_MASK		(EF_AWARD_EXCELLENT|EF_AWARD_IMPRESSIVE|EF_AWARD_FIRSTSTRIKE|EF_AWARD_STREAK_MASK)
 
+// Reuse EF_VOTED flag because it is unused for entities in original game
+#define EF_PINGCOMP_NO_DAMAGE EF_VOTED		// indicates entity does not take damage (for weapon prediction purposes)
+
 
 typedef enum {
 	PW_NONE,
@@ -744,6 +747,26 @@ qboolean	BG_PlayerTouchesItem( playerState_t *ps, entityState_t *item, int atTim
 
 extern int Max_Ammo[];
 
+
+#define EXPAND_VECTOR( x ) x[0], x[1], x[2]
+
+//
+// weapon fire prediction
+//
+
+// random string to verify client/server compatibility
+#define BG_WEAPON_PREDICT_VERSION "uxb09a9y"
+
+#define BG_PREDICTABLE_RANDOM( rand ) ( ( (unsigned int)(rand)&0x7fff ) / ( (float)0x7fff ) )
+#define BG_PREDICTABLE_CRANDOM( rand ) ( 2.0 * ( BG_PREDICTABLE_RANDOM( rand ) - 0.5 ) )
+#define BG_PREDICTABLE_IRANDOM( rand, min, max ) ( ( (unsigned int)rand ) % ( max - min ) + min )
+
+typedef struct {
+	unsigned int currentWindow;
+	unsigned int seed;
+} predictableRNG_t;
+
+unsigned int BG_PredictableRNG_Rand( predictableRNG_t *rng, int time );
 
 //
 // vm_extensions.c

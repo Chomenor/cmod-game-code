@@ -17,6 +17,13 @@ extern int	borgQueenClientNum;
 
 #define DMG_VAR			(flrandom(0.8,1.2))
 
+#define WEAPON_TRACE( results, start, mins, maxs, end, passEntityNum, contentmask ) \
+		modfn.TrapTrace( results, start, mins, maxs, end, passEntityNum, contentmask, MOD_TRACE_WEAPON )
+
+// Random functions which can be replicated on the client if weapon prediction is enabled
+#define PREDICTABLE_RANDOM( clientNum ) BG_PREDICTABLE_RANDOM( modfn.WeaponPredictableRNG( clientNum ) )
+#define PREDICTABLE_CRANDOM( clientNum ) BG_PREDICTABLE_CRANDOM( modfn.WeaponPredictableRNG( clientNum ) )
+#define PREDICTABLE_IRANDOM( clientNum, min, max ) BG_PREDICTABLE_IRANDOM( modfn.WeaponPredictableRNG( clientNum ), min, max )
 
 // Weapon damages are located up here for easy access...
 // Phaser
@@ -72,6 +79,15 @@ extern int	borgQueenClientNum;
 // Borg Weapon
 #define BORG_PROJ_DAMAGE			20
 #define BORG_TASER_DAMAGE			15
+
+/*
+======================
+(ModFN) WeaponPredictableRNG
+======================
+*/
+LOGFUNCTION_RET( unsigned int, ModFNDefault_WeaponPredictableRNG, ( int clientNum ), ( clientNum ), "G_MODFN_WEAPONPREDICTABLERNG" ) {
+	return (unsigned int)rand();
+}
 
 /*
 ======================
@@ -143,7 +159,7 @@ void WP_FirePhaser( gentity_t *ent, qboolean alt_fire )
 	}
 	// Find out who we've hit
 //	gi.trace ( &tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT);
-	trap_Trace (&tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT );
+	WEAPON_TRACE (&tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT );
 	if (tr.entityNum != (MAX_GENTITIES-1))
 	{
 		trEnts[0] = tr.entityNum;
@@ -159,7 +175,7 @@ void WP_FirePhaser( gentity_t *ent, qboolean alt_fire )
 		VectorMA(muzzle, halfBeamWidth, vRight, start2);
 		VectorMA(end, halfBeamWidth, vRight, end2);
 		VectorCopy(tr.endpos, end);
-		trap_Trace (&tr, muzzle, NULL, NULL, end, ent->s.number, (CONTENTS_PLAYERCLIP|CONTENTS_BODY) );
+		WEAPON_TRACE (&tr, muzzle, NULL, NULL, end, ent->s.number, (CONTENTS_PLAYERCLIP|CONTENTS_BODY) );
 		if (	(tr.entityNum != (MAX_GENTITIES-1)) &&
 				(tr.entityNum != trEnts[0]) )
 		{
@@ -168,7 +184,7 @@ void WP_FirePhaser( gentity_t *ent, qboolean alt_fire )
 		}
 		VectorMA(muzzle, -halfBeamWidth, vRight, start2);
 		VectorMA(end, -halfBeamWidth, vRight, end2);
-		trap_Trace (&tr, muzzle, NULL, NULL, end, ent->s.number, (CONTENTS_PLAYERCLIP|CONTENTS_BODY) );
+		WEAPON_TRACE (&tr, muzzle, NULL, NULL, end, ent->s.number, (CONTENTS_PLAYERCLIP|CONTENTS_BODY) );
 		if (	(tr.entityNum != (MAX_GENTITIES-1)) &&
 				(tr.entityNum != trEnts[0]) &&
 				(tr.entityNum != trEnts[1]))
@@ -273,13 +289,13 @@ void WP_FireCompressionRifle ( gentity_t *ent, qboolean alt_fire )
 			ent->client->ps.velocity[1] ||
 			ent->client->ps.velocity[2] )
 	{
-		r = crandom()*COMPRESSION_SPREAD;
-		u = crandom()*COMPRESSION_SPREAD;
+		r = PREDICTABLE_CRANDOM( ent - g_entities )*COMPRESSION_SPREAD;
+		u = PREDICTABLE_CRANDOM( ent - g_entities )*COMPRESSION_SPREAD;
 		VectorMA (end, r, right, end);
 		VectorMA (end, u, up, end);
 	}
 
-	trap_Trace (&tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT );
+	WEAPON_TRACE (&tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT );
 
 	// If the beam hits a skybox, etc. it would look foolish to add in an explosion
 	if ( tr.surfaceFlags & SURF_NOIMPACT )
@@ -460,7 +476,7 @@ void WP_FireIMOD ( gentity_t *ent, qboolean alt_fire )
 	// trace only against the solids, so the railgun will go through people
 	do
 	{
-		trap_Trace (&tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT );
+		WEAPON_TRACE (&tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT );
 		traceEnt = &g_entities[ tr.entityNum ];
 		if ( tr.surfaceFlags & SURF_NOIMPACT )
 		{	// If the beam hit the skybox, etc. it would look foolish to add in an explosion
@@ -614,6 +630,8 @@ void FireScavengerBullet( gentity_t *ent, vec3_t start, vec3_t dir )
 	VectorScale( dir, SCAV_VELOCITY, bolt->s.pos.trDelta );
 	SnapVector( bolt->s.pos.trDelta );			// save net bandwidth
 	VectorCopy( start, bolt->r.currentOrigin);
+
+	modfn.PostFireProjectile( bolt );
 }
 
 // Alt-fire...
@@ -649,7 +667,7 @@ void FireScavengerGrenade( gentity_t *ent, vec3_t start, vec3_t dir )
 
 	VectorCopy( start, grenade->s.pos.trBase );
 	SnapVector( grenade->s.pos.trBase );			// save net bandwidth
-	VectorScale( dir, random() * 100 + SCAV_ALT_VELOCITY, grenade->s.pos.trDelta );
+	VectorScale( dir, PREDICTABLE_RANDOM( ent - g_entities ) * 100 + SCAV_ALT_VELOCITY, grenade->s.pos.trDelta );
 
 	// Add a tad of upwards velocity to the shot.
 	grenade->s.pos.trDelta[2] += SCAV_ALT_UP_VELOCITY;
@@ -662,6 +680,8 @@ void FireScavengerGrenade( gentity_t *ent, vec3_t start, vec3_t dir )
 	VectorCopy (start, grenade->pos1);
 	VectorCopy (start, grenade->s.origin2);
 	SnapVector( grenade->s.origin2 );			// save net bandwidth
+
+	modfn.PostFireProjectile( grenade );
 }
 
 //---------------------------------------------------------
@@ -682,11 +702,12 @@ void WP_FireScavenger( gentity_t *ent, qboolean alt_fire )
 	else
 	{
 		vectoangles( dir, angles );
-		VectorSet( temp_ang, angles[0] + (crandom() * SCAV_SPREAD), angles[1] + (crandom() * SCAV_SPREAD), angles[2] );
+		VectorSet( temp_ang, angles[0] + (PREDICTABLE_CRANDOM( ent - g_entities ) * SCAV_SPREAD),
+				angles[1] + (PREDICTABLE_CRANDOM( ent - g_entities ) * SCAV_SPREAD), angles[2] );
 		AngleVectors( temp_ang, dir, NULL, NULL );
 
 		// try to make the shot alternate between barrels
-		offset = irandom(0, 1) * 2 + 1;
+		offset = PREDICTABLE_IRANDOM(ent - g_entities, 0, 1) * 2 + 1;
 
 		// FIXME:  These offsets really don't work like they should
 		VectorMA( start, offset, right, temp_org );
@@ -770,6 +791,8 @@ void FireStasisMissile( gentity_t *ent, vec3_t origin, vec3_t dir, int size )
 	// kef -- need to keep the origin in something that'll reach the cgame side
 	VectorCopy(origin, bolt->s.angles2);
 	SnapVector( bolt->s.angles2 );			// save net bandwidth
+
+	modfn.PostFireProjectile( bolt );
 }
 
 //---------------------------------------------------------
@@ -800,7 +823,7 @@ void DoSmallStasisBeam(gentity_t *ent, vec3_t start, vec3_t dir)
 	gentity_t *traceEnt;
 
 	VectorMA(start, MAXRANGE_ALT_STASIS, dir, end);
-	trap_Trace(&tr, start, NULL, NULL, end, ent->s.number, MASK_SHOT);
+	WEAPON_TRACE(&tr, start, NULL, NULL, end, ent->s.number, MASK_SHOT);
 
 	traceEnt = &g_entities[ tr.entityNum ];
 
@@ -835,7 +858,7 @@ void WP_FireStasisAlt( gentity_t *ent )
 
 	// Find the main impact point
 	VectorMA (muzzle, MAXRANGE_ALT_STASIS, forward, end);
-	trap_Trace ( &tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT);
+	WEAPON_TRACE ( &tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT);
 
 	traceEnt = &g_entities[ tr.entityNum ];
 
@@ -1114,6 +1137,8 @@ void WP_FireGrenade( gentity_t *ent, qboolean alt_fire )
 	VectorCopy( start, grenade->pos2 );
 
 	G_LogWeaponFire(ent->s.number, WP_GRENADE_LAUNCHER);
+
+	modfn.PostFireProjectile( grenade );
 }
 
 
@@ -1199,7 +1224,7 @@ void FireTetrionBullet( gentity_t *ent, vec3_t start, vec3_t dir )
 		VectorNormalize(spreadFwd);
 		// determine new end position for this bullet. give the endpoint some spread, too.
 		VectorMA(new_start, MAXRANGE_TETRION, spreadFwd, end);
-		trap_Trace ( &tr, new_start, NULL, NULL, end, ent->s.number, MASK_SHOT);
+		WEAPON_TRACE ( &tr, new_start, NULL, NULL, end, ent->s.number, MASK_SHOT);
 		if ((tr.entityNum < MAX_GENTITIES) && (tr.entityNum != ENTITYNUM_WORLD))
 		{
 			bHitAlready = qfalse;
@@ -1277,6 +1302,8 @@ void FireTetrionProjectile( gentity_t *ent, vec3_t start, vec3_t dir )
 	VectorScale( dir, TETRION_ALT_VELOCITY, bolt->s.pos.trDelta );
 	SnapVector( bolt->s.pos.trDelta );			// save net bandwidth
 	VectorCopy (start, bolt->r.currentOrigin);
+
+	modfn.PostFireProjectile( bolt );
 }
 
 //---------------------------------------------------------
@@ -1356,6 +1383,8 @@ void FireQuantumBurst( gentity_t *ent, vec3_t start, vec3_t dir )
 	SnapVector( bolt->s.pos.trDelta );			// save net bandwidth
 	VectorCopy (start, bolt->r.currentOrigin);
 	VectorCopy (start, bolt->pos1);
+
+	modfn.PostFireProjectile( bolt );
 }
 
 
@@ -1365,7 +1394,7 @@ qboolean SearchTarget(gentity_t *ent, vec3_t start, vec3_t end)
 	gentity_t *traceEnt;
 	vec3_t fwd;
 
-	trap_Trace (&tr, start, NULL, NULL, end, ent->s.number, MASK_SHOT );
+	WEAPON_TRACE (&tr, start, NULL, NULL, end, ent->s.number, MASK_SHOT );
 	traceEnt = &g_entities[ tr.entityNum ];
 
 	// Don't find teleporting borg in Assimilation mode
@@ -1532,6 +1561,8 @@ void FireQuantumBurstAlt( gentity_t *ent, vec3_t start, vec3_t dir )
 
 	SnapVector( bolt->s.pos.trDelta );			// save net bandwidth
 	VectorCopy (start, bolt->r.currentOrigin);
+
+	modfn.PostFireProjectile( bolt );
 }
 
 //---------------------------------------------------------
@@ -1579,7 +1610,7 @@ void WP_FireDreadnoughtBeam( gentity_t *ent )
 	VectorMA( start, MAXRANGE_DREADNOUGHT, forward, end );
 
 	// Find out who we've hit
-	trap_Trace( &tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT );
+	WEAPON_TRACE( &tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT );
 	traceEnt = &g_entities[ tr.entityNum ];
 
 	if ( traceEnt->takedamage)
@@ -1594,7 +1625,7 @@ void WP_FireDreadnoughtBeam( gentity_t *ent )
 	VectorMA( start, MAXRANGE_DREADNOUGHT, forward, end );
 
 	// Find out who we've hit
-	trap_Trace( &tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT );
+	WEAPON_TRACE( &tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT );
 	traceEnt = &g_entities[ tr.entityNum ];
 
 	if ( traceEnt->takedamage)
@@ -1664,7 +1695,7 @@ void DreadnoughtBurstThink(gentity_t *ent)
 		source = ent->s.number;
 	}
 
-	trap_Trace (&tr, startpos, mins, maxs, endpos, source, MASK_SHOT );
+	WEAPON_TRACE (&tr, startpos, mins, maxs, endpos, source, MASK_SHOT );
 	traceEnt = &g_entities[ tr.entityNum ];
 	// did we hit the holdable shield?
 	if (traceEnt->classname && !Q_stricmp(traceEnt->classname, "holdable_shield"))
@@ -1777,7 +1808,7 @@ void DreadnoughtBurstThink(gentity_t *ent)
 	endpos[1] += flrandom(-DN_RAND_DEV, DN_RAND_DEV);
 	endpos[2] += flrandom(-DN_RAND_DEV*0.5, DN_RAND_DEV*0.5);
 
-	trap_Trace (&tr, startpos, mins, maxs, endpos, source, MASK_SHOT );
+	WEAPON_TRACE (&tr, startpos, mins, maxs, endpos, source, MASK_SHOT );
 	traceEnt = &g_entities[ tr.entityNum ];
 	// did we hit the holdable shield?
 	if (traceEnt->classname && !Q_stricmp(traceEnt->classname, "holdable_shield"))
@@ -1826,7 +1857,7 @@ void DreadnoughtBurstThink(gentity_t *ent)
 	endpos[1] += flrandom(-DN_RAND_DEV, DN_RAND_DEV);
 	endpos[2] += flrandom(-DN_RAND_DEV*0.5, DN_RAND_DEV*0.5);
 
-	trap_Trace (&tr, startpos, mins, maxs, endpos, source, MASK_SHOT );
+	WEAPON_TRACE (&tr, startpos, mins, maxs, endpos, source, MASK_SHOT );
 	traceEnt = &g_entities[ tr.entityNum ];
 	// did we hit the holdable shield?
 	if (traceEnt->classname && !Q_stricmp(traceEnt->classname, "holdable_shield"))
@@ -1919,7 +1950,13 @@ void WP_FireDreadnoughtBurst( gentity_t *ent )
 	VectorCopy( start, bolt->pos1 );
 	VectorCopy( start, bolt->pos2 );
 
-	DreadnoughtBurstThink(bolt);
+	if ( !modfn.AdjustWeaponConstant( WC_WELDER_SKIP_INITIAL_THINK, 0 ) ) {
+		DreadnoughtBurstThink(bolt);
+	}
+
+	if ( bolt->inuse ) {
+		modfn.PostFireProjectile( bolt );
+	}
 }
 
 //---------------------------------------------------------
@@ -1954,7 +1991,7 @@ void WP_FireBorgTaser( gentity_t *ent )
 
 	VectorMA (muzzle, MAXRANGE_IMOD, forward, end);
 
-	trap_Trace (&tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT );
+	WEAPON_TRACE (&tr, muzzle, NULL, NULL, end, ent->s.number, MASK_SHOT );
 	traceEnt = &g_entities[ tr.entityNum ];
 
 	if ( traceEnt->takedamage )
@@ -2016,6 +2053,8 @@ void WP_FireBorgProjectile( gentity_t *ent, vec3_t start )
 	VectorScale( forward, BORG_PROJ_VELOCITY, bolt->s.pos.trDelta );
 	SnapVector( bolt->s.pos.trDelta );			// save net bandwidth
 	VectorCopy( start, bolt->r.currentOrigin);
+
+	modfn.PostFireProjectile( bolt );
 }
 
 void WP_FireBorgWeapon( gentity_t *ent, qboolean alt_fire )
@@ -2085,11 +2124,11 @@ void CorrectForwardVector(gentity_t *ent, vec3_t forward, vec3_t muzzlePoint, fl
 	{
 		VectorSet(mins, -projsize, -projsize, -projsize);
 		VectorSet(maxs, projsize, projsize, projsize);
-		trap_Trace(&tr, eyepoint, mins, maxs, muzzlePoint, ent->s.number, MASK_SHOT);
+		WEAPON_TRACE(&tr, eyepoint, mins, maxs, muzzlePoint, ent->s.number, MASK_SHOT);
 	}
 	else
 	{
-		trap_Trace(&tr, eyepoint, NULL, NULL, muzzlePoint, ent->s.number, MASK_SHOT);
+		WEAPON_TRACE(&tr, eyepoint, NULL, NULL, muzzlePoint, ent->s.number, MASK_SHOT);
 	}
 
 	if (tr.fraction < 1.0)
@@ -2101,7 +2140,7 @@ void CorrectForwardVector(gentity_t *ent, vec3_t forward, vec3_t muzzlePoint, fl
 	{
 		// figure out what our crosshairs are on...
 		VectorMA(eyepoint, MAX_FORWARD_TRACE, forward, end);
-		trap_Trace (&tr, eyepoint, NULL, NULL, end, ent->s.number, MASK_SHOT );
+		WEAPON_TRACE (&tr, eyepoint, NULL, NULL, end, ent->s.number, MASK_SHOT );
 
 		// ...and have our new forward vector point at it
 		VectorSubtract(tr.endpos, muzzlePoint, forward);
@@ -2236,7 +2275,7 @@ void WP_SprayVoyagerHypo( gentity_t *ent, qboolean alt_fire )
 	VectorSet( maxs, 6, 6, 6 );
 	VectorScale( maxs, -1, mins );
 
-	trap_Trace ( &tr, muzzle, mins, maxs, end, ent->s.number, MASK_SHOT );
+	WEAPON_TRACE ( &tr, muzzle, mins, maxs, end, ent->s.number, MASK_SHOT );
 
 	if ( tr.entityNum >= ENTITYNUM_WORLD )
 	{
@@ -2290,7 +2329,7 @@ void WP_Assimilate( gentity_t *ent, qboolean alt_fire )
 	}
 	VectorMA( muzzle, range, forward, end );
 
-	trap_Trace ( &tr, muzzle, vec3_origin, vec3_origin, end, ent->s.number, MASK_SHOT );
+	WEAPON_TRACE ( &tr, muzzle, vec3_origin, vec3_origin, end, ent->s.number, MASK_SHOT );
 
 	if ( tr.entityNum >= ENTITYNUM_WORLD )
 	{

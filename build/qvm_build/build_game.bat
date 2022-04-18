@@ -65,6 +65,16 @@ set src=game\mods&set name=g_mod_stubs&call :compile
 set src=game\mods&set name=g_mod_utils&call :compile
 set src=game\mods\features&set name=feature_altswap_handler&call :compile
 set src=game\mods\features&set name=feature_player_move&call :compile
+set src=game\mods\features\pingcomp&set name=pc_client_predict&call :compile
+set src=game\mods\features\pingcomp&set name=pc_dead_move&call :compile
+set src=game\mods\features\pingcomp&set name=pc_instant_weapons&call :compile
+set src=game\mods\features\pingcomp&set name=pc_main&call :compile
+set src=game\mods\features\pingcomp&set name=pc_position_shift&call :compile
+set src=game\mods\features\pingcomp&set name=pc_projectile_impact&call :compile
+set src=game\mods\features\pingcomp&set name=pc_projectile_launch&call :compile
+set src=game\mods\features\pingcomp&set name=pc_smoothing&call :compile
+set src=game\mods\features\pingcomp&set name=pc_smoothing_debug&call :compile
+set src=game\mods\features\pingcomp&set name=pc_smoothing_offset&call :compile
 set src=common&set name=logging&call :compile
 set src=common&set name=vm_extensions&call :compile
 

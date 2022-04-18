@@ -86,6 +86,9 @@
     <ClCompile Include="..\..\code\cgame\cg_predict.c">
       <Filter>cgame</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\code\cgame\cg_predict_weapons.c">
+      <Filter>cgame</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\code\cgame\cg_scoreboard.c">
       <Filter>cgame</Filter>
     </ClCompile>

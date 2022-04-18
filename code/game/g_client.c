@@ -1594,8 +1594,9 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 	// read or initialize the session data
 	if ( firstTime || level.newSession ) {
 		G_InitSessionData( client, userinfo );
+	} else {
+		G_ReadSessionData( client );
 	}
-	G_ReadSessionData( client );
 
 	if( isBot ) {
 		ent->r.svFlags |= SVF_BOT;

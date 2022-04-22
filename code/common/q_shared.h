@@ -725,12 +725,12 @@ char	* QDECL va(char *format, ...);
 // key / value info strings
 //
 char *Info_ValueForKey( const char *s, const char *key );
-void Info_RemoveKey( char *s, const char *key );
-void Info_RemoveKey_big( char *s, const char *key );
-void Info_SetValueForKey( char *s, const char *key, const char *value );
-void Info_SetValueForKey_Big( char *s, const char *key, const char *value );
+void Info_SetValueForKey_Size( char *s, const char *key, const char *value, int bufSize );
 qboolean Info_Validate( const char *s );
 void Info_NextPair( const char **s, char key[MAX_INFO_KEY], char value[MAX_INFO_VALUE] );
+
+#define Info_SetValueForKey( s, key, value ) Info_SetValueForKey_Size( s, key, value, MAX_INFO_STRING )
+#define Info_SetValueForKey_Big( s, key, value ) Info_SetValueForKey_Size( s, key, value, BIG_INFO_STRING )
 
 // this is only here so the functions in q_shared.c and bg_*.c can link
 void	QDECL Com_Error( int level, const char *error, ... );

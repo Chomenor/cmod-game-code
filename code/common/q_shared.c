@@ -901,7 +901,6 @@ char *Info_ValueForKey( const char *s, const char *key ) {
 	return "";
 }
 
-
 /*
 ===================
 Info_NextPair
@@ -942,20 +941,23 @@ void Info_NextPair( const char **head, char key[MAX_INFO_KEY], char value[MAX_IN
 	*head = s;
 }
 
-
 /*
 ===================
-Info_RemoveKey
+Info_RemoveKey_Size
 ===================
 */
-void Info_RemoveKey( char *s, const char *key ) {
+static void Info_RemoveKey_Size( char *s, const char *key, unsigned int bufSize ) {
 	char	*start;
-	char	pkey[MAX_INFO_KEY];
-	char	value[MAX_INFO_VALUE];
+	char	pkey[BIG_INFO_STRING];
+	char	value[BIG_INFO_STRING];
 	char	*o;
 
-	if ( strlen( s ) >= MAX_INFO_STRING ) {
-		Com_Error( ERR_DROP, "Info_RemoveKey: oversize infostring" );
+	if ( bufSize > BIG_INFO_STRING ) {
+		Com_Error( ERR_DROP, "Info_RemoveKey_Size: oversize bufSize" );
+	}
+
+	if ( strlen( s ) >= bufSize ) {
+		Com_Error( ERR_DROP, "Info_RemoveKey_Size: oversize infostring" );
 	}
 
 	if (strchr (key, '\\')) {
@@ -988,7 +990,7 @@ void Info_RemoveKey( char *s, const char *key ) {
 
 		if (!strcmp (key, pkey) )
 		{
-			strcpy (start, s);	// remove this part
+			memmove(start, s, strlen(s) + 1);	// remove this part
 			return;
 		}
 
@@ -997,64 +999,6 @@ void Info_RemoveKey( char *s, const char *key ) {
 	}
 
 }
-
-/*
-===================
-Info_RemoveKey_Big
-===================
-*/
-void Info_RemoveKey_Big( char *s, const char *key ) {
-	char	*start;
-	char	pkey[BIG_INFO_KEY];
-	char	value[BIG_INFO_VALUE];
-	char	*o;
-
-	if ( strlen( s ) >= BIG_INFO_STRING ) {
-		Com_Error( ERR_DROP, "Info_RemoveKey_Big: oversize infostring" );
-	}
-
-	if (strchr (key, '\\')) {
-		return;
-	}
-
-	while (1)
-	{
-		start = s;
-		if (*s == '\\')
-			s++;
-		o = pkey;
-		while (*s != '\\')
-		{
-			if (!*s)
-				return;
-			*o++ = *s++;
-		}
-		*o = 0;
-		s++;
-
-		o = value;
-		while (*s != '\\' && *s)
-		{
-			if (!*s)
-				return;
-			*o++ = *s++;
-		}
-		*o = 0;
-
-		if (!strcmp (key, pkey) )
-		{
-			strcpy (start, s);	// remove this part
-			return;
-		}
-
-		if (!*s)
-			return;
-	}
-
-}
-
-
-
 
 /*
 ==================
@@ -1076,63 +1020,20 @@ qboolean Info_Validate( const char *s ) {
 
 /*
 ==================
-Info_SetValueForKey
+Info_SetValueForKey_Size
 
 Changes or adds a key/value pair
 ==================
 */
-void Info_SetValueForKey( char *s, const char *key, const char *value ) {
-	char	newi[MAX_INFO_STRING];
-
-	if ( strlen( s ) >= MAX_INFO_STRING ) {
-		Com_Error( ERR_DROP, "Info_SetValueForKey: oversize infostring" );
-	}
-
-	if (strchr (key, '\\') || strchr (value, '\\'))
-	{
-		Com_Printf ("Can't use keys or values with a \\\n");
-		return;
-	}
-
-	if (strchr (key, ';') || strchr (value, ';'))
-	{
-		Com_Printf ("Can't use keys or values with a semicolon\n");
-		return;
-	}
-
-	if (strchr (key, '\"') || strchr (value, '\"'))
-	{
-		Com_Printf ("Can't use keys or values with a \"\n");
-		return;
-	}
-
-	Info_RemoveKey (s, key);
-	if (!value || !strlen(value))
-		return;
-
-	Com_sprintf (newi, sizeof(newi), "\\%s\\%s", key, value);
-
-	if (strlen(newi) + strlen(s) > MAX_INFO_STRING)
-	{
-		Com_Printf ("Info string length exceeded\n");
-		return;
-	}
-
-	strcat (s, newi);
-}
-
-/*
-==================
-Info_SetValueForKey_Big
-
-Changes or adds a key/value pair
-==================
-*/
-void Info_SetValueForKey_Big( char *s, const char *key, const char *value ) {
+void Info_SetValueForKey_Size( char *s, const char *key, const char *value, int bufSize ) {
 	char	newi[BIG_INFO_STRING];
 
-	if ( strlen( s ) >= BIG_INFO_STRING ) {
-		Com_Error( ERR_DROP, "Info_SetValueForKey: oversize infostring" );
+	if ( bufSize > BIG_INFO_STRING ) {
+		Com_Error( ERR_DROP, "Info_SetValueForKey_Size: oversize bufSize" );
+	}
+
+	if ( strlen( s ) >= bufSize ) {
+		Com_Error( ERR_DROP, "Info_SetValueForKey_Size: oversize infostring" );
 	}
 
 	if (strchr (key, '\\') || strchr (value, '\\'))
@@ -1153,15 +1054,15 @@ void Info_SetValueForKey_Big( char *s, const char *key, const char *value ) {
 		return;
 	}
 
-	Info_RemoveKey_Big (s, key);
+	Info_RemoveKey_Size (s, key, bufSize);
 	if (!value || !strlen(value))
 		return;
 
 	Com_sprintf (newi, sizeof(newi), "\\%s\\%s", key, value);
 
-	if (strlen(newi) + strlen(s) > BIG_INFO_STRING)
+	if (strlen(newi) + strlen(s) >= bufSize)
 	{
-		Com_Printf ("BIG Info string length exceeded\n");
+		Com_Printf ("Info string length exceeded\n");
 		return;
 	}
 

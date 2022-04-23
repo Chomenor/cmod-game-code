@@ -324,6 +324,8 @@ struct gclient_s {
 	//added for new game mods
 	int			teleportTime;		// Borg teleporting
 	int			classChangeDebounceTime;	// next time you can change classes
+	
+	qboolean	newExternalEvent;
 };
 
 

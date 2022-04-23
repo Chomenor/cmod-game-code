@@ -1542,34 +1542,52 @@ void ClientEvents( gentity_t *ent, int oldEventSequence ) {
 void BotTestSolid(vec3_t origin);
 
 /*
+===============
+G_ExternalizePlayerEvent
+===============
+*/
+void G_ExternalizePlayerEvent( gentity_t *ent, int event, int eventParm ) {
+	event &= ~EV_EVENT_BITS;
+	if ( EF_WARN_ASSERT( event ) ) {
+		int bits = ent->s.event & EV_EVENT_BITS;
+		bits = ( bits + EV_EVENT_BIT1 ) & EV_EVENT_BITS;
+		ent->s.event = event | bits;
+		ent->s.eventParm = eventParm;
+		ent->eventTime = level.time;
+	}
+}
+
+/*
 ==============
-SendPendingPredictableEvents
+G_ExternalizePlayerEvents
+
+Transfers playerstate events to player entity so they can be seen by other clients.
+
+The playerstate can store up to 5 events (1 external + 4 predictable), but the entity
+only holds 1. If the playerstate has multiple new events only 1 event will be
+transferred to the entity per server frame to try to avoid dropping events.
 ==============
 */
-void SendPendingPredictableEvents( playerState_t *ps ) {
-	gentity_t *t;
-	int event, seq;
-	int extEvent;
+static void G_ExternalizePlayerEvents( int clientNum ) {
+	gclient_t *client = &level.clients[clientNum];
+	playerState_t *ps = &client->ps;
+	gentity_t *ent = &g_entities[clientNum];
 
-	// if there are still events pending
-	if ( ps->entityEventSequence < ps->eventSequence ) {
-		// create a temporary entity for this event which is sent to everyone
-		// except the client generated the event
-		seq = ps->entityEventSequence & (MAX_PS_EVENTS-1);
-		event = ps->events[ seq ] | ( ( ps->entityEventSequence & 3 ) << 8 );
-		// set external event to zero before calling BG_PlayerStateToEntityState
-		extEvent = ps->externalEvent;
-		ps->externalEvent = 0;
-		// create temporary entity for event
-		t = G_TempEntity( ps->origin, event );
-		BG_PlayerStateToEntityState( ps, &t->s, qtrue );
-		t->s.eType = ET_EVENTS + event;
-		// send to everyone except the client who generated the event
-		t->r.svFlags |= SVF_NOTSINGLECLIENT;
-		t->r.singleClient = ps->clientNum;
-		// set back external event
-		ps->externalEvent = extEvent;
+	if ( client->newExternalEvent ) {
+		G_ExternalizePlayerEvent( ent, ps->externalEvent, ps->externalEventParm );
+
+	} else if ( ps->entityEventSequence < ps->eventSequence ) {
+		int seq;
+		if ( ps->entityEventSequence < ps->eventSequence - MAX_PS_EVENTS ) {
+			ps->entityEventSequence = ps->eventSequence - MAX_PS_EVENTS;
+		}
+		seq = ps->entityEventSequence & ( MAX_PS_EVENTS - 1 );
+
+		G_ExternalizePlayerEvent( ent, ps->events[seq], ps->eventParms[seq] );
+		ps->entityEventSequence++;
 	}
+
+	client->newExternalEvent = qfalse;
 }
 
 /*
@@ -1736,6 +1754,7 @@ void ClientThink_real( gentity_t *ent ) {
 	int			clientNum = ent - g_entities;
 	gclient_t	*client = &level.clients[clientNum];
 	int			oldCommandTime = client->ps.commandTime;
+	int			oldEventSequence;
 	int			msec;
 	usercmd_t	*ucmd;
 
@@ -1821,7 +1840,14 @@ void ClientThink_real( gentity_t *ent ) {
 		client->ps.speed *= 0.75;
 	}
 
+	oldEventSequence = client->ps.eventSequence;
+
 	modfn.RunPlayerMove( clientNum );
+
+	// check for eventTime reset
+	if ( ent->client->ps.eventSequence != oldEventSequence ) {
+		ent->eventTime = level.time;
+	}
 
 	// check for respawning
 	if ( client->ps.stats[STAT_HEALTH] <= 0 ) {
@@ -2020,7 +2046,7 @@ void ClientEndFrame( gentity_t *ent ) {
 
 	// set the latest infor
 	BG_PlayerStateToEntityState( &ent->client->ps, &ent->s, qtrue );
-	SendPendingPredictableEvents( &ent->client->ps );
+	G_ExternalizePlayerEvents( ent - g_entities );
 
 	/*
 	if ( noJoinLimit != 0 && level.time > noJoinLimit )

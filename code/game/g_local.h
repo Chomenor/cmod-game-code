@@ -175,9 +175,6 @@ struct gentity_s {
 	gentity_t	*teamchain;		// next entity in team
 	gentity_t	*teammaster;	// master of the team
 
-	int			watertype;
-	int			waterlevel;
-
 	int			noise_index;
 
 	// timing variables
@@ -186,8 +183,6 @@ struct gentity_s {
 	int			nextthink2;		// not cleared by G_RunThink (for welder projectile)
 
 	gitem_t		*item;			// for bonus items
-
-	qboolean	botDelayBegin;
 };
 
 
@@ -309,12 +304,11 @@ struct gclient_s {
 	int			rewardTime;			// clear the EF_AWARD_IMPRESSIVE, etc when time > this
 	int			lastTeleportTime;	// last time a touch teleporter was triggered
 
+	int			watertype;
+	int			waterlevel;
 	int			airOutTime;
 
 	int			lastKillTime;		// for multiple kill rewards
-
-	qboolean	fireHeld;			// used for hook
-	gentity_t	*hook;				// grapple hook if out
 
 	// timeResidual is used to handle events that happen every second
 	// like health / armor countdowns and regeneration
@@ -326,6 +320,7 @@ struct gclient_s {
 	int			classChangeDebounceTime;	// next time you can change classes
 	
 	qboolean	newExternalEvent;
+	qboolean	botDelayBegin;
 };
 
 

@@ -258,14 +258,14 @@ void P_WorldEffects( gentity_t *ent ) {
 		return;
 	}
 
-	waterlevel = ent->waterlevel;
+	waterlevel = ent->client->waterlevel;
 
 	envirosuit = ent->client->ps.powerups[PW_BATTLESUIT] > level.time;
 
 	//
 	// check for drowning
 	//
-	if ( waterlevel == 3 && !(ent->watertype&CONTENTS_LADDER)) {
+	if ( waterlevel == 3 && !(ent->client->watertype&CONTENTS_LADDER)) {
 		// envirosuit give air, techs can't drown
 		if ( envirosuit || ent->client->sess.sessionClass == PC_TECH ) {
 			ent->client->airOutTime = level.time + 10000;
@@ -306,19 +306,19 @@ void P_WorldEffects( gentity_t *ent ) {
 	// check for sizzle damage (move to pmove?)
 	//
 	if (waterlevel &&
-		(ent->watertype&(CONTENTS_LAVA|CONTENTS_SLIME)) ) {
+		(ent->client->watertype&(CONTENTS_LAVA|CONTENTS_SLIME)) ) {
 		if (ent->health > 0
 			&& ent->pain_debounce_time < level.time	) {
 
 			if ( envirosuit ) {
 				G_AddEvent( ent, EV_POWERUP_BATTLESUIT, 0 );
 			} else {
-				if (ent->watertype & CONTENTS_LAVA) {
+				if (ent->client->watertype & CONTENTS_LAVA) {
 					G_Damage (ent, NULL, NULL, NULL, NULL,
 						30*waterlevel, 0, MOD_LAVA);
 				}
 
-				if (ent->watertype & CONTENTS_SLIME) {
+				if (ent->client->watertype & CONTENTS_SLIME) {
 					G_Damage (ent, NULL, NULL, NULL, NULL,
 						10*waterlevel, 0, MOD_SLIME);
 				}
@@ -336,7 +336,7 @@ G_SetClientSound
 */
 void G_SetClientSound( gentity_t *ent )
 {	// 3/28/00 kef -- this is dumb.
-	if (ent->waterlevel && (ent->watertype&(CONTENTS_LAVA|CONTENTS_SLIME)) )
+	if (ent->client->waterlevel && (ent->client->watertype&(CONTENTS_LAVA|CONTENTS_SLIME)) )
 		ent->s.loopSound = level.snd_fry;
 	else
 		ent->s.loopSound = 0;
@@ -1645,8 +1645,8 @@ LOGFUNCTION_VOID( ModFNDefault_PostPmoveActions, ( pmove_t *pmove, int clientNum
 	VectorCopy( pmove->mins, ent->r.mins );
 	VectorCopy( pmove->maxs, ent->r.maxs );
 
-	ent->waterlevel = pmove->waterlevel;
-	ent->watertype = pmove->watertype;
+	client->waterlevel = pmove->waterlevel;
+	client->watertype = pmove->watertype;
 
 	// execute client events
 	ClientEvents( ent, oldEventSequence );

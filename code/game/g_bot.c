@@ -524,10 +524,10 @@ qboolean G_BotConnect( int clientNum, qboolean restart ) {
 	}
 
 	if( restart && g_gametype.integer == GT_SINGLE_PLAYER ) {
-		g_entities[clientNum].botDelayBegin = qtrue;
+		level.clients[clientNum].botDelayBegin = qtrue;
 	}
 	else {
-		g_entities[clientNum].botDelayBegin = qfalse;
+		level.clients[clientNum].botDelayBegin = qfalse;
 	}
 
 	return qtrue;

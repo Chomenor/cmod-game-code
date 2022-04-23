@@ -1645,21 +1645,17 @@ and on transition between teams, but doesn't happen on respawns
 ============
 */
 void ClientBegin( int clientNum, qboolean careAboutWarmup ) {
-	gentity_t	*ent;
-	gclient_t	*client;
+	gentity_t	*ent = &g_entities[clientNum];
+	gclient_t	*client = &level.clients[clientNum];
 	gentity_t	*tent;
 	int			flags;
 	qboolean	alreadyIn = qfalse;
 
-	ent = g_entities + clientNum;
-
-	if( ent->botDelayBegin ) {
+	if( client->botDelayBegin ) {
 		G_QueueBotBegin( clientNum );
-		ent->botDelayBegin = qfalse;
+		client->botDelayBegin = qfalse;
 		return;
 	}
-
-	client = level.clients + clientNum;
 
 	if ( ent->r.linked ) {
 		trap_UnlinkEntity( ent );
@@ -2141,8 +2137,6 @@ void ClientSpawn(gentity_t *ent) {
 	ent->r.contents = CONTENTS_BODY;
 	ent->clipmask = MASK_PLAYERSOLID;
 	ent->die = player_die;
-	ent->waterlevel = 0;
-	ent->watertype = 0;
 	ent->flags = 0;
 
 	VectorCopy (playerMins, ent->r.mins);

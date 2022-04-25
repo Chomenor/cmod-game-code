@@ -889,15 +889,21 @@ void CalculateRanks( qboolean fromExit ) {
 	// set the rank value for all clients that are connected and not spectators
 	if ( g_gametype.integer >= GT_TEAM ) {
 		// in team games, rank is just the order of the teams, 0=red, 1=blue, 2=tied
+		int rankValue;
+		if ( level.teamScores[TEAM_RED] == level.teamScores[TEAM_BLUE] ) {
+			level.winningTeam = TEAM_FREE;
+			rankValue = 2;
+		} else if ( level.teamScores[TEAM_RED] > level.teamScores[TEAM_BLUE] ) {
+			level.winningTeam = TEAM_RED;
+			rankValue = 0;
+		} else {
+			level.winningTeam = TEAM_BLUE;
+			rankValue = 1;
+		}
+
 		for ( i = 0;  i < level.numConnectedClients; i++ ) {
 			cl = &level.clients[ level.sortedClients[i] ];
-			if ( level.teamScores[TEAM_RED] == level.teamScores[TEAM_BLUE] ) {
-				cl->ps.persistant[PERS_RANK] = 2;
-			} else if ( level.teamScores[TEAM_RED] > level.teamScores[TEAM_BLUE] ) {
-				cl->ps.persistant[PERS_RANK] = 0;
-			} else {
-				cl->ps.persistant[PERS_RANK] = 1;
-			}
+			cl->ps.persistant[PERS_RANK] = rankValue;
 		}
 	} else {
 		rank = -1;

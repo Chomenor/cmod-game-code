@@ -6,133 +6,117 @@
 
 #include "g_local.h"
 
-#ifndef min
-#define min(a, b)	(a) < (b) ? a : b
-#endif
+static gentity_t *podiumModels[3];
 
+#define PLAYER_SCORE( clientNum ) level.clients[clientNum].ps.persistant[PERS_SCORE]
+#define SPECTATOR_CLIENT( clientNum ) ( level.clients[clientNum].sess.sessionTeam == TEAM_SPECTATOR )
 
-gentity_t	*podium1;
-gentity_t	*podium2;
-gentity_t	*podium3;
+/*
+==================
+TallyTeamPoints
 
+Get the combined number of points awarded to individual team members in a CTF game.
+==================
+*/
+static int TallyTeamPoints( team_t team ) {
+	int scores = 0;
+	int i;
+
+	for ( i=0; i < level.maxclients; ++i ) {
+		const gclient_t *client = &level.clients[i];
+
+		if ( client->pers.connected >= CON_CONNECTING && client->sess.sessionTeam == team ) {
+			scores += PLAYER_SCORE( i );
+		}
+	}
+
+	return scores;
+}
 
 /*
 ==================
 UpdateTournamentInfo
+
+Send intermission info to clients.
 ==================
 */
-
 void UpdateTournamentInfo( void ) {
-	int			i = 0, j = 0, k = 0;
-	gentity_t	*player = NULL, *ent = NULL;
+	int			i = 0;
 	int			playerClientNum;
-	int			n;
 	char		msg[AWARDS_MSG_LENGTH], msg2[AWARDS_MSG_LENGTH];
-	int			playerRank=level.numNonSpectatorClients-1, highestTiedRank = 0;
-	gentity_t	*MVP = NULL;
-	int			mvpNum = -1, mvpPoints = 0, winningCaptures = 0, winningPoints = 0;
-	int			winningTeam=0;
+	int			playerRank=level.numPlayingClients-1;
+	int			mvpPoints = 0, winningCaptures = 0, winningPoints = 0;
 	int			loseCaptures = 0, losePoints = 0;
 	char		*mvpName = "";
-	gclient_t	*cl = NULL;
-	gclient_t	*cl2= NULL;
 	int			secondPlaceTied=0;
 
 	memset(msg, 0, AWARDS_MSG_LENGTH);
 	memset(msg2, 0, AWARDS_MSG_LENGTH);
 
-	player = NULL;
-
-	// Was there a tie for second place on the podium?
-	cl = &level.clients[level.sortedClients[1]];
-	cl2= &level.clients[level.sortedClients[2]];
-	if (cl->ps.persistant[PERS_SCORE] == cl2->ps.persistant[PERS_SCORE])
-		secondPlaceTied=1;
-
-	winningTeam = level.clients[0].ps.persistant[PERS_RANK]+1;
-	if ( winningTeam != TEAM_BLUE && winningTeam != TEAM_RED )
-	{//tie or not a team game
-		winningTeam = 0;
-	}
-
-	// In team game, we want to represent the highest scored client from the WINNING team.
-	for (i = 0; i < level.maxclients; i++)
-	{
-		ent = &g_entities[i];
-		if (ent->client &&
-			(ent->client->sess.sessionTeam != TEAM_SPECTATOR) &&
-			CalculateTeamMVPByRank(ent))
-		{
-			// found the winning team's MVP
-			mvpNum = i;
-			break;
+	if ( g_gametype.integer < GT_TEAM ) {
+		// Was there a tie for second place on the podium?
+		if ( level.numPlayingClients >= 3 && PLAYER_SCORE( level.sortedClients[1] ) == PLAYER_SCORE( level.sortedClients[2] ) ) {
+			secondPlaceTied=1;
 		}
 	}
-	if (mvpNum < 0)
-	{//ah, crap no MVP, pick the first player on the winning team
-		for (i = 0; i < level.maxclients; i++ )
-		{
-			if ( g_entities[i].client->ps.persistant[PERS_TEAM] == winningTeam )
-			{
-				mvpNum = i;
-				break;
+
+	else {
+		// In team game, we want to represent the highest scored client from the WINNING team.
+		int mvpNum = GetWinningTeamMVP();
+
+		// If teams are tied, these values just determine which team gets the top score readout box
+		team_t winningTeam = level.winningTeam;
+		team_t losingTeam;
+
+		if ( mvpNum >= 0 ) {
+			gclient_t *mvpClient = &level.clients[mvpNum];
+			mvpName = mvpClient->pers.netname;
+			mvpPoints = PLAYER_SCORE( mvpNum );
+
+			if ( winningTeam != TEAM_RED && winningTeam != TEAM_BLUE ) {
+				winningTeam = mvpClient->sess.sessionTeam;
 			}
 		}
-	}
-	if (mvpNum >= 0)
-	{//still no MVP, so skip it
-		MVP = &g_entities[mvpNum];
-		mvpName = MVP->client->pers.netname;
-		mvpPoints = MVP->client->ps.persistant[PERS_SCORE];
-		winningTeam = MVP->client->ps.persistant[PERS_TEAM];
-	}
 
-	if ( winningTeam )
-	{//one of the teams won
+		if ( winningTeam != TEAM_RED && winningTeam != TEAM_BLUE ) {
+			winningTeam = TEAM_RED;
+		}
+
+		losingTeam = winningTeam == TEAM_RED ? TEAM_BLUE : TEAM_RED;
+
+		if ( g_gametype.integer == GT_CTF ) {
+			winningPoints = TallyTeamPoints( winningTeam );
+			losePoints = TallyTeamPoints( losingTeam );
+		} else {
+			winningPoints = level.teamScores[winningTeam];
+			losePoints = level.teamScores[losingTeam];
+		}
+
+		// This should only be displayed in CTF games, but set it regardless just in case
 		winningCaptures = level.teamScores[winningTeam];
-		if (winningTeam == TEAM_RED)
-			loseCaptures = level.teamScores[TEAM_BLUE];
-		else
-			loseCaptures = level.teamScores[TEAM_RED];
-
-		if ( g_pModElimination.integer != 0 )
-		{//in elimination, don't add each member's points to the total
-			winningPoints = winningCaptures;
-			losePoints = loseCaptures;
-		}
-		else
-		{
-			for (i = 0; i < level.maxclients; i++ )
-			{
-				if ( g_entities[i].client->ps.persistant[PERS_TEAM] == winningTeam )
-					winningPoints += g_entities[i].client->ps.persistant[PERS_SCORE];
-				else
-					losePoints += g_entities[i].client->ps.persistant[PERS_SCORE];
-			}
-		}
+		loseCaptures = level.teamScores[losingTeam];
 	}
 
-	for (i = 0; i < level.maxclients; i++ )
+	for (playerClientNum = 0; playerClientNum < level.maxclients; playerClientNum++ )
 	{
-		player = &g_entities[i];
+		int highestTiedRank = 0;
+		gentity_t *player = &g_entities[playerClientNum];
+
 		if ( !player->inuse || (player->r.svFlags & SVF_BOT))
 		{
 			continue;
 		}
-		playerClientNum = i;
 
-		CalculateRanks( qfalse );
 		// put info for the top three players into the msg
-		Com_sprintf(msg, AWARDS_MSG_LENGTH, "awards %d", level.numNonSpectatorClients);
-		for( j = 0; j < level.numNonSpectatorClients; j++ )
+		Com_sprintf(msg, AWARDS_MSG_LENGTH, "awards %d", level.numPlayingClients);
+		for( i = 0; i < level.numPlayingClients; i++ )
 		{
-			if (j > 2)
+			if (i > 2)
 			{
 				break;
 			}
-			n = level.sortedClients[j];
 			strcpy(msg2, msg);
-			Com_sprintf(msg, AWARDS_MSG_LENGTH, "%s %d", msg2, n);
+			Com_sprintf(msg, AWARDS_MSG_LENGTH, "%s %d", msg2, level.sortedClients[i]);
 		}
 
 		// put this guy's awards into the msg
@@ -144,6 +128,21 @@ void UpdateTournamentInfo( void ) {
 		else
 		{
 			CalculateAwards(player, msg);
+
+			// get the best rank this player's score matches
+			// 0=first place, 1=second place, ...
+			for ( playerRank = 0; playerRank < level.numPlayingClients - 1; playerRank++ ) {
+				if ( PLAYER_SCORE( playerClientNum ) >= PLAYER_SCORE( level.sortedClients[playerRank] ) ) {
+					break;
+				}
+			}
+
+			// if next player down has the same score, set highestTiedRank to display "tied for rank" message
+			// 0=not tied, 1=first place tie, 2=second place tie, ...
+			if ( playerRank < level.numPlayingClients - 1 &&
+					PLAYER_SCORE( level.sortedClients[playerRank + 1] ) == PLAYER_SCORE( playerClientNum ) ) {
+				highestTiedRank = playerRank + 1;
+			}
 		}
 
 		// now supply...
@@ -160,24 +159,7 @@ void UpdateTournamentInfo( void ) {
 		// 10) intermission point
 		// 11) intermission angles
 		//
-		for (k = 0; k < level.numNonSpectatorClients; k++)
-		{
-			if (level.sortedClients[k] == playerClientNum)
-			{
-				playerRank = k;
-				break;
-			}
-		}
-		highestTiedRank = 0;
-		for (k = playerRank-1; k >= 0; k--)
-		{
-			cl = &level.clients[level.sortedClients[k]];
-			if (cl->ps.persistant[PERS_SCORE] > level.clients[level.sortedClients[playerRank]].ps.persistant[PERS_SCORE])
-			{
-				break;
-			}
-			highestTiedRank = k+1;
-		}
+
 		strcpy(msg2, msg);
 		Com_sprintf(msg, AWARDS_MSG_LENGTH, "%s \"%s\" %d %d %d %d %d %d %d %d %f %f %f %f %f %f",
 			msg2, mvpName, mvpPoints, winningCaptures, winningPoints, playerRank, highestTiedRank,
@@ -193,20 +175,52 @@ void UpdateTournamentInfo( void ) {
 		Com_sprintf( msg, sizeof(msg), "postgame %i", playerRank);
 		trap_SendConsoleCommand( EXEC_APPEND, msg);
 	}
-
 }
 
+/*
+==================
+SetPodiumOrigin
+==================
+*/
+static void SetPodiumOrigin( gentity_t *pad ) {
+	vec3_t vec;
+	vec3_t origin;
 
-static gentity_t *SpawnModelOnVictoryPad( gentity_t *pad, vec3_t offset, gentity_t *ent, int place ) {
-	gentity_t	*body;
-	vec3_t		vec;
-	vec3_t		f, r, u;
+	AngleVectors( level.intermission_angle, vec, NULL, NULL );
+	VectorMA( level.intermission_origin, g_podiumDist.value, vec, origin );
+	origin[2] -= g_podiumDrop.value;
+	G_SetOrigin( pad, origin );
+}
 
-	body = G_Spawn();
-	if ( !body ) {
-		G_Printf( S_COLOR_RED "ERROR: out of gentities\n" );
-		return NULL;
-	}
+/*
+==================
+SetPodiumModelOrigin
+==================
+*/
+static void SetPodiumModelOrigin( gentity_t *pad, gentity_t *body, vec3_t offset ) {
+	vec3_t vec;
+	vec3_t f, r, u;
+
+	VectorSubtract( level.intermission_origin, pad->r.currentOrigin, vec );
+	vectoangles( vec, body->s.apos.trBase );
+	body->s.apos.trBase[PITCH] = 0;
+	body->s.apos.trBase[ROLL] = 0;
+
+	AngleVectors( body->s.apos.trBase, f, r, u );
+	VectorMA( pad->r.currentOrigin, offset[0], f, vec );
+	VectorMA( vec, offset[1], r, vec );
+	VectorMA( vec, offset[2], u, vec );
+
+	G_SetOrigin( body, vec );
+}
+
+/*
+==================
+SpawnModelOnVictoryPad
+==================
+*/
+static gentity_t *SpawnModelOnVictoryPad( gentity_t *pad, vec3_t offset, gentity_t *ent ) {
+	gentity_t	*body = G_Spawn();
 
 	body->classname = ent->client->pers.netname;
 	body->client = ent->client;
@@ -239,26 +253,19 @@ static gentity_t *SpawnModelOnVictoryPad( gentity_t *pad, vec3_t offset, gentity
 	body->r.contents = CONTENTS_BODY;
 	body->r.ownerNum = ent->r.ownerNum;
 	body->takedamage = qfalse;
-	VectorSubtract( level.intermission_origin, pad->r.currentOrigin, vec );
-	vectoangles( vec, body->s.apos.trBase );
-	body->s.apos.trBase[PITCH] = 0;
-	body->s.apos.trBase[ROLL] = 0;
 
-	AngleVectors( body->s.apos.trBase, f, r, u );
-	VectorMA( pad->r.currentOrigin, offset[0], f, vec );
-	VectorMA( vec, offset[1], r, vec );
-	VectorMA( vec, offset[2], u, vec );
-
-	G_SetOrigin( body, vec );
+	SetPodiumModelOrigin( pad, body, offset );
 
 	trap_LinkEntity (body);
-
-	body->count = place;
 
 	return body;
 }
 
-
+/*
+==================
+CelebrateStop
+==================
+*/
 static void CelebrateStop( gentity_t *player ) {
 	int		anim;
 
@@ -266,106 +273,61 @@ static void CelebrateStop( gentity_t *player ) {
 	player->s.torsoAnim = ( ( player->s.torsoAnim & ANIM_TOGGLEBIT ) ^ ANIM_TOGGLEBIT ) | anim;
 }
 
-
+/*
+==================
+CelebrateStart
+==================
+*/
 #define	TIMER_GESTURE	(34*66+50)
-extern void	BG_AddPredictableEventToPlayerstate( int newEvent, int eventParm, playerState_t *ps );
 static void CelebrateStart( gentity_t *player )
 {
 	player->s.torsoAnim = ( ( player->s.torsoAnim & ANIM_TOGGLEBIT ) ^ ANIM_TOGGLEBIT ) | TORSO_GESTURE;
 	player->nextthink = level.time + TIMER_GESTURE;
 	player->think = CelebrateStop;
-
-//	We don't want the taunt sound effect because it interfears with the computer voice giving awards
-//	FIXME: just get timing right?
-	//FIXME: why does this get lost now?
-	BG_AddPredictableEventToPlayerstate( EV_TAUNT, 0, &player->client->ps );
 }
 
+static vec3_t podiumModelOffsets[3] = { { 0, 0, 64 }, { -10, 60, 44 }, { -19, -60, 35 } };
 
-static vec3_t	offsetFirst  = {0, 0, 64};
-static vec3_t	offsetSecond = {-10, 60, 44};
-static vec3_t	offsetThird  = {-19, -60, 35};
+/*
+==================
+PodiumPlacementThink
 
+Update positions to accout for g_podiumDist and g_podiumDrop cvar changes.
+==================
+*/
 static void PodiumPlacementThink( gentity_t *podium ) {
-	vec3_t		vec;
-	vec3_t		origin;
-	vec3_t		f, r, u;
-
+	int i;
 	podium->nextthink = level.time + 100;
 
-	AngleVectors( level.intermission_angle, vec, NULL, NULL );
-	VectorMA( level.intermission_origin, trap_Cvar_VariableIntegerValue( "g_podiumDist" ), vec, origin );
-	origin[2] -= trap_Cvar_VariableIntegerValue( "g_podiumDrop" );
-	G_SetOrigin( podium, origin );
+	SetPodiumOrigin( podium );
 
-	if( podium1 ) {
-		VectorSubtract( level.intermission_origin, podium->r.currentOrigin, vec );
-		vectoangles( vec, podium1->s.apos.trBase );
-		podium1->s.apos.trBase[PITCH] = 0;
-		podium1->s.apos.trBase[ROLL] = 0;
-
-		AngleVectors( podium1->s.apos.trBase, f, r, u );
-		VectorMA( podium->r.currentOrigin, offsetFirst[0], f, vec );
-		VectorMA( vec, offsetFirst[1], r, vec );
-		VectorMA( vec, offsetFirst[2], u, vec );
-
-		G_SetOrigin( podium1, vec );
-	}
-
-	if( podium2 ) {
-		VectorSubtract( level.intermission_origin, podium->r.currentOrigin, vec );
-		vectoangles( vec, podium2->s.apos.trBase );
-		podium2->s.apos.trBase[PITCH] = 0;
-		podium2->s.apos.trBase[ROLL] = 0;
-
-		AngleVectors( podium2->s.apos.trBase, f, r, u );
-		VectorMA( podium->r.currentOrigin, offsetSecond[0], f, vec );
-		VectorMA( vec, offsetSecond[1], r, vec );
-		VectorMA( vec, offsetSecond[2], u, vec );
-
-		G_SetOrigin( podium2, vec );
-	}
-
-	if( podium3 ) {
-		VectorSubtract( level.intermission_origin, podium->r.currentOrigin, vec );
-		vectoangles( vec, podium3->s.apos.trBase );
-		podium3->s.apos.trBase[PITCH] = 0;
-		podium3->s.apos.trBase[ROLL] = 0;
-
-		AngleVectors( podium3->s.apos.trBase, f, r, u );
-		VectorMA( podium->r.currentOrigin, offsetThird[0], f, vec );
-		VectorMA( vec, offsetThird[1], r, vec );
-		VectorMA( vec, offsetThird[2], u, vec );
-
-		G_SetOrigin( podium3, vec );
+	for ( i = 0; i < 3; ++i ) {
+		if ( podiumModels[i] ) {
+			SetPodiumModelOrigin( podium, podiumModels[i], podiumModelOffsets[i] );
+		}
 	}
 }
 
-
+/*
+==================
+SpawnPodium
+==================
+*/
 static gentity_t *SpawnPodium( void ) {
-	gentity_t	*podium;
+	gentity_t	*podium = G_Spawn();
 	vec3_t		vec;
-	vec3_t		origin;
-
-	podium = G_Spawn();
-	if ( !podium ) {
-		return NULL;
-	}
 
 	podium->classname = "podium";
 	podium->s.eType = ET_GENERAL;
 	podium->s.number = podium - g_entities;
 	podium->clipmask = CONTENTS_SOLID;
 	podium->r.contents = CONTENTS_SOLID;
-	if (g_gametype.integer > GT_SINGLE_PLAYER)
+	if (g_gametype.integer >= GT_TEAM)
 		podium->s.modelindex = G_ModelIndex( TEAM_PODIUM_MODEL );
 	else
 		podium->s.modelindex = G_ModelIndex( SP_PODIUM_MODEL );
 
-	AngleVectors( level.intermission_angle, vec, NULL, NULL );
-	VectorMA( level.intermission_origin, trap_Cvar_VariableIntegerValue( "g_podiumDist" ), vec, origin );
-	origin[2] -= trap_Cvar_VariableIntegerValue( "g_podiumDrop" );
-	G_SetOrigin( podium, origin );
+	SetPodiumOrigin( podium );
 
 	VectorSubtract( level.intermission_origin, podium->r.currentOrigin, vec );
 	podium->s.apos.trBase[YAW] = vectoyaw( vec );
@@ -376,74 +338,45 @@ static gentity_t *SpawnPodium( void ) {
 	return podium;
 }
 
-
 /*
 ==================
 SpawnModelsOnVictoryPads
 ==================
 */
 void SpawnModelsOnVictoryPads( void ) {
-	gentity_t	*player;
-	gentity_t	*podium;
-	int i = 0;
-	gentity_t	*ent = &g_entities[0];
-
-	podium1 = NULL;
-	podium2 = NULL;
-	podium3 = NULL;
-
-	podium = SpawnPodium();
-
+	gentity_t *podium = SpawnPodium();
 
 	// SPAWN PLAYER ON TOP MOST PODIUM
-	if (g_gametype.integer > GT_SINGLE_PLAYER)
+	if (g_gametype.integer >= GT_TEAM)
 	{
 		// In team game, we want to represent the highest scored client from the WINNING team.
-		for (i = 0; i < level.maxclients; i++)
-		{
-			ent = &g_entities[i];
-			if (ent->client && CalculateTeamMVPByRank(ent))
-			{
-				// found the winning team's MVP
-				break;
-			}
+		int mvpNum = GetWinningTeamMVP();
+		if ( mvpNum >= 0 ) {
+			podiumModels[0] = SpawnModelOnVictoryPad( podium, podiumModelOffsets[0], &g_entities[mvpNum] );
 		}
-		player = SpawnModelOnVictoryPad( podium, offsetFirst, ent,
-					level.clients[ level.sortedClients[0] ].ps.persistant[PERS_RANK] &~ RANK_TIED_FLAG );
 	}
-	else
+	else if ( level.numPlayingClients >= 1 )
 	{
-		player = SpawnModelOnVictoryPad( podium, offsetFirst, &g_entities[level.sortedClients[0]],
-				level.clients[ level.sortedClients[0] ].ps.persistant[PERS_RANK] &~ RANK_TIED_FLAG );
+		podiumModels[0] = SpawnModelOnVictoryPad( podium, podiumModelOffsets[0], &g_entities[level.sortedClients[0]] );
 	}
-	if ( player ) {
-		player->nextthink = level.time + 2000;
-		player->think = CelebrateStart;
-		podium1 = player;
+	if ( podiumModels[0] ) {
+		podiumModels[0]->nextthink = level.time + 2000;
+		podiumModels[0]->think = CelebrateStart;
 	}
 
 	// For non team game types, we want to spawn 3 characters on the victory pad
 	// For team games (GT_TEAM, GT_CTF) we want to have only a single player on the pad
-	if (( g_gametype.integer == GT_FFA ) || (g_gametype.integer == GT_TOURNAMENT) || (g_gametype.integer == GT_SINGLE_PLAYER))
+	if ( g_gametype.integer < GT_TEAM )
 	{
-		if ( level.numNonSpectatorClients > 1 ) {
-			player = SpawnModelOnVictoryPad( podium, offsetSecond, &g_entities[level.sortedClients[1]],
-					level.clients[ level.sortedClients[1] ].ps.persistant[PERS_RANK] &~ RANK_TIED_FLAG );
-			if ( player ) {
-				podium2 = player;
-			}
+		if ( level.numPlayingClients >= 2 ) {
+			podiumModels[1] = SpawnModelOnVictoryPad( podium, podiumModelOffsets[1], &g_entities[level.sortedClients[1]] );
 		}
 
-		if ( level.numNonSpectatorClients > 2 ) {
-			player = SpawnModelOnVictoryPad( podium, offsetThird, &g_entities[level.sortedClients[2]],
-				level.clients[ level.sortedClients[2] ].ps.persistant[PERS_RANK] &~ RANK_TIED_FLAG );
-			if ( player ) {
-				podium3 = player;
-			}
+		if ( level.numPlayingClients >= 3 ) {
+			podiumModels[2] = SpawnModelOnVictoryPad( podium, podiumModelOffsets[2], &g_entities[level.sortedClients[2]] );
 		}
 	}
 }
-
 
 /*
 ===============
@@ -455,8 +388,8 @@ void Svcmd_AbortPodium_f( void ) {
 		return;
 	}
 
-	if( podium1 ) {
-		podium1->nextthink = level.time;
-		podium1->think = CelebrateStop;
+	if( podiumModels[0] ) {
+		podiumModels[0]->nextthink = level.time;
+		podiumModels[0]->think = CelebrateStop;
 	}
 }

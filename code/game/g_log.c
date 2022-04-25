@@ -1274,84 +1274,67 @@ int CalculateStreak(gentity_t *ent)
 	return 0;
 }
 
-qboolean CalculateTeamMVP(gentity_t *ent)
-{
-	int			i = 0, nBestPlayer = -1, nScore = 0, nHighestScore = 0,
-				team = ent->client->ps.persistant[PERS_TEAM];
-	gentity_t	*player = NULL;
+/*
+==================
+GetTeamMVP
 
-	for (i = 0; i < g_maxclients.integer; i++)
-	{
-		nScore = 0;
-		player = g_entities + i;
-		if (!player->inuse || (player->client->ps.persistant[PERS_TEAM] != team))
-			continue;
-		nScore = player->client->ps.persistant[PERS_SCORE];
-		if (nScore > nHighestScore)
-		{
-			nHighestScore = nScore;
-			nBestPlayer = i;
+Returns client number of MVP of specified team, or -1 if no match found.
+==================
+*/
+int GetTeamMVP( team_t team ) {
+	int i;
+
+	// Always select borg queen as MVP
+	if ( G_IsConnectedClient( borgQueenClientNum ) && level.clients[borgQueenClientNum].sess.sessionTeam == team ) {
+		return borgQueenClientNum;
+	}
+
+	for ( i = 0; i < level.numPlayingClients; ++i ) {
+		int clientNum = level.sortedClients[i];
+		if ( level.clients[clientNum].sess.sessionTeam == team ) {
+			return clientNum;
 		}
 	}
-	if (-1 == nBestPlayer)
-	{
-		return qfalse;
-	}
-	if (nBestPlayer == ent->s.number)
-	{
-		return qtrue;
-	}
-	return qfalse;
+
+	return -1;
 }
 
-qboolean CalculateTeamMVPByRank(gentity_t *ent)
-{
-	int			i = 0, nBestPlayer = -1, nScore = 0, nHighestScore = 0,
-				team = ent->client->ps.persistant[PERS_RANK]+1;
-	qboolean	bTied = (team == 3);
-	gentity_t	*player = NULL;
+/*
+==================
+GetWinningTeamMVP
 
-	if ( team == ent->client->ps.persistant[PERS_TEAM] && ent->client->ps.persistant[PERS_CLASS] == PC_BORG )
-	{//only the queen can be the MVP
-		if ( borgQueenClientNum == ent->s.number )
-		{
-			return qtrue;
-		}
-		else
-		{
-			return qfalse;
-		}
+Returns client number of MVP of winning team, or overall MVP if teams are tied or winning team has no players.
+Returns -1 if no match found.
+==================
+*/
+int GetWinningTeamMVP( void ) {
+	int MVP = -1;
+
+	if ( level.winningTeam != TEAM_FREE ) {
+		// Try to get MVP from winning team
+		MVP = GetTeamMVP( level.winningTeam );
 	}
 
-	for (i = 0; i < g_maxclients.integer; i++)
-	{
-		nScore = 0;
-		player = g_entities + i;
-		if (!player->inuse)
-			continue;
-		if (!bTied)
-		{
-			if (player->client->ps.persistant[PERS_TEAM] != team)
-			{
-				continue;
+	if ( MVP < 0 ) {
+		// Tied or no valid MVP, so just pick the top player overall
+		int i;
+		for ( i = 0; i < level.numPlayingClients; ++i ) {
+			int clientNum = level.sortedClients[i];
+			if ( level.clients[clientNum].sess.sessionTeam != TEAM_SPECTATOR ) {
+				MVP = clientNum;
+				break;
 			}
 		}
-		nScore = player->client->ps.persistant[PERS_SCORE];
-		if (nScore > nHighestScore)
-		{
-			nHighestScore = nScore;
-			nBestPlayer = i;
-		}
 	}
-	if (-1 == nBestPlayer)
-	{
-		return qfalse;
-	}
-	if (nBestPlayer == ent->s.number)
-	{
-		return qtrue;
-	}
-	return qfalse;
+
+	return MVP;
+}
+
+qboolean CalculateTeamMVP(gentity_t *ent)
+{
+	// To get MVP award you need to be the team MVP and have a score higher than 0
+	int MVP = GetTeamMVP( ent->client->sess.sessionTeam );
+	return ent - g_entities == MVP && ent->client->ps.persistant[PERS_SCORE] > 0;
 }
 
 qboolean CalculateTeamDefender(gentity_t *ent)

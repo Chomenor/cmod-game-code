@@ -32,5 +32,6 @@ LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 		ModPlayerMove_Init();
 		ModAltSwapHandler_Init();
 		ModPingcomp_Init();
+		ModSpectPassThrough_Init();
 	}
 }

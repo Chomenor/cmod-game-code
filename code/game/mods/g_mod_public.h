@@ -11,6 +11,7 @@ typedef enum {
 	GC_NONE,
 	GC_SKIP_RUN_MISSILE,
 	GC_EVENT_TIME_OFFSET,
+	GC_SKIP_SPECTATOR_DOOR_TELEPORT,
 } generalConstant_t;
 
 typedef enum {

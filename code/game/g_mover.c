@@ -755,6 +755,10 @@ static void Touch_DoorTriggerSpectator( gentity_t *ent, gentity_t *other, trace_
 	int i, axis;
 	vec3_t origin, dir, angles;
 
+	if ( modfn.AdjustGeneralConstant( GC_SKIP_SPECTATOR_DOOR_TELEPORT, 0 ) ) {
+		return;
+	}
+
 	axis = ent->count;
 	VectorClear(dir);
 	if (fabs(other->s.origin[axis] - ent->r.absmax[axis]) <

@@ -274,6 +274,24 @@ void G_AddRandomBot( int team ) {
 
 /*
 ===============
+G_RealSessionTeam
+
+Returns player-selected team, even if active team is temporarily overriden by borg assimilation.
+===============
+*/
+static int G_RealSessionTeam( gclient_t *cl ) {
+	if ( cl->ps.eFlags & EF_ASSIMILATED ) {
+		if ( cl->sess.sessionTeam == TEAM_RED ) {
+			return TEAM_BLUE;
+		} else if ( cl->sess.sessionTeam == TEAM_BLUE ) {
+			return TEAM_RED;
+		}
+	}
+	return cl->sess.sessionTeam;
+}
+
+/*
+===============
 G_RemoveRandomBot
 ===============
 */
@@ -290,7 +308,7 @@ int G_RemoveRandomBot( int team ) {
 		if ( !(g_entities[cl->ps.clientNum].r.svFlags & SVF_BOT) ) {
 			continue;
 		}
-		if ( team >= 0 && cl->sess.sessionTeam != team ) {
+		if ( team >= 0 && G_RealSessionTeam( cl ) != team ) {
 			continue;
 		}
 		strcpy(netname, cl->pers.netname);
@@ -319,7 +337,7 @@ int G_CountHumanPlayers( int team ) {
 		if ( g_entities[cl->ps.clientNum].r.svFlags & SVF_BOT ) {
 			continue;
 		}
-		if ( team >= 0 && cl->sess.sessionTeam != team ) {
+		if ( team >= 0 && G_RealSessionTeam( cl ) != team ) {
 			continue;
 		}
 		num++;
@@ -345,7 +363,7 @@ int G_CountBotPlayers( int team ) {
 		if ( !(g_entities[cl->ps.clientNum].r.svFlags & SVF_BOT) ) {
 			continue;
 		}
-		if ( team >= 0 && cl->sess.sessionTeam != team ) {
+		if ( team >= 0 && G_RealSessionTeam( cl ) != team ) {
 			continue;
 		}
 		num++;
@@ -390,7 +408,7 @@ void G_CheckMinimumPlayers( void ) {
 		humanplayers = G_CountHumanPlayers( TEAM_RED );
 		botplayers = G_CountBotPlayers(	TEAM_RED );
 		//
-		if (humanplayers + botplayers < minplayers) {
+		if (humanplayers + botplayers + G_CountBotPlayers( TEAM_SPECTATOR ) < minplayers) {
 			G_AddRandomBot( TEAM_RED );
 		} else if (humanplayers + botplayers > minplayers && botplayers) {
 			G_RemoveRandomBot( TEAM_RED );
@@ -399,7 +417,7 @@ void G_CheckMinimumPlayers( void ) {
 		humanplayers = G_CountHumanPlayers( TEAM_BLUE );
 		botplayers = G_CountBotPlayers( TEAM_BLUE );
 		//
-		if (humanplayers + botplayers < minplayers) {
+		if (humanplayers + botplayers + G_CountBotPlayers( TEAM_SPECTATOR ) < minplayers) {
 			G_AddRandomBot( TEAM_BLUE );
 		} else if (humanplayers + botplayers > minplayers && botplayers) {
 			G_RemoveRandomBot( TEAM_BLUE );
@@ -427,7 +445,7 @@ void G_CheckMinimumPlayers( void ) {
 			minplayers = g_maxclients.integer-1;
 		}
 		humanplayers = G_CountHumanPlayers( TEAM_FREE );
-		botplayers = G_CountBotPlayers( TEAM_FREE );
+		botplayers = G_CountBotPlayers( -1 );
 		//
 		if (humanplayers + botplayers < minplayers) {
 			G_AddRandomBot( TEAM_FREE );

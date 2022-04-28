@@ -853,8 +853,6 @@ void CalculateRanks( qboolean fromExit ) {
 	int		newScore;
 	gclient_t	*cl;
 
-	level.follow1 = -1;
-	level.follow2 = -1;
 	level.numConnectedClients = 0;
 	level.numNonSpectatorClients = 0;
 	level.numPlayingClients = 0;
@@ -867,16 +865,10 @@ void CalculateRanks( qboolean fromExit ) {
 			if ( level.clients[i].sess.sessionTeam != TEAM_SPECTATOR ) {
 				level.numNonSpectatorClients++;
 
-				// decide if this should be auto-followed
 				if ( level.clients[i].pers.connected == CON_CONNECTED ) {
 					level.numPlayingClients++;
 					if ( !(g_entities[i].r.svFlags & SVF_BOT) ) {
 						level.numVotingClients++;
-					}
-					if ( level.follow1 == -1 ) {
-						level.follow1 = i;
-					} else if ( level.follow2 == -1 ) {
-						level.follow2 = i;
 					}
 				}
 			}

@@ -1254,6 +1254,9 @@ void Cmd_FollowCycle_f( gentity_t *ent, int dir ) {
 	}
 
 	clientnum = ent->client->sess.spectatorClient;
+	if ( clientnum < 0 ) {
+		clientnum = 0;
+	}
 	original = clientnum;
 	do {
 		clientnum += dir;

@@ -1955,12 +1955,15 @@ void SpectatorClientEndFrame( gentity_t *ent ) {
 
 		clientNum = ent->client->sess.spectatorClient;
 
-		// team follow1 and team follow2 go to whatever clients are playing
-		if ( clientNum == -1 ) {
-			clientNum = level.follow1;
-		} else if ( clientNum == -2 ) {
-			clientNum = level.follow2;
+		// "team follow1" follows 1st place and "team follow2" follows second place
+		if ( clientNum == -2 && level.numPlayingClients >= 2 &&
+				level.clients[level.sortedClients[1]].sess.sessionTeam != TEAM_SPECTATOR ) {
+			clientNum = level.sortedClients[1];
+		} else if ( clientNum < 0 && level.numPlayingClients >= 1 &&
+				level.clients[level.sortedClients[0]].sess.sessionTeam != TEAM_SPECTATOR ) {
+			clientNum = level.sortedClients[0];
 		}
+
 		if ( clientNum >= 0 ) {
 			cl = &level.clients[ clientNum ];
 			if ( cl->pers.connected == CON_CONNECTED && cl->sess.sessionTeam != TEAM_SPECTATOR ) {

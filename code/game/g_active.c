@@ -1302,7 +1302,7 @@ qboolean PlaceDecoy(gentity_t *ent)
 		{
 			return qfalse;		// Drop to ground and trap to clients
 		}
-		decoy->s.clientNum = ent->client->ps.clientNum;
+		decoy->s.clientNum = ent - g_entities;
 
 		//--------------------------- SPECIALIZED DECOY SETUP
 		decoy->think = DecoyThink;

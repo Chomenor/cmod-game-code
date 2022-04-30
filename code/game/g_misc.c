@@ -68,15 +68,15 @@ void TeleportPlayer2( gentity_t *player, vec3_t origin, vec3_t angles, tpType_t 
 		{
 			// ...we are borg...prepare to be...
 			tent = G_TempEntity( origin, EV_BORG_TELEPORT );
-			tent->s.clientNum = player->s.clientNum;
+			tent->s.clientNum = player - g_entities;
 		}
 		else
 		{
 			tent = G_TempEntity( player->client->ps.origin, EV_PLAYER_TELEPORT_OUT );
-			tent->s.clientNum = player->s.clientNum;
+			tent->s.clientNum = player - g_entities;
 
 			tent = G_TempEntity( origin, EV_PLAYER_TELEPORT_IN );
-			tent->s.clientNum = player->s.clientNum;
+			tent->s.clientNum = player - g_entities;
 		}
 	}
 
@@ -91,7 +91,7 @@ void TeleportPlayer2( gentity_t *player, vec3_t origin, vec3_t angles, tpType_t 
 
 		VectorCopy ( origin, newOrg );
 		newOrg[2] += 1;
-		trap_Trace( &tr, player->client->ps.origin, player->r.mins, player->r.maxs, newOrg, player->client->ps.clientNum, player->clipmask );
+		trap_Trace( &tr, player->client->ps.origin, player->r.mins, player->r.maxs, newOrg, player - g_entities, player->clipmask );
 		if ( !tr.allsolid && !tr.startsolid && tr.fraction == 1.0 )
 		{
 			player->client->ps.origin[2] += 1;

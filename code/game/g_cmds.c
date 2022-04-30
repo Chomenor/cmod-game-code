@@ -57,7 +57,7 @@ void DeathmatchScoreboardMessage( gentity_t *ent ) {
 			GetMaxDeathsForClient(level.sortedClients[i]),
 			GetFavoriteWeaponForClient(level.sortedClients[i]),
 			cl->ps.persistant[PERS_KILLED],
-			((g_entities[cl->ps.clientNum].r.svFlags&SVF_ELIMINATED)!=0) );
+			((g_entities[level.sortedClients[i]].r.svFlags&SVF_ELIMINATED)!=0) );
 		j = strlen(entry);
 		if (stringlength + j > 1024)
 			break;
@@ -405,12 +405,12 @@ void Cmd_Kill_f( gentity_t *ent ) {
 		// Disallow suicides by feds so they can't cheat their way out of dangerous situations.
 		return;
 	}
-	if ( lastKillTime[ent->client->ps.clientNum] > level.time - 30000 )
+	if ( lastKillTime[ent - g_entities] > level.time - 30000 )
 	{//can't flood-kill
-		trap_SendServerCommand( ent->client->ps.clientNum, va("cp \"Cannot suicide for %d seconds", (lastKillTime[ent->client->ps.clientNum]-(level.time-30000))/1000 ) );
+		trap_SendServerCommand( ent - g_entities, va("cp \"Cannot suicide for %d seconds", (lastKillTime[ent - g_entities]-(level.time-30000))/1000 ) );
 		return;
 	}
-	lastKillTime[ent->client->ps.clientNum] = level.time;
+	lastKillTime[ent - g_entities] = level.time;
 	ent->flags &= ~FL_GODMODE;
 	ent->client->ps.stats[STAT_HEALTH] = ent->health = 0;
 	player_die (ent, ent, ent, 100000, MOD_SUICIDE);
@@ -596,18 +596,16 @@ qboolean SetTeam( gentity_t *ent, char *s ) {
 		if ( g_teamForceBalance.integer && g_pModAssimilation.integer == 0 ) {
 			int		counts[TEAM_NUM_TEAMS];
 
-			counts[TEAM_BLUE] = TeamCount( ent->client->ps.clientNum, TEAM_BLUE );
-			counts[TEAM_RED] = TeamCount( ent->client->ps.clientNum, TEAM_RED );
+			counts[TEAM_BLUE] = TeamCount( clientNum, TEAM_BLUE );
+			counts[TEAM_RED] = TeamCount( clientNum, TEAM_RED );
 
 			// We allow a spread of two
 			if ( team == TEAM_RED && counts[TEAM_RED] - counts[TEAM_BLUE] > 1 ) {
-				trap_SendServerCommand( ent->client->ps.clientNum,
-					"cp \"Red team has too many players.\n\"" );
+				trap_SendServerCommand( clientNum, "cp \"Red team has too many players.\n\"" );
 				return qfalse; // ignore the request
 			}
 			if ( team == TEAM_BLUE && counts[TEAM_BLUE] - counts[TEAM_RED] > 1 ) {
-				trap_SendServerCommand( ent->client->ps.clientNum,
-					"cp \"Blue team has too many players.\n\"" );
+				trap_SendServerCommand( clientNum, "cp \"Blue team has too many players.\n\"" );
 				return qfalse; // ignore the request
 			}
 

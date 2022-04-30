@@ -1799,7 +1799,7 @@ void ClientWeaponsForClass ( gclient_t *client, pclass_t pclass )
 		// assimilator
 		client->ps.stats[STAT_WEAPONS] = ( 1 << WP_BORG_ASSIMILATOR );
 		client->ps.ammo[WP_BORG_ASSIMILATOR] = Max_Ammo[WP_BORG_ASSIMILATOR];
-		if ( client->ps.clientNum != borgQueenClientNum )
+		if ( client - level.clients != borgQueenClientNum )
 		{
 			// projectile/shock weapon
 			client->ps.stats[STAT_WEAPONS] |= ( 1 << WP_BORG_WEAPON );
@@ -2186,7 +2186,7 @@ void ClientSpawn(gentity_t *ent) {
 
 		if ( oClass != client->sess.sessionClass )
 		{//need to send the class change
-			ClientUserinfoChanged( client->ps.clientNum );
+			ClientUserinfoChanged( index );
 		}
 
 		client->ps.persistant[PERS_CLASS] = client->sess.sessionClass;
@@ -2458,7 +2458,7 @@ void ClientDisconnect( int clientNum ) {
 	if ( ent->client->pers.connected == CON_CONNECTED
 		&& ent->client->sess.sessionTeam != TEAM_SPECTATOR ) {
 		tent = G_TempEntity( ent->client->ps.origin, EV_PLAYER_TELEPORT_OUT );
-		tent->s.clientNum = ent->s.clientNum;
+		tent->s.clientNum = clientNum;
 
 		// They don't get to take powerups with them!
 		// Especially important for stuff like CTF flags

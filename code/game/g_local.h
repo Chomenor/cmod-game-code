@@ -320,6 +320,7 @@ struct gclient_s {
 	int			classChangeDebounceTime;	// next time you can change classes
 	
 	qboolean	newExternalEvent;
+	qboolean	scoreUpdatePending;
 	qboolean	botDelayBegin;
 };
 
@@ -422,7 +423,7 @@ char *G_NewString( const char *string );
 //
 // g_cmds.c
 //
-void Cmd_Score_f (gentity_t *ent);
+void DeathmatchScoreboardMessage( gentity_t *ent );
 void StopFollowing( gentity_t *ent );
 void BroadcastTeamChange( gclient_t *client, int oldTeam );
 qboolean SetTeam( gentity_t *ent, char *s );
@@ -582,7 +583,6 @@ void FireWeapon( gentity_t *ent, qboolean alt_fire );
 //
 void MoveClientToIntermission (gentity_t *client);
 void G_SetStats (gentity_t *ent);
-void DeathmatchScoreboardMessage (gentity_t *client);
 
 //
 // g_cmds.c

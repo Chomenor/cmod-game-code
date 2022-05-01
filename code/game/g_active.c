@@ -2000,6 +2000,22 @@ void ClientEndFrame( gentity_t *ent ) {
 	int			i;
 	clientPersistant_t	*pers;
 
+	// check for pending score updates
+	if ( ent->client->scoreUpdatePending ) {
+		DeathmatchScoreboardMessage( ent );
+
+		// also update any clients that are following this one
+		for ( i = 0 ; i < level.maxclients ; i++ ) {
+			gclient_t *client = &level.clients[i];
+			if ( client->pers.connected == CON_CONNECTED && client->sess.sessionTeam == TEAM_SPECTATOR &&
+					client->sess.spectatorState == SPECTATOR_FOLLOW && client->sess.spectatorClient == ent - g_entities ) {
+				DeathmatchScoreboardMessage( &g_entities[i] );
+			}
+		}
+
+		ent->client->scoreUpdatePending = qfalse;
+	}
+
 	if ( ent->client->sess.sessionTeam == TEAM_SPECTATOR || (ent->client->ps.eFlags&EF_ELIMINATED) ) {
 		SpectatorClientEndFrame( ent );
 		return;

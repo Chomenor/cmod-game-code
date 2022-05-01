@@ -114,7 +114,7 @@ void Use_Target_Score (gentity_t *ent, gentity_t *other, gentity_t *activator) {
 	{
 		AddScore( activator, ent->count );
 	}
-	CalculateRanks( qfalse );
+	CalculateRanks();
 }
 
 void SP_target_score( gentity_t *ent ) {

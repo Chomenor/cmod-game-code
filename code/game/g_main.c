@@ -31,7 +31,7 @@ static int trackedCvarCount = 0;
 void G_InitGame( int levelTime, int randomSeed, int restart );
 void G_RunFrame( int levelTime );
 void G_ShutdownGame( int restart );
-void CheckExitRules( void );
+static void CheckExitRules( void );
 
 //=============================
 //** begin code
@@ -769,69 +769,60 @@ void AdjustTournamentScores( void ) {
 
 
 
+#define SELECT_LOWER if ( va < vb ) return -1; if ( vb < va ) return 1;
+#define SELECT_HIGHER if ( va > vb ) return -1; if ( vb > va ) return 1;
+
 /*
 =============
 SortRanks
-
 =============
 */
 int QDECL SortRanks( const void *a, const void *b ) {
-	gclient_t	*ca, *cb;
-
-	ca = &level.clients[*(int *)a];
-	cb = &level.clients[*(int *)b];
+	int ia = *(int *)a;
+	int ib = *(int *)b;
+	gclient_t *ca = &level.clients[ia];
+	gclient_t *cb = &level.clients[ib];
+	int va;
+	int vb;
 
 	// sort special clients last
-	if ( ca->sess.spectatorState == SPECTATOR_SCOREBOARD || ca->sess.spectatorClient < 0 ) {
-		return 1;
-	}
-	if ( cb->sess.spectatorState == SPECTATOR_SCOREBOARD || cb->sess.spectatorClient < 0  ) {
-		return -1;
-	}
+	va = ca->sess.sessionTeam == TEAM_SPECTATOR &&
+		( ca->sess.spectatorState == SPECTATOR_SCOREBOARD || ca->sess.spectatorClient < 0 );
+	vb = cb->sess.sessionTeam == TEAM_SPECTATOR &&
+		( cb->sess.spectatorState == SPECTATOR_SCOREBOARD || cb->sess.spectatorClient < 0 );
+	SELECT_LOWER;
 
 	// then connecting clients
-	if ( ca->pers.connected == CON_CONNECTING ) {
-		return 1;
-	}
-	if ( cb->pers.connected == CON_CONNECTING ) {
-		return -1;
-	}
-
+	va = ca->pers.connected == CON_CONNECTING;
+	vb = cb->pers.connected == CON_CONNECTING;
+	SELECT_LOWER;
 
 	// then spectators
+	va = ca->sess.sessionTeam == TEAM_SPECTATOR;
+	vb = cb->sess.sessionTeam == TEAM_SPECTATOR;
+	SELECT_LOWER;
+
 	if ( ca->sess.sessionTeam == TEAM_SPECTATOR && cb->sess.sessionTeam == TEAM_SPECTATOR ) {
-		if ( ca->sess.spectatorTime < cb->sess.spectatorTime ) {
-			return -1;
-		}
-		if ( ca->sess.spectatorTime > cb->sess.spectatorTime ) {
-			return 1;
-		}
-		return 0;
-	}
-	if ( ca->sess.sessionTeam == TEAM_SPECTATOR ) {
-		return 1;
-	}
-	if ( cb->sess.sessionTeam == TEAM_SPECTATOR ) {
-		return -1;
+		va = ca->sess.spectatorTime;
+		vb = cb->sess.spectatorTime;
+		SELECT_LOWER;
 	}
 
-	// then sort by score & number of times killed
-	if ( ca->ps.persistant[PERS_SCORE]
-		> cb->ps.persistant[PERS_SCORE] ) {
-		return -1;
-	}
-	if ((ca->ps.persistant[PERS_SCORE] == cb->ps.persistant[PERS_SCORE]) &&
-		(ca->ps.persistant[PERS_KILLED] < cb->ps.persistant[PERS_KILLED])   )
-	{	return -1;}
+	else {
+		// then sort by score & number of times killed
+		va = ca->ps.persistant[PERS_SCORE];
+		vb = cb->ps.persistant[PERS_SCORE];
+		SELECT_HIGHER;
 
-	if ( ca->ps.persistant[PERS_SCORE]
-		< cb->ps.persistant[PERS_SCORE] ) {
-		return 1;
+		va = ca->ps.persistant[PERS_KILLED];
+		vb = cb->ps.persistant[PERS_KILLED];
+		SELECT_LOWER;
 	}
-	if ((ca->ps.persistant[PERS_SCORE] == cb->ps.persistant[PERS_SCORE]) &&
-		(ca->ps.persistant[PERS_KILLED] > cb->ps.persistant[PERS_KILLED])   )
-	{	return 1;}
 
+	// if all else is equal, sort by clientnum
+	va = ia;
+	vb = ib;
+	SELECT_LOWER;
 	return 0;
 }
 
@@ -846,7 +837,7 @@ and team change.
 FIXME: for elimination, the last man standing must be ranked first
 ============
 */
-void CalculateRanks( qboolean fromExit ) {
+void CalculateRanks( void ) {
 	int		i;
 	int		rank;
 	int		score;
@@ -936,16 +927,10 @@ void CalculateRanks( qboolean fromExit ) {
 		}
 	}
 
-	// see if it is time to end the level
-	if ( !fromExit )
-	{//not coming this from the CheckExitRules func
-		CheckExitRules();
-	}
-
-	// if we are at the intermission, send the new info to everyone
-	if ( level.intermissiontime ) {
-		SendScoreboardMessageToAllClients();
-	}
+	// run exit check here to ensure exit is processed at the first qualified time
+	// if we waited until next frame, simultaneous events like multiple players being hit by explosion
+	// could be handled incorrectly
+	CheckExitRules();
 }
 
 
@@ -1313,7 +1298,7 @@ qboolean ScoreIsTied( void ) {
 
 /*
 =================
-CheckExitRules
+G_CheckExitRules2
 
 There will be a delay between the time the exit is qualified for
 and the time everyone is moved to the intermission spot, so you
@@ -1321,7 +1306,7 @@ can see the last frag.
 =================
 */
 extern int	borgQueenClientNum;
-void CheckExitRules( void ) {
+static void CheckExitRules2( void ) {
 	int			i;
 	gclient_t	*cl;
 
@@ -1445,7 +1430,7 @@ void CheckExitRules( void ) {
 				{
 					level.teamScores[TEAM_RED] = level.teamScores[TEAM_BLUE] + 1;
 				}
-				CalculateRanks( qtrue );
+				CalculateRanks();
 			}
 			else if ( g_timelimitWinningTeam.string[0] == 'b' || g_timelimitWinningTeam.string[0] == 'B' )
 			{
@@ -1457,7 +1442,7 @@ void CheckExitRules( void ) {
 				{
 					level.teamScores[TEAM_BLUE] = level.teamScores[TEAM_RED] + 1;
 				}
-				CalculateRanks( qtrue );
+				CalculateRanks();
 			}
 			trap_SendServerCommand( -1, "print \"Timelimit hit.\n\"");
 			G_LogExit( "Timelimit hit." );
@@ -1511,6 +1496,24 @@ void CheckExitRules( void ) {
 			return;
 		}
 	}
+}
+
+/*
+==================
+CheckExitRules
+
+Wrapper for CheckExitRules2 to protect against recursive calls via CalculateRanks.
+==================
+*/
+static void CheckExitRules( void ) {
+	static qboolean recursive = qfalse;
+	if ( recursive ) {
+		return;
+	}
+
+	recursive = qtrue;
+	CheckExitRules2();
+	recursive = qfalse;
 }
 
 

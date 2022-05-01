@@ -1630,7 +1630,12 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 	}
 
 	// count current clients and rank for scoreboard
-	CalculateRanks( qfalse );
+	CalculateRanks();
+
+	// if we are at the intermission, update the scoreboard
+	if ( level.intermissiontime ) {
+		SendScoreboardMessageToAllClients();
+	}
 
 	return NULL;
 }
@@ -1702,7 +1707,12 @@ void ClientBegin( int clientNum, qboolean careAboutWarmup ) {
 	G_LogPrintf( "ClientBegin: %i\n", clientNum );
 
 	// count current clients and rank for scoreboard
-	CalculateRanks( qfalse );
+	CalculateRanks();
+
+	// if we are at the intermission, update the scoreboard
+	if ( level.intermissiontime ) {
+		SendScoreboardMessageToAllClients();
+	}
 
 	// Use intro holodeck door if desired and we did not come from a restart
 	if (g_holoIntro.integer && !(ent->r.svFlags & SVF_BOT) && !(level.restarted) && !(g_restarted.integer) && !alreadyIn )
@@ -2486,7 +2496,12 @@ void ClientDisconnect( int clientNum ) {
 
 	trap_SetConfigstring( CS_PLAYERS + clientNum, "");
 
-	CalculateRanks( qfalse );
+	CalculateRanks();
+
+	// if we are at the intermission, update the scoreboard
+	if ( level.intermissiontime ) {
+		SendScoreboardMessageToAllClients();
+	}
 
 	if ( ent->r.svFlags & SVF_BOT ) {
 		BotAIShutdownClient( clientNum );

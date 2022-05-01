@@ -36,7 +36,7 @@ void AddScore( gentity_t *ent, int score ) {
 	{//this isn't capture score
 		level.teamScores[ ent->client->ps.persistant[PERS_TEAM] ] += score;
 	}
-	CalculateRanks( qfalse );
+	CalculateRanks();
 }
 
 /*
@@ -58,7 +58,7 @@ void SetScore( gentity_t *ent, int score ) {
 		return;
 	}
 	ent->client->ps.persistant[PERS_SCORE] = score;
-	CalculateRanks( qfalse );
+	CalculateRanks();
 }
 /*
 =================
@@ -727,7 +727,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 				}
 			}
 		}
-		CalculateRanks( qfalse );
+		CalculateRanks();
 	}
 }
 

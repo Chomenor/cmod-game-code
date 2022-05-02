@@ -11,8 +11,6 @@
 // the "gameversion" client command will print this plus compile date
 #define	GAMEVERSION	"baseEF"
 
-#define BODY_QUEUE_SIZE		8
-
 #define INFINITE			1000000
 
 #define	FRAMETIME			100					// msec
@@ -402,8 +400,6 @@ typedef struct {
 
 	qboolean	locationLinked;			// target_locations get linked
 	gentity_t	*locationHead;			// head of the location list
-	int			bodyQueIndex;			// dead bodies
-	gentity_t	*bodyQue[BODY_QUEUE_SIZE];
 
 	int			numObjectives;			//
 } level_locals_t;

@@ -430,8 +430,25 @@ BODYQUE
 =======================================================================
 */
 
-static int	bodyFadeSound=0;
+#define BODY_QUEUE_MIN 8
+#define BODY_QUEUE_MAX 32
 
+static int			bodyFadeSound=0;
+static int			bodyQueIndex;			// dead bodies
+static int			bodyQueSize;
+static gentity_t	*bodyQue[BODY_QUEUE_MAX];
+
+/*
+===============
+InitBody
+===============
+*/
+static void InitBody( gentity_t *ent ) {
+	memset( ent, 0, sizeof( *ent ) );
+	G_InitGentity( ent );
+	ent->classname = "bodyque";
+	ent->neverFree = qtrue;
+}
 
 /*
 ===============
@@ -442,12 +459,29 @@ void InitBodyQue (void) {
 	int		i;
 	gentity_t	*ent;
 
-	level.bodyQueIndex = 0;
-	for (i=0; i<BODY_QUEUE_SIZE ; i++) {
-		ent = G_Spawn();
-		ent->classname = "bodyque";
-		ent->neverFree = qtrue;
-		level.bodyQue[i] = ent;
+	bodyQueIndex = 0;
+	bodyQueSize = 0;
+
+	// try to allocate bodies within MAX_CLIENTS space if possible
+	// original EF cgame has issues with body entities exceeding MAX_CLIENTS -
+	// CG_PlayerSprites makes buggy references to cgs.clientinfo indexed by the body entity number
+	for ( i = level.maxclients; i < MAX_CLIENTS && bodyQueSize < BODY_QUEUE_MAX; ++i ) {
+		ent = &g_entities[i];
+		if ( !ent->inuse ) {
+			InitBody( ent );
+			bodyQue[bodyQueSize++] = ent;
+		}
+	}
+
+	// fall back to standard method if not enough slots allocated
+	if ( bodyQueSize < BODY_QUEUE_MIN ) {
+		G_Printf( "WARNING: Failed to allocate body que within MAX_CLIENTS entity space.\n" );
+
+		while ( bodyQueSize < BODY_QUEUE_MIN ) {
+			ent = G_Spawn();
+			InitBody( ent );
+			bodyQue[bodyQueSize++] = ent;
+		}
 	}
 
 	if (bodyFadeSound == 0)
@@ -484,6 +518,12 @@ void BodyRezOut( gentity_t *ent )
 
 A player is respawning, so make an entity that looks
 just like the existing corpse to leave behind.
+
+If source player was gibbed, s.eType will be ET_INVISIBLE. The body inherits this and
+will also be invisible, but can still interact with weapon fire...
+
+If source player died with PW_DISINTEGRATE or PW_EXPLODE the body will be set to
+invisible but may still be able to be gibbed...
 =============
 */
 LOGFUNCTION_RET( gentity_t *, ModFNDefault_CopyToBodyQue, ( int clientNum ), ( clientNum ), "G_MODFN_COPYTOBODYQUE" ) {
@@ -501,11 +541,10 @@ LOGFUNCTION_RET( gentity_t *, ModFNDefault_CopyToBodyQue, ( int clientNum ), ( c
 	}
 
 	// grab a body que and cycle to the next one
-	body = level.bodyQue[ level.bodyQueIndex ];
-	level.bodyQueIndex = (level.bodyQueIndex + 1) % BODY_QUEUE_SIZE;
+	body = bodyQue[ bodyQueIndex ];
+	bodyQueIndex = (bodyQueIndex + 1) % bodyQueSize;
 
-	trap_UnlinkEntity (body);
-
+	InitBody( body );
 	body->s = ent->s;
 	body->s.eFlags = EF_DEAD;		// clear EF_TALK, etc
 	body->s.powerups = 0;	// clear powerups

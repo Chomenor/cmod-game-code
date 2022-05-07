@@ -15,6 +15,10 @@ LOGFUNCTION_VOID( ModFNDefault_PostRunFrame, ( void ),
 		(), "G_MODFN_POSTRUNFRAME" ) {
 }
 
+LOGFUNCTION_VOID( ModFNDefault_PatchClientSpawn, ( int clientNum, gentity_t **spawn, vec3_t origin, vec3_t angles ),
+		( clientNum, spawn, origin, angles ), "G_MODFN_PATCHCLIENTSPAWN" ) {
+}
+
 int ModFNDefault_AdjustWeaponConstant( weaponConstant_t wcType, int defaultValue ) {
 	return defaultValue;
 }

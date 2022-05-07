@@ -1463,7 +1463,7 @@ void ClientEvents( gentity_t *ent, int oldEventSequence ) {
 				vec3_t	origin, angles;
 
 				ent->client->ps.stats[STAT_USEABLE_PLACED] = 0;
-				SelectSpawnPoint( ent->client->ps.origin, origin, angles );
+				SelectSpawnPoint( ent->client->ps.origin, origin, angles, qtrue, qtrue );
 				TeleportPlayer( ent, origin, angles, TP_NORMAL );
 			}
 			break;

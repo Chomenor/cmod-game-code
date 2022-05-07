@@ -252,14 +252,14 @@ SpotWouldTelefrag
 
 ================
 */
-qboolean SpotWouldTelefrag( gentity_t *spot ) {
+qboolean SpotWouldTelefrag( vec3_t origin ) {
 	int			i, num;
 	int			touch[MAX_GENTITIES];
 	gentity_t	*hit;
 	vec3_t		mins, maxs;
 
-	VectorAdd( spot->s.origin, playerMins, mins );
-	VectorAdd( spot->s.origin, playerMaxs, maxs );
+	VectorAdd( origin, playerMins, mins );
+	VectorAdd( origin, playerMaxs, maxs );
 	num = trap_EntitiesInBox( mins, maxs, touch, MAX_GENTITIES );
 
 	for (i=0 ; i<num ; i++) {
@@ -285,7 +285,7 @@ Find the spot that we DON'T want to use
 ================
 */
 #define	MAX_SPAWN_POINTS	128
-gentity_t *SelectNearestDeathmatchSpawnPoint( vec3_t from ) {
+static gentity_t *SelectNearestDeathmatchSpawnPoint( vec3_t from ) {
 	gentity_t	*spot;
 	vec3_t		delta;
 	float		dist, nearestDist;
@@ -317,7 +317,7 @@ go to a random point that doesn't telefrag
 ================
 */
 #define	MAX_SPAWN_POINTS	128
-gentity_t *SelectRandomDeathmatchSpawnPoint( void ) {
+static gentity_t *SelectRandomDeathmatchSpawnPoint( qboolean useHumanSpots, qboolean useBotSpots ) {
 	gentity_t	*spot;
 	int			count;
 	int			selection;
@@ -326,8 +326,14 @@ gentity_t *SelectRandomDeathmatchSpawnPoint( void ) {
 	count = 0;
 	spot = NULL;
 
-	while ((spot = G_Find (spot, FOFS(classname), "info_player_deathmatch")) != NULL) {
-		if ( SpotWouldTelefrag( spot ) ) {
+	while ((spot = G_Find (spot, FOFS(classname), "info_player_deathmatch")) != NULL && count < MAX_SPAWN_POINTS) {
+		if ( ( spot->flags & FL_NO_BOTS ) && !useHumanSpots ) {
+			continue;
+		}
+		if ( ( spot->flags & FL_NO_HUMANS ) && !useBotSpots ) {
+			continue;
+		}
+		if ( SpotWouldTelefrag( spot->s.origin ) ) {
 			continue;
 		}
 		spots[ count ] = spot;
@@ -350,19 +356,19 @@ SelectSpawnPoint
 Chooses a player start, deathmatch start, etc
 ============
 */
-gentity_t *SelectSpawnPoint ( vec3_t avoidPoint, vec3_t origin, vec3_t angles ) {
+gentity_t *SelectSpawnPoint ( vec3_t avoidPoint, vec3_t origin, vec3_t angles, qboolean useHumanSpots, qboolean useBotSpots ) {
 	gentity_t	*spot;
 	gentity_t	*nearestSpot;
 
 	nearestSpot = SelectNearestDeathmatchSpawnPoint( avoidPoint );
 
-	spot = SelectRandomDeathmatchSpawnPoint ( );
+	spot = SelectRandomDeathmatchSpawnPoint ( useHumanSpots, useBotSpots );
 	if ( spot == nearestSpot ) {
 		// roll again if it would be real close to point of death
-		spot = SelectRandomDeathmatchSpawnPoint ( );
+		spot = SelectRandomDeathmatchSpawnPoint ( useHumanSpots, useBotSpots );
 		if ( spot == nearestSpot ) {
 			// last try
-			spot = SelectRandomDeathmatchSpawnPoint ( );
+			spot = SelectRandomDeathmatchSpawnPoint ( useHumanSpots, useBotSpots );
 		}
 	}
 
@@ -386,7 +392,7 @@ Try to find a spawn point marked 'initial', otherwise
 use normal spawn selection.
 ============
 */
-gentity_t *SelectInitialSpawnPoint( vec3_t origin, vec3_t angles ) {
+static gentity_t *SelectInitialSpawnPoint( vec3_t origin, vec3_t angles, qboolean useHumanSpots, qboolean useBotSpots ) {
 	gentity_t	*spot;
 
 	spot = NULL;
@@ -396,8 +402,8 @@ gentity_t *SelectInitialSpawnPoint( vec3_t origin, vec3_t angles ) {
 		}
 	}
 
-	if ( !spot || SpotWouldTelefrag( spot ) ) {
-		return SelectSpawnPoint( vec3_origin, origin, angles );
+	if ( !spot || SpotWouldTelefrag( spot->s.origin ) ) {
+		return SelectSpawnPoint( vec3_origin, origin, angles, useHumanSpots, useBotSpots );
 	}
 
 	VectorCopy (spot->s.origin, origin);
@@ -413,7 +419,7 @@ SelectSpectatorSpawnPoint
 
 ============
 */
-gentity_t *SelectSpectatorSpawnPoint( vec3_t origin, vec3_t angles ) {
+static gentity_t *SelectSpectatorSpawnPoint( vec3_t origin, vec3_t angles ) {
 	FindIntermissionPoint();
 
 	VectorCopy( level.intermission_origin, origin );
@@ -2089,6 +2095,8 @@ void ClientSpawn(gentity_t *ent) {
 	index = ent - g_entities;
 	client = ent->client;
 
+	trap_UnlinkEntity( ent );
+
 	/*
 	if ( actionHeroClientNum == -1 )
 	{
@@ -2099,46 +2107,32 @@ void ClientSpawn(gentity_t *ent) {
 	*/
 
 	// find a spawn point
-	// do it before setting health back up, so farthest
-	// ranging doesn't count this client
 	if ( client->sess.sessionTeam == TEAM_SPECTATOR ) {
-		spawnPoint = SelectSpectatorSpawnPoint (
-			spawn_origin, spawn_angles);
-	} else if (g_gametype.integer >= GT_TEAM) {
-		spawnPoint = SelectCTFSpawnPoint (
-			ent,
-			client->sess.sessionTeam,
-			client->pers.teamState.state,
-			spawn_origin, spawn_angles);
+		spawnPoint = SelectSpectatorSpawnPoint( spawn_origin, spawn_angles );
+	} else if ( g_gametype.integer >= GT_TEAM ) {
+		spawnPoint = SelectCTFSpawnPoint( ent, client->sess.sessionTeam, client->pers.teamState.state,
+				spawn_origin, spawn_angles );
 	} else {
-		do {
-			// the first spawn should be at a good looking spot
-			if ( !client->pers.initialSpawn && client->pers.localClient ) {
-				client->pers.initialSpawn = qtrue;
-				spawnPoint = SelectInitialSpawnPoint( spawn_origin, spawn_angles );
-			} else {
-				// don't spawn near existing origin if possible
-				spawnPoint = SelectSpawnPoint (
-					client->ps.origin,
-					spawn_origin, spawn_angles);
-			}
+		// allow selecting bot/human exclusive spots
+		qboolean useBotSpots = ( ent->r.svFlags & SVF_BOT ) ? qtrue : qfalse;
+		qboolean useHumanSpots = !useBotSpots;
 
-			// Tim needs to prevent bots from spawning at the initial point
-			// on q3dm0...
-			if ( ( spawnPoint->flags & FL_NO_BOTS ) && ( ent->r.svFlags & SVF_BOT ) ) {
-				continue;	// try again
-			}
-			// just to be symetric, we have a nohumans option...
-			if ( ( spawnPoint->flags & FL_NO_HUMANS ) && !( ent->r.svFlags & SVF_BOT ) ) {
-				continue;	// try again
-			}
-
-			break;
-
-		} while ( 1 );
+		// the first spawn should be at a good looking spot
+		if ( !client->pers.initialSpawn && client->pers.localClient ) {
+			client->pers.initialSpawn = qtrue;
+			spawnPoint = SelectInitialSpawnPoint( spawn_origin, spawn_angles, useHumanSpots, useBotSpots );
+		} else {
+			// don't spawn near existing origin if possible
+			spawnPoint = SelectSpawnPoint( client->ps.origin, spawn_origin, spawn_angles, useHumanSpots, useBotSpots );
+		}
 	}
 	client->pers.teamState.state = TEAM_ACTIVE;
 
+	// try to avoid spawn kills
+	if ( client->sess.sessionTeam != TEAM_SPECTATOR ) {
+		EF_ERR_ASSERT( spawnPoint );
+		modfn.PatchClientSpawn( index, &spawnPoint, spawn_origin, spawn_angles );
+	}
 
 	// toggle the teleport bit so the client knows to not lerp
 	flags = ent->client->ps.eFlags & (EF_TELEPORT_BIT | EF_VOTED);

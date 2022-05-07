@@ -18,6 +18,7 @@ int G_ModUtils_GetLatchedValue( const char *cvar_name, const char *default_value
 void ModAltSwapHandler_Init( void );
 void ModPingcomp_Init( void );
 void ModPlayerMove_Init( void );
+void ModSpawnProtect_Init( void );
 void ModSpectPassThrough_Init( void );
 
 //

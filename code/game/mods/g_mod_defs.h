@@ -24,6 +24,13 @@ MOD_FUNCTION_DEF( GeneralInit, void, ( void ) )
 MOD_FUNCTION_DEF( PostRunFrame, void, ( void ) )
 
 //////////////////////////
+// client misc
+//////////////////////////
+
+// Checks selected player spawn point for spawn killing, and corrects it if needed.
+MOD_FUNCTION_DEF( PatchClientSpawn, void, ( int clientNum, gentity_t **spawn, vec3_t origin, vec3_t angles ) )
+
+//////////////////////////
 // weapon related
 //////////////////////////
 

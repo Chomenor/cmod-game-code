@@ -503,6 +503,11 @@ void G_KillBox (gentity_t *ent) {
 			continue;
 		}
 
+		if ( !EF_WARN_ASSERT( hit != ent ) ) {
+			// don't kill self
+			continue;
+		}
+
 		if ( g_pModAssimilation.integer && touch[i] == borgQueenClientNum )
 		{//kill me instead
 			G_Damage ( ent, hit, hit, NULL, NULL,

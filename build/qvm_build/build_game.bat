@@ -66,6 +66,7 @@ set src=game\mods&set name=g_mod_utils&call :compile
 set src=game\mods\features&set name=feature_altswap_handler&call :compile
 set src=game\mods\features&set name=feature_player_move&call :compile
 set src=game\mods\features&set name=feature_spect_passthrough&call :compile
+set src=game\mods\features&set name=feature_spawn_protect&call :compile
 set src=game\mods\features\pingcomp&set name=pc_client_predict&call :compile
 set src=game\mods\features\pingcomp&set name=pc_dead_move&call :compile
 set src=game\mods\features\pingcomp&set name=pc_instant_weapons&call :compile

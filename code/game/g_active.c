@@ -911,65 +911,83 @@ void DetonateDetpack(gentity_t *ent)
 #define SHIELD_HALFTHICKNESS		4
 #define SHIELD_PLACEDIST			64
 
-
 static qhandle_t	shieldAttachSound=0;
 static qhandle_t	shieldActivateSound=0;
 static qhandle_t	shieldDamageSound=0;
 
-
-void ShieldRemove(gentity_t *self)
+/*
+================
+G_ShieldRemove
+================
+*/
+static void G_ShieldRemove(gentity_t *self)
 {
 	self->think = G_FreeEntity;
 	self->nextthink = level.time + 100;
 
 	// Play raising sound...
 	G_AddEvent(self, EV_GENERAL_SOUND, shieldActivateSound);
-
-	return;
 }
 
+/*
+================
+G_ShieldThink
 
-// Count down the health of the shield.
-void ShieldThink(gentity_t *self)
+Count down the health of the shield.
+================
+*/
+static void G_ShieldThink(gentity_t *self)
 {
 	self->s.eFlags &= ~(EF_ITEMPLACEHOLDER | EF_NODRAW);
 	self->health -= SHIELD_HEALTH_DEC;
 	self->nextthink = level.time + 1000;
 	if (self->health <= 0)
 	{
-		ShieldRemove(self);
+		G_ShieldRemove(self);
 	}
-	return;
 }
 
+/*
+================
+G_ShieldDie
 
-// The shield was damaged to below zero health.
-void ShieldDie(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod)
+The shield was damaged to below zero health.
+================
+*/
+static void G_ShieldDie(gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod)
 {
 	// Play damaging sound...
 	G_AddEvent(self, EV_GENERAL_SOUND, shieldDamageSound);
 
-	ShieldRemove(self);
+	G_ShieldRemove(self);
 }
 
+/*
+================
+G_ShieldPain
 
-// The shield had damage done to it.  Make it flicker.
-void ShieldPain(gentity_t *self, gentity_t *attacker, int damage)
+The shield had damage done to it. Make it flicker.
+================
+*/
+static void G_ShieldPain(gentity_t *self, gentity_t *attacker, int damage)
 {
 	// Set the itemplaceholder flag to indicate the the shield drawing that the shield pain should be drawn.
 	self->s.eFlags |= EF_ITEMPLACEHOLDER;
-	self->think = ShieldThink;
+	self->think = G_ShieldThink;
 	self->nextthink = level.time + 400;
 
 	// Play damaging sound...
 	G_AddEvent(self, EV_GENERAL_SOUND, shieldDamageSound);
-
-	return;
 }
 
+/*
+================
+G_ShieldGoSolid
 
-// Try to turn the shield back on after a delay.
-void ShieldGoSolid(gentity_t *self)
+Try to turn the shield back on after a delay.
+================
+*/
+static void G_ShieldGoSolid(gentity_t *self)
 {
 	trace_t		tr;
 
@@ -977,7 +995,7 @@ void ShieldGoSolid(gentity_t *self)
 	self->health--;
 	if (self->health <= 0)
 	{
-		ShieldRemove(self);
+		G_ShieldRemove(self);
 		return;
 	}
 
@@ -985,7 +1003,7 @@ void ShieldGoSolid(gentity_t *self)
 	if(tr.startsolid)
 	{	// gah, we can't activate yet
 		self->nextthink = level.time + 200;
-		self->think = ShieldGoSolid;
+		self->think = G_ShieldGoSolid;
 		trap_LinkEntity(self);
 	}
 	else
@@ -993,27 +1011,30 @@ void ShieldGoSolid(gentity_t *self)
 		self->r.contents = CONTENTS_SOLID;
 		self->s.eFlags &= ~(EF_NODRAW | EF_ITEMPLACEHOLDER);
 		self->nextthink = level.time + 1000;
-		self->think = ShieldThink;
+		self->think = G_ShieldThink;
 		self->takedamage = qtrue;
 		trap_LinkEntity(self);
 
 		// Play raising sound...
 		G_AddEvent(self, EV_GENERAL_SOUND, shieldActivateSound);
 	}
-
-	return;
 }
 
+/*
+================
+G_ShieldGoNotSolid
 
-// Turn the shield off to allow a friend to pass through.
-void ShieldGoNotSolid(gentity_t *self)
+Turn the shield off to allow a friend to pass through.
+================
+*/
+static void G_ShieldGoNotSolid(gentity_t *self)
 {
 	// make the shield non-solid very briefly
 	self->r.contents = CONTENTS_NONE;
 	self->s.eFlags |= EF_NODRAW;
 	// nextthink needs to have a large enough interval to avoid excess accumulation of Activate messages
 	self->nextthink = level.time + 200;
-	self->think = ShieldGoSolid;
+	self->think = G_ShieldGoSolid;
 	self->takedamage = qfalse;
 	trap_LinkEntity(self);
 
@@ -1021,9 +1042,14 @@ void ShieldGoNotSolid(gentity_t *self)
 	G_AddEvent(self, EV_GENERAL_SOUND, shieldActivateSound);
 }
 
+/*
+================
+G_ShieldTouch
 
-// Somebody (a player) has touched the shield.  See if it is a "friend".
-void ShieldTouch(gentity_t *self, gentity_t *other, trace_t *trace)
+Somebody (a player) has touched the shield. See if it is a "friend".
+================
+*/
+static void G_ShieldTouch(gentity_t *self, gentity_t *other, trace_t *trace)
 {
 	if (g_gametype.integer >= GT_TEAM)
 	{ // let teammates through
@@ -1032,7 +1058,7 @@ void ShieldTouch(gentity_t *self, gentity_t *other, trace_t *trace)
 		{
 			if ( self->parent->client->sess.sessionTeam == other->client->sess.sessionTeam || other->client->sess.sessionClass == PC_TECH )
 			{
-				ShieldGoNotSolid(self);
+				G_ShieldGoNotSolid(self);
 			}
 		}
 	}
@@ -1040,115 +1066,28 @@ void ShieldTouch(gentity_t *self, gentity_t *other, trace_t *trace)
 	{//let the person who dropped the shield through
 		if (self->parent->s.number == other->s.number)
 		{
-			ShieldGoNotSolid(self);
+			G_ShieldGoNotSolid(self);
 		}
 	}
 }
 
+/*
+================
+G_ActivateShield
 
-// After a short delay, create the shield by expanding in all directions.
-void CreateShield(gentity_t *ent)
+After a short delay, create the shield by expanding in all directions.
+================
+*/
+static void G_ActivateShield( gentity_t *ent )
 {
 	trace_t		tr;
-	vec3_t		mins, maxs, end, posTraceEnd, negTraceEnd, start;
-	int			height, posWidth, negWidth, halfWidth = 0;
-	qboolean	xaxis;
-	int			paramData = 0;
-	static int	shieldID;
 
-	// trace upward to find height of shield
-	VectorCopy(ent->r.currentOrigin, end);
-	end[2] += MAX_SHIELD_HEIGHT;
-	trap_Trace (&tr, ent->r.currentOrigin, NULL, NULL, end, ent->s.number, MASK_SHOT );
-	height = (int)(MAX_SHIELD_HEIGHT * tr.fraction);
-
-	// use angles to find the proper axis along which to align the shield
-	VectorSet(mins, -SHIELD_HALFTHICKNESS, -SHIELD_HALFTHICKNESS, 0);
-	VectorSet(maxs, SHIELD_HALFTHICKNESS, SHIELD_HALFTHICKNESS, height);
-	VectorCopy(ent->r.currentOrigin, posTraceEnd);
-	VectorCopy(ent->r.currentOrigin, negTraceEnd);
-
-	if ((int)(ent->s.angles[YAW]) == 0) // shield runs along y-axis
-	{
-		posTraceEnd[1]+=MAX_SHIELD_HALFWIDTH;
-		negTraceEnd[1]-=MAX_SHIELD_HALFWIDTH;
-		xaxis = qfalse;
-	}
-	else  // shield runs along x-axis
-	{
-		posTraceEnd[0]+=MAX_SHIELD_HALFWIDTH;
-		negTraceEnd[0]-=MAX_SHIELD_HALFWIDTH;
-		xaxis = qtrue;
-	}
-
-	// trace horizontally to find extend of shield
-	// positive trace
-	VectorCopy(ent->r.currentOrigin, start);
-	start[2] += (height>>1);
-	trap_Trace (&tr, start, 0, 0, posTraceEnd, ent->s.number, MASK_SHOT );
-	posWidth = MAX_SHIELD_HALFWIDTH * tr.fraction;
-	// negative trace
-	trap_Trace (&tr, start, 0, 0, negTraceEnd, ent->s.number, MASK_SHOT );
-	negWidth = MAX_SHIELD_HALFWIDTH * tr.fraction;
-
-	// kef -- monkey with dimensions and place origin in center
-	halfWidth = (posWidth + negWidth)>>1;
-	if (xaxis)
-	{
-		ent->r.currentOrigin[0] = ent->r.currentOrigin[0] - negWidth + halfWidth;
-	}
-	else
-	{
-		ent->r.currentOrigin[1] = ent->r.currentOrigin[1] - negWidth + halfWidth;
-	}
-	ent->r.currentOrigin[2] += (height>>1);
-
-	// set entity's mins and maxs to new values, make it solid, and link it
-	if (xaxis)
-	{
-		VectorSet(ent->r.mins, -halfWidth, -SHIELD_HALFTHICKNESS, -(height>>1));
-		VectorSet(ent->r.maxs, halfWidth, SHIELD_HALFTHICKNESS, height);
-	}
-	else
-	{
-		VectorSet(ent->r.mins, -SHIELD_HALFTHICKNESS, -halfWidth, -(height>>1));
-		VectorSet(ent->r.maxs, SHIELD_HALFTHICKNESS, halfWidth, height);
-	}
-	ent->clipmask = MASK_SHOT;
-
-	// Information for shield rendering.
-
-//	xaxis - 1 bit
-//	height - 0-254 8 bits
-//	posWidth - 0-255 8 bits
-//  negWidth - 0 - 255 8 bits
-
-	paramData = (xaxis << 24) | (height << 16) | (posWidth << 8) | (negWidth);
-	ent->s.time2 = paramData;
-
-	if ( g_pModSpecialties.integer != 0 )
-	{
-		if ( ent->s.otherEntityNum2 == TEAM_RED )
-		{
-			ent->team = "1";
-		}
-		else if ( ent->s.otherEntityNum2 == TEAM_BLUE )
-		{
-			ent->team = "2";
-		}
-		ent->health = ceil(SHIELD_HEALTH*4*g_dmgmult.value);
-	}
-	else
-	{
-		ent->health = ceil(SHIELD_HEALTH*g_dmgmult.value);
-	}
+	ent->health = SHIELD_HEALTH;
 
 	ent->s.time = ent->health;//???
-	ent->pain = ShieldPain;
-	ent->die = ShieldDie;
-	ent->touch = ShieldTouch;
-
-	ent->r.svFlags |= SVF_SHIELD_BBOX;
+	ent->pain = G_ShieldPain;
+	ent->die = G_ShieldDie;
+	ent->touch = G_ShieldTouch;
 
 	// see if we're valid
 	trap_Trace (&tr, ent->r.currentOrigin, ent->r.mins, ent->r.maxs, ent->r.currentOrigin, ent->s.number, CONTENTS_BODY );
@@ -1160,16 +1099,17 @@ void CreateShield(gentity_t *ent)
 		ent->s.eFlags |= EF_NODRAW;
 		// nextthink needs to have a large enough interval to avoid excess accumulation of Activate messages
 		ent->nextthink = level.time + 200;
-		ent->think = ShieldGoSolid;
+		ent->think = G_ShieldGoSolid;
 		ent->takedamage = qfalse;
 		trap_LinkEntity(ent);
 	}
 	else
 	{	// Get solid.
 		ent->r.contents = CONTENTS_PLAYERCLIP|CONTENTS_SHOTCLIP;//CONTENTS_SOLID;
+		ent->s.eFlags &= ~EF_NODRAW;
 
 		ent->nextthink = level.time + 1000;
-		ent->think = ShieldThink;
+		ent->think = G_ShieldThink;
 
 		ent->takedamage = qtrue;
 		trap_LinkEntity(ent);
@@ -1177,85 +1117,160 @@ void CreateShield(gentity_t *ent)
 		// Play raising sound...
 		G_AddEvent(ent, EV_GENERAL_SOUND, shieldActivateSound);
 	}
-
-	return;
 }
 
-qboolean PlaceShield(gentity_t *playerent)
-{
-	static const gitem_t *shieldItem = NULL;
-	gentity_t	*shield = NULL;
-	trace_t		tr;
-	vec3_t		fwd, pos, dest, mins = {-16,-16, 0}, maxs = {16,16,16};
+/*
+================
+G_ForcefieldInitialTrace
 
-	if (shieldAttachSound==0)
-	{
-		shieldAttachSound = G_SoundIndex("sound/weapons/detpacklatch.wav");
-		shieldActivateSound = G_SoundIndex("sound/movers/forceup.wav");
-		shieldDamageSound = G_SoundIndex("sound/ambience/spark5.wav");
-		shieldItem = BG_FindItemForHoldable(HI_SHIELD);
-	}
+Trace to initial location on ground to start placing forcefield.
+Returns qtrue if valid, qfalse otherwise.
+================
+*/
+static qboolean G_ForcefieldInitialTrace( int clientNum, trace_t *tr ) {
+	gclient_t *client = &level.clients[clientNum];
+	vec3_t fwd, pos, dest;
+	vec3_t mins = { -16, -16, 0 }, maxs = { 16, 16, 16 };
 
 	// can we place this in front of us?
-	AngleVectors (playerent->client->ps.viewangles, fwd, NULL, NULL);
+	AngleVectors( client->ps.viewangles, fwd, NULL, NULL );
 	fwd[2] = 0;
-	VectorMA(playerent->client->ps.origin, SHIELD_PLACEDIST, fwd, dest);
-	trap_Trace (&tr, playerent->client->ps.origin, mins, maxs, dest, playerent->s.number, MASK_SHOT );
-	if (tr.fraction > 0.9)
-	{//room in front
-		VectorCopy(tr.endpos, pos);
-		// drop to floor
-		VectorSet( dest, pos[0], pos[1], pos[2] - 4096 );
-		trap_Trace( &tr, pos, mins, maxs, dest, playerent->s.number, MASK_SOLID );
-		if ( !tr.startsolid && !tr.allsolid )
-		{
-			// got enough room so place the portable shield
-			shield = G_Spawn();
+	VectorMA( client->ps.origin, SHIELD_PLACEDIST, fwd, dest );
+	trap_Trace( tr, client->ps.origin, mins, maxs, dest, clientNum, MASK_SHOT );
 
-			// Figure out what direction the shield is facing.
-			if (fabs(fwd[0]) > fabs(fwd[1]))
-			{	// shield is north/south, facing east.
-				shield->s.angles[YAW] = 0;
-			}
-			else
-			{	// shield is along the east/west axis, facing north
-				shield->s.angles[YAW] = 90;
-			}
-			shield->think = CreateShield;
-			shield->nextthink = level.time + 500;	// power up after .5 seconds
-			shield->parent = playerent;
-
-			// Set team number.
-			shield->s.otherEntityNum2 = playerent->client->sess.sessionTeam;
-
-			shield->s.eType = ET_USEABLE;
-			shield->s.modelindex =  HI_SHIELD;	// this'll be used in CG_Useable() for rendering.
-			shield->classname = shieldItem->classname;
-
-			shield->r.contents = CONTENTS_TRIGGER;
-
-			shield->touch = 0;
-			// using an item causes it to respawn
-			shield->use = 0; //Use_Item;
-
-			// allow to ride movers
-			shield->s.groundEntityNum = tr.entityNum;
-
-			G_SetOrigin( shield, tr.endpos );
-
-			shield->s.eFlags &= ~EF_NODRAW;
-			shield->r.svFlags &= ~SVF_NOCLIENT;
-
-			trap_LinkEntity (shield);
-
-			// Play placing sound...
-			G_AddEvent(shield, EV_GENERAL_SOUND, shieldAttachSound);
-
-			return qtrue;
-		}
+	if ( tr->fraction <= 0.9 ) {
+		// not enough room
+		return qfalse;
 	}
-	// no room
-	return qfalse;
+
+	VectorCopy( tr->endpos, pos );
+	// drop to floor
+	VectorSet( dest, pos[0], pos[1], pos[2] - 4096 );
+	trap_Trace( tr, pos, mins, maxs, dest, clientNum, MASK_SOLID );
+
+	if ( tr->startsolid || tr->allsolid ) {
+		// invalid trace
+		return qfalse;
+	}
+
+	return qtrue;
+}
+
+/*
+================
+G_ForcefieldPlace
+
+Sets forcefield in place and starts timer (500ms default) to fully activate it.
+Returns forcefield entity if successfully placed, or NULL if positioning was invalid.
+================
+*/
+static qboolean G_ForcefieldPlace( int clientNum ) {
+	gentity_t *playerent = &g_entities[clientNum];
+	static const gitem_t *shieldItem = NULL;
+	gentity_t *shield = NULL;
+	trace_t tr;
+	float axis_angle;
+	qboolean xaxis;
+	vec3_t origin, trace_start, trace_end;
+	int height, posWidth, negWidth, halfWidth;
+	int groundEntityNum;
+
+	if ( shieldAttachSound == 0 ) {
+		shieldAttachSound = G_SoundIndex( "sound/weapons/detpacklatch.wav" );
+		shieldActivateSound = G_SoundIndex( "sound/movers/forceup.wav" );
+		shieldDamageSound = G_SoundIndex( "sound/ambience/spark5.wav" );
+		shieldItem = BG_FindItemForHoldable( HI_SHIELD );
+	}
+
+	// Trace down for start location
+	if ( !G_ForcefieldInitialTrace( clientNum, &tr ) ) {
+		return qfalse;
+	}
+	VectorCopy( tr.endpos, origin );
+	groundEntityNum = tr.entityNum;
+
+	// Determine axis
+	axis_angle = fabs( playerent->client->ps.viewangles[YAW] );
+	if ( axis_angle > 45 && axis_angle < 135 ) {
+		xaxis = qtrue;
+	} else {
+		xaxis = qfalse;
+	}
+
+	// Trace upwards for height
+	VectorCopy( origin, trace_end );
+	trace_end[2] += MAX_SHIELD_HEIGHT;
+	trap_Trace( &tr, origin, NULL, NULL, trace_end, ENTITYNUM_NONE, MASK_SHOT );
+	height = (int)( MAX_SHIELD_HEIGHT * tr.fraction );
+
+	// Trace to both sides for width
+	VectorCopy( origin, trace_start );
+	trace_start[2] += ( height >> 1 );
+
+	VectorCopy( origin, trace_end );
+	trace_end[xaxis ? 0 : 1] += MAX_SHIELD_HALFWIDTH;
+	trap_Trace( &tr, trace_start, 0, 0, trace_end, ENTITYNUM_NONE, MASK_SHOT );
+	posWidth = MAX_SHIELD_HALFWIDTH * tr.fraction;
+
+	VectorCopy( origin, trace_end );
+	trace_end[xaxis ? 0 : 1] -= MAX_SHIELD_HALFWIDTH;
+	trap_Trace( &tr, trace_start, 0, 0, trace_end, ENTITYNUM_NONE, MASK_SHOT );
+	negWidth = MAX_SHIELD_HALFWIDTH * tr.fraction;
+
+	halfWidth = ( posWidth + negWidth ) >> 1;
+
+	// Don't allow excessively small forcefield
+	if ( height < MAX_SHIELD_HEIGHT / 10 || halfWidth < MAX_SHIELD_HEIGHT / 10 ) {
+		return qfalse;
+	}
+
+	// Reposition origin to center
+	origin[xaxis ? 0 : 1] = origin[xaxis ? 0 : 1] - negWidth + halfWidth;
+
+	// Create the shield
+	shield = G_Spawn();
+
+	shield->s.eType = ET_USEABLE;
+	shield->s.modelindex = HI_SHIELD;	// this'll be used in CG_Useable() for rendering.
+	shield->classname = shieldItem->classname;
+
+	shield->parent = playerent;
+	shield->s.otherEntityNum2 = playerent->client->sess.sessionTeam;
+
+	G_SetOrigin( shield, origin );
+
+	if ( xaxis ) {
+		VectorSet( shield->r.mins, -halfWidth, -SHIELD_HALFTHICKNESS, 0 );
+		VectorSet( shield->r.maxs, halfWidth, SHIELD_HALFTHICKNESS, height );
+	} else {
+		VectorSet( shield->r.mins, -SHIELD_HALFTHICKNESS, -halfWidth, 0 );
+		VectorSet( shield->r.maxs, SHIELD_HALFTHICKNESS, halfWidth, height );
+	}
+
+	shield->s.time2 = ( xaxis << 24 ) | ( height << 16 ) | ( halfWidth << 8 ) | ( halfWidth );
+
+	// Allow to ride movers
+	// Moving forcefields are currently not supported in G_MoverPush, though
+	shield->clipmask = MASK_SHOT;
+	shield->s.groundEntityNum = groundEntityNum;
+
+	// Initially inactive
+	shield->r.contents = CONTENTS_NONE;
+	shield->s.eFlags |= EF_NODRAW;
+
+	// Power up after .5 seconds
+	shield->think = G_ActivateShield;
+	shield->nextthink = level.time + 500;
+
+	// Enable SV_LinkEntity to set additional values for client collision prediction in CG_ClipMoveToEntities
+	shield->r.svFlags |= SVF_SHIELD_BBOX;
+
+	trap_LinkEntity( shield );
+
+	// Play placing sound...
+	G_AddEvent( shield, EV_GENERAL_SOUND, shieldAttachSound );
+
+	return qtrue;
 }
 
 
@@ -1509,7 +1524,7 @@ void ClientEvents( gentity_t *ent, int oldEventSequence ) {
 			break;
 
 		case EV_USE_ITEM4:		// portable shield
-			if ( !PlaceShield(ent) )	// fixme if we fail, perhaps just spawn it as a pickup
+			if ( !G_ForcefieldPlace( ent - g_entities ) )
 			{//couldn't place it
 				ent->client->ps.stats[STAT_HOLDABLE_ITEM] = (BG_FindItemForHoldable( HI_SHIELD ) - bg_itemlist);
 				trap_SendServerCommand( ent-g_entities, "cp \"NO ROOM TO PLACE FORCE FIELD\"" );

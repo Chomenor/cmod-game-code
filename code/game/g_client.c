@@ -7,7 +7,6 @@ extern void SetPlayerClassCvar(gentity_t *ent);
 extern void SetClass( gentity_t *ent, char *s, char *teamName );
 extern void BroadcastClassChange( gclient_t *client, pclass_t oldPClass );
 
-extern qboolean levelExiting;
 // g_client.c -- client functions that don't happen every frame
 
 void G_StoreClientInitialStatus( gentity_t *ent );
@@ -85,7 +84,7 @@ void G_CheckReplaceActionHero( int clientNum )
 		{
 			// get and distribute relevent paramters
 			ClientUserinfoChanged( actionHeroClientNum );
-			ClientSpawn( &g_entities[actionHeroClientNum] );
+			ClientSpawn( &g_entities[actionHeroClientNum], CST_RESPAWN );
 		}//else ERROR!!!
 	}
 }
@@ -96,7 +95,7 @@ void INeedAHero( void )
 	if ( actionHeroClientNum >= 0 && actionHeroClientNum < level.maxclients )
 	{// get and distribute relevent paramters
 		ClientUserinfoChanged( actionHeroClientNum );
-		ClientSpawn( &g_entities[actionHeroClientNum] );
+		ClientSpawn( &g_entities[actionHeroClientNum], CST_RESPAWN );
 	}//else ERROR!!!
 }
 
@@ -186,7 +185,7 @@ void G_CheckReplaceQueen( int clientNum )
 		{
 			// get and distribute relevent paramters
 			ClientUserinfoChanged( borgQueenClientNum );
-			ClientSpawn( &g_entities[borgQueenClientNum] );
+			ClientSpawn( &g_entities[borgQueenClientNum], CST_RESPAWN );
 		}//else ERROR!!!
 	}
 }
@@ -197,7 +196,7 @@ void G_PickBorgQueen( void )
 	if ( borgQueenClientNum >= 0 && borgQueenClientNum < level.maxclients )
 	{// get and distribute relevent paramters
 		ClientUserinfoChanged( borgQueenClientNum );
-		ClientSpawn( &g_entities[borgQueenClientNum] );
+		ClientSpawn( &g_entities[borgQueenClientNum], CST_RESPAWN );
 	}//else ERROR!!!
 }
 
@@ -654,7 +653,7 @@ void EliminationRespawn( gentity_t *ent, char *team )
 	ent->s.eFlags &= ~EF_ELIMINATED;
 	ent->client->ps.eFlags &= ~EF_ELIMINATED;
 	ent->r.svFlags &= ~SVF_ELIMINATED;
-	ClientSpawn(ent);
+	ClientSpawn(ent, CST_RESPAWN);
 	/*
 	int oldScore;
 	oldScore = ent->client->ps.persistant[PERS_SCORE];
@@ -667,7 +666,7 @@ void EliminationSpectate( gentity_t *ent )
 {
 	modfn.CopyToBodyQue (ent - g_entities);
 
-	ClientSpawn(ent);
+	ClientSpawn(ent, CST_RESPAWN);
 	ent->takedamage = qfalse;
 	ent->r.contents = 0;
 	ent->flags |= FL_NOTARGET;
@@ -746,7 +745,7 @@ void respawn( gentity_t *ent ) {
 		modfn.CopyToBodyQue (ent - g_entities);
 	}
 
-	ClientSpawn(ent);
+	ClientSpawn(ent, CST_RESPAWN);
 
 	// add a teleportation effect
 	if ( borg )
@@ -1196,11 +1195,8 @@ void ClientUserinfoChanged( int clientNum ) {
 
 	if ( client->pers.connected == CON_CONNECTED ) {
 		if ( strcmp( oldname, client->pers.netname ) ) {
-			if ( !levelExiting )
-			{//no need to do this during level changes
-				trap_SendServerCommand( -1, va("print \"%s" S_COLOR_WHITE " renamed to %s\n\"", oldname,
-					client->pers.netname) );
-			}
+			trap_SendServerCommand( -1, va("print \"%s" S_COLOR_WHITE " renamed to %s\n\"", oldname,
+				client->pers.netname) );
 		}
 	}
 
@@ -1468,11 +1464,8 @@ void ClientUserinfoChanged( int clientNum ) {
 
 				if (reset)
 				{
-					if ( !levelExiting )
-					{//no need to do this during level changes
-						trap_SendServerCommand( -1, va("print \"In-appropriate skin selected for %s on team %s\nSkin selection overridden from skin %s to skin %s\n\"",
-							client->pers.netname, g_team_group_red.string, Info_ValueForKey (userinfo, "model"), model));
-					}
+					trap_SendServerCommand( -1, va("print \"In-appropriate skin selected for %s on team %s\nSkin selection overridden from skin %s to skin %s\n\"",
+						client->pers.netname, g_team_group_red.string, Info_ValueForKey (userinfo, "model"), model));
 					ForceClientSkin(model, "red");
 					// change the value in out local copy, then update it on the server
 					Info_SetValueForKey(userinfo, "model", model);
@@ -1528,11 +1521,8 @@ void ClientUserinfoChanged( int clientNum ) {
 
 				if (reset)
 				{
-					if ( !levelExiting )
-					{//no need to do this during level changes
-						trap_SendServerCommand( -1, va("print \"In-appropriate skin selected for %s on team %s\nSkin selection overridden from skin %s to skin %s\n\"",
-							client->pers.netname, g_team_group_blue.string, Info_ValueForKey (userinfo, "model"), model));
-					}
+					trap_SendServerCommand( -1, va("print \"In-appropriate skin selected for %s on team %s\nSkin selection overridden from skin %s to skin %s\n\"",
+						client->pers.netname, g_team_group_blue.string, Info_ValueForKey (userinfo, "model"), model));
 					ForceClientSkin(model, "blue");
 					// change the value in out local copy, then update it on the server
 					Info_SetValueForKey(userinfo, "model", model);
@@ -1637,6 +1627,7 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 	memset( client, 0, sizeof(*client) );
 
 	client->pers.connected = CON_CONNECTING;
+	client->pers.firstTime = firstTime;
 
 	// read or initialize the session data
 	if ( firstTime || level.newSession ) {
@@ -1663,10 +1654,7 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 
 	// don't do the "xxx connected" messages if they were caried over from previous level
 	if ( firstTime ) {
-		if ( !levelExiting )
-		{//no need to do this during level changes
-			trap_SendServerCommand( -1, va("print \"%s" S_COLOR_WHITE " connected\n\"", client->pers.netname) );
-		}
+		trap_SendServerCommand( -1, va("print \"%s" S_COLOR_WHITE " connected\n\"", client->pers.netname) );
 	}
 
 	if ( g_gametype.integer >= GT_TEAM &&
@@ -1694,17 +1682,28 @@ to be placed into the level.  This will happen every level load,
 and on transition between teams, but doesn't happen on respawns
 ============
 */
-void ClientBegin( int clientNum, qboolean careAboutWarmup ) {
+void ClientBegin( int clientNum ) {
 	gentity_t	*ent = &g_entities[clientNum];
 	gclient_t	*client = &level.clients[clientNum];
 	gentity_t	*tent;
 	int			flags;
-	qboolean	alreadyIn = qfalse;
+	clientSpawnType_t spawnType;
 
 	if( client->botDelayBegin ) {
 		G_QueueBotBegin( clientNum );
 		client->botDelayBegin = qfalse;
 		return;
+	}
+
+	// do some calculations to figure out what kind of spawn this is
+	if ( client->pers.connected == CON_CONNECTED ) {
+		spawnType = CST_TEAMCHANGE;
+	} else if ( client->pers.firstTime ) {
+		spawnType = CST_FIRSTTIME;
+	} else if ( level.hasRestarted ) {
+		spawnType = CST_MAPRESTART;
+	} else {
+		spawnType = CST_MAPCHANGE;
 	}
 
 	if ( ent->r.linked ) {
@@ -1715,13 +1714,8 @@ void ClientBegin( int clientNum, qboolean careAboutWarmup ) {
 	ent->pain = 0;
 	ent->client = client;
 
-	if ( client->pers.connected == CON_CONNECTED )
-	{
-		alreadyIn = qtrue;
-	}
 	client->pers.connected = CON_CONNECTED;
 	client->pers.enterTime = level.time;
-	client->pers.teamState.state = TEAM_BEGIN;
 
 	// save eflags around this, because changing teams will
 	// cause this to happen with a valid entity, and we
@@ -1733,20 +1727,18 @@ void ClientBegin( int clientNum, qboolean careAboutWarmup ) {
 	client->ps.eFlags = flags;
 
 	// locate ent at a spawn point
-	ClientSpawn( ent );
+	ClientSpawn( ent, spawnType );
 
 	if ( client->sess.sessionTeam != TEAM_SPECTATOR && g_holoIntro.integer==0 )
 	{	// Don't use transporter FX for spectators or those watching the holodoors.
 		// send event
-
-		tent = G_TempEntity( ent->client->ps.origin, EV_PLAYER_TELEPORT_IN );
-		tent->s.clientNum = ent->s.clientNum;
+		if ( spawnType != CST_MAPRESTART ) {
+			tent = G_TempEntity( ent->client->ps.origin, EV_PLAYER_TELEPORT_IN );
+			tent->s.clientNum = clientNum;
+		}
 
 		if ( g_gametype.integer != GT_TOURNAMENT ) {
-			if ( !levelExiting )
-			{//no need to do this during level changes
-				trap_SendServerCommand( -1, va("print \"%s" S_COLOR_WHITE " entered the game\n\"", client->pers.netname) );
-			}
+			trap_SendServerCommand( -1, va("print \"%s" S_COLOR_WHITE " entered the game\n\"", client->pers.netname) );
 		}
 	}
 	G_LogPrintf( "ClientBegin: %i\n", clientNum );
@@ -1760,7 +1752,7 @@ void ClientBegin( int clientNum, qboolean careAboutWarmup ) {
 	}
 
 	// Use intro holodeck door if desired and we did not come from a restart
-	if (g_holoIntro.integer && !(ent->r.svFlags & SVF_BOT) && !(level.restarted) && !(g_restarted.integer) && !alreadyIn )
+	if ( g_holoIntro.integer && !(ent->r.svFlags & SVF_BOT) && (spawnType == CST_FIRSTTIME || spawnType == CST_MAPCHANGE) )
 	{
 		// kef -- also, don't do this if we're in intermission
 		if (!level.intermissiontime)
@@ -1772,15 +1764,6 @@ void ClientBegin( int clientNum, qboolean careAboutWarmup ) {
 			{
 				ent->client->ps.powerups[PW_GHOST] = level.time + (g_ghostRespawn.integer * 1000) + TIME_INTRO;
 			}
-		}
-	}
-
-	if ( careAboutWarmup )
-	{
-		if (level.restarted || g_restarted.integer)
-		{
-			trap_Cvar_Set( "g_restarted", "0" );
-			level.restarted = qfalse;
 		}
 	}
 
@@ -2078,7 +2061,7 @@ after the first ClientBegin, and after each respawn
 Initializes all non-persistant parts of playerState
 ============
 */
-void ClientSpawn(gentity_t *ent) {
+void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	int		index;
 	vec3_t	spawn_origin, spawn_angles;
 	gclient_t	*client;
@@ -2110,7 +2093,7 @@ void ClientSpawn(gentity_t *ent) {
 	if ( client->sess.sessionTeam == TEAM_SPECTATOR ) {
 		spawnPoint = SelectSpectatorSpawnPoint( spawn_origin, spawn_angles );
 	} else if ( g_gametype.integer >= GT_TEAM ) {
-		spawnPoint = SelectCTFSpawnPoint( ent, client->sess.sessionTeam, client->pers.teamState.state,
+		spawnPoint = SelectCTFSpawnPoint( ent, client->sess.sessionTeam, spawnType != CST_RESPAWN,
 				spawn_origin, spawn_angles );
 	} else {
 		// allow selecting bot/human exclusive spots
@@ -2118,15 +2101,13 @@ void ClientSpawn(gentity_t *ent) {
 		qboolean useHumanSpots = !useBotSpots;
 
 		// the first spawn should be at a good looking spot
-		if ( !client->pers.initialSpawn && client->pers.localClient ) {
-			client->pers.initialSpawn = qtrue;
+		if ( spawnType != CST_RESPAWN && spawnType != CST_TEAMCHANGE && client->pers.localClient ) {
 			spawnPoint = SelectInitialSpawnPoint( spawn_origin, spawn_angles, useHumanSpots, useBotSpots );
 		} else {
 			// don't spawn near existing origin if possible
 			spawnPoint = SelectSpawnPoint( client->ps.origin, spawn_origin, spawn_angles, useHumanSpots, useBotSpots );
 		}
 	}
-	client->pers.teamState.state = TEAM_ACTIVE;
 
 	// try to avoid spawn kills
 	if ( client->sess.sessionTeam != TEAM_SPECTATOR ) {

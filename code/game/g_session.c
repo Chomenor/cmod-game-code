@@ -41,6 +41,17 @@ LOGFUNCTION_VOID( ModFNDefault_GenerateClientSessionInfo, ( int clientNum, info_
 
 /*
 ================
+(ModFN) GenerateGlobalSessionInfo
+================
+*/
+LOGFUNCTION_VOID( ModFNDefault_GenerateGlobalSessionInfo, ( info_string_t *info ),
+		( info ), "G_MODFN_GENERATEGLOBALSESSIONINFO" ) {
+	Info_SetValueForKey_Big( info->s, "numConnected", va( "%i", level.numConnectedClients ) );
+	Info_SetValueForKey_Big( info->s, "warmupRestarting", level.warmupRestarting ? "1" : "0" );
+}
+
+/*
+================
 G_VerifySessionVersion
 
 Returns qtrue if session data was written by compatible mod.
@@ -56,6 +67,52 @@ static qboolean G_VerifySessionVersion( void ) {
 	}
 
 	return qfalse;
+}
+
+/*
+==================
+G_RetrieveClientSessionInfo
+
+Retrieves client info segment in session_info* cvars.
+
+This should only be called for clients that are reconnecting with firstTime=false,
+otherwise invalid info may be returned.
+==================
+*/
+static void G_RetrieveClientSessionInfo( int clientNum, info_string_t *output ) {
+	output->s[0] = '\0';
+	if ( G_VerifySessionVersion() ) {
+		char buffer[256];
+		Com_sprintf( buffer, sizeof( buffer ), "session_info%i", clientNum );
+		trap_Cvar_VariableStringBuffer( buffer, output->s, sizeof( output->s ) );
+	}
+}
+
+/*
+==================
+G_RetrieveGlobalSessionInfo
+
+Retrieves match info segment in session_info cvar.
+==================
+*/
+static void G_RetrieveGlobalSessionInfo( info_string_t *output ) {
+	output->s[0] = '\0';
+	if ( G_VerifySessionVersion() ) {
+		trap_Cvar_VariableStringBuffer( "session_info", output->s, sizeof( output->s ) );
+	}
+}
+
+/*
+==================
+G_RetrieveGlobalSessionValue
+
+Retrieves integer value from session_info cvar.
+==================
+*/
+int G_RetrieveGlobalSessionValue( const char *key ) {
+	info_string_t info;
+	G_RetrieveGlobalSessionInfo( &info );
+	return atoi( Info_ValueForKey( info.s, key ) );
 }
 
 /*
@@ -93,26 +150,6 @@ void G_WriteClientSessionData( gclient_t *client ) {
 }
 
 /*
-==================
-G_RetrieveSessionInfo
-
-Retrieves client session info segment in session_info* cvars.
-
-This should only be called for clients that are reconnecting with firstTime=false,
-otherwise invalid info may be returned.
-==================
-*/
-void G_RetrieveSessionInfo( int clientNum, info_string_t *output ) {
-	output->s[0] = '\0';
-
-	if ( G_VerifySessionVersion() ) {
-		char buffer[256];
-		Com_sprintf( buffer, sizeof( buffer ), "session_info%i", clientNum );
-		trap_Cvar_VariableStringBuffer( buffer, output->s, sizeof( output->s ) );
-	}
-}
-
-/*
 ================
 G_ReadSessionData
 
@@ -140,7 +177,7 @@ void G_ReadSessionData( gclient_t *client ) {
 	// Call mod initialization
 	{
 		info_string_t info;
-		G_RetrieveSessionInfo( clientNum, &info );
+		G_RetrieveClientSessionInfo( clientNum, &info );
 		modfn.InitClientSession( clientNum, qfalse, &info );
 	}
 }
@@ -261,9 +298,16 @@ G_WriteSessionData
 */
 void G_WriteSessionData( void ) {
 	int		i;
+	info_string_t info;
 
 	trap_Cvar_Set( "session", va("%i*" SESSION_VERSION, g_gametype.integer) );
 
+	// Write global session info
+	info.s[0] = '\0';
+	modfn.GenerateGlobalSessionInfo( &info );
+	trap_Cvar_Set( "session_info", info.s );
+
+	// Write client info
 	for ( i = 0 ; i < level.maxclients ; i++ ) {
 		if ( level.clients[i].pers.connected >= CON_CONNECTING ) {
 			G_WriteClientSessionData( &level.clients[i] );

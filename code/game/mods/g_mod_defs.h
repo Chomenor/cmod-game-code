@@ -23,6 +23,9 @@ MOD_FUNCTION_DEF( GeneralInit, void, ( void ) )
 // Called after G_RunFrame completes.
 MOD_FUNCTION_DEF( PostRunFrame, void, ( void ) )
 
+// Called when level.matchState has been updated.
+MOD_FUNCTION_DEF( MatchStateTransition, void, ( matchState_t oldState, matchState_t newState ) )
+
 //////////////////////////
 // client misc
 //////////////////////////
@@ -65,6 +68,9 @@ MOD_FUNCTION_DEF( InitClientSession, void, ( int clientNum, qboolean initialConn
 
 // Generates client info string data to be written to cvar on match exit.
 MOD_FUNCTION_DEF( GenerateClientSessionInfo, void, ( int clientNum, info_string_t *info ) )
+
+// Generates global info string data to be written to cvar on match exit.
+MOD_FUNCTION_DEF( GenerateGlobalSessionInfo, void, ( info_string_t *info ) )
 
 //////////////////////////
 // player movement

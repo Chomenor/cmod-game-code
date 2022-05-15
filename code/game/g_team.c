@@ -669,14 +669,14 @@ go to a random point that doesn't telefrag
 ================
 */
 #define	MAX_TEAM_SPAWN_POINTS	16
-gentity_t *SelectRandomTeamSpawnPoint( gentity_t *ent, int teamstate, team_t team ) {
+gentity_t *SelectRandomTeamSpawnPoint( gentity_t *ent, qboolean initialSpawn, team_t team ) {
 	gentity_t	*spot;
 	int			count;
 	int			selection;
 	gentity_t	*spots[MAX_TEAM_SPAWN_POINTS];
 	char		*classname;
 
-	if (teamstate == TEAM_BEGIN||ent->s.number == borgQueenClientNum) {
+	if (initialSpawn||ent->s.number == borgQueenClientNum) {
 		if (team == TEAM_RED)
 			classname = "team_CTF_redplayer";
 		else if (team == TEAM_BLUE)
@@ -696,7 +696,7 @@ gentity_t *SelectRandomTeamSpawnPoint( gentity_t *ent, int teamstate, team_t tea
 	spot = NULL;
 
 	while ((spot = G_Find (spot, FOFS(classname), classname)) != NULL) {
-		if ( teamstate == TEAM_BEGIN || ent->s.number == borgQueenClientNum ) {//just starting
+		if ( initialSpawn || ent->s.number == borgQueenClientNum ) {//just starting
 			if ( spot->s.number == borgQueenStartPoint ) {
 				//Borg queen only
 				if ( ent->s.number != borgQueenClientNum ) {
@@ -737,10 +737,10 @@ SelectCTFSpawnPoint
 
 ============
 */
-gentity_t *SelectCTFSpawnPoint ( gentity_t *ent, team_t team, int teamstate, vec3_t origin, vec3_t angles ) {
+gentity_t *SelectCTFSpawnPoint ( gentity_t *ent, team_t team, qboolean initialSpawn, vec3_t origin, vec3_t angles ) {
 	gentity_t	*spot;
 
-	spot = SelectRandomTeamSpawnPoint ( ent, teamstate, team );
+	spot = SelectRandomTeamSpawnPoint ( ent, initialSpawn, team );
 
 	if (!spot) {
 		return SelectSpawnPoint( vec3_origin, origin, angles, qtrue, qtrue );

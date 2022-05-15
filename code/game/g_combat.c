@@ -702,9 +702,9 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		//Now increment score for everyone else
 		if ( g_gametype.integer < GT_TEAM )
 		{
-			for ( i = 0; i < MAX_CLIENTS; i++ )
+			for ( i = 0; i < level.maxclients; i++ )
 			{
-				if ( &g_entities[i] != NULL && &g_entities[i].client != NULL && g_entities[i].inuse )
+				if ( &g_entities[i] != NULL && g_entities[i].client != NULL && g_entities[i].inuse )
 				{
 					if ( g_entities[i].client->sess.sessionTeam != TEAM_SPECTATOR && g_entities[i].health > 0 && !(g_entities[i].client->ps.eFlags&EF_ELIMINATED) )
 					{

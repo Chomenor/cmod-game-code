@@ -9,7 +9,6 @@ CVAR_DEF( g_cheats, "sv_cheats", "", 0, qfalse )
 // noset vars
 CVAR_DEF( gamename, "gamename", GAMEVERSION , CVAR_SERVERINFO | CVAR_ROM, qfalse )
 CVAR_DEF( gamedate, "gamedate", __DATE__ , CVAR_ROM, qfalse )
-CVAR_DEF( g_restarted, "g_restarted", "0", CVAR_ROM, qfalse  )
 
 // latched vars
 CVAR_DEF( g_gametype, "g_gametype", "0", CVAR_SERVERINFO | CVAR_LATCH, qfalse )

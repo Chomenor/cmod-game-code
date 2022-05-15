@@ -9,7 +9,6 @@ extern int		borgQueenClientNum;
 extern int		noJoinLimit;
 extern int	numKilled;
 extern clInitStatus_t clientInitialStatus[];
-extern qboolean levelExiting;
 
 /*
 ==================
@@ -425,7 +424,7 @@ Let everyone know about a team change
 */
 void BroadcastTeamChange( gclient_t *client, int oldTeam )
 {
-	if ( levelExiting )
+	if ( level.exiting )
 	{//no need to do this during level changes
 		return;
 	}
@@ -508,7 +507,7 @@ Let everyone know about a team change
 */
 void BroadcastClassChange( gclient_t *client, pclass_t oldPClass )
 {
-	if ( levelExiting )
+	if ( level.exiting )
 	{//no need to do this during level changes
 		return;
 	}
@@ -643,9 +642,6 @@ qboolean SetTeam( gentity_t *ent, char *s ) {
 	// execute the team change
 	//
 
-	// he starts at 'base'
-	client->pers.teamState.state = TEAM_BEGIN;
-
 	if ( oldTeam != TEAM_SPECTATOR ) {
 		// Kill him (makes sure he loses flags, etc)
 		ent->flags &= ~FL_GODMODE;
@@ -667,15 +663,7 @@ qboolean SetTeam( gentity_t *ent, char *s ) {
 	// get and distribute relevent paramters
 	ClientUserinfoChanged( clientNum );
 
-	//THIS IS VERY VERY BAD, CAUSED ENDLESS WARMUP, FOUND ANOTHER WAY TO PREVENT DOORS
-	/*
-	if (level.time - client->pers.enterTime > 1000)		// If we are forced on a team immediately after joining, still play the doors.
-	{	// We signal NOT to play the doors by setting level.restarted to true.  This is abusing the system, but it works.
-		level.restarted = qtrue;
-	}
-	*/
-
-	ClientBegin( clientNum, qfalse );
+	ClientBegin( clientNum );
 
 	return qtrue;
 }
@@ -842,23 +830,12 @@ qboolean SetClass( gentity_t *ent, char *s, char *teamName ) {
 		}
 		else
 		{
-			// he starts at 'base'
-			client->pers.teamState.state = TEAM_BEGIN;
-
 			// Kill him (makes sure he loses flags, etc)
 			ent->flags &= ~FL_GODMODE;
 			ent->client->ps.stats[STAT_HEALTH] = ent->health = 0;
 			player_die (ent, NULL, NULL, 100000, MOD_RESPAWN);
 
-			//THIS IS VERY VERY BAD, CAUSED ENDLESS WARMUP, FOUND ANOTHER WAY TO PREVENT DOORS
-			/*
-			if (level.time - client->pers.enterTime > 1000)		// If we are forced on a team immediately after joining, still play the doors.
-			{	// We signal NOT to play the doors by setting level.restarted to true.  This is abusing the system, but it works.
-				level.restarted = qtrue;
-			}
-			*/
-
-			ClientBegin( clientNum, qfalse );
+			ClientBegin( clientNum );
 		}
 	}
 	return qtrue;

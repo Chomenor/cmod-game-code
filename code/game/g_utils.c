@@ -44,6 +44,33 @@ qboolean G_IsConnectedClient( int clientNum ) {
 }
 
 /*
+=================================================================================
+
+debug print functions
+
+=================================================================================
+*/
+
+const char *G_MatchStateString( matchState_t matchState ) {
+	switch ( matchState ) {
+		case MS_INIT:
+			return "MS_INIT";
+		case MS_WAITING_FOR_PLAYERS:
+			return "MS_WAITING_FOR_PLAYERS";
+		case MS_WARMUP:
+			return "MS_WARMUP";
+		case MS_ACTIVE:
+			return "MS_ACTIVE";
+		case MS_INTERMISSION_QUEUED:
+			return "MS_INTERMISSION_QUEUED";
+		case MS_INTERMISSION_ACTIVE:
+			return "MS_INTERMISSION_ACTIVE";
+		default:
+			return "<invalid>";
+	}
+}
+
+/*
 =========================================================================
 
 model / sound configstring indexes

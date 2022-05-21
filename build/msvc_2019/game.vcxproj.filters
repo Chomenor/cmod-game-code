@@ -239,16 +239,16 @@
     <ClCompile Include="..\..\code\game\g_weapon.c">
       <Filter>game</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\code\game\mods\features\feature_altswap_handler.c">
+    <ClCompile Include="..\..\code\game\mods\features\feat_altswap_handler.c">
       <Filter>game\mods\features</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\code\game\mods\features\feature_player_move.c">
+    <ClCompile Include="..\..\code\game\mods\features\feat_player_move.c">
       <Filter>game\mods\features</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\code\game\mods\features\feature_spawn_protect.c">
+    <ClCompile Include="..\..\code\game\mods\features\feat_spawn_protect.c">
       <Filter>game\mods\features</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\code\game\mods\features\feature_spect_passthrough.c">
+    <ClCompile Include="..\..\code\game\mods\features\feat_spect_passthrough.c">
       <Filter>game\mods\features</Filter>
     </ClCompile>
     <ClCompile Include="..\..\code\game\mods\features\pingcomp\pc_client_predict.c">

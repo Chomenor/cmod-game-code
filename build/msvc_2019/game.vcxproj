@@ -253,10 +253,10 @@
     <ClCompile Include="..\..\code\game\g_usable.c" />
     <ClCompile Include="..\..\code\game\g_utils.c" />
     <ClCompile Include="..\..\code\game\g_weapon.c" />
-    <ClCompile Include="..\..\code\game\mods\features\feature_altswap_handler.c" />
-    <ClCompile Include="..\..\code\game\mods\features\feature_player_move.c" />
-    <ClCompile Include="..\..\code\game\mods\features\feature_spawn_protect.c" />
-    <ClCompile Include="..\..\code\game\mods\features\feature_spect_passthrough.c" />
+    <ClCompile Include="..\..\code\game\mods\features\feat_altswap_handler.c" />
+    <ClCompile Include="..\..\code\game\mods\features\feat_player_move.c" />
+    <ClCompile Include="..\..\code\game\mods\features\feat_spawn_protect.c" />
+    <ClCompile Include="..\..\code\game\mods\features\feat_spect_passthrough.c" />
     <ClCompile Include="..\..\code\game\mods\features\pingcomp\pc_client_predict.c" />
     <ClCompile Include="..\..\code\game\mods\features\pingcomp\pc_dead_move.c" />
     <ClCompile Include="..\..\code\game\mods\features\pingcomp\pc_instant_weapons.c" />

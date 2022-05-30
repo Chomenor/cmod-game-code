@@ -800,13 +800,28 @@ void G_CheckTeamItems( void ) {
 }
 
 /*
-==============
-ClearRegisteredItems
-==============
-*/
-void ClearRegisteredItems( void ) {
-	memset( itemRegistered, 0, sizeof( itemRegistered ) );
+===============
+RegisterItem
 
+The item will be added to the precache list
+===============
+*/
+void RegisterItem( gitem_t *item ) {
+	if ( !item ) {
+		G_Error( "RegisterItem: NULL" );
+	}
+	itemRegistered[ item - bg_itemlist ] = qtrue;
+}
+
+/*
+================
+(ModFN) AddRegisteredItems
+
+Can be used to add additional registered items, which are added to a configstring for
+client caching purposes.
+================
+*/
+LOGFUNCTION_VOID( ModFNDefault_AddRegisteredItems, ( void ), (), "G_MODFN_ADDREGISTEREDITEMS" ) {
 	// players always start with the base weapon
 	RegisterItem( BG_FindItemForWeapon( WP_PHASER ) );
 	RegisterItem( BG_FindItemForWeapon( WP_COMPRESSION_RIFLE ) );	//this is for the podium at the end, make sure we have the model
@@ -850,28 +865,7 @@ void ClearRegisteredItems( void ) {
 		RegisterItem( BG_FindItemForWeapon( WP_QUANTUM_BURST ) );
 		RegisterItem( BG_FindItemForWeapon( WP_DREADNOUGHT ) );
 	}
-	if ( g_pModAssimilation.integer )
-	{
-		RegisterItem( BG_FindItemForWeapon( WP_BORG_ASSIMILATOR ) );
-		RegisterItem( BG_FindItemForWeapon( WP_BORG_WEAPON ) );	//queen
-		RegisterItem( BG_FindItemForPowerup( PW_REGEN ) );	//queen
-	}
 }
-
-/*
-===============
-RegisterItem
-
-The item will be added to the precache list
-===============
-*/
-void RegisterItem( gitem_t *item ) {
-	if ( !item ) {
-		G_Error( "RegisterItem: NULL" );
-	}
-	itemRegistered[ item - bg_itemlist ] = qtrue;
-}
-
 
 /*
 ===============
@@ -885,6 +879,9 @@ void SaveRegisteredItems( void ) {
 	char	string[MAX_ITEMS+1];
 	int		i;
 	int		count;
+
+	// add any extra items needed by mods
+	modfn.AddRegisteredItems();
 
 	count = 0;
 	for ( i = 0 ; i < bg_numItems ; i++ ) {
@@ -901,6 +898,18 @@ void SaveRegisteredItems( void ) {
 	trap_SetConfigstring(CS_ITEMS, string);
 }
 
+
+/*
+================
+(ModFN) CheckReplaceItem
+
+Allows replacing an item with a different item during initial spawn.
+================
+*/
+LOGFUNCTION_RET( gitem_t *, ModFNDefault_CheckReplaceItem, ( gentity_t *ent, gitem_t *item ),
+		( ent, item ), "G_MODFN_CHECKREPLACEITEM" ) {
+	return item;
+}
 
 qboolean G_ItemSuppressed( int itemType, int itemTag )
 {
@@ -981,35 +990,6 @@ qboolean G_ItemClassnameSuppressed( char *itemname )
 	return G_ItemSuppressed( itemType, itemTag );
 }
 
-gitem_t *G_CheckReplaceItem( gentity_t *ent, gitem_t *item )
-{
-	gitem_t *newitem = item;
-	if ( g_pModAssimilation.integer != 0 )
-	{//replace tetryon and scav rifles with I-Mods
-		switch ( item->giTag )
-		{
-		case WP_SCAVENGER_RIFLE:
-		case WP_TETRION_DISRUPTOR:
-			switch( item->giType )
-			{
-			case IT_WEAPON:
-				newitem = BG_FindItemForWeapon( WP_IMOD );
-				ent->classname = "weapon_imod";
-				break;
-			case IT_AMMO:
-				newitem = BG_FindItemForAmmo( WP_IMOD );
-				ent->classname = "ammo_imod";
-				break;
-			default:
-				break;
-			}
-			break;
-		default:
-			break;
-		}
-	}
-	return newitem;
-}
 /*
 ============
 G_SpawnItem
@@ -1025,7 +1005,7 @@ void G_SpawnItem (gentity_t *ent, gitem_t *item) {
 	{
 		return;
 	}
-	item = G_CheckReplaceItem( ent, item );
+	item = modfn.CheckReplaceItem( ent, item );
 
 	G_SpawnFloat( "random", "0", &ent->random );
 	G_SpawnFloat( "wait", "0", &ent->wait );

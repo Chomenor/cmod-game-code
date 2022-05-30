@@ -2,7 +2,6 @@
 
 #define LOGGING_WEAPONS
 
-extern int	borgQueenClientNum;
 /*
 =================
 G_LogPrintf
@@ -1031,7 +1030,7 @@ qboolean CalculateUntouchable(gentity_t *ent)
 	int			playTime;
 	playTime = (level.time - ent->client->pers.enterTime)/60000;
 
-	if ( g_pModAssimilation.integer && ent - g_entities == borgQueenClientNum )
+	if ( modfn.IsBorgQueen( ent - g_entities ) )
 	{//Borg queen can only be killed once anyway
 		return qfalse;
 	}
@@ -1121,7 +1120,7 @@ qboolean CalculateTactician(gentity_t *ent, int *kills)
 	{//duh, only 1 weapon
 		return qfalse;
 	}
-	if ( g_pModAssimilation.integer && ent - g_entities == borgQueenClientNum )
+	if ( modfn.IsBorgQueen( ent - g_entities ) )
 	{//Borg queen has only 1 weapon
 		return qfalse;
 	}
@@ -1286,8 +1285,11 @@ int GetTeamMVP( team_t team ) {
 	int i;
 
 	// Always select borg queen as MVP
-	if ( G_IsConnectedClient( borgQueenClientNum ) && level.clients[borgQueenClientNum].sess.sessionTeam == team ) {
-		return borgQueenClientNum;
+	for ( i = 0; i < level.numPlayingClients; ++i ) {
+		int clientNum = level.sortedClients[i];
+		if ( level.clients[clientNum].sess.sessionTeam == team && modfn.IsBorgQueen( clientNum ) ) {
+			return clientNum;
+		}
 	}
 
 	for ( i = 0; i < level.numPlayingClients; ++i ) {

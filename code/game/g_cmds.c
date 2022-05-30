@@ -3,9 +3,6 @@
 #include "g_local.h"
 
 
-extern void G_CheckReplaceQueen( int clientNum );
-
-extern int		borgQueenClientNum;
 extern int		noJoinLimit;
 extern int	numKilled;
 extern clInitStatus_t clientInitialStatus[];
@@ -388,6 +385,27 @@ void Cmd_LevelShot_f( gentity_t *ent ) {
 	trap_SendServerCommand( ent-g_entities, "clientLevelShot" );
 }
 
+/*
+=================
+(ModFN) CheckSuicideAllowed
+
+Check if suicide is allowed. If not, prints notification to client.
+=================
+*/
+int lastKillTime[MAX_CLIENTS];
+LOGFUNCTION_RET( qboolean, ModFNDefault_CheckSuicideAllowed, ( int clientNum ),
+		( clientNum ), "G_MODFN_CHECKSUICIDEALLOWED" ) {
+	gclient_t *client = &level.clients[clientNum];
+
+	if( lastKillTime[clientNum] > level.time - 30000 ) {
+		// can't flood-kill
+		trap_SendServerCommand( clientNum, va("cp \"Cannot suicide for %d seconds",
+			(lastKillTime[clientNum]-(level.time-30000))/1000 ) );
+		return qfalse;
+	}
+
+	return qtrue;
+}
 
 /*
 =================
@@ -399,20 +417,12 @@ void Cmd_Kill_f( gentity_t *ent ) {
 
 	if (ent->client->sess.sessionTeam == TEAM_SPECTATOR || (ent->client->ps.eFlags & EF_ELIMINATED))
 		return;
-	if(g_pModAssimilation.integer && ent->client->sess.sessionClass != PC_BORG)
-	{
-		// Disallow suicides by feds so they can't cheat their way out of dangerous situations.
-		return;
+	if ( modfn.CheckSuicideAllowed( ent - g_entities ) ) {
+		lastKillTime[ent - g_entities] = level.time;
+		ent->flags &= ~FL_GODMODE;
+		ent->client->ps.stats[STAT_HEALTH] = ent->health = 0;
+		player_die (ent, ent, ent, 100000, MOD_SUICIDE);
 	}
-	if ( lastKillTime[ent - g_entities] > level.time - 30000 )
-	{//can't flood-kill
-		trap_SendServerCommand( ent - g_entities, va("cp \"Cannot suicide for %d seconds", (lastKillTime[ent - g_entities]-(level.time-30000))/1000 ) );
-		return;
-	}
-	lastKillTime[ent - g_entities] = level.time;
-	ent->flags &= ~FL_GODMODE;
-	ent->client->ps.stats[STAT_HEALTH] = ent->health = 0;
-	player_die (ent, ent, ent, 100000, MOD_SUICIDE);
 }
 
 /*
@@ -496,6 +506,28 @@ void SetPlayerClassCvar(gentity_t *ent)
 		trap_SendServerCommand(ent-g_entities,"pc NOCLASS");
 		break;
 	}
+}
+
+/*
+=================
+(ModFN) CheckJoinAllowed
+
+Check if client is allowed to join game or change team/class.
+If join was blocked, sends appropriate notification message to client.
+=================
+*/
+LOGFUNCTION_RET( qboolean, ModFNDefault_CheckJoinAllowed, ( int clientNum, join_allowed_type_t type, team_t targetTeam ),
+		( clientNum, type, targetTeam ), "G_MODFN_CHECKJOINALLOWED" ) {
+	// Check for g_maxGameClients limits
+	if ( g_maxGameClients.integer > 0 && level.numNonSpectatorClients >= g_maxGameClients.integer && type != CJA_SETCLASS ) {
+		if ( type != CJA_AUTOJOIN ) {
+			trap_SendServerCommand( clientNum, "cp \"Too many players.\"" );
+		}
+
+		return qfalse;
+	}
+
+	return qtrue;
 }
 
 /*
@@ -592,7 +624,7 @@ qboolean SetTeam( gentity_t *ent, char *s ) {
 			team = PickTeam( clientNum );
 		}
 
-		if ( g_teamForceBalance.integer && g_pModAssimilation.integer == 0 ) {
+		if ( g_teamForceBalance.integer && !modfn.AdjustGeneralConstant( GC_DISABLE_TEAM_FORCE_BALANCE, 0 ) ) {
 			int		counts[TEAM_NUM_TEAMS];
 
 			counts[TEAM_BLUE] = TeamCount( clientNum, TEAM_BLUE );
@@ -616,33 +648,32 @@ qboolean SetTeam( gentity_t *ent, char *s ) {
 		team = TEAM_FREE;
 	}
 
-	// override decision if limiting the players
 	if ( g_gametype.integer == GT_TOURNAMENT
 		&& level.numNonSpectatorClients >= 2 ) {
 		team = TEAM_SPECTATOR;
-	} else if ( g_maxGameClients.integer > 0 &&
-		level.numNonSpectatorClients >= g_maxGameClients.integer ) {
-		team = TEAM_SPECTATOR;
+	}
+
+	// ignore redundant change
+	if ( team == client->sess.sessionTeam && team != TEAM_SPECTATOR ) {
+		return qfalse;
 	}
 
 	//
 	// decide if we will allow the change
 	//
 	oldTeam = client->sess.sessionTeam;
-	if ( team == oldTeam && team != TEAM_SPECTATOR ) {
+	if ( team != TEAM_SPECTATOR && !modfn.CheckJoinAllowed( clientNum, CJA_SETTEAM, team ) ) {
 		return qfalse;
 	}
 
-	//replace them if they're the queen
-	if ( borgQueenClientNum != -1 )
-	{
-		G_CheckReplaceQueen( clientNum );
-	}
+
 	//
 	// execute the team change
 	//
 
 	if ( oldTeam != TEAM_SPECTATOR ) {
+		modfn.PrePlayerLeaveTeam( clientNum, oldTeam );
+
 		// Kill him (makes sure he loses flags, etc)
 		ent->flags &= ~FL_GODMODE;
 		ent->client->ps.stats[STAT_HEALTH] = ent->health = 0;
@@ -750,10 +781,6 @@ qboolean SetClass( gentity_t *ent, char *s, char *teamName ) {
 	{
 		pclass = PC_TECH;
 	}
-	else if ( !Q_stricmp( s, "borg" ) )
-	{
-		pclass = PC_BORG;
-	}
 	else if ( !Q_stricmp( s, "noclass" ) )
 	{
 		pclass = PC_NOCLASS;
@@ -766,6 +793,10 @@ qboolean SetClass( gentity_t *ent, char *s, char *teamName ) {
 	//
 	// decide if we will allow the change
 	//
+	if ( client->sess.sessionTeam != TEAM_SPECTATOR && !modfn.CheckJoinAllowed( clientNum, CJA_SETCLASS, TEAM_FREE ) ) {
+		return qfalse;
+	}
+
 	oldPClass = client->sess.sessionClass;
 
 	switch ( pclass )
@@ -779,13 +810,6 @@ qboolean SetClass( gentity_t *ent, char *s, char *teamName ) {
 		if ( g_pModSpecialties.integer == 0 )
 		{
 			trap_SendServerCommand( ent-g_entities, "print \"Specialty mode is not enabled.\n\"" );
-			return qfalse;
-		}
-		break;
-	case PC_BORG:
-		if ( g_pModAssimilation.integer == 0 )
-		{
-			trap_SendServerCommand( ent-g_entities, "print \"Assimilation mode is not enabled.\n\"" );
 			return qfalse;
 		}
 		break;
@@ -809,8 +833,6 @@ qboolean SetClass( gentity_t *ent, char *s, char *teamName ) {
 	//
 
 	client->sess.sessionClass = pclass;
-
-	SetPlayerClassCvar(ent);
 
 	BroadcastClassChange( client, oldPClass );
 
@@ -898,26 +920,6 @@ void Cmd_Team_f( gentity_t *ent ) {
 				if ( ent->client->ps.eFlags & EF_ELIMINATED )
 				{
 					trap_SendServerCommand( ent-g_entities, "cp \"You have been eliminated until next round\"" );
-				}
-				else if ( ent->client->sess.sessionTeam == TEAM_SPECTATOR )
-				{
-					trap_SendServerCommand( ent-g_entities, "cp \"Wait until next round to join\"" );
-				}
-				else
-				{
-					trap_SendServerCommand( ent-g_entities, "cp \"Wait until next round to change teams\"" );
-				}
-				return;
-			}
-		}
-
-		if ( g_pModAssimilation.integer )
-		{
-			if ( borgQueenClientNum != -1 && noJoinLimit != 0 && ( level.time-level.startTime > noJoinLimit || numKilled > 0 ) )
-			{
-				if ( ent->client->ps.eFlags & EF_ASSIMILATED )
-				{
-					trap_SendServerCommand( ent-g_entities, "cp \"You have been assimilated until next round\"" );
 				}
 				else if ( ent->client->sess.sessionTeam == TEAM_SPECTATOR )
 				{
@@ -1022,27 +1024,6 @@ void Cmd_Class_f( gentity_t *ent ) {
 		}
 	}
 
-	if ( g_pModAssimilation.integer )
-	{
-		if ( ent->client->ps.eFlags & EF_ASSIMILATED )
-		{//assimilated player trying to switch
-			trap_SendServerCommand( ent-g_entities, "cp \"You have been assimilated until next round\"" );
-			return;
-		}
-		else if ( noJoinLimit != 0 && ( level.time-level.startTime > noJoinLimit || numKilled > 0 ) )
-		{//spectator coming in after start of game
-			if ( ent->client->sess.sessionTeam == TEAM_SPECTATOR )
-			{
-				trap_SendServerCommand( ent-g_entities, "cp \"Wait until next round to join\"" );
-			}
-			else
-			{
-				trap_SendServerCommand( ent-g_entities, "cp \"Wait until next round to change class\"" );
-			}
-			return;
-		}
-	}
-
 	if ( g_pModSpecialties.integer )
 	{
 		if ( ent->client->classChangeDebounceTime > level.time )
@@ -1111,13 +1092,6 @@ void Cmd_Class_f( gentity_t *ent ) {
 	if ( Q_stricmp( "borg", s ) == 0 || Q_stricmp( "hero", s ) == 0 || Q_stricmp( "vip", s ) == 0 )
 	{
 		trap_SendServerCommand( ent-g_entities, va( "print \"Cannot manually change to class %s\n\"", s ) );
-		return;
-	}
-
-	//can't change from a Borg class
-	if ( ent->client->sess.sessionClass == PC_BORG )
-	{
-		trap_SendServerCommand( ent-g_entities, "print \"Cannot manually change from class Borg\n\"" );
 		return;
 	}
 

@@ -63,6 +63,8 @@ set src=game&set name=g_weapon&call :compile
 set src=game\mods&set name=g_mod_main&call :compile
 set src=game\mods&set name=g_mod_stubs&call :compile
 set src=game\mods&set name=g_mod_utils&call :compile
+set src=game\mods\components&set name=comp_holdable_transporter&call :compile
+set src=game\mods\components&set name=comp_pending_item&call :compile
 set src=game\mods\features&set name=feat_altswap_handler&call :compile
 set src=game\mods\features&set name=feat_player_move&call :compile
 set src=game\mods\features&set name=feat_spect_passthrough&call :compile
@@ -77,6 +79,9 @@ set src=game\mods\features\pingcomp&set name=pc_projectile_launch&call :compile
 set src=game\mods\features\pingcomp&set name=pc_smoothing&call :compile
 set src=game\mods\features\pingcomp&set name=pc_smoothing_debug&call :compile
 set src=game\mods\features\pingcomp&set name=pc_smoothing_offset&call :compile
+set src=game\mods\modes\assimilation&set name=assim_borg_adapt&call :compile
+set src=game\mods\modes\assimilation&set name=assim_borg_teleport&call :compile
+set src=game\mods\modes\assimilation&set name=assim_main&call :compile
 set src=common&set name=logging&call :compile
 set src=common&set name=vm_extensions&call :compile
 

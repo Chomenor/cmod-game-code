@@ -30,7 +30,7 @@ static int trackedCvarCount = 0;
 void G_InitGame( int levelTime, int randomSeed, int restart );
 void G_RunFrame( int levelTime );
 void G_ShutdownGame( int restart );
-static void CheckExitRules( void );
+static void G_CheckExitRules( void );
 static int G_WarmupLength( void );
 
 //=============================
@@ -94,6 +94,19 @@ void QDECL G_Printf( const char *fmt, ... ) {
 	va_end (argptr);
 
 	trap_Printf( text );
+}
+
+void QDECL G_DedPrintf( const char *fmt, ... ) {
+	va_list		argptr;
+	char		text[1024];
+
+	va_start (argptr, fmt);
+	vsprintf (text, fmt, argptr);
+	va_end (argptr);
+
+	if ( g_dedicated.integer ) {
+		trap_Printf( text );
+	}
 }
 
 void QDECL G_Error( const char *fmt, ... ) {
@@ -399,8 +412,6 @@ static void G_UpdateCvars( void ) {
 }
 
 extern int altAmmoUsage[];
-extern team_t	borgTeam;
-extern team_t	initialBorgTeam;
 void G_InitModRules( void )
 {
 	numKilled = 0;
@@ -412,10 +423,6 @@ void G_InitModRules( void )
 	if ( g_pModSpecialties.integer != 0 )
 	{//tripwires use more ammo
 		altAmmoUsage[WP_GRENADE_LAUNCHER] = 3;
-	}
-	if ( g_pModAssimilation.integer != 0 )
-	{
-		borgTeam = initialBorgTeam;
 	}
 }
 
@@ -518,8 +525,6 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	// reserve some spots for dead player bodies
 	InitBodyQue();
 
-	ClearRegisteredItems();
-
 	// parse the key/value pairs and spawn gentities
 	G_SpawnEntitiesFromString();
 
@@ -573,29 +578,6 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	G_Printf ("-----------------------------------\n");
 }
 
-extern void G_RestoreClientInitialStatus( gentity_t *ent );
-extern int	borgQueenClientNum;
-void G_CheckResetAssimilationClients( void )
-{
-	if ( g_pModAssimilation.integer != 0 )
-	{
-		gentity_t *ent;
-		int			i;
-		//clear current queen
-		borgQueenClientNum = -1;
-		//put the assimilated players back on their original team and class
-		for ( i = 0; i < level.maxclients; i++ )
-		{
-			ent = &g_entities[i];
-			if ( ent->client && ent->inuse )
-			{
-				G_RestoreClientInitialStatus( ent );
-			}
-		}
-		//clear borg team
-		borgTeam = initialBorgTeam;
-	}
-}
 void EliminationRespawn( gentity_t *ent, char *team );
 void G_CheckResetEliminationClients( void )
 {
@@ -621,7 +603,6 @@ G_ShutdownGame
 =================
 */
 void G_ShutdownGame( int restart ) {
-	G_CheckResetAssimilationClients();
 	G_CheckResetEliminationClients();
 
 	G_Printf ("==== ShutdownGame ====\n");
@@ -947,7 +928,7 @@ void CalculateRanks( void ) {
 	// run exit check here to ensure exit is processed at the first qualified time
 	// if we waited until next frame, simultaneous events like multiple players being hit by explosion
 	// could be handled incorrectly
-	CheckExitRules();
+	G_CheckExitRules();
 }
 
 
@@ -1119,7 +1100,7 @@ void BeginIntermission( void ) {
 			client->flags &= ~FL_NOTARGET;
 		}
 		if (client->health <= 0) {
-			respawn(client);
+			modfn.ClientRespawn(i);
 		}
 		MoveClientToIntermission( client );
 
@@ -1170,9 +1151,6 @@ void ExitLevel (void) {
 
 	trap_SendConsoleCommand( EXEC_APPEND, "vstr nextmap\n" );
 	level.intermissiontime = 0;
-
-	//don't reset the bots until after level.intermission is off so that it doesn't send 5 billion score updates
-	G_CheckResetAssimilationClients();
 }
 
 
@@ -1297,57 +1275,21 @@ qboolean ScoreIsTied( void ) {
 }
 
 /*
-=================
-G_CheckExitRules2
+==================
+(ModFN) CheckExitRules
 
-There will be a delay between the time the exit is qualified for
-and the time everyone is moved to the intermission spot, so you
-can see the last frag.
-=================
+Checks for initiating match exit to intermission.
+Called every frame and after CalculateRanks, which is called on events like
+   player death, connect, disconnect, team change, etc.
+Not called if warmup or intermission is already in progress.
+==================
 */
-extern int	borgQueenClientNum;
-static void CheckExitRules2( void ) {
+LOGFUNCTION_VOID( ModFNDefault_CheckExitRules, ( void ), (), "G_MODFN_CHECKEXITRULES" ) {
 	int			i;
 	gclient_t	*cl;
 
 	if ( level.numPlayingClients < 2 ) {
 		//not enough players
-		return;
-	}
-
-	if ( g_pModAssimilation.integer != 0 )
-	{//check assimilation rules
-		if ( level.numConnectedClients > 0 && numKilled > 0 )
-		{
-			gclient_t *survivor = NULL;
-
-			if ( borgQueenClientNum != -1 )
-			{//see if borg queen is dead first
-				if ( g_entities[borgQueenClientNum].health <= 0 )
-				{//the queen is dead!
-					//FIXME: What if the queen disconnects somehow...?  Shouldn't be possible
-					G_LogExit( "The Borg Queen has been killed!" );
-					return;
-				}
-			}
-
-			//See if only one player remains alive, if so, end it.
-			for ( i = 0; i < level.maxclients; i++ )
-			{
-				cl = &level.clients[i];
-				if ( cl->pers.connected == CON_CONNECTED && cl->sess.sessionTeam != TEAM_SPECTATOR && cl->sess.sessionClass != PC_BORG )
-				{
-					survivor = cl;
-					break;
-				}
-			}
-			if ( survivor == NULL )
-			{
-				G_LogExit( "Assimilation Complete." );
-				return;
-			}
-		}
-		//don't check anything else
 		return;
 	}
 
@@ -1474,12 +1416,13 @@ static void CheckExitRules2( void ) {
 
 /*
 ==================
-CheckExitRules
+G_CheckExitRules
 
-Wrapper for CheckExitRules2 to protect against recursive calls via CalculateRanks.
+Wrapper for CheckExitRules modfn.
 ==================
 */
-static void CheckExitRules( void ) {
+static void G_CheckExitRules( void ) {
+	// make sure no recursive calls via CalculateRanks
 	static qboolean recursive = qfalse;
 	if ( recursive ) {
 		return;
@@ -1488,7 +1431,7 @@ static void CheckExitRules( void ) {
 	// only check for exits during active match
 	if ( level.matchState == MS_ACTIVE ) {
 		recursive = qtrue;
-		CheckExitRules2();
+		modfn.CheckExitRules();
 		recursive = qfalse;
 	}
 }
@@ -1608,7 +1551,7 @@ static void G_CheckMatchState( void ) {
 	}
 
 	// check for starting queued intermission
-	CheckExitRules();
+	G_CheckExitRules();
 
 	if ( level.matchState == MS_INTERMISSION_ACTIVE ) {
 		// current intermission - check for exit to next match
@@ -1775,7 +1718,6 @@ Advances the non-player objects in the world
 ================
 */
 void CheckHealthInfoMessage( void );
-extern void G_PickBorgQueen( void );
 extern void INeedAHero( void );
 extern int actionHeroClientNum;
 void G_RunFrame( int levelTime ) {
@@ -1797,6 +1739,8 @@ int start, end;
 
 	// get any cvar changes
 	G_UpdateCvars();
+
+	modfn.PreRunFrame();
 
 	//
 	// go through all allocated objects
@@ -1902,11 +1846,6 @@ end = trap_Milliseconds();
 	// cancel vote if timed out
 	CheckVote();
 
-	//keep looking for a borgQueen if we don't have one yet
-	if ( borgQueenClientNum == -1 )
-	{
-		G_PickBorgQueen();
-	}
 	//keep looking for an actionHero if we don't have one yet
 	if ( actionHeroClientNum == -1 )
 	{

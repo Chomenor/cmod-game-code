@@ -5,10 +5,8 @@
 #include "g_local.h"
 
 extern int	actionHeroClientNum;
-extern int	borgQueenClientNum;
 extern int	numKilled;
 extern void G_RandomActionHero( int ignoreClientNum );
-extern void SetClass( gentity_t *ent, char *s, char *teamName );
 
 
 /*
@@ -60,6 +58,24 @@ void SetScore( gentity_t *ent, int score ) {
 	ent->client->ps.persistant[PERS_SCORE] = score;
 	CalculateRanks();
 }
+
+/*
+============
+(ModFN) CanItemBeDropped
+
+Check if item can be tossed on death/disconnect.
+============
+*/
+LOGFUNCTION_RET( qboolean, ModFNDefault_CanItemBeDropped, ( gitem_t *item, int clientNum ),
+		( item, clientNum ), "G_MODFN_CANITEMBEDROPPED" ) {
+	if ( item->giType == IT_POWERUP && g_gametype.integer == GT_TEAM ) {
+		// no powerup drops in THM mode
+		return qfalse;
+	}
+
+	return qtrue;
+}
+
 /*
 =================
 TossClientItems
@@ -74,7 +90,7 @@ void TossClientItems( gentity_t *self ) {
 	int			i;
 	gentity_t	*drop;
 
-	if ( g_pModDisintegration.integer == 0 && g_pModSpecialties.integer == 0 && self->client->sess.sessionClass != PC_BORG )
+	if ( g_pModDisintegration.integer == 0 && g_pModSpecialties.integer == 0 )
 	{//not in playerclass game mode and not in disintegration mode (okay to drop weap)
 		// drop the weapon if not a phaser
 		weapon = self->s.weapon;
@@ -98,34 +114,34 @@ void TossClientItems( gentity_t *self ) {
 			item = BG_FindItemForWeapon( weapon );
 
 			// spawn the item
-			Drop_Item( self, item, 0 );
+			if ( modfn.CanItemBeDropped( item, self - g_entities ) ) {
+				Drop_Item( self, item, 0 );
+			}
 		}
 	}
 
 	// drop all the powerups if not in teamplay
-	if ( g_gametype.integer != GT_TEAM ) {
-		angle = 45;
-		for ( i = 1 ; i < PW_NUM_POWERUPS ; i++ ) {
-			if ( self->client->ps.powerups[ i ] > level.time ) {
-				item = BG_FindItemForPowerup( i );
-				if ( !item ) {
+	angle = 45;
+	for ( i = 1 ; i < PW_NUM_POWERUPS ; i++ ) {
+		if ( self->client->ps.powerups[ i ] > level.time ) {
+			item = BG_FindItemForPowerup( i );
+			if ( !item || !modfn.CanItemBeDropped( item, self - g_entities ) ) {
+				continue;
+			}
+			if ( g_pModSpecialties.integer != 0 )
+			{//in playerclass game mode
+				if ( item->giType != IT_TEAM )
+				{//only drop the flag
 					continue;
 				}
-				if ( g_pModSpecialties.integer != 0 || self->client->sess.sessionClass == PC_BORG )
-				{//in playerclass game mode
-					if ( item->giType != IT_TEAM )
-					{//only drop the flag
-						continue;
-					}
-				}
-				drop = Drop_Item( self, item, angle );
-				// decide how many seconds it has left
-				drop->count = ( self->client->ps.powerups[ i ] - level.time ) / 1000;
-				if ( drop->count < 1 ) {
-					drop->count = 1;
-				}
-				angle += 45;
 			}
+			drop = Drop_Item( self, item, angle );
+			// decide how many seconds it has left
+			drop->count = ( self->client->ps.powerups[ i ] - level.time ) / 1000;
+			if ( drop->count < 1 ) {
+				drop->count = 1;
+			}
+			angle += 45;
 		}
 	}
 }
@@ -254,6 +270,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	char		*classname = NULL;
 	int			BottomlessPitDeath;
 	static		int deathNum;
+	int			awardPoints = 0;	// Amount of points to give/take from attacker (or self if attacker is non-client).
 
 
 
@@ -374,38 +391,22 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		{
 			if ( meansOfDeath != MOD_RESPAWN )
 			{//just changing class
-				if ( self->s.number == borgQueenClientNum )
-				{
-					numKilled++;
-					AddScore( attacker, -500 );
-				}
-				else
-				{
-					AddScore( attacker, -1 );
-				}
+				awardPoints = -1;
 			}
 		}
 		else
 		{
 			attacker->client->pers.teamState.frags++;
-			if ( self->s.number == borgQueenClientNum && attacker )
-			{
-				numKilled++;
-				if ( attacker->client )
-				{//killed by opponent
-					AddScore( attacker, 500 );//500 bonus
-				}
-			}
-			else if ( self->s.number == actionHeroClientNum && attacker )
+			if ( self->s.number == actionHeroClientNum && attacker )
 			{
 				if ( attacker->client )
 				{//killed by opponent
-					AddScore( attacker, 5 );//5 bonus
+					awardPoints = 5;//5 bonus
 				}
 			}
 			else
 			{
-				AddScore( attacker, 1 );
+				awardPoints = 1;
 			}
 
 			// check for two kills in a short amount of time
@@ -486,15 +487,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	{
 		if ( meansOfDeath != MOD_RESPAWN )
 		{//not just changing class
-			if ( self->s.number == borgQueenClientNum )
-			{
-				numKilled++;
-				AddScore( self, -500 );
-			}
-			else
-			{
-				AddScore( self, -1 );
-			}
+			awardPoints = -1;
 		}
 	}
 
@@ -541,7 +534,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
 	// don't allow respawn until the death anim is done
 	// g_forcerespawn may force spawning at some later time
-	self->client->respawnTime = level.time + 1700;
+	self->client->respawnKilledTime = level.time;
 
 	// remove powerups
 	memset( self->client->ps.powerups, 0, sizeof(self->client->ps.powerups) );
@@ -641,24 +634,6 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 
 	trap_LinkEntity (self);
 
-	if ( g_pModAssimilation.integer != 0 )
-	{
-		if ( meansOfDeath == MOD_ASSIMILATE )
-		{//Go to Borg team if killed by assimilation
-			if ( attacker && attacker->client && attacker->client->sess.sessionTeam != self->client->sess.sessionTeam )
-			{
-				/*
-				if ( !numKilled )
-				{
-					trap_SendServerCommand( -1, "cp \"Assimilation Has Begun!\"" );
-				}
-				*/
-				numKilled++;
-				self->client->mod = meansOfDeath;
-				AddScore( attacker, 9 );//+ the 1 above = 10 points for an assimilation
-			}
-		}
-	}
 	if ( g_pModActionHero.integer != 0 )
 	{
 		if ( self->client && self->s.number == actionHeroClientNum )
@@ -677,7 +652,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 			}
 			//respawn the new hero
 			//FIXME: or just give them full health and all the goodies?
-			respawn( &g_entities[actionHeroClientNum] );
+			modfn.ClientRespawn( actionHeroClientNum );
 		}
 	}
 	if ( g_pModElimination.integer != 0 && meansOfDeath != MOD_RESPAWN && meansOfDeath != MOD_KNOCKOUT )
@@ -713,8 +688,21 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 				}
 			}
 		}
-		CalculateRanks();
 	}
+
+	if ( meansOfDeath != MOD_RESPAWN ) {
+		modfn.PostPlayerDie( self, inflictor, attacker, meansOfDeath, &awardPoints );
+	}
+
+	if ( awardPoints ) {
+		if ( attacker && attacker->client ) {
+			AddScore( attacker, awardPoints );
+		} else {
+			AddScore( self, awardPoints );
+		}
+	}
+
+	CalculateRanks();
 }
 
 
@@ -764,97 +752,18 @@ int CheckArmor (gentity_t *ent, int damage, int dflags)
 	return save;
 }
 
-#define	BORG_ADAPT_NUM_HITS 10
-qboolean G_CheckBorgAdaptation( gentity_t *targ, int mod )
-{
-	static int	borgAdaptHits[WP_NUM_WEAPONS];
-	int	weapon = 0;
 
-	if ( !targ->client )
-	{
-		return qfalse;
-	}
+/*
+============
+(ModFN) CheckBorgAdapt
 
-	if ( targ->client->sess.sessionClass != PC_BORG )
-	{
-		return qfalse;
-	}
-
-	switch( mod )
-	{
-//other kinds of damage
-	case MOD_UNKNOWN:
-	case MOD_WATER:
-	case MOD_SLIME:
-	case MOD_LAVA:
-	case MOD_CRUSH:
-	case MOD_TELEFRAG:
-	case MOD_FALLING:
-	case MOD_SUICIDE:
-	case MOD_RESPAWN:
-	case MOD_TARGET_LASER:
-	case MOD_TRIGGER_HURT:
-	case MOD_DETPACK:
-	case MOD_MAX:
-	case MOD_KNOCKOUT:
-	case MOD_IMOD:
-	case MOD_IMOD_ALT:
-	case MOD_EXPLOSION:
-		return qfalse;
-		break;
-// Trek weapons
-	case MOD_PHASER:
-	case MOD_PHASER_ALT:
-		weapon = WP_PHASER;
-		break;
-	case MOD_CRIFLE:
-	case MOD_CRIFLE_SPLASH:
-	case MOD_CRIFLE_ALT:
-	case MOD_CRIFLE_ALT_SPLASH:
-		weapon = WP_COMPRESSION_RIFLE;
-		break;
-	case MOD_SCAVENGER:
-	case MOD_SCAVENGER_ALT:
-	case MOD_SCAVENGER_ALT_SPLASH:
-	case MOD_SEEKER:
-		weapon = WP_SCAVENGER_RIFLE;
-		break;
-	case MOD_STASIS:
-	case MOD_STASIS_ALT:
-		weapon = WP_STASIS;
-		break;
-	case MOD_GRENADE:
-	case MOD_GRENADE_ALT:
-	case MOD_GRENADE_SPLASH:
-	case MOD_GRENADE_ALT_SPLASH:
-		weapon = WP_GRENADE_LAUNCHER;
-		break;
-	case MOD_TETRION:
-	case MOD_TETRION_ALT:
-		weapon = WP_TETRION_DISRUPTOR;
-		break;
-	case MOD_DREADNOUGHT:
-	case MOD_DREADNOUGHT_ALT:
-		weapon = WP_DREADNOUGHT;
-		break;
-	case MOD_QUANTUM:
-	case MOD_QUANTUM_SPLASH:
-	case MOD_QUANTUM_ALT:
-	case MOD_QUANTUM_ALT_SPLASH:
-		weapon = WP_QUANTUM_BURST;
-		break;
-	case MOD_ASSIMILATE:
-	case MOD_BORG:
-	case MOD_BORG_ALT:
-		return qtrue;
-		break;
-	}
-
-	borgAdaptHits[weapon]++;
-	if ( borgAdaptHits[weapon] > BORG_ADAPT_NUM_HITS )//FIXME: different count per weapon?
-	{//we have adapted to this weapon
-		return qtrue;
-	}
+Returns whether borg adaptive shields have blocked damage.
+Also sets PW_BORG_ADAPT to play effect on target if needed.
+============
+*/
+LOGFUNCTION_RET( qboolean, ModFNDefault_CheckBorgAdapt, ( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+		vec3_t dir, vec3_t point, int damage, int dflags, int mod ),
+		( targ, inflictor, attacker, dir, point, damage, dflags, mod ), "G_MODFN_CHECKBORGADAPT" ) {
 	return qfalse;
 }
 
@@ -891,6 +800,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	int			knockback;
 	qboolean	bFriend = (targ && attacker)?OnSameTeam( targ, attacker ):qfalse;
 	gentity_t	*evEnt;
+	qboolean	adapted;
 
 	if (!targ->takedamage) {
 		return;
@@ -919,14 +829,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		return;
 	}
 
-	if ( G_CheckBorgAdaptation( targ, mod ) )
-	{
-		//flag targ for adaptation effect
-		targ->client->ps.powerups[PW_BORG_ADAPT] = level.time + 250;
-		//targ->client->ps.powerups[PW_BATTLESUIT] += 200;
-		//do no damage
-		//return;
-	}
+	adapted = modfn.CheckBorgAdapt( targ, inflictor, attacker, dir, point, damage, dflags, mod );
 
 	// multiply damage times dmgmult
 	damage *= g_dmgmult.value;
@@ -1057,7 +960,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	if ( MOD_TELEFRAG != mod )
 	{
 		// battlesuit protects from all damage...
-		if ( client && ( client->ps.powerups[PW_BATTLESUIT] || client->ps.powerups[PW_BORG_ADAPT] ))
+		if ( client && ( client->ps.powerups[PW_BATTLESUIT] || adapted ))
 		{	// EXCEPT DAMAGE_NO_INVULNERABILITY, like the IMOD
 			if ( dflags & DAMAGE_NO_INVULNERABILITY )
 			{	// Do only half damage if he has the battlesuit, and that's just because I'm in a good mood...

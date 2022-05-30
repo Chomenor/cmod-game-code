@@ -10,11 +10,20 @@
     <Filter Include="game\mods">
       <UniqueIdentifier>{81BBD40A-ED25-8981-3664-3A27A20D67D6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="game\mods\components">
+      <UniqueIdentifier>{16F2AA6C-0281-3436-AB9F-4831970D45DC}</UniqueIdentifier>
+    </Filter>
     <Filter Include="game\mods\features">
       <UniqueIdentifier>{CF5F3109-BB43-F25E-24A4-ECB110A7DCE0}</UniqueIdentifier>
     </Filter>
     <Filter Include="game\mods\features\pingcomp">
       <UniqueIdentifier>{BBE6177B-27F4-4561-B0DA-414C1CE71118}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\mods\modes">
+      <UniqueIdentifier>{A811E3E3-149D-50A8-1DAE-D39C89B8ACA8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game\mods\modes\assimilation">
+      <UniqueIdentifier>{A4FF88CF-90BA-787B-3972-F1C5250CC30B}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -116,6 +125,9 @@
     </ClInclude>
     <ClInclude Include="..\..\code\game\mods\g_mod_public.h">
       <Filter>game\mods</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\game\mods\modes\assimilation\assim_local.h">
+      <Filter>game\mods\modes\assimilation</Filter>
     </ClInclude>
     <ClInclude Include="..\..\code\game\syn.h">
       <Filter>game</Filter>
@@ -239,6 +251,12 @@
     <ClCompile Include="..\..\code\game\g_weapon.c">
       <Filter>game</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\components\comp_holdable_transporter.c">
+      <Filter>game\mods\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\components\comp_pending_item.c">
+      <Filter>game\mods\components</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\code\game\mods\features\feat_altswap_handler.c">
       <Filter>game\mods\features</Filter>
     </ClCompile>
@@ -289,6 +307,15 @@
     </ClCompile>
     <ClCompile Include="..\..\code\game\mods\g_mod_utils.c">
       <Filter>game\mods</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\modes\assimilation\assim_borg_adapt.c">
+      <Filter>game\mods\modes\assimilation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\modes\assimilation\assim_borg_teleport.c">
+      <Filter>game\mods\modes\assimilation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\modes\assimilation\assim_main.c">
+      <Filter>game\mods\modes\assimilation</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

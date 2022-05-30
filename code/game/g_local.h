@@ -270,6 +270,7 @@ typedef struct {
 	playerTeamState_t teamState;	// status in teamplay games
 	int			voteCount;			// to prevent people from constantly calling votes
 	qboolean	teamInfo;			// send team overlay updates?
+	pclass_t	uiClass;			// last class sent to client via "pclass" command
 } clientPersistant_t;
 
 // this structure is cleared on each ClientSpawn(),
@@ -306,7 +307,7 @@ struct gclient_s {
 	int			lasthurt_mod;		// type of damage the client did
 
 	// timers
-	int			respawnTime;		// can respawn when time > this, force after g_forcerespwan
+	int			respawnKilledTime;	// time of death; respawn timers start from this time
 	int			inactivityTime;		// kick players when time > this
 	qboolean	inactivityWarning;	// qtrue if the five seoond warning has been given
 	int			rewardTime;			// clear the EF_AWARD_IMPRESSIVE, etc when time > this
@@ -415,6 +416,7 @@ typedef struct {
 	gentity_t	*locationHead;			// head of the location list
 
 	int			numObjectives;			//
+	gentity_t	*borgQueenStartPoint;	// spawn point reserved for borg queen
 } level_locals_t;
 
 
@@ -435,6 +437,7 @@ char *G_NewString( const char *string );
 void DeathmatchScoreboardMessage( gentity_t *ent );
 void StopFollowing( gentity_t *ent );
 void BroadcastTeamChange( gclient_t *client, int oldTeam );
+void SetPlayerClassCvar(gentity_t *ent);
 qboolean SetTeam( gentity_t *ent, char *s );
 void Cmd_FollowCycle_f( gentity_t *ent, int dir );
 
@@ -456,7 +459,6 @@ int ArmorIndex (gentity_t *ent);
 void	Add_Ammo (gentity_t *ent, int weapon, int count);
 void Touch_Item (gentity_t *ent, gentity_t *other, trace_t *trace);
 
-void ClearRegisteredItems( void );
 void RegisterItem( gitem_t *item );
 void SaveRegisteredItems( void );
 
@@ -566,7 +568,6 @@ team_t TeamCount( int ignoreClientNum, int team );
 team_t PickTeam( int ignoreClientNum );
 void SetClientViewAngle( gentity_t *ent, vec3_t angle );
 gentity_t *SelectSpawnPoint ( vec3_t avoidPoint, vec3_t origin, vec3_t angles, qboolean useHumanSpots, qboolean useBotSpots );
-void respawn (gentity_t *ent);
 void BeginIntermission (void);
 void InitClientPersistant (gclient_t *client);
 void InitClientResp (gclient_t *client);
@@ -617,6 +618,7 @@ void G_RunThink (gentity_t *ent);
 void SendScoreboardMessageToAllClients( void );
 void G_SetMatchState( matchState_t matchState );
 void QDECL G_Printf( const char *fmt, ... );
+void QDECL G_DedPrintf( const char *fmt, ... );
 void QDECL G_Error( const char *fmt, ... );
 
 
@@ -695,15 +697,13 @@ void ClientCommand( int clientNum );
 
 typedef struct
 {
-	char	model[MAX_QPATH];
-	team_t	team;
-	pclass_t pClass;
 	qboolean initialized;
 } clInitStatus_t;
 
 //
 // g_active.c
 //
+void G_GiveHoldable( gclient_t *client, holdable_t item );
 void ClientThink( int clientNum );
 void ClientEndFrame( gentity_t *ent );
 void G_RunClient( gentity_t *ent );
@@ -725,6 +725,7 @@ void Svcmd_GameMem_f( void );
 //
 // g_session.c
 //
+void G_RetrieveGlobalSessionInfo( info_string_t *output );
 int G_RetrieveGlobalSessionValue( const char *key );
 void G_ReadSessionData( gclient_t *client );
 void G_InitSessionData( gclient_t *client, char *userinfo );
@@ -744,6 +745,7 @@ void Svcmd_AbortPodium_f( void );
 void G_InitBots( qboolean restart );
 char *G_GetBotInfoByNumber( int num );
 char *G_GetBotInfoByName( const char *name );
+int G_CountHumanPlayers( int team );
 void G_CheckBotSpawn( void );
 void G_QueueBotBegin( int clientNum );
 qboolean G_BotConnect( int clientNum, qboolean restart );

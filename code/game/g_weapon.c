@@ -11,8 +11,6 @@ static	vec3_t	muzzle;
 
 extern void G_MissileImpact( gentity_t *ent, trace_t *trace);
 
-extern int	borgQueenClientNum;
-
 #define MAX_BEAM_HITS	4
 
 #define DMG_VAR			(flrandom(0.8,1.2))
@@ -1398,7 +1396,7 @@ qboolean SearchTarget(gentity_t *ent, vec3_t start, vec3_t end)
 	traceEnt = &g_entities[ tr.entityNum ];
 
 	// Don't find teleporting borg in Assimilation mode
-	if ( g_pModAssimilation.integer != 0 && traceEnt->client
+	if ( traceEnt->client
 				&& traceEnt->client->sess.sessionClass == PC_BORG
 				&& traceEnt->s.eFlags == EF_NODRAW )
 	{
@@ -1437,7 +1435,7 @@ void WP_QuantumAltThink(gentity_t *ent)
 	if (ent->target_ent)
 	{	// Already have a target, start homing.
 		if (ent->health <= 0 || !ent->inuse ||
-				(g_pModAssimilation.integer != 0 && ent->target_ent->client
+				(ent->target_ent->client
 					&& ent->target_ent->client->sess.sessionClass == PC_BORG
 					&& ent->target_ent->s.eFlags == EF_NODRAW))
 		{	// No longer target this
@@ -2319,7 +2317,7 @@ void WP_Assimilate( gentity_t *ent, qboolean alt_fire )
 	vec3_t		end;
 	float		range;
 
-	if ( ent->s.number == borgQueenClientNum )
+	if ( modfn.IsBorgQueen( ent - g_entities ) )
 	{
 		range = 32;
 	}
@@ -2340,7 +2338,7 @@ void WP_Assimilate( gentity_t *ent, qboolean alt_fire )
 
 	if ( tr_ent && tr_ent->client && tr_ent->health > 0 && ent->client && ent->client->sess.sessionTeam != tr_ent->client->sess.sessionTeam )
 	{
-		if ( ent->s.number == borgQueenClientNum )
+		if ( modfn.IsBorgQueen( ent - g_entities ) )
 		{//Borg queen assimilates with one hit
 			tr_ent->health = 0;
 			player_die( tr_ent, ent, ent, 100, MOD_ASSIMILATE );

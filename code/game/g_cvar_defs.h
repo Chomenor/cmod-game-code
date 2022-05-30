@@ -12,7 +12,6 @@ CVAR_DEF( gamedate, "gamedate", __DATE__ , CVAR_ROM, qfalse )
 
 // latched vars
 CVAR_DEF( g_gametype, "g_gametype", "0", CVAR_SERVERINFO | CVAR_LATCH, qfalse )
-CVAR_DEF( g_pModAssimilation, "g_pModAssimilation", "0", CVAR_SERVERINFO | CVAR_LATCH, qfalse )
 CVAR_DEF( g_pModDisintegration, "g_pModDisintegration", "0", CVAR_SERVERINFO | CVAR_LATCH, qfalse )
 CVAR_DEF( g_pModActionHero, "g_pModActionHero", "0", CVAR_SERVERINFO | CVAR_LATCH, qfalse )
 CVAR_DEF( g_pModSpecialties, "g_pModSpecialties", "0", CVAR_SERVERINFO | CVAR_LATCH, qfalse )

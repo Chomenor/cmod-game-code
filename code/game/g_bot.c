@@ -225,7 +225,7 @@ void G_AddRandomBot( int team ) {
 			if ( !(g_entities[i].r.svFlags & SVF_BOT) ) {
 				continue;
 			}
-			if ( team >= 0 && cl->sess.sessionTeam != team ) {
+			if ( team >= 0 && modfn.RealSessionTeam( i ) != team ) {
 				continue;
 			}
 			if ( !Q_stricmp( value, cl->pers.netname ) ) {
@@ -248,7 +248,7 @@ void G_AddRandomBot( int team ) {
 			if ( !(g_entities[i].r.svFlags & SVF_BOT) ) {
 				continue;
 			}
-			if ( team >= 0 && cl->sess.sessionTeam != team ) {
+			if ( team >= 0 && modfn.RealSessionTeam( i ) != team ) {
 				continue;
 			}
 			if ( !Q_stricmp( value, cl->pers.netname ) ) {
@@ -274,24 +274,6 @@ void G_AddRandomBot( int team ) {
 
 /*
 ===============
-G_RealSessionTeam
-
-Returns player-selected team, even if active team is temporarily overriden by borg assimilation.
-===============
-*/
-static int G_RealSessionTeam( gclient_t *cl ) {
-	if ( cl->ps.eFlags & EF_ASSIMILATED ) {
-		if ( cl->sess.sessionTeam == TEAM_RED ) {
-			return TEAM_BLUE;
-		} else if ( cl->sess.sessionTeam == TEAM_BLUE ) {
-			return TEAM_RED;
-		}
-	}
-	return cl->sess.sessionTeam;
-}
-
-/*
-===============
 G_RemoveRandomBot
 ===============
 */
@@ -308,7 +290,7 @@ int G_RemoveRandomBot( int team ) {
 		if ( !(g_entities[i].r.svFlags & SVF_BOT) ) {
 			continue;
 		}
-		if ( team >= 0 && G_RealSessionTeam( cl ) != team ) {
+		if ( team >= 0 && modfn.RealSessionTeam( i ) != team ) {
 			continue;
 		}
 		strcpy(netname, cl->pers.netname);
@@ -337,7 +319,7 @@ int G_CountHumanPlayers( int team ) {
 		if ( g_entities[i].r.svFlags & SVF_BOT ) {
 			continue;
 		}
-		if ( team >= 0 && G_RealSessionTeam( cl ) != team ) {
+		if ( team >= 0 && modfn.RealSessionTeam( i ) != team ) {
 			continue;
 		}
 		num++;
@@ -363,7 +345,7 @@ int G_CountBotPlayers( int team ) {
 		if ( !(g_entities[i].r.svFlags & SVF_BOT) ) {
 			continue;
 		}
-		if ( team >= 0 && G_RealSessionTeam( cl ) != team ) {
+		if ( team >= 0 && modfn.RealSessionTeam( i ) != team ) {
 			continue;
 		}
 		num++;

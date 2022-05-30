@@ -17,7 +17,6 @@ and tournament restarts.
 // server uses mod switching.
 #define SESSION_VERSION "hszK3I2I"
 
-extern int	borgQueenClientNum;
 extern int	noJoinLimit;
 extern int	numKilled;
 
@@ -95,7 +94,7 @@ G_RetrieveGlobalSessionInfo
 Retrieves match info segment in session_info cvar.
 ==================
 */
-static void G_RetrieveGlobalSessionInfo( info_string_t *output ) {
+void G_RetrieveGlobalSessionInfo( info_string_t *output ) {
 	output->s[0] = '\0';
 	if ( G_VerifySessionVersion() ) {
 		trap_Cvar_VariableStringBuffer( "session_info", output->s, sizeof( output->s ) );
@@ -129,8 +128,8 @@ void G_WriteClientSessionData( gclient_t *client ) {
 	info_string_t info;
 
 	s = va("%i %i %i %i %i %i %i",
-		client->sess.sessionTeam,
-		client->sess.sessionClass,
+		modfn.RealSessionTeam( clientNum ),
+		modfn.RealSessionClass( clientNum ),
 		client->sess.spectatorTime,
 		client->sess.spectatorState,
 		client->sess.spectatorClient,
@@ -200,19 +199,14 @@ void G_InitSessionData( gclient_t *client, char *userinfo ) {
 	// initial team determination
 	if ( g_gametype.integer >= GT_TEAM )
 	{//Team holomatch or CTF
-		if ( g_teamAutoJoin.integer && !(g_team_group_red.string[0] || g_team_group_blue.string[0]) ) {
+		if ( g_teamAutoJoin.integer && modfn.CheckJoinAllowed( clientNum, CJA_AUTOJOIN, TEAM_FREE ) ) {
 			if ( g_pModElimination.integer && noJoinLimit != 0 && ( level.time-level.startTime > noJoinLimit || numKilled > 0 ) )
 			{//elim game already in progress
-				sess->sessionTeam = TEAM_SPECTATOR;
-			}
-			else if ( g_pModAssimilation.integer && borgQueenClientNum != -1 && noJoinLimit != 0 && ( level.time-level.startTime > noJoinLimit || numKilled > 0 ) )
-			{//assim game already in progress
 				sess->sessionTeam = TEAM_SPECTATOR;
 			}
 			else
 			{
 				sess->sessionTeam = PickTeam( -1 );
-				BroadcastTeamChange( client, -1 );
 			}
 		} else {
 			// always spawn as spectator in team games
@@ -230,8 +224,7 @@ void G_InitSessionData( gclient_t *client, char *userinfo ) {
 			default:
 			case GT_FFA:
 			case GT_SINGLE_PLAYER:
-				if ( g_maxGameClients.integer > 0 &&
-					level.numNonSpectatorClients >= g_maxGameClients.integer ) {
+				if ( !modfn.CheckJoinAllowed( clientNum, CJA_AUTOJOIN, TEAM_FREE ) ) {
 					sess->sessionTeam = TEAM_SPECTATOR;
 				} else {
 					if ( g_pModElimination.integer && noJoinLimit != 0 && ( level.time-level.startTime > noJoinLimit || numKilled > 0 ) )

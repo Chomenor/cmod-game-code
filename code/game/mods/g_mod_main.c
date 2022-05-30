@@ -7,6 +7,7 @@
 #include "mods/g_mod_local.h"
 
 mod_functions_t modfn;
+mod_config_t modcfg;
 
 /*
 ================
@@ -27,12 +28,20 @@ LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 		return;
 	}
 
+	// Initialize cvars
+	trap_Cvar_Register( NULL, "g_pModAssimilation", "0", CVAR_SERVERINFO );
+
+	// Default mods
 	if ( modsEnabled >= 2 ) {
-		// Default mods
 		ModPlayerMove_Init();
 		ModAltSwapHandler_Init();
 		ModPingcomp_Init();
 		ModSpectPassThrough_Init();
 		ModSpawnProtect_Init();
+	}
+
+	// Game modes
+	if ( trap_Cvar_VariableIntegerValue( "g_pModAssimilation" ) ) {
+		ModAssimilation_Init();
 	}
 }

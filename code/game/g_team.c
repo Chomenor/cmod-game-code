@@ -3,10 +3,6 @@
 
 #include "g_local.h"
 
-team_t	initialBorgTeam = TEAM_FREE;
-int		borgQueenStartPoint = ENTITYNUM_NONE;
-extern	int	borgQueenClientNum;
-
 typedef enum _flag_status {
 	FLAG_ATBASE = 0,
 	FLAG_TAKEN,
@@ -675,8 +671,9 @@ gentity_t *SelectRandomTeamSpawnPoint( gentity_t *ent, qboolean initialSpawn, te
 	int			selection;
 	gentity_t	*spots[MAX_TEAM_SPAWN_POINTS];
 	char		*classname;
+	qboolean	isBorgQueen = modfn.IsBorgQueen( ent - g_entities );
 
-	if (initialSpawn||ent->s.number == borgQueenClientNum) {
+	if ( initialSpawn || isBorgQueen ) {
 		if (team == TEAM_RED)
 			classname = "team_CTF_redplayer";
 		else if (team == TEAM_BLUE)
@@ -696,14 +693,14 @@ gentity_t *SelectRandomTeamSpawnPoint( gentity_t *ent, qboolean initialSpawn, te
 	spot = NULL;
 
 	while ((spot = G_Find (spot, FOFS(classname), classname)) != NULL) {
-		if ( initialSpawn || ent->s.number == borgQueenClientNum ) {//just starting
-			if ( spot->s.number == borgQueenStartPoint ) {
+		if ( initialSpawn || isBorgQueen ) {//just starting
+			if ( spot == level.borgQueenStartPoint ) {
 				//Borg queen only
-				if ( ent->s.number != borgQueenClientNum ) {
+				if ( !isBorgQueen ) {
 					continue;
 				}
 			}
-			else if ( borgQueenStartPoint != ENTITYNUM_NONE && ent->s.number == borgQueenClientNum ) {
+			else if ( level.borgQueenStartPoint && isBorgQueen ) {
 				//she must start on the right spot
 				continue;
 			}
@@ -970,8 +967,7 @@ BORGQUEEN - The player that is the Borg Queen will spawn here
 void SP_team_CTF_redplayer( gentity_t *ent ) {
 	if ( ent->spawnflags & 1 )
 	{
-		initialBorgTeam = TEAM_RED;
-		borgQueenStartPoint = ent->s.number;
+		level.borgQueenStartPoint = ent;
 	}
 }
 
@@ -984,8 +980,7 @@ BORGQUEEN - The player that is the Borg Queen will spawn here
 void SP_team_CTF_blueplayer( gentity_t *ent ) {
 	if ( ent->spawnflags & 1 )
 	{
-		initialBorgTeam = TEAM_BLUE;
-		borgQueenStartPoint = ent->s.number;
+		level.borgQueenStartPoint = ent;
 	}
 }
 

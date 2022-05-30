@@ -11,12 +11,32 @@ LOGFUNCTION_VOID( ModFNDefault_GeneralInit, ( void ),
 		(), "G_MODFN_GENERALINIT" ) {
 }
 
+LOGFUNCTION_VOID( ModFNDefault_PreRunFrame, ( void ),
+		(), "G_MODFN_PRERUNFRAME" ) {
+}
+
 LOGFUNCTION_VOID( ModFNDefault_PostRunFrame, ( void ),
 		(), "G_MODFN_POSTRUNFRAME" ) {
 }
 
 LOGFUNCTION_VOID( ModFNDefault_MatchStateTransition, ( matchState_t oldState, matchState_t newState ),
 		( oldState, newState ), "G_MODFN_MATCHSTATETRANSITION" ) {
+}
+
+LOGFUNCTION_VOID( ModFNDefault_PreClientConnect, ( int clientNum, qboolean firstTime, qboolean isBot ),
+		( clientNum, firstTime, isBot ), "G_MODFN_PRECLIENTCONNECT" ) {
+}
+
+LOGFUNCTION_VOID( ModFNDefault_PreClientSpawn, ( int clientNum, clientSpawnType_t spawnType ),
+		( clientNum, spawnType ), "G_MODFN_PRECLIENTSPAWN" ) {
+}
+
+LOGFUNCTION_VOID( ModFNDefault_PrePlayerLeaveTeam, ( int clientNum, team_t oldTeam ),
+		( clientNum, oldTeam ), "G_MODFN_PREPLAYERLEAVETEAM" ) {
+}
+
+LOGFUNCTION_VOID( ModFNDefault_PostPlayerDie, ( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int meansOfDeath, int *awardPoints ),
+		( self, inflictor, attacker, meansOfDeath, awardPoints ), "G_MODFN_POSTPLAYERDIE" ) {
 }
 
 LOGFUNCTION_VOID( ModFNDefault_PatchClientSpawn, ( int clientNum, gentity_t **spawn, vec3_t origin, vec3_t angles ),
@@ -56,4 +76,9 @@ LOGFUNCTION_VOID( ModFNDefault_TrapTrace, ( trace_t *results, const vec3_t start
 		const vec3_t end, int passEntityNum, int contentmask, int modFlags ),
 		( results, start, mins, maxs, end, passEntityNum, contentmask, modFlags ), "G_MODFN_TRAPTRACE" ) {
 	trap_Trace( results, start, mins, maxs, end, passEntityNum, contentmask );
+}
+
+LOGFUNCTION_RET( qboolean, ModFNDefault_IsBorgQueen, ( int clientNum ),
+		( clientNum ), "G_MODFN_ISBORGQUEEN" ) {
+	return qfalse;
 }

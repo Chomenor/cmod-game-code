@@ -6,10 +6,27 @@
 
 #include "g_local.h"
 
+// Shared Variables
+
+typedef struct {
+	qboolean assimilation;
+} mods_enabled_t;
+
+typedef struct {
+	mods_enabled_t mods_enabled;
+} mod_config_t;
+
+extern mod_config_t modcfg;
+
 // Utils
+
 int G_ModUtils_GetLatchedValue( const char *cvar_name, const char *default_value, int flags );
 
-// Note: By convention, functions labeled 'static' can be called even if the mod isn't loaded.
+/* ************************************************************************* */
+// Modes - Modules loaded directly from G_ModsInit to change game mechanics
+/* ************************************************************************* */
+
+void ModAssimilation_Init( void );
 
 /* ************************************************************************* */
 // Features - Modules loaded directly from G_ModsInit to add features
@@ -26,3 +43,30 @@ void ModSpectPassThrough_Init( void );
 //
 
 qboolean ModPingcomp_Static_PingCompensationEnabled( void );
+
+/* ************************************************************************* */
+// Components - Modules generally only loaded by other modules
+/* ************************************************************************* */
+
+void ModHoldableTransporter_Init( void );
+void ModPendingItem_Init( void );
+
+//
+// Portable transporter & borg teleport (comp_holdable_transporter.c)
+//
+
+typedef struct {
+	// Determines whether to use borg teleporter for given client.
+	qboolean ( *borgTeleportEnabled )( int clientNum );
+
+	// Callback when borg teleport completes.
+	void ( *postBorgTeleport )( int clientNum );
+} ModHoldableTransporter_config_t;
+
+extern ModHoldableTransporter_config_t *ModHoldableTransporter_config;
+
+//
+// Pending item handling (g_mod_pending_item.c)
+//
+
+void ModPendingItem_Shared_SchedulePendingItem( int clientNum, holdable_t item, int delay );

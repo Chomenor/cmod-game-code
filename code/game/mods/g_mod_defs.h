@@ -20,11 +20,62 @@
 // Called after G_InitGame completes.
 MOD_FUNCTION_DEF( GeneralInit, void, ( void ) )
 
+// Called at beginning of G_RunFrame.
+MOD_FUNCTION_DEF( PreRunFrame, void, ( void ) )
+
 // Called after G_RunFrame completes.
 MOD_FUNCTION_DEF( PostRunFrame, void, ( void ) )
 
 // Called when level.matchState has been updated.
 MOD_FUNCTION_DEF( MatchStateTransition, void, ( matchState_t oldState, matchState_t newState ) )
+
+// Checks for initiating match exit to intermission.
+// Called every frame and after CalculateRanks, which is called on events like
+//   player death, connect, disconnect, team change, etc.
+// Not called if warmup or intermission is already in progress, but is typically called
+//   before check to enter warmup, so events like a player quitting or being assimilated
+//   can trigger intermission even if they make CheckEnoughPlayers false.
+MOD_FUNCTION_DEF( CheckExitRules, void, ( void ) )
+
+//////////////////////////
+// client events
+// (connection, spawn, disconnect, etc.)
+//////////////////////////
+
+// Called at beginning of ClientConnect when a valid client is connecting.
+// Note that client structures have not yet been initialized at this point.
+MOD_FUNCTION_DEF( PreClientConnect, void, ( int clientNum, qboolean firstTime, qboolean isBot ) )
+
+// Called when a player is ready to respawn.
+MOD_FUNCTION_DEF( ClientRespawn, void, ( int clientNum ) )
+
+// Called when a player is spawning.
+MOD_FUNCTION_DEF( PreClientSpawn, void, ( int clientNum, clientSpawnType_t spawnType ) )
+
+// Called when a player is leaving a team either due to team change or disconnect.
+MOD_FUNCTION_DEF( PrePlayerLeaveTeam, void, ( int clientNum, team_t oldTeam ) )
+
+// Called near the end of player_die function.
+MOD_FUNCTION_DEF( PostPlayerDie, void, ( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int meansOfDeath, int *awardPoints ) )
+
+//////////////////////////
+// client accessors
+//////////////////////////
+
+// Returns player-selected team, even if active team is temporarily overriden by borg assimilation.
+MOD_FUNCTION_DEF( RealSessionTeam, team_t, ( int clientNum ) )
+
+// Returns player-selected class, even if active class is temporarily overridden by borg assimilation.
+MOD_FUNCTION_DEF( RealSessionClass, pclass_t, ( int clientNum ) )
+
+// Check if client is allowed to join game or change team/class.
+// If join was blocked, sends appropriate notification message to client.
+// targetTeam is only applicable if type is CJA_SETTEAM.
+MOD_FUNCTION_DEF( CheckJoinAllowed, qboolean, ( int clientNum, join_allowed_type_t type, team_t targetTeam ) )
+
+// Returns true if time to respawn dead player has been reached. Called with voluntary true if player
+// is pressing the respawn button, and voluntary false to check for forced respawns.
+MOD_FUNCTION_DEF( CheckRespawnTime, qboolean, ( int clientNum, qboolean voluntary ) )
 
 //////////////////////////
 // client misc
@@ -32,6 +83,19 @@ MOD_FUNCTION_DEF( MatchStateTransition, void, ( matchState_t oldState, matchStat
 
 // Checks selected player spawn point for spawn killing, and corrects it if needed.
 MOD_FUNCTION_DEF( PatchClientSpawn, void, ( int clientNum, gentity_t **spawn, vec3_t origin, vec3_t angles ) )
+
+// Checks if current player class is valid, and sets a new one if necessary.
+// Called both during spawn and initial client connect when reading session info.
+MOD_FUNCTION_DEF( UpdateSessionClass, void, ( int clientNum ) )
+
+// Configures class and other client parameters for non-spectators during ClientSpawn.
+MOD_FUNCTION_DEF( SpawnConfigureClient, void, ( int clientNum ) )
+
+// Prints info messages to client during ClientSpawn.
+MOD_FUNCTION_DEF( SpawnCenterPrintMessage, void, ( int clientNum, clientSpawnType_t spawnType ) )
+
+// Play transporter effect when player spawns.
+MOD_FUNCTION_DEF( SpawnTransporterEffect, void, ( int clientNum, clientSpawnType_t spawnType ) )
 
 //////////////////////////
 // weapon related
@@ -57,6 +121,27 @@ MOD_FUNCTION_DEF( RadiusDamage, qboolean, ( vec3_t origin, gentity_t *attacker, 
 
 // Creates a corpse entity for dead player. Returns body if created, null otherwise.
 MOD_FUNCTION_DEF( CopyToBodyQue, gentity_t *, ( int clientNum ) )
+
+//////////////////////////
+// item pickup related
+//////////////////////////
+
+// Allows replacing an item with a different item during initial map spawn.
+MOD_FUNCTION_DEF( CheckReplaceItem, gitem_t *, ( gentity_t *ent, gitem_t *item ) )
+
+// Check if item can be tossed on death/disconnect.
+MOD_FUNCTION_DEF( CanItemBeDropped, qboolean, ( gitem_t *item, int clientNum ) )
+
+// Can be used to add additional registered items, which are added to a configstring for
+// client caching purposes.
+MOD_FUNCTION_DEF( AddRegisteredItems, void, ( void ) )
+
+//////////////////////////
+// holdable item related
+//////////////////////////
+
+// Called when player triggers the holdable transporter powerup.
+MOD_FUNCTION_DEF( PortableTransporterActivate, void, ( int clientNum ) )
 
 //////////////////////////
 // session related
@@ -106,6 +191,22 @@ MOD_FUNCTION_DEF( ModClientCommand, qboolean, ( int clientNum, const char *cmd )
 // Allows mods to add values to the mod config configstring.
 MOD_FUNCTION_DEF( AddModConfigInfo, void, ( char *info ) )
 
+// Check if suicide is allowed. If not, prints notification to client.
+MOD_FUNCTION_DEF( CheckSuicideAllowed, qboolean, ( int clientNum ) )
+
 // Wrapper to trap_Trace function allowing mod overrides.
 MOD_FUNCTION_DEF( TrapTrace, void, ( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs,
 		const vec3_t end, int passEntityNum, int contentmask, int modFlags ) )
+
+//////////////////////////
+// mod-specific
+//////////////////////////
+
+// Returns whether borg adaptive shields have blocked damage.
+// Also sets PW_BORG_ADAPT to play effect on target if needed.
+MOD_FUNCTION_DEF( CheckBorgAdapt, qboolean, ( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+		vec3_t dir, vec3_t point, int damage, int dflags, int mod ) )
+
+// Checks whether specific client is the borg queen. Always returns false if not in Assimilation mode.
+// Also returns false if not a valid client number, so is valid to call for any entity.
+MOD_FUNCTION_DEF( IsBorgQueen, qboolean, ( int clientNum ) )

@@ -8,10 +8,18 @@ void G_ModCoreInit( void );
 void G_ModsInit( void );
 
 typedef enum {
+	CJA_AUTOJOIN,
+	CJA_SETTEAM,
+	CJA_SETCLASS,
+} join_allowed_type_t;
+
+typedef enum {
 	GC_NONE,
 	GC_SKIP_RUN_MISSILE,
 	GC_EVENT_TIME_OFFSET,
 	GC_SKIP_SPECTATOR_DOOR_TELEPORT,
+	GC_ASSIMILATION_MODELS,
+	GC_DISABLE_TEAM_FORCE_BALANCE,
 } generalConstant_t;
 
 typedef enum {

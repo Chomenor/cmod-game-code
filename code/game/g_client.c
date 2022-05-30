@@ -3,8 +3,6 @@
 #include "g_local.h"
 #include "g_groups.h"
 
-extern void SetPlayerClassCvar(gentity_t *ent);
-extern void SetClass( gentity_t *ent, char *s, char *teamName );
 extern void BroadcastClassChange( gclient_t *client, pclass_t oldPClass );
 
 // g_client.c -- client functions that don't happen every frame
@@ -15,10 +13,8 @@ static vec3_t	playerMins = {-15, -15, -24};
 static vec3_t	playerMaxs = {15, 15, 32};
 
 int		actionHeroClientNum = -1;
-int		borgQueenClientNum = -1;
 int		noJoinLimit = 0;
 clInitStatus_t clientInitialStatus[MAX_CLIENTS];
-team_t	borgTeam = TEAM_FREE;
 
 void G_RandomActionHero( int ignoreClientNum )
 {
@@ -96,107 +92,6 @@ void INeedAHero( void )
 	{// get and distribute relevent paramters
 		ClientUserinfoChanged( actionHeroClientNum );
 		ClientSpawn( &g_entities[actionHeroClientNum], CST_RESPAWN );
-	}//else ERROR!!!
-}
-
-void G_RandomBorgQueen( int ignoreClientNum )
-{
-	int i, borgCount = 0;
-	int	borgClients[MAX_CLIENTS];
-
-	//FIXME: make it not always pick the first borg client to connect as the Queen!!!
-	//is there a way to wait until all initial clients connect?
-	if ( borgQueenClientNum != -1 )
-	{
-		if ( borgQueenClientNum != ignoreClientNum )
-		{//already have a valid one
-			return;
-		}
-	}
-
-	if ( g_doWarmup.integer )
-	{
-		if ( level.warmupTime != 0 )
-		{
-			if ( level.warmupTime < 0 || level.time - level.startTime <= level.warmupTime )
-			{//don't choose one until warmup is done
-				return;
-			}
-		}
-	}
-	else if ( level.time - level.startTime <= 3000 )
-	{//don't choose one until 3 seconds into the game
-		return;
-	}
-
-	if ( g_pModAssimilation.integer != 0 && ( borgTeam == TEAM_BLUE || borgTeam == TEAM_RED ) )
-	{
-		for ( i = 0; i < level.maxclients; i++ )
-		{
-			if ( i == ignoreClientNum )
-			{
-				continue;
-			}
-			if ( level.clients[i].sess.sessionTeam == borgTeam )//&& level.clients[i].ps.stats[STAT_HEALTH] > 0
-			{
-				borgClients[borgCount++] = i;
-			}
-		}
-		/*
-		if ( borgCount < 1 )
-		{
-			if ( ignoreClientNum > 0 && ignoreClientNum < level.maxclients )
-			{
-				if ( level.clients[ignoreClientNum].sess.sessionTeam == borgTeam )// && level.clients[ignoreClientNum].ps.stats[STAT_HEALTH] > 0
-				{
-					borgClients[borgCount++] = ignoreClientNum;
-				}
-			}
-		}
-		*/
-		if ( borgCount > 0 )
-		{
-			/*
-			int oldQueenClientNum = -1;
-
-			if ( borgCount > 1 )
-			{//more than 1 borg, don't let it pick the same queen twice in a row
-				oldQueenClientNum = borgQueenClientNum;
-			}
-			while ( borgQueenClientNum == oldQueenClientNum )
-			*/
-			{
-				borgQueenClientNum = borgClients[irandom(0, borgCount-1)];
-			}
-		}
-		else
-		{
-			borgQueenClientNum = -1;
-		}
-	}
-}
-
-void G_CheckReplaceQueen( int clientNum )
-{
-	if ( clientNum == borgQueenClientNum )
-	{
-		G_RandomBorgQueen( clientNum );
-		if ( borgQueenClientNum >= 0 && borgQueenClientNum < level.maxclients )
-		{
-			// get and distribute relevent paramters
-			ClientUserinfoChanged( borgQueenClientNum );
-			ClientSpawn( &g_entities[borgQueenClientNum], CST_RESPAWN );
-		}//else ERROR!!!
-	}
-}
-
-void G_PickBorgQueen( void )
-{
-	G_RandomBorgQueen( borgQueenClientNum );
-	if ( borgQueenClientNum >= 0 && borgQueenClientNum < level.maxclients )
-	{// get and distribute relevent paramters
-		ClientUserinfoChanged( borgQueenClientNum );
-		ClientSpawn( &g_entities[borgQueenClientNum], CST_RESPAWN );
 	}//else ERROR!!!
 }
 
@@ -689,20 +584,37 @@ void EliminationSpectate( gentity_t *ent )
 	//FIXME: specator mode when dead kind of freaky if trying to follow
 	*/
 }
+
 /*
 ================
-respawn
+(ModFN) RealSessionTeam
+
+Returns player-selected team, even if active team is overriden by borg assimilation.
 ================
 */
-extern char *ClassNameForValue( pclass_t pClass );
-void respawn( gentity_t *ent ) {
-	qboolean	borg = qfalse;
-	gentity_t	*tent;
+team_t ModFNDefault_RealSessionTeam( int clientNum ) {
+	return level.clients[clientNum].sess.sessionTeam;
+}
 
-	if ( ent->s.number == borgQueenClientNum )
-	{//can't respawn if queen
-		return;
-	}
+/*
+================
+(ModFN) RealSessionClass
+
+Returns player-selected class, even if active class is overridden by borg assimilation.
+================
+*/
+pclass_t ModFNDefault_RealSessionClass( int clientNum ) {
+	return level.clients[clientNum].sess.sessionClass;
+}
+
+/*
+================
+(ModFN) ClientRespawn
+================
+*/
+LOGFUNCTION_EVOID( ModFNDefault_ClientRespawn, ( int clientNum ), ( clientNum ), clientNum, "G_MODFN_CLIENTRESPAWN G_CLIENTSTATE" ) {
+	gentity_t *ent = &g_entities[clientNum];
+
 	if ( g_pModElimination.integer != 0 )
 	{//no players respawn when in elimination
 		if ( !(level.intermissiontime && level.intermissiontime != -1) )
@@ -712,48 +624,8 @@ void respawn( gentity_t *ent ) {
 		return;
 	}
 
-	if ( g_pModAssimilation.integer != 0 && ent->client )
-	{//Go to Borg team if killed by assimilation
-		if ( ent->client->sess.sessionClass != PC_BORG )
-		{
-			if ( ent->client->mod == MOD_ASSIMILATE )
-			{
-				//first, save their current state
-				clientInitialStatus[ent->s.number].initialized = qfalse;
-				G_StoreClientInitialStatus( ent );
-				if ( ent->client->sess.sessionTeam == TEAM_RED )
-				{
-					SetClass( ent, "borg", "blue" );
-				}
-				else if ( ent->client->sess.sessionTeam == TEAM_BLUE )
-				{
-					SetClass( ent, "borg", "red" );
-				}
-				ent->s.eFlags |= EF_ASSIMILATED;
-				ent->client->ps.eFlags |= EF_ASSIMILATED;
-				return;
-			}
-		}
-		else
-		{
-			// flag this so we can play a different spawn in effect for a borg
-			borg = qtrue;
-		}
-	}
-	else
-	{//assimilated players don't leave corpses
-		modfn.CopyToBodyQue (ent - g_entities);
-	}
-
+	modfn.CopyToBodyQue( clientNum );
 	ClientSpawn(ent, CST_RESPAWN);
-
-	// add a teleportation effect
-	if ( borg )
-		tent = G_TempEntity( ent->client->ps.origin, EV_BORG_TELEPORT );
-	else
-		tent = G_TempEntity( ent->client->ps.origin, EV_PLAYER_TELEPORT_IN );
-
-	tent->s.clientNum = ent->s.clientNum;
 }
 
 /*
@@ -1118,22 +990,6 @@ void ClientMaxHealthForClass ( gclient_t *client, pclass_t pclass )
 	}
 }
 
-void SetCSTeam( team_t team, char *teamname )
-{
-	if ( teamname == NULL || teamname[0] == 0 )
-	{
-		return;
-	}
-	switch ( team )
-	{
-	case TEAM_BLUE:
-		trap_SetConfigstring( CS_BLUE_GROUP, teamname );
-		break;
-	case TEAM_RED:
-		trap_SetConfigstring( CS_RED_GROUP, teamname );
-		break;
-	}
-}
 /*
 ===========
 ClientUserinfoChanged
@@ -1200,92 +1056,6 @@ void ClientUserinfoChanged( int clientNum ) {
 		}
 	}
 
-	//In assimilation, make sure everyone is the right class/team for their chosen class/team
-	//FIXME: don't want to make these g_team_group_???'s stay forever
-	if ( g_pModAssimilation.integer != 0 )
-	{//become a Borg Queen if needed
-		if ( client->sess.sessionClass == PC_BORG )
-		{//trying to join as a Borg
-			if ( borgTeam != TEAM_BLUE && borgTeam != TEAM_RED )
-			{//borg team not chosen yet, so choose it
-				borgTeam = client->sess.sessionTeam;
-				if ( borgTeam != TEAM_BLUE && borgTeam != TEAM_RED )
-				{
-					if ( irandom(0, 1) )
-					{
-						borgTeam = TEAM_RED;
-					}
-					else
-					{
-						borgTeam = TEAM_BLUE;
-					}
-					SetCSTeam( borgTeam, "Borg" );
-				}
-			}
-
-			if ( client->sess.sessionTeam != borgTeam )
-			{//can't join this team if you're a borg, force them to be non-borg
-				if ( g_pModSpecialties.integer != 0 )
-				{
-					SetClass( ent, (char *)ClassNameForValue( irandom( PC_INFILTRATOR, PC_TECH ) ), NULL );
-				}
-				else
-				{
-					SetClass( ent, "noclass", NULL );
-				}
-				return;
-			}
-		}
-		else if ( borgTeam != TEAM_BLUE && borgTeam != TEAM_RED )
-		{//borg team not chosen yet, choose one now
-			if ( Q_strncmp( "Borg", g_team_group_red.string, 4 ) != 0 )
-			{//the red team isn't borg
-				if ( Q_strncmp( "Borg", g_team_group_blue.string, 4 ) != 0 )
-				{//the blue team isn't borg
-					if ( TeamCount( clientNum, TEAM_BLUE ) > 0 )
-					{//blue has people on it, so red is borg
-						borgTeam = TEAM_RED;
-					}
-					else if ( TeamCount( clientNum, TEAM_RED ) > 0 )
-					{//red has people on it, so blue is borg
-						borgTeam = TEAM_BLUE;
-					}
-					else
-					{//no-one on a team yet, so borgTeam is the other team
-						switch( client->sess.sessionTeam )
-						{
-						case TEAM_BLUE:
-							borgTeam = TEAM_RED;
-							break;
-						case TEAM_RED:
-							borgTeam = TEAM_BLUE;
-							break;
-						default:
-							break;
-						}
-					}
-					SetCSTeam( borgTeam, "Borg" );
-				}
-				else if ( borgTeam != TEAM_BLUE && borgTeam != TEAM_RED )
-				{
-					borgTeam = TEAM_BLUE;
-					SetCSTeam( borgTeam, "Borg" );
-				}
-			}
-			else if ( borgTeam != TEAM_BLUE && borgTeam != TEAM_RED )
-			{
-				borgTeam = TEAM_RED;
-				SetCSTeam( borgTeam, "Borg" );
-			}
-		}
-		else if ( client->sess.sessionTeam == borgTeam )
-		{//borg team is chosen and you are not a borg and you are trying to join borg team
-			SetClass( ent, "borg", NULL );
-			return;
-		}
-
-		//G_RandomBorgQueen( -1 );
-	}
 	// set max health
 	client->pers.maxHealth = atoi( Info_ValueForKey( userinfo, "handicap" ) );
 	if ( client->pers.maxHealth < 1 || client->pers.maxHealth > 100 ) {
@@ -1337,7 +1107,7 @@ void ClientUserinfoChanged( int clientNum ) {
 		break;
 	case PC_BORG:
 		//randomly pick one from Borg group
-		if ( clientNum == borgQueenClientNum )
+		if ( modfn.IsBorgQueen( clientNum ) )
 		{
 			Q_strncpyz( model, "borgqueen", sizeof( model ) );
 		}
@@ -1421,7 +1191,7 @@ void ClientUserinfoChanged( int clientNum ) {
 			// decide if we are going to have to reset a skin cos it's not applicable to a race selected
 			if (g_gametype.integer < GT_TEAM || !Q_stricmp("", g_team_group_red.string))
 			{
-				if ( g_pModAssimilation.integer != 0 && legalSkin(G_searchGroupList( model ), "borg" ) == qtrue )
+				if ( modfn.AdjustGeneralConstant( GC_ASSIMILATION_MODELS, 0 ) && legalSkin(G_searchGroupList( model ), "borg" ) == qtrue )
 				{//if you're trying to be a Borg and not a borg playerclass, then pick a different model
 					getNewSkin("HazardTeam", model, "red", client, clientNum);
 					ForceClientSkin(model, "red");
@@ -1438,7 +1208,7 @@ void ClientUserinfoChanged( int clientNum ) {
 			// at this point, we are playing CTF and there IS a race specified for this game
 			else
 			{
-				if ( g_pModAssimilation.integer != 0 && Q_stricmp( "borg", g_team_group_blue.string ) == 0 )
+				if ( modfn.AdjustGeneralConstant( GC_ASSIMILATION_MODELS, 0 ) && Q_stricmp( "borg", g_team_group_blue.string ) == 0 )
 				{//team model is set to borg, but that is now allowed, pick a different "race"
 					reset = getNewSkin("HazardTeam", model, "blue", client, clientNum);
 				}
@@ -1477,7 +1247,7 @@ void ClientUserinfoChanged( int clientNum ) {
 			// decide if we are going to have to reset a skin cos it's not applicable to a race selected
 			if (g_gametype.integer < GT_TEAM || !Q_stricmp("", g_team_group_blue.string))
 			{
-				if ( g_pModAssimilation.integer != 0 && legalSkin(G_searchGroupList( model ), "borg" ) == qtrue )
+				if ( modfn.AdjustGeneralConstant( GC_ASSIMILATION_MODELS, 0 ) && legalSkin(G_searchGroupList( model ), "borg" ) == qtrue )
 				{//if you're trying to be a Borg and not a borg playerclass, then pick a different model
 					getNewSkin("HazardTeam", model, "blue", client, clientNum);
 					ForceClientSkin(model, "blue");
@@ -1494,7 +1264,7 @@ void ClientUserinfoChanged( int clientNum ) {
 			// at this point, we are playing CTF and there IS a race specified for this game
 			else
 			{
-				if ( g_pModAssimilation.integer != 0 && Q_stricmp( "borg", g_team_group_blue.string ) == 0 )
+				if ( modfn.AdjustGeneralConstant( GC_ASSIMILATION_MODELS, 0 ) && Q_stricmp( "borg", g_team_group_blue.string ) == 0 )
 				{//team model is set to borg, but that is now allowed, pick a different "race"
 					reset = getNewSkin("HazardTeam", model, "blue", client, clientNum);
 				}
@@ -1620,6 +1390,8 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 		}
 	}
 
+	modfn.PreClientConnect( clientNum, firstTime, isBot );
+
 	// they can connect
 	ent->client = level.clients + clientNum;
 	client = ent->client;
@@ -1685,7 +1457,6 @@ and on transition between teams, but doesn't happen on respawns
 void ClientBegin( int clientNum ) {
 	gentity_t	*ent = &g_entities[clientNum];
 	gclient_t	*client = &level.clients[clientNum];
-	gentity_t	*tent;
 	int			flags;
 	clientSpawnType_t spawnType;
 
@@ -1730,13 +1501,7 @@ void ClientBegin( int clientNum ) {
 	ClientSpawn( ent, spawnType );
 
 	if ( client->sess.sessionTeam != TEAM_SPECTATOR && g_holoIntro.integer==0 )
-	{	// Don't use transporter FX for spectators or those watching the holodoors.
-		// send event
-		if ( spawnType != CST_MAPRESTART ) {
-			tent = G_TempEntity( ent->client->ps.origin, EV_PLAYER_TELEPORT_IN );
-			tent->s.clientNum = clientNum;
-		}
-
+	{
 		if ( g_gametype.integer != GT_TOURNAMENT ) {
 			trap_SendServerCommand( -1, va("print \"%s" S_COLOR_WHITE " entered the game\n\"", client->pers.netname) );
 		}
@@ -1833,17 +1598,6 @@ void ClientWeaponsForClass ( gclient_t *client, pclass_t pclass )
 		client->ps.stats[STAT_WEAPONS] |= ( 1 << WP_DREADNOUGHT );
 		client->ps.ammo[WP_DREADNOUGHT] = Max_Ammo[WP_DREADNOUGHT];
 		break;
-	case PC_BORG:
-		// assimilator
-		client->ps.stats[STAT_WEAPONS] = ( 1 << WP_BORG_ASSIMILATOR );
-		client->ps.ammo[WP_BORG_ASSIMILATOR] = Max_Ammo[WP_BORG_ASSIMILATOR];
-		if ( client - level.clients != borgQueenClientNum )
-		{
-			// projectile/shock weapon
-			client->ps.stats[STAT_WEAPONS] |= ( 1 << WP_BORG_WEAPON );
-			client->ps.ammo[WP_BORG_WEAPON] = Max_Ammo[WP_BORG_WEAPON];
-		}
-		break;
 	case PC_NOCLASS:
 	default:
 		client->ps.stats[STAT_WEAPONS] = ( 1 << WP_PHASER );
@@ -1891,9 +1645,6 @@ void ClientArmorForClass ( gclient_t *client, pclass_t pclass )
 	case PC_ACTIONHERO:
 		client->ps.stats[STAT_ARMOR] = 100;
 		break;
-	case PC_BORG:
-		client->ps.stats[STAT_ARMOR] = 100;
-		break;
 	case PC_NOCLASS:
 	default:
 		break;
@@ -1931,9 +1682,6 @@ void ClientHoldablesForClass ( gclient_t *client, pclass_t pclass )
 	case PC_VIP:
 		break;
 	case PC_ACTIONHERO:
-		break;
-	case PC_BORG:
-		client->ps.stats[STAT_HOLDABLE_ITEM] = BG_FindItemForHoldable( HI_TRANSPORTER ) - bg_itemlist;//teleport spots should be on other side of map
 		break;
 	case PC_NOCLASS:
 	default:
@@ -1981,14 +1729,6 @@ void ClientPowerupsForClass ( gentity_t *ent, pclass_t pclass )
 		ent->client->ps.powerups[regen->giTag] = level.time - ( level.time % 1000 );
 		ent->client->ps.powerups[regen->giTag] += 1800 * 1000;
 		break;
-	case PC_BORG:
-		//FIXME: adaptive shields
-		if ( ent->s.number == borgQueenClientNum )
-		{//queen has full regeneration
-			ent->client->ps.powerups[regen->giTag] = level.time - ( level.time % 1000 );
-			ent->client->ps.powerups[regen->giTag] += 1800 * 1000;
-		}
-		break;
 	case PC_NOCLASS:
 	default:
 		break;
@@ -1997,8 +1737,6 @@ void ClientPowerupsForClass ( gentity_t *ent, pclass_t pclass )
 
 void G_StoreClientInitialStatus( gentity_t *ent )
 {
-	char	userinfo[MAX_INFO_STRING];
-
 	if ( clientInitialStatus[ent->s.number].initialized )
 	{//already set
 		return;
@@ -2009,49 +1747,197 @@ void G_StoreClientInitialStatus( gentity_t *ent )
 		return;
 	}
 
-	trap_GetUserinfo( ent->s.number, userinfo, sizeof( userinfo ) );
-	Q_strncpyz( clientInitialStatus[ent->s.number].model, Info_ValueForKey (userinfo, "model"), sizeof( clientInitialStatus[ent->s.number].model ) );
-	clientInitialStatus[ent->s.number].pClass = ent->client->sess.sessionClass;
-	clientInitialStatus[ent->s.number].team = ent->client->sess.sessionTeam;
 	clientInitialStatus[ent->s.number].initialized = qtrue;
 	ent->client->classChangeDebounceTime = 0;
 }
 
-void G_RestoreClientInitialStatus( gentity_t *ent )
-{
-	char	userinfo[MAX_INFO_STRING];
+/*
+===========
+(ModFN) UpdateSessionClass
 
-	if ( !clientInitialStatus[ent->s.number].initialized )
-	{//not set
-		return;
-	}
+Checks if current player class is valid, and picks a new one if necessary.
+============
+*/
+LOGFUNCTION_VOID( ModFNDefault_UpdateSessionClass, ( int clientNum ),
+		( clientNum ), "G_MODFN_UPDATESESSIONCLASS" ) {
+	gclient_t *client = &level.clients[clientNum];
 
-	trap_GetUserinfo( ent->s.number, userinfo, sizeof( userinfo ) );
-
-	if ( clientInitialStatus[ent->s.number].team != ent->client->sess.sessionTeam &&
-		clientInitialStatus[ent->s.number].pClass != ent->client->sess.sessionClass )
+	if ( g_pModSpecialties.integer != 0 )
 	{
-		SetClass( ent, ClassNameForValue( clientInitialStatus[ent->s.number].pClass ), (char *)TeamName( clientInitialStatus[ent->s.number].team ) );
+		if ( client->sess.sessionClass == PC_NOCLASS )
+		{
+			client->sess.sessionClass = irandom( PC_INFILTRATOR, PC_TECH );
+			SetPlayerClassCvar(&g_entities[clientNum]);
+		}
+	}
+	else if ( g_pModActionHero.integer != 0 )
+	{
+		if ( clientNum == actionHeroClientNum )
+		{
+			client->sess.sessionClass = PC_ACTIONHERO;
+			BroadcastClassChange( client, PC_NOCLASS );
+		}
+		else if ( client->sess.sessionClass == PC_ACTIONHERO )
+		{//make sure to take action hero away from previous one
+			client->sess.sessionClass = PC_NOCLASS;
+		}
 	}
 	else
 	{
-		if ( clientInitialStatus[ent->s.number].pClass != ent->client->sess.sessionClass )
-		{
-			SetClass( ent, ClassNameForValue( clientInitialStatus[ent->s.number].pClass ), NULL );
-		}
-		if ( clientInitialStatus[ent->s.number].team != ent->client->sess.sessionTeam )
-		{
-			SetTeam( ent, (char *)TeamName( clientInitialStatus[ent->s.number].team ) );
-		}
-	}
-	if ( Q_stricmp( clientInitialStatus[ent->s.number].model, Info_ValueForKey (userinfo, "model") ) != 0 )
-	{//restore the model
-		Info_SetValueForKey( userinfo, "model", clientInitialStatus[ent->s.number].model );
-		trap_SetUserinfo( ent->s.number, userinfo );
-		//FIXME: send this to everyone or let it automatically do it when the map restarts?
-		//trap_SetConfigstring( CS_PLAYERS+ent->s.number, s );
+		client->sess.sessionClass = PC_NOCLASS;
 	}
 }
+
+/*
+===========
+(ModFN) SpawnConfigureClient
+
+Configures class and other client parameters during ClientSpawn.
+Not called for spectators.
+============
+*/
+LOGFUNCTION_VOID( ModFNDefault_SpawnConfigureClient, ( int clientNum ),
+		( clientNum ), "G_MODFN_SPAWNCONFIGURECLIENT" ) {
+	gentity_t *ent = &g_entities[clientNum];
+	gclient_t *client = &level.clients[clientNum];
+	pclass_t pClass = client->sess.sessionClass;
+
+	// health will count down towards max_health
+	ent->health = client->ps.stats[STAT_HEALTH] = client->ps.stats[STAT_MAX_HEALTH] * 1.25;
+
+	// start with a small amount of armor as well
+	client->ps.stats[STAT_ARMOR] = client->ps.stats[STAT_MAX_HEALTH] * 0.25;
+
+	if ( g_pModDisintegration.integer != 0 )
+	{//this is instagib
+		client->ps.stats[STAT_WEAPONS] |= ( 1 << WP_COMPRESSION_RIFLE );
+		client->ps.ammo[WP_COMPRESSION_RIFLE] = Max_Ammo[WP_COMPRESSION_RIFLE];
+	}
+	else
+	{
+		ClientMaxHealthForClass( client, pClass );
+		if ( pClass != PC_NOCLASS )
+		{//no health boost on spawn for playerclasses
+			ent->health = client->ps.stats[STAT_HEALTH] = client->ps.stats[STAT_MAX_HEALTH] = client->pers.maxHealth;
+		}
+		ClientWeaponsForClass( client, pClass );
+		ClientArmorForClass( client, pClass );
+		ClientHoldablesForClass( client, pClass );
+		ClientPowerupsForClass( ent, pClass );
+	}
+}
+
+/*
+===========
+(ModFN) SpawnCenterPrintMessage
+
+Prints info messages to clients during ClientSpawn.
+============
+*/
+LOGFUNCTION_VOID( ModFNDefault_SpawnCenterPrintMessage, ( int clientNum, clientSpawnType_t spawnType ),
+		( clientNum, spawnType ), "G_MODFN_SPAWNCENTERPRINTMESSAGE" ) {
+	gclient_t *client = &level.clients[clientNum];
+
+	if ( client->sess.sessionTeam == TEAM_SPECTATOR )
+	{//spectators just get the title of the game
+		if ( g_pModElimination.integer )
+		{
+			trap_SendServerCommand( clientNum, "cp \"Elimination\"" );
+		}
+		else
+		{
+			switch ( g_gametype.integer )
+			{
+			case GT_FFA:				// free for all
+				trap_SendServerCommand( clientNum, "cp \"Free For All\"" );
+				break;
+			case GT_TOURNAMENT:		// one on one tournament
+				trap_SendServerCommand( clientNum, "cp \"Tournament\"" );
+				break;
+			case GT_SINGLE_PLAYER:	// single player tournament
+				trap_SendServerCommand( clientNum, "cp \"SoloMatch\"" );
+				break;
+			case GT_TEAM:			// team deathmatch
+				trap_SendServerCommand( clientNum, "cp \"Team Holomatch\"" );
+				break;
+			case GT_CTF:				// capture the flag
+				trap_SendServerCommand( clientNum, "cp \"Capture the Flag\"" );
+				break;
+			}
+		}
+	}
+	else
+	{
+		if ( g_pModElimination.integer )
+		{
+			if ( !clientInitialStatus[clientNum].initialized )
+			{//first time coming in
+				trap_SendServerCommand( clientNum, "cp \"Elimination\n\"" );
+			}
+		}
+		else
+		{
+			if ( !clientInitialStatus[clientNum].initialized )
+			{//first time coming in
+				switch ( g_gametype.integer )
+				{
+				case GT_FFA:				// free for all
+					trap_SendServerCommand( clientNum, "cp \"Free For All\"" );
+					break;
+				case GT_TOURNAMENT:		// one on one tournament
+					trap_SendServerCommand( clientNum, "cp \"Tournament\"" );
+					break;
+				case GT_SINGLE_PLAYER:	// single player tournament
+					trap_SendServerCommand( clientNum, "cp \"SoloMatch\"" );
+					break;
+				case GT_TEAM:			// team deathmatch
+					trap_SendServerCommand( clientNum, "cp \"Team Holomatch\"" );
+					break;
+				case GT_CTF:				// capture the flag
+					trap_SendServerCommand( clientNum, "cp \"Capture the Flag\"" );
+					break;
+				}
+			}
+			if ( clientNum == actionHeroClientNum )
+			{
+				trap_SendServerCommand( clientNum, "cp \"You are the Action Hero!\"" );
+			}
+			else if ( actionHeroClientNum > -1 )
+			{//FIXME: this will make it so that those who spawn before the action hero won't be told who he is
+				if ( !clientInitialStatus[clientNum].initialized )
+				{//first time coming in
+					gentity_t *aH = &g_entities[actionHeroClientNum];
+					if ( aH != NULL && aH->client != NULL && aH->client->pers.netname[0] != 0 )
+					{
+						trap_SendServerCommand( clientNum, va("cp \"Action Hero is %s!\"", aH->client->pers.netname) );
+					}
+					else
+					{
+						trap_SendServerCommand( clientNum, "cp \"Action Hero!\"" );
+					}
+				}
+			}
+		}
+	}
+}
+
+/*
+===========
+(ModFN) SpawnTransporterEffect
+
+Play transporter effect when player spawns.
+============
+*/
+LOGFUNCTION_VOID( ModFNDefault_SpawnTransporterEffect, ( int clientNum, clientSpawnType_t spawnType ),
+		( clientNum, spawnType ), "G_MODFN_SPAWNTRANSPORTEREFFECT" ) {
+	gclient_t *client = &level.clients[clientNum];
+
+	if ( spawnType != CST_MAPRESTART ) {
+		gentity_t *tent = G_TempEntity( client->ps.origin, EV_PLAYER_TELEPORT_IN );
+		tent->s.clientNum = clientNum;
+	}
+}
+
 /*
 ===========
 ClientSpawn
@@ -2074,19 +1960,20 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	int		savedPing;
 	pclass_t	pClass = PC_NOCLASS;
 	int		cCDT = 0;
+	pclass_t oClass = ent->client->sess.sessionClass;
 
 	index = ent - g_entities;
 	client = ent->client;
 
 	trap_UnlinkEntity( ent );
 
+	modfn.PreClientSpawn( index, spawnType );
+
 	/*
 	if ( actionHeroClientNum == -1 )
 	{
 		G_RandomActionHero( -1 );
 	}
-
-	G_RandomBorgQueen( -1 );
 	*/
 
 	// find a spawn point
@@ -2166,67 +2053,6 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	VectorCopy (playerMins, ent->r.mins);
 	VectorCopy (playerMaxs, ent->r.maxs);
 
-	client->ps.clientNum = index;
-
-	// health will count down towards max_health
-	ent->health = client->ps.stats[STAT_HEALTH] = client->ps.stats[STAT_MAX_HEALTH] * 1.25;
-
-	// Start with a small amount of armor as well.
-	client->ps.stats[STAT_ARMOR] = client->ps.stats[STAT_MAX_HEALTH] * 0.25;
-
-	if ( g_pModDisintegration.integer != 0 )
-	{//this is instagib
-		client->ps.stats[STAT_WEAPONS] |= ( 1 << WP_COMPRESSION_RIFLE );
-		client->ps.ammo[WP_COMPRESSION_RIFLE] = Max_Ammo[WP_COMPRESSION_RIFLE];
-	}
-	else
-	{
-		pclass_t oClass = client->sess.sessionClass;
-		if ( g_pModSpecialties.integer != 0 )
-		{
-			if ( client->sess.sessionClass == PC_NOCLASS )
-			{
-				client->sess.sessionClass = irandom( PC_INFILTRATOR, PC_TECH );
-				SetPlayerClassCvar(ent);
-			}
-		}
-		else if ( g_pModActionHero.integer != 0 )
-		{
-			if ( ent->s.number == actionHeroClientNum )
-			{
-				client->sess.sessionClass = PC_ACTIONHERO;
-				BroadcastClassChange( client, PC_NOCLASS );
-			}
-			else if ( client->sess.sessionClass == PC_ACTIONHERO )
-			{//make sure to take action hero away from previous one
-				client->sess.sessionClass = PC_NOCLASS;
-			}
-		}
-		else if ( client->sess.sessionClass != PC_BORG )
-		{
-
-			client->sess.sessionClass = PC_NOCLASS;
-		}
-
-		if ( oClass != client->sess.sessionClass )
-		{//need to send the class change
-			ClientUserinfoChanged( index );
-		}
-
-		client->ps.persistant[PERS_CLASS] = client->sess.sessionClass;
-		pClass = client->sess.sessionClass;
-
-		ClientMaxHealthForClass( client, pClass );
-		if ( pClass != PC_NOCLASS )
-		{//no health boost on spawn for playerclasses
-			ent->health = client->ps.stats[STAT_HEALTH] = client->ps.stats[STAT_MAX_HEALTH] = client->pers.maxHealth;
-		}
-		ClientWeaponsForClass( client, pClass );
-		ClientArmorForClass( client, pClass );
-		ClientHoldablesForClass( client, pClass );
-		ClientPowerupsForClass( ent, pClass );
-	}
-
 	G_SetOrigin( ent, spawn_origin );
 	VectorCopy( spawn_origin, client->ps.origin );
 
@@ -2236,9 +2062,22 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	trap_GetUsercmd( client - level.clients, &ent->client->pers.cmd );
 	SetClientViewAngle( ent, spawn_angles );
 
+	client->ps.clientNum = index;
+
+	// Determine player class
+	modfn.UpdateSessionClass( index );
+	if ( oClass != client->sess.sessionClass )
+	{//need to send the class change
+		ClientUserinfoChanged( index );
+	}
+	client->ps.persistant[PERS_CLASS] = client->sess.sessionClass;
+
 	if ( ent->client->sess.sessionTeam == TEAM_SPECTATOR || (ent->client->ps.eFlags&EF_ELIMINATED) ) {
 
 	} else {
+		// Perform class-specific configuration
+		modfn.SpawnConfigureClient( index );
+
 		G_KillBox( ent );
 		trap_LinkEntity (ent);
 
@@ -2258,7 +2097,6 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 		ent->client->ps.powerups[PW_GHOST] = level.time + (g_ghostRespawn.integer * 1000);
 	}
 
-	client->respawnTime = level.time;
 	client->inactivityTime = level.time + g_inactivity.integer * 1000;
 
 	// set default animations
@@ -2301,78 +2139,7 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	// clear entity state values
 	BG_PlayerStateToEntityState( &client->ps, &ent->s, qtrue );
 
-	//start-up messages
-	//FIXME: externalize all this text!
-	//FIXME: make the gametype titles be graphics!
-	//FIXME: make it do this on a map_restart also
-	if ( ent->client->sess.sessionTeam == TEAM_SPECTATOR )
-	{//spectators just get the title of the game
-		if ( g_pModAssimilation.integer )
-		{
-			trap_SendServerCommand( ent-g_entities, "cp \"Assimilation\"" );
-		}
-		else if ( g_pModElimination.integer )
-		{
-			trap_SendServerCommand( ent-g_entities, "cp \"Elimination\"" );
-		}
-		else
-		{
-			switch ( g_gametype.integer )
-			{
-			case GT_FFA:				// free for all
-				trap_SendServerCommand( ent-g_entities, "cp \"Free For All\"" );
-				break;
-			case GT_TOURNAMENT:		// one on one tournament
-				trap_SendServerCommand( ent-g_entities, "cp \"Tournament\"" );
-				break;
-			case GT_SINGLE_PLAYER:	// single player tournament
-				trap_SendServerCommand( ent-g_entities, "cp \"SoloMatch\"" );
-				break;
-			case GT_TEAM:			// team deathmatch
-				trap_SendServerCommand( ent-g_entities, "cp \"Team Holomatch\"" );
-				break;
-			case GT_CTF:				// capture the flag
-				trap_SendServerCommand( ent-g_entities, "cp \"Capture the Flag\"" );
-				break;
-			}
-		}
-	}
-	else if ( g_pModAssimilation.integer )
-	{
-		if ( TeamCount( -1, TEAM_BLUE ) > 0 && TeamCount( -1, TEAM_RED ) > 0 )//&& borgQueenClientNum != -1 )
-		{//no join limit only begins once there is at least 1 person on each team
-			noJoinLimit = g_noJoinTimeout.integer*1000;
-		}
-		if ( !clientInitialStatus[ent->s.number].initialized )
-		{//first time coming in
-			if ( ent->client->sess.sessionClass == PC_BORG )
-			{
-				trap_SendServerCommand( ent-g_entities, "cp \"Assimilation:\nAssimilate all enemies!\n\"" );
-			}
-			else if ( ent->s.number != borgQueenClientNum )
-			{
-				trap_SendServerCommand( ent-g_entities, "cp \"Assimilation:\nKill the Borg Queen!\n\"" );
-			}
-		}
-		else
-		{
-			//make sure I'm marked as assimilated if I was
-			if ( clientInitialStatus[ent->s.number].pClass != PC_BORG && client->sess.sessionClass == PC_BORG )
-			{
-				//now mark them assimilated
-				ent->s.eFlags |= EF_ASSIMILATED;
-				ent->client->ps.eFlags |= EF_ASSIMILATED;
-			}
-		}
-		//send me a message if I'm the queen
-		if ( ent->s.number == borgQueenClientNum )
-		{
-			trap_SendServerCommand( ent->s.number, "cp \"Assimilation:\nYou Are the Queen!\n\"" );
-			//FIXME: precache
-			//G_Sound( ent, G_SoundIndex( "sound/voice/computer/misc/borgqueen.wav" ) );
-		}
-	}
-	else
+	if ( ent->client->sess.sessionTeam != TEAM_SPECTATOR )
 	{
 		if ( g_pModElimination.integer )
 		{
@@ -2387,60 +2154,25 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 			{
 				noJoinLimit = g_noJoinTimeout.integer*1000;
 			}
-			if ( !clientInitialStatus[ent->s.number].initialized )
-			{//first time coming in
-				trap_SendServerCommand( ent-g_entities, "cp \"Elimination\n\"" );
-			}
-		}
-		else
-		{
-			if ( !clientInitialStatus[ent->s.number].initialized )
-			{//first time coming in
-				switch ( g_gametype.integer )
-				{
-				case GT_FFA:				// free for all
-					trap_SendServerCommand( ent-g_entities, "cp \"Free For All\"" );
-					break;
-				case GT_TOURNAMENT:		// one on one tournament
-					trap_SendServerCommand( ent-g_entities, "cp \"Tournament\"" );
-					break;
-				case GT_SINGLE_PLAYER:	// single player tournament
-					trap_SendServerCommand( ent-g_entities, "cp \"SoloMatch\"" );
-					break;
-				case GT_TEAM:			// team deathmatch
-					trap_SendServerCommand( ent-g_entities, "cp \"Team Holomatch\"" );
-					break;
-				case GT_CTF:				// capture the flag
-					trap_SendServerCommand( ent-g_entities, "cp \"Capture the Flag\"" );
-					break;
-				}
-				if ( level.numObjectives > 0 )
-				{//Turn on their objectives
-					//trap_SendServerCommand( ent-g_entities, "+analysis" );
-					//FIXME: turn this off after warm-up period
-				}
-			}
-			if ( ent->s.number == actionHeroClientNum )
-			{
-				trap_SendServerCommand( ent->s.number, "cp \"You are the Action Hero!\"" );
-			}
-			else if ( actionHeroClientNum > -1 )
-			{//FIXME: this will make it so that those who spawn before the action hero won't be told who he is
-				if ( !clientInitialStatus[ent->s.number].initialized )
-				{//first time coming in
-					gentity_t *aH = &g_entities[actionHeroClientNum];
-					if ( aH != NULL && aH->client != NULL && aH->client->pers.netname[0] != 0 )
-					{
-						trap_SendServerCommand( ent->s.number, va("cp \"Action Hero is %s!\"", aH->client->pers.netname) );
-					}
-					else
-					{
-						trap_SendServerCommand( ent->s.number, "cp \"Action Hero!\"" );
-					}
-				}
-			}
 		}
 	}
+
+	// send current class to client for UI team/class menu
+	if ( spawnType == CST_FIRSTTIME || spawnType == CST_MAPCHANGE || spawnType == CST_MAPRESTART
+			|| client->pers.uiClass != client->sess.sessionClass ) {
+		SetPlayerClassCvar( ent );
+		client->pers.uiClass = client->sess.sessionClass;
+	}
+
+	// print spawn messages
+	modfn.SpawnCenterPrintMessage( index, spawnType );
+
+	// play transporter effect, but not for spectators or holodeck intro viewers
+	if ( !( ent->client->sess.sessionTeam == TEAM_SPECTATOR || (ent->client->ps.eFlags&EF_ELIMINATED) )
+			&& !( client->ps.introTime > level.time ) ) {
+		modfn.SpawnTransporterEffect( index, spawnType );
+	}
+
 	//store intial client values
 	//FIXME: when purposely change teams, this gets confused?
 	G_StoreClientInitialStatus( ent );
@@ -2467,6 +2199,10 @@ void ClientDisconnect( int clientNum ) {
 	ent = g_entities + clientNum;
 	if ( !ent->client ) {
 		return;
+	}
+
+	if ( ent->client->sess.sessionTeam != TEAM_SPECTATOR ) {
+		modfn.PrePlayerLeaveTeam( clientNum, ent->client->sess.sessionTeam );
 	}
 
 	// stop any following clients
@@ -2527,11 +2263,7 @@ void ClientDisconnect( int clientNum ) {
 	//also remove any initial data
 	clientInitialStatus[clientNum].initialized = qfalse;
 
-	//If the queen or action hero leaves, have to pick a new one...
-	if ( g_pModAssimilation.integer != 0 )
-	{
-		G_CheckReplaceQueen( clientNum );
-	}
+	//If the action hero leaves, have to pick a new one...
 	if ( g_pModActionHero.integer != 0 )
 	{
 		G_CheckReplaceActionHero( clientNum );

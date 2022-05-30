@@ -5,7 +5,6 @@
 
 extern void SP_misc_ammo_station( gentity_t *ent );
 extern void ammo_station_finish_spawning ( gentity_t *self );
-extern int	borgQueenClientNum;
 
 /*
 ==============
@@ -570,9 +569,8 @@ void ClientTimerActions( gentity_t *ent, int msec ) {
 
 		if ( !client->ps.stats[STAT_HOLDABLE_ITEM] )
 		{//holding nothing...
-			if ( client->ps.stats[STAT_USEABLE_PLACED] > 0 )
-			{//we're in some kind of countdown
-				//so count down
+			if ( client->sess.sessionClass == PC_DEMO && client->ps.stats[STAT_USEABLE_PLACED] > 0 )
+			{//demolitionist detpack countdown
 				client->ps.stats[STAT_USEABLE_PLACED]--;
 			}
 		}
@@ -1358,35 +1356,30 @@ qboolean PlaceDecoy(gentity_t *ent)
 
 
 
-void G_Rematerialize( gentity_t *ent )
-{
-	if ( ent->s.number == borgQueenClientNum )
-	{
-		ent->client->teleportTime = level.time + 60000;//get it back in 60 seconds
-		ent->client->ps.stats[STAT_USEABLE_PLACED] = 60;
-	}
-	else
-	{
-		ent->client->teleportTime = level.time + 15000;//get it back in 15 seconds
-		ent->client->ps.stats[STAT_USEABLE_PLACED] = 15;
-	}
-	ent->flags &= ~FL_NOTARGET;
-	ent->takedamage = qtrue;
-	ent->r.contents = MASK_PLAYERSOLID;
-	ent->s.eFlags &= ~EF_NODRAW;
-	ent->client->ps.eFlags &= ~EF_NODRAW;
-	TeleportPlayer( ent, ent->client->ps.origin, ent->client->ps.viewangles, TP_BORG );
-	//ent->client->ps.stats[STAT_USEABLE_PLACED] = 0;
-	//take it away
-	ent->client->ps.stats[STAT_HOLDABLE_ITEM] = 0;
-}
-
 void G_GiveHoldable( gclient_t *client, holdable_t item )
 {
 	gitem_t	*holdable = BG_FindItemForHoldable( item );
 
 	client->ps.stats[STAT_HOLDABLE_ITEM] = holdable - bg_itemlist;//teleport spots should be on other side of map
 	RegisterItem( holdable );
+}
+
+/*
+================
+(ModFN) PortableTransporterActivate
+
+Called when player triggers the holdable transporter powerup.
+================
+*/
+LOGFUNCTION_VOID( ModFNDefault_PortableTransporterActivate, ( int clientNum ),
+		( clientNum ), "G_MODFN_PORTABLETRANSPORTERACTIVATE" ) {
+	// get rid of transporter and go to random spawnpoint
+	gentity_t *ent = &g_entities[clientNum];
+	vec3_t	origin, angles;
+
+	ent->client->ps.stats[STAT_USEABLE_PLACED] = 0;
+	SelectSpawnPoint( ent->client->ps.origin, origin, angles, qtrue, qtrue );
+	TeleportPlayer( ent, origin, angles, TP_NORMAL );
 }
 
 /*
@@ -1452,35 +1445,9 @@ void ClientEvents( gentity_t *ent, int oldEventSequence ) {
 			ent->client->ps.powerups[PW_BLUEFLAG] = 0;
 			ent->client->ps.powerups[PW_REDFLAG]  = 0;
 			//------------------------------------------------------- DROP FLAGS
-			if ( ent->client->sess.sessionClass == PC_BORG )
-			{
-				if ( !ent->client->ps.stats[STAT_USEABLE_PLACED] )
-				{//go into free-roaming mode
-					gentity_t	*tent;
-					//FIXME: limit this to 10 seconds
-					ent->flags |= FL_NOTARGET;
-					ent->takedamage = qfalse;
-					ent->r.contents = CONTENTS_PLAYERCLIP;
-					ent->s.eFlags |= EF_NODRAW;
-					ent->client->ps.eFlags |= EF_NODRAW;
-					ent->client->ps.stats[STAT_USEABLE_PLACED] = 2;
-					ent->client->teleportTime = level.time + 10000;
-					tent = G_TempEntity( ent->client->ps.origin, EV_BORG_TELEPORT );
-					tent->s.clientNum = ent->s.clientNum;
-				}
-				else
-				{//come out of free-roaming mode, teleport to current position
-					G_Rematerialize( ent );
-				}
-			}
-			else// get rid of transporter and go to random spawnpoint
-			{
-				vec3_t	origin, angles;
 
-				ent->client->ps.stats[STAT_USEABLE_PLACED] = 0;
-				SelectSpawnPoint( ent->client->ps.origin, origin, angles, qtrue, qtrue );
-				TeleportPlayer( ent, origin, angles, TP_NORMAL );
-			}
+			modfn.PortableTransporterActivate( ent - g_entities );
+
 			break;
 
 		case EV_USE_ITEM2:		// medkit
@@ -1603,6 +1570,34 @@ static void G_ExternalizePlayerEvents( int clientNum ) {
 	}
 
 	client->newExternalEvent = qfalse;
+}
+
+/*
+==============
+(ModFN) CheckRespawnTime
+
+Returns true if time to respawn dead player has been reached. Called with voluntary true if player
+is pressing the respawn button, and voluntary false to check for forced respawns.
+==============
+*/
+LOGFUNCTION_RET( qboolean, ModFNDefault_CheckRespawnTime, ( int clientNum, qboolean voluntary ),
+		( clientNum, voluntary ), "G_MODFN_CHECKRESPAWNTIME" ) {
+	gclient_t *client = &level.clients[clientNum];
+
+	if ( voluntary && level.time > client->respawnKilledTime + 1700 ) {
+		return qtrue;
+	}
+
+	if ( !voluntary && g_forcerespawn.integer > 0 &&
+			level.time > client->respawnKilledTime + 1700 + g_forcerespawn.integer * 1000 ) {
+		return qtrue;
+	}
+
+	if ( !voluntary && g_pModElimination.integer && level.time > client->respawnKilledTime + 3000 ) {
+		return qtrue;
+	}
+
+	return qfalse;
 }
 
 /*
@@ -1866,29 +1861,12 @@ void ClientThink_real( gentity_t *ent ) {
 
 	// check for respawning
 	if ( client->ps.stats[STAT_HEALTH] <= 0 ) {
-		// wait for the attack button to be pressed
-		if ( level.time > client->respawnTime ) {
-			// forcerespawn is to prevent users from waiting out powerups
-			if ( g_forcerespawn.integer > 0 &&
-				( level.time - client->respawnTime ) > g_forcerespawn.integer * 1000 ) {
-				respawn( ent );
-				return;
-			}
-
-			// pressing attack or use is the normal respawn method
-			if ( ucmd->buttons & ( BUTTON_ATTACK | BUTTON_USE_HOLDABLE ) ) {
-				respawn( ent );
-				return;
-			}
-
-			//in assimilation and elimination, always force respawn
-			if ( level.time - client->respawnTime > 1300 && //NOTE: when killed, client->respawnTime = level.time + 1700, so this is 3000 ms
-				( g_pModAssimilation.integer || g_pModElimination.integer ) )
-			{
-				respawn( ent );
-				return;
-			}
+		// pressing attack or use is the normal respawn method
+		if ( ( ucmd->buttons & ( BUTTON_ATTACK | BUTTON_USE_HOLDABLE ) ) &&
+				modfn.CheckRespawnTime( clientNum, qtrue ) ) {
+			modfn.ClientRespawn( clientNum );
 		}
+
 		return;
 	}
 
@@ -1901,19 +1879,7 @@ void ClientThink_real( gentity_t *ent ) {
 
 	if ( ent->client->teleportTime > 0 && ent->client->teleportTime < level.time )
 	{
-		if ( ent->client->sess.sessionClass == PC_BORG )
-		{
-			if ( BG_BorgTransporting( &ent->client->ps ) )
-			{//in Borg teleport warp
-				G_Rematerialize( ent );
-			}
-			else
-			{//waiting to get another teleport
-				G_GiveHoldable( ent->client, HI_TRANSPORTER );
-				ent->client->teleportTime = 0;
-			}
-		}
-		else if ( ent->client->sess.sessionClass == PC_DEMO )
+		if ( ent->client->sess.sessionClass == PC_DEMO )
 		{//after an initial delay, the demo gets the detpack
 			G_GiveHoldable( ent->client, HI_DETPACK );//give it to me
 			ent->client->ps.stats[STAT_USEABLE_PLACED] = 0;//make sure I'm set up to be able to drop it
@@ -2058,6 +2024,12 @@ void ClientEndFrame( gentity_t *ent ) {
 	// the player any normal movement attributes
 	//
 	if ( level.intermissiontime ) {
+		return;
+	}
+
+	// check for forced respawn
+	if ( ent->client->ps.stats[STAT_HEALTH] <= 0 && modfn.CheckRespawnTime( ent - g_entities, qfalse ) ) {
+		modfn.ClientRespawn( ent - g_entities );
 		return;
 	}
 

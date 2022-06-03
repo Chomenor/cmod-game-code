@@ -2072,8 +2072,13 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	}
 	client->ps.persistant[PERS_CLASS] = client->sess.sessionClass;
 
-	if ( ent->client->sess.sessionTeam == TEAM_SPECTATOR || (ent->client->ps.eFlags&EF_ELIMINATED) ) {
+	client->ps.ammo[WP_PHASER] = PHASER_AMMO_MAX;
 
+	if ( ent->client->sess.sessionTeam == TEAM_SPECTATOR || (ent->client->ps.eFlags&EF_ELIMINATED) ) {
+		ent->health = client->ps.stats[STAT_HEALTH] = client->ps.stats[STAT_MAX_HEALTH] = 100;
+
+		// Don't trip the out of ammo sound in CG_CheckAmmo
+		client->ps.stats[STAT_WEAPONS] = 1 << WP_PHASER;
 	} else {
 		// Perform class-specific configuration
 		modfn.SpawnConfigureClient( index );

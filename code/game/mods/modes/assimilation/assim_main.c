@@ -176,7 +176,7 @@ have been assimilated.
 ================
 */
 static qboolean ModAssimilation_MatchLocked( void ) {
-	if ( level.matchState == MS_ACTIVE ) {
+	if ( level.matchState >= MS_ACTIVE ) {
 		if ( MOD_STATE->numAssimilated > 0 ) {
 			return qtrue;
 		}

@@ -3,8 +3,6 @@
 #include "g_local.h"
 
 
-extern int		noJoinLimit;
-extern int	numKilled;
 extern clInitStatus_t clientInitialStatus[];
 
 /*
@@ -34,6 +32,7 @@ void DeathmatchScoreboardMessage( gentity_t *ent ) {
 	}
 
 	for (i=0 ; i < numSorted ; i++) {
+		int scoreClientNum = level.sortedClients[i];
 		int		ping;
 
 		cl = &level.clients[level.sortedClients[i]];
@@ -45,7 +44,8 @@ void DeathmatchScoreboardMessage( gentity_t *ent ) {
 		}
 		Com_sprintf (entry, sizeof(entry),
 			" %i %i %i %i %i %i %i %i %i %i %i", level.sortedClients[i],
-			cl->ps.persistant[PERS_SCORE], ping, (level.time - cl->pers.enterTime)/60000,
+			modfn.EffectiveScore(scoreClientNum, EST_SCOREBOARD), ping,
+			(level.time - cl->pers.enterTime)/60000,
 			scoreFlags, g_entities[level.sortedClients[i]].s.powerups,
 //			GetFavoriteTargetForClient(level.sortedClients[i]),
 //			GetMaxKillsForClient(level.sortedClients[i]),
@@ -53,7 +53,7 @@ void DeathmatchScoreboardMessage( gentity_t *ent ) {
 			GetMaxDeathsForClient(level.sortedClients[i]),
 			GetFavoriteWeaponForClient(level.sortedClients[i]),
 			cl->ps.persistant[PERS_KILLED],
-			((g_entities[level.sortedClients[i]].r.svFlags&SVF_ELIMINATED)!=0) );
+			modfn.AdjustScoreboardAttributes(scoreClientNum, SA_ELIMINATED, 0) );
 		j = strlen(entry);
 		if (stringlength + j > 1024)
 			break;
@@ -414,10 +414,7 @@ Cmd_Kill_f
 */
 int lastKillTime[MAX_CLIENTS];
 void Cmd_Kill_f( gentity_t *ent ) {
-
-	if (ent->client->sess.sessionTeam == TEAM_SPECTATOR || (ent->client->ps.eFlags & EF_ELIMINATED))
-		return;
-	if ( modfn.CheckSuicideAllowed( ent - g_entities ) ) {
+	if ( !modfn.SpectatorClient( ent - g_entities ) && modfn.CheckSuicideAllowed( ent - g_entities ) ) {
 		lastKillTime[ent - g_entities] = level.time;
 		ent->flags &= ~FL_GODMODE;
 		ent->client->ps.stats[STAT_HEALTH] = ent->health = 0;
@@ -594,18 +591,10 @@ qboolean SetTeam( gentity_t *ent, char *s ) {
 		team = TEAM_SPECTATOR;
 		specState = SPECTATOR_SCOREBOARD;
 	} else if ( !Q_stricmp( s, "follow1" ) && !(ent->r.svFlags&SVF_BOT) ) {
-		if ( g_pModElimination.integer != 0 )
-		{//don't do this follow stuff, it's bad!
-			return qfalse;
-		}
 		team = TEAM_SPECTATOR;
 		specState = SPECTATOR_FOLLOW;
 		specClient = -1;
 	} else if ( !Q_stricmp( s, "follow2" ) && !(ent->r.svFlags&SVF_BOT) ) {
-		if ( g_pModElimination.integer != 0 )
-		{//don't do this follow stuff, it's bad!
-			return qfalse;
-		}
 		team = TEAM_SPECTATOR;
 		specState = SPECTATOR_FOLLOW;
 		specClient = -2;
@@ -673,13 +662,15 @@ qboolean SetTeam( gentity_t *ent, char *s ) {
 
 	if ( oldTeam != TEAM_SPECTATOR ) {
 		modfn.PrePlayerLeaveTeam( clientNum, oldTeam );
+	}
 
+	if ( !modfn.SpectatorClient( clientNum ) ) {
 		// Kill him (makes sure he loses flags, etc)
 		ent->flags &= ~FL_GODMODE;
 		ent->client->ps.stats[STAT_HEALTH] = ent->health = 0;
 		player_die (ent, NULL, NULL, 100000, MOD_RESPAWN);
-
 	}
+
 	// they go to the end of the line for tournements
 	if ( team == TEAM_SPECTATOR ) {
 		client->sess.spectatorTime = level.time;
@@ -871,8 +862,7 @@ to free floating spectator mode
 =================
 */
 void StopFollowing( gentity_t *ent ) {
-	ent->client->ps.persistant[ PERS_TEAM ] = TEAM_SPECTATOR;
-	ent->client->sess.sessionTeam = TEAM_SPECTATOR;
+	ent->client->ps.persistant[ PERS_TEAM ] = ent->client->sess.sessionTeam;
 	ent->client->sess.spectatorState = SPECTATOR_FREE;
 	ent->client->ps.pm_flags &= ~PMF_FOLLOW;
 	ent->r.svFlags &= ~SVF_BOT;
@@ -910,29 +900,6 @@ void Cmd_Team_f( gentity_t *ent ) {
 	}
 
 	trap_Argv( 1, s, sizeof( s ) );
-
-	if ( !s || s[0] != 's' )
-	{//not trying to become a spectator
-		if ( g_pModElimination.integer )
-		{
-			if ( noJoinLimit != 0 && ( level.time-level.startTime > noJoinLimit || numKilled > 0 ) )
-			{
-				if ( ent->client->ps.eFlags & EF_ELIMINATED )
-				{
-					trap_SendServerCommand( ent-g_entities, "cp \"You have been eliminated until next round\"" );
-				}
-				else if ( ent->client->sess.sessionTeam == TEAM_SPECTATOR )
-				{
-					trap_SendServerCommand( ent-g_entities, "cp \"Wait until next round to join\"" );
-				}
-				else
-				{
-					trap_SendServerCommand( ent-g_entities, "cp \"Wait until next round to change teams\"" );
-				}
-				return;
-			}
-		}
-	}
 
 	// if they are playing a tournement game, count as a loss
 	if ( g_gametype.integer == GT_TOURNAMENT && ent->client->sess.sessionTeam == TEAM_FREE ) {
@@ -1002,26 +969,6 @@ void Cmd_Class_f( gentity_t *ent ) {
 		}
 		trap_SendServerCommand( ent-g_entities, va( "print \"class: %s\n\"", className ) );
 		return;
-	}
-
-	if ( g_pModElimination.integer )
-	{
-		if ( noJoinLimit != 0 && ( level.time-level.startTime > noJoinLimit || numKilled > 0 ) )
-		{
-			if ( ent->client->ps.eFlags & EF_ELIMINATED )
-			{//eliminated player trying to rejoin
-				trap_SendServerCommand( ent-g_entities, "cp \"You have been eliminated until next round\"" );
-			}
-			else if ( ent->client->sess.sessionTeam == TEAM_SPECTATOR )
-			{
-				trap_SendServerCommand( ent-g_entities, "cp \"Wait until next round to join\"" );
-			}
-			else
-			{
-				trap_SendServerCommand( ent-g_entities, "cp \"Wait until next round to change classes\"" );
-			}
-			return;
-		}
 	}
 
 	if ( g_pModSpecialties.integer )
@@ -1147,14 +1094,7 @@ void Cmd_Follow_f( gentity_t *ent ) {
 	}
 
 	// can't follow another spectator
-	if ( level.clients[ i ].sess.sessionTeam == TEAM_SPECTATOR ) {
-		return;
-	}
-
-	if ( g_pModElimination.integer != 0 )
-	{//don't do this follow stuff, it's bad!
-		VectorCopy( level.clients[i].ps.viewangles, ent->client->ps.viewangles );
-		VectorCopy( level.clients[i].ps.origin, ent->client->ps.origin );
+	if ( modfn.SpectatorClient( i ) ) {
 		return;
 	}
 
@@ -1164,7 +1104,7 @@ void Cmd_Follow_f( gentity_t *ent ) {
 	}
 
 	// first set them to spectator
-	if ( ent->client->sess.sessionTeam != TEAM_SPECTATOR ) {
+	if ( !modfn.SpectatorClient( ent - g_entities ) ) {
 		SetTeam( ent, "spectator" );
 	}
 
@@ -1191,11 +1131,8 @@ void Cmd_FollowCycle_f( gentity_t *ent, int dir ) {
 		ent->client->sess.losses++;
 	}
 	// first set them to spectator
-	if ( ent->client->sess.spectatorState == SPECTATOR_NOT ) {
-		if ( g_pModElimination.integer == 0 )
-		{
-			SetTeam( ent, "spectator" );
-		}
+	if ( !modfn.SpectatorClient( ent - g_entities ) ) {
+		SetTeam( ent, "spectator" );
 	}
 
 	if ( dir != 1 && dir != -1 ) {
@@ -1222,21 +1159,10 @@ void Cmd_FollowCycle_f( gentity_t *ent, int dir ) {
 		}
 
 		// can't follow another spectator, including myself
-		if ( level.clients[ clientnum ].sess.sessionTeam == TEAM_SPECTATOR ) {
+		if ( modfn.SpectatorClient( clientnum ) ) {
 			continue;
 		}
 
-		if ( g_pModElimination.integer != 0 )
-		{//don't do this follow stuff, it's bad!
-			if ( level.clients[ clientnum ].ps.eFlags&EF_ELIMINATED)
-			{//don't cycle to a dead guy
-				continue;
-			}
-			VectorCopy( level.clients[clientnum].ps.viewangles, ent->client->ps.viewangles );
-			VectorCopy( level.clients[clientnum].ps.origin, ent->client->ps.origin );
-			ent->client->sess.spectatorClient = clientnum;
-			return;
-		}
 		// this is good, we can use it
 		ent->client->sess.spectatorClient = clientnum;
 		ent->client->sess.spectatorState = SPECTATOR_FOLLOW;

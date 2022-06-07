@@ -212,6 +212,7 @@
     <ClInclude Include="..\..\code\game\mods\g_mod_local.h" />
     <ClInclude Include="..\..\code\game\mods\g_mod_public.h" />
     <ClInclude Include="..\..\code\game\mods\modes\assimilation\assim_local.h" />
+    <ClInclude Include="..\..\code\game\mods\modes\elimination\elim_local.h" />
     <ClInclude Include="..\..\code\game\syn.h" />
   </ItemGroup>
   <ItemGroup>
@@ -276,6 +277,7 @@
     <ClCompile Include="..\..\code\game\mods\modes\assimilation\assim_borg_adapt.c" />
     <ClCompile Include="..\..\code\game\mods\modes\assimilation\assim_borg_teleport.c" />
     <ClCompile Include="..\..\code\game\mods\modes\assimilation\assim_main.c" />
+    <ClCompile Include="..\..\code\game\mods\modes\elimination\elim_main.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

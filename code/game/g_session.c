@@ -17,9 +17,6 @@ and tournament restarts.
 // server uses mod switching.
 #define SESSION_VERSION "hszK3I2I"
 
-extern int	noJoinLimit;
-extern int	numKilled;
-
 /*
 ================
 (ModFN) InitClientSession
@@ -200,14 +197,7 @@ void G_InitSessionData( gclient_t *client, char *userinfo ) {
 	if ( g_gametype.integer >= GT_TEAM )
 	{//Team holomatch or CTF
 		if ( g_teamAutoJoin.integer && modfn.CheckJoinAllowed( clientNum, CJA_AUTOJOIN, TEAM_FREE ) ) {
-			if ( g_pModElimination.integer && noJoinLimit != 0 && ( level.time-level.startTime > noJoinLimit || numKilled > 0 ) )
-			{//elim game already in progress
-				sess->sessionTeam = TEAM_SPECTATOR;
-			}
-			else
-			{
-				sess->sessionTeam = PickTeam( -1 );
-			}
+			sess->sessionTeam = PickTeam( -1 );
 		} else {
 			// always spawn as spectator in team games
 			sess->sessionTeam = TEAM_SPECTATOR;
@@ -227,14 +217,7 @@ void G_InitSessionData( gclient_t *client, char *userinfo ) {
 				if ( !modfn.CheckJoinAllowed( clientNum, CJA_AUTOJOIN, TEAM_FREE ) ) {
 					sess->sessionTeam = TEAM_SPECTATOR;
 				} else {
-					if ( g_pModElimination.integer && noJoinLimit != 0 && ( level.time-level.startTime > noJoinLimit || numKilled > 0 ) )
-					{//game already in progress
-						sess->sessionTeam = TEAM_SPECTATOR;
-					}
-					else
-					{
-						sess->sessionTeam = TEAM_FREE;
-					}
+					sess->sessionTeam = TEAM_FREE;
 				}
 				break;
 			case GT_TOURNAMENT:

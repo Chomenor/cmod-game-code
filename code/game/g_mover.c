@@ -830,7 +830,7 @@ void Touch_DoorTrigger( gentity_t *ent, gentity_t *other, trace_t *trace ) {
 	}
 #endif
 
-	if ( other->client && (other->client->sess.sessionTeam == TEAM_SPECTATOR || (other->client->ps.eFlags&EF_ELIMINATED)) ) {
+	if ( other->client && modfn.SpectatorClient( other - g_entities ) ) {
 		// if the door is not open and not opening
 		if ( ent->parent->moverState != MOVER_1TO2 &&
 			ent->parent->moverState != MOVER_POS2 ) {

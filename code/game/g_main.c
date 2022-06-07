@@ -10,11 +10,9 @@
 
 level_locals_t	level;
 extern char	races[256];	//this is evil!
-extern int noJoinLimit;
 
 group_list_t	group_list[MAX_GROUP_MEMBERS];
 int 			group_count;
-int numKilled;
 
 gentity_t		g_entities[MAX_GENTITIES];
 gclient_t		g_clients[MAX_CLIENTS];
@@ -414,8 +412,6 @@ static void G_UpdateCvars( void ) {
 extern int altAmmoUsage[];
 void G_InitModRules( void )
 {
-	numKilled = 0;
-
 	if ( g_pModDisintegration.integer != 0 )
 	{//don't use up ammo in disintegration mode
 		altAmmoUsage[WP_COMPRESSION_RIFLE] = 0;
@@ -578,33 +574,12 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	G_Printf ("-----------------------------------\n");
 }
 
-void EliminationRespawn( gentity_t *ent, char *team );
-void G_CheckResetEliminationClients( void )
-{
-	if ( g_pModElimination.integer != 0 )
-	{//no players respawn when in elimination
-		gentity_t	*client;
-		int			i;
-
-		for ( i = 0; i < level.numConnectedClients; i++ )
-		{
-			client = &g_entities[&level.clients[level.sortedClients[i]] - level.clients];
-			if ( client->team && client->client->sess.sessionTeam == TEAM_SPECTATOR )
-			{
-				EliminationRespawn( client, client->team );
-			}
-		}
-	}
-}
-
 /*
 =================
 G_ShutdownGame
 =================
 */
 void G_ShutdownGame( int restart ) {
-	G_CheckResetEliminationClients();
-
 	G_Printf ("==== ShutdownGame ====\n");
 
 #if 0	// kef -- Pat sez this is causing some trouble these days
@@ -808,8 +783,8 @@ int QDECL SortRanks( const void *a, const void *b ) {
 
 	else {
 		// then sort by score & number of times killed
-		va = ca->ps.persistant[PERS_SCORE];
-		vb = cb->ps.persistant[PERS_SCORE];
+		va = modfn.EffectiveScore( ia, EST_REALSCORE );
+		vb = modfn.EffectiveScore( ib, EST_REALSCORE );
 		SELECT_HIGHER;
 
 		va = ca->ps.persistant[PERS_KILLED];
@@ -831,8 +806,6 @@ CalculateRanks
 Recalculates the score ranks of all players
 This will be called on every client connect, begin, disconnect, death,
 and team change.
-
-FIXME: for elimination, the last man standing must be ranked first
 ============
 */
 void CalculateRanks( void ) {
@@ -871,15 +844,21 @@ void CalculateRanks( void ) {
 	if ( g_gametype.integer >= GT_TEAM ) {
 		// in team games, rank is just the order of the teams, 0=red, 1=blue, 2=tied
 		int rankValue;
-		if ( level.teamScores[TEAM_RED] == level.teamScores[TEAM_BLUE] ) {
-			level.winningTeam = TEAM_FREE;
-			rankValue = 2;
+		if ( level.forceWinningTeam == TEAM_RED ) {
+			level.winningTeam = TEAM_RED;
+			rankValue = 0;
+		} else if ( level.forceWinningTeam == TEAM_BLUE ) {
+			level.winningTeam = TEAM_BLUE;
+			rankValue = 1;
 		} else if ( level.teamScores[TEAM_RED] > level.teamScores[TEAM_BLUE] ) {
 			level.winningTeam = TEAM_RED;
 			rankValue = 0;
-		} else {
+		} else if ( level.teamScores[TEAM_BLUE] > level.teamScores[TEAM_RED] ) {
 			level.winningTeam = TEAM_BLUE;
 			rankValue = 1;
+		} else {
+			level.winningTeam = TEAM_FREE;
+			rankValue = 2;
 		}
 
 		for ( i = 0;  i < level.numConnectedClients; i++ ) {
@@ -890,8 +869,7 @@ void CalculateRanks( void ) {
 		rank = -1;
 		score = 0;
 		for ( i = 0;  i < level.numPlayingClients; i++ ) {
-			cl = &level.clients[ level.sortedClients[i] ];
-			newScore = cl->ps.persistant[PERS_SCORE];
+			newScore = modfn.EffectiveScore( level.sortedClients[i], EST_REALSCORE );
 			if ( i == 0 || newScore != score ) {
 				rank = i;
 				// assume we aren't tied until the next client is checked
@@ -917,11 +895,11 @@ void CalculateRanks( void ) {
 			trap_SetConfigstring( CS_SCORES1, va("%i", SCORE_NOT_PRESENT) );
 			trap_SetConfigstring( CS_SCORES2, va("%i", SCORE_NOT_PRESENT) );
 		} else if ( level.numConnectedClients == 1 ) {
-			trap_SetConfigstring( CS_SCORES1, va("%i", level.clients[ level.sortedClients[0] ].ps.persistant[PERS_SCORE] ) );
+			trap_SetConfigstring( CS_SCORES1, va("%i", modfn.EffectiveScore( level.sortedClients[0], EST_REALSCORE ) ) );
 			trap_SetConfigstring( CS_SCORES2, va("%i", SCORE_NOT_PRESENT) );
 		} else {
-			trap_SetConfigstring( CS_SCORES1, va("%i", level.clients[ level.sortedClients[0] ].ps.persistant[PERS_SCORE] ) );
-			trap_SetConfigstring( CS_SCORES2, va("%i", level.clients[ level.sortedClients[1] ].ps.persistant[PERS_SCORE] ) );
+			trap_SetConfigstring( CS_SCORES1, va("%i", modfn.EffectiveScore( level.sortedClients[0], EST_REALSCORE ) ) );
+			trap_SetConfigstring( CS_SCORES2, va("%i", modfn.EffectiveScore( level.sortedClients[1], EST_REALSCORE ) ) );
 		}
 	}
 
@@ -968,7 +946,7 @@ If a new client connects, this will be called after the spawn function.
 */
 void MoveClientToIntermission( gentity_t *ent ) {
 	// take out of follow mode if needed
-	if ( ent->client->sess.spectatorState == SPECTATOR_FOLLOW ) {
+	if ( modfn.SpectatorClient( ent - g_entities ) && ent->client->sess.spectatorState == SPECTATOR_FOLLOW ) {
 		StopFollowing( ent );
 	}
 
@@ -1063,8 +1041,6 @@ void BeginIntermission( void ) {
 	if ( level.intermissiontime && level.intermissiontime != -1 ) {
 		return;		// already active
 	}
-
-	G_CheckResetEliminationClients();
 
 	// if in tournament mode, change the wins / losses
 	if ( g_gametype.integer == GT_TOURNAMENT ) {
@@ -1268,8 +1244,8 @@ qboolean ScoreIsTied( void ) {
 		return level.teamScores[TEAM_RED] == level.teamScores[TEAM_BLUE];
 	}
 
-	a = level.clients[level.sortedClients[0]].ps.persistant[PERS_SCORE];
-	b = level.clients[level.sortedClients[1]].ps.persistant[PERS_SCORE];
+	a = modfn.EffectiveScore( level.sortedClients[0], EST_REALSCORE );
+	b = modfn.EffectiveScore( level.sortedClients[1], EST_REALSCORE );
 
 	return a == b;
 }
@@ -1290,40 +1266,6 @@ LOGFUNCTION_VOID( ModFNDefault_CheckExitRules, ( void ), (), "G_MODFN_CHECKEXITR
 
 	if ( level.numPlayingClients < 2 ) {
 		//not enough players
-		return;
-	}
-
-	if ( g_pModElimination.integer != 0 )
-	{//check elimination rules
-		gclient_t *survivor = NULL;
-		//See if only one player remains alive, if so, end it.
-		if ( level.numConnectedClients > 1 && numKilled > 0 )
-		{
-			for ( i = 0; i < level.numConnectedClients; i++ )
-			{
-				cl = &level.clients[ level.sortedClients[i] ];
-				if ( cl->sess.sessionTeam != TEAM_SPECTATOR && !(cl->ps.eFlags&EF_ELIMINATED) )
-				{
-					if ( survivor != NULL )
-					{
-						if ( g_gametype.integer < GT_TEAM || cl->sess.sessionTeam != survivor->sess.sessionTeam )
-						{//not in a team game or survivor is on same team as previously found survivor, keep looking
-							survivor = NULL;
-							break;
-						}
-					}
-					else
-					{
-						survivor = cl;
-					}
-				}
-			}
-		}
-		if ( survivor != NULL )
-		{
-			G_LogExit( "Last Man Standing." );
-		}
-		//don't check anything else
 		return;
 	}
 
@@ -1389,7 +1331,7 @@ LOGFUNCTION_VOID( ModFNDefault_CheckExitRules, ( void ), (), "G_MODFN_CHECKEXITR
 				continue;
 			}
 
-			if ( cl->ps.persistant[PERS_SCORE] >= g_fraglimit.integer ) {
+			if ( modfn.EffectiveScore( i, EST_REALSCORE ) >= g_fraglimit.integer ) {
 				G_LogExit( "Fraglimit hit." );
 				trap_SendServerCommand( -1, va("print \"%s" S_COLOR_WHITE " hit the point limit.\n\"",
 					cl->pers.netname ) );
@@ -1559,7 +1501,7 @@ static void G_CheckMatchState( void ) {
 
 	} else if ( level.matchState == MS_INTERMISSION_QUEUED ) {
 		// queued intermission - check for transition to actual intermission
-		if ( level.time - level.intermissionQueued >= 2000 ) {
+		if ( level.time - level.intermissionQueued >= modfn.AdjustGeneralConstant( GC_INTERMISSION_DELAY_TIME, 2000 ) ) {
 			level.intermissionQueued = 0;
 			BeginIntermission();
 		}

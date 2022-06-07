@@ -62,7 +62,7 @@ void TeleportPlayer2( gentity_t *player, vec3_t origin, vec3_t angles, tpType_t 
 
 	// use temp events at source and destination to prevent the effect
 	// from getting dropped by a second player event
-	if ( player->client->sess.sessionTeam != TEAM_SPECTATOR && !(player->client->ps.eFlags&EF_ELIMINATED) )
+	if ( !modfn.SpectatorClient( player - g_entities ) )
 	{
 		if ( tpType == TP_BORG )
 		{
@@ -114,7 +114,7 @@ void TeleportPlayer2( gentity_t *player, vec3_t origin, vec3_t angles, tpType_t 
 	SetClientViewAngle( player, angles );
 
 	// kill anything at the destination
-	if ( player->client->sess.sessionTeam != TEAM_SPECTATOR && !(player->client->ps.eFlags&EF_ELIMINATED)) {
+	if ( !modfn.SpectatorClient( player - g_entities ) ) {
 		G_KillBox (player);
 	}
 
@@ -124,7 +124,7 @@ void TeleportPlayer2( gentity_t *player, vec3_t origin, vec3_t angles, tpType_t 
 	// use the precise origin for linking
 	VectorCopy( player->client->ps.origin, player->r.currentOrigin );
 
-	if ( player->client->sess.sessionTeam != TEAM_SPECTATOR && !(player->client->ps.eFlags&EF_ELIMINATED)) {
+	if ( !modfn.SpectatorClient( player - g_entities ) ) {
 		trap_LinkEntity (player);
 	}
 }

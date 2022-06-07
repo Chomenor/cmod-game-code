@@ -425,7 +425,7 @@ void	G_TouchTriggers( gentity_t *ent ) {
 		}
 
 		// ignore most entities if a spectator
-		if ( ent->client->sess.sessionTeam == TEAM_SPECTATOR || (ent->client->ps.eFlags&EF_ELIMINATED) ) {
+		if ( modfn.SpectatorClient( ent - g_entities ) ) {
 			if ( hit->s.eType != ET_TELEPORT_TRIGGER &&
 				// this is ugly but adding a new ET_? type will
 				// most likely cause network incompatibilities
@@ -1593,10 +1593,6 @@ LOGFUNCTION_RET( qboolean, ModFNDefault_CheckRespawnTime, ( int clientNum, qbool
 		return qtrue;
 	}
 
-	if ( !voluntary && g_pModElimination.integer && level.time > client->respawnKilledTime + 3000 ) {
-		return qtrue;
-	}
-
 	return qfalse;
 }
 
@@ -1786,7 +1782,7 @@ void ClientThink_real( gentity_t *ent ) {
 	if ( !PM_IsMoveNeeded( client->ps.commandTime, ucmd->serverTime, modfn.AdjustPmoveConstant( PMC_FIXED_LENGTH, 0 ) ) &&
 			// following others may result in bad times, but we still want
 			// to check for follow toggles
-			client->sess.spectatorState != SPECTATOR_FOLLOW ) {
+			!( modfn.SpectatorClient( clientNum ) && client->sess.spectatorState == SPECTATOR_FOLLOW ) ) {
 		return;
 	}
 
@@ -1804,7 +1800,7 @@ void ClientThink_real( gentity_t *ent ) {
 	}
 
 	// spectators don't do much
-	if ( client->sess.sessionTeam == TEAM_SPECTATOR || (client->ps.eFlags&EF_ELIMINATED) ) {
+	if ( modfn.SpectatorClient( ent - g_entities ) ) {
 		if ( client->sess.spectatorState == SPECTATOR_SCOREBOARD ) {
 			return;
 		}
@@ -1947,7 +1943,7 @@ void SpectatorClientEndFrame( gentity_t *ent ) {
 
 		if ( clientNum >= 0 ) {
 			cl = &level.clients[ clientNum ];
-			if ( cl->pers.connected == CON_CONNECTED && cl->sess.sessionTeam != TEAM_SPECTATOR ) {
+			if ( cl->pers.connected == CON_CONNECTED && !modfn.SpectatorClient( clientNum ) ) {
 				ent->client->ps = cl->ps;
 				ent->client->ps.pm_flags |= PMF_FOLLOW;
 				return;
@@ -1988,7 +1984,7 @@ void ClientEndFrame( gentity_t *ent ) {
 		// also update any clients that are following this one
 		for ( i = 0 ; i < level.maxclients ; i++ ) {
 			gclient_t *client = &level.clients[i];
-			if ( client->pers.connected == CON_CONNECTED && client->sess.sessionTeam == TEAM_SPECTATOR &&
+			if ( client->pers.connected == CON_CONNECTED && modfn.SpectatorClient( i ) &&
 					client->sess.spectatorState == SPECTATOR_FOLLOW && client->sess.spectatorClient == ent - g_entities ) {
 				DeathmatchScoreboardMessage( &g_entities[i] );
 			}
@@ -1997,7 +1993,7 @@ void ClientEndFrame( gentity_t *ent ) {
 		ent->client->scoreUpdatePending = qfalse;
 	}
 
-	if ( ent->client->sess.sessionTeam == TEAM_SPECTATOR || (ent->client->ps.eFlags&EF_ELIMINATED) ) {
+	if ( modfn.SpectatorClient( ent - g_entities ) ) {
 		SpectatorClientEndFrame( ent );
 		return;
 	}
@@ -2053,13 +2049,6 @@ void ClientEndFrame( gentity_t *ent ) {
 	// set the latest infor
 	BG_PlayerStateToEntityState( &ent->client->ps, &ent->s, qtrue );
 	G_ExternalizePlayerEvents( ent - g_entities );
-
-	/*
-	if ( noJoinLimit != 0 && level.time > noJoinLimit )
-	{//turn off objectives
-		trap_SendServerCommand( ent-g_entities, "-analyze" );
-	}
-	*/
 }
 
 

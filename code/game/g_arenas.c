@@ -8,7 +8,7 @@
 
 static gentity_t *podiumModels[3];
 
-#define PLAYER_SCORE( clientNum ) level.clients[clientNum].ps.persistant[PERS_SCORE]
+#define PLAYER_SCORE( clientNum ) modfn.EffectiveScore( clientNum, EST_REALSCORE )
 #define SPECTATOR_CLIENT( clientNum ) ( level.clients[clientNum].sess.sessionTeam == TEAM_SPECTATOR )
 
 /*

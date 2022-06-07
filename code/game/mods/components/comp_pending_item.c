@@ -51,7 +51,7 @@ LOGFUNCTION_SVOID( PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) 
 		gclient_t *client = &level.clients[i];
 		modClient_t *modclient = &MOD_STATE->clients[i];
 
-		if ( client->pers.connected != CON_CONNECTED || client->sess.sessionTeam == TEAM_SPECTATOR ) {
+		if ( client->pers.connected != CON_CONNECTED || modfn.SpectatorClient( i ) ) {
 			continue;
 		}
 

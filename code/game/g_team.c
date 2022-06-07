@@ -782,7 +782,7 @@ void CheckHealthInfoMessage( void )
 	for (i = 0, sendToCnt = 0; i < g_maxclients.integer; i++)
 	{
 		if ( level.clients[i].pers.connected == CON_CONNECTED && level.clients[i].ps.stats[STAT_HEALTH] > 0 &&//make sure they've actually spawned in already
-			level.clients[i].sess.sessionTeam == TEAM_SPECTATOR || level.clients[i].sess.sessionClass == PC_MEDIC )
+			modfn.SpectatorClient( i ) || level.clients[i].sess.sessionClass == PC_MEDIC )
 		{
 			sendToClients[sendToCnt++] = i;
 		}

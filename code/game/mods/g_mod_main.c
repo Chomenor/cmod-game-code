@@ -30,6 +30,7 @@ LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 
 	// Initialize cvars
 	trap_Cvar_Register( NULL, "g_pModAssimilation", "0", CVAR_SERVERINFO );
+	trap_Cvar_Register( NULL, "g_pModElimination", "0", CVAR_SERVERINFO );
 
 	// Default mods
 	if ( modsEnabled >= 2 ) {
@@ -41,7 +42,9 @@ LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 	}
 
 	// Game modes
-	if ( trap_Cvar_VariableIntegerValue( "g_pModAssimilation" ) ) {
+	if ( trap_Cvar_VariableIntegerValue( "g_pModElimination" ) ) {
+		ModElimination_Init();
+	} else if ( trap_Cvar_VariableIntegerValue( "g_pModAssimilation" ) ) {
 		ModAssimilation_Init();
 	}
 }

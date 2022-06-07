@@ -25,6 +25,9 @@
     <Filter Include="game\mods\modes\assimilation">
       <UniqueIdentifier>{A4FF88CF-90BA-787B-3972-F1C5250CC30B}</UniqueIdentifier>
     </Filter>
+    <Filter Include="game\mods\modes\elimination">
+      <UniqueIdentifier>{D0BE827E-3CCC-B064-C5B2-AC4F31BF7C1B}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\code\common\bg_local.h">
@@ -128,6 +131,9 @@
     </ClInclude>
     <ClInclude Include="..\..\code\game\mods\modes\assimilation\assim_local.h">
       <Filter>game\mods\modes\assimilation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\game\mods\modes\elimination\elim_local.h">
+      <Filter>game\mods\modes\elimination</Filter>
     </ClInclude>
     <ClInclude Include="..\..\code\game\syn.h">
       <Filter>game</Filter>
@@ -316,6 +322,9 @@
     </ClCompile>
     <ClCompile Include="..\..\code\game\mods\modes\assimilation\assim_main.c">
       <Filter>game\mods\modes\assimilation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\modes\elimination\elim_main.c">
+      <Filter>game\mods\modes\elimination</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

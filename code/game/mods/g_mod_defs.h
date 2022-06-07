@@ -62,6 +62,13 @@ MOD_FUNCTION_DEF( PostPlayerDie, void, ( gentity_t *self, gentity_t *inflictor, 
 // client accessors
 //////////////////////////
 
+// Returns true if client is currently spectating, including eliminated players.
+// Note: This returns false for players who were eliminated but not yet respawned as a spectator.
+MOD_FUNCTION_DEF( SpectatorClient, qboolean, ( int clientNum ) )
+
+// Returns effective score values to use for client.
+MOD_FUNCTION_DEF( EffectiveScore, int, ( int clientNum, effectiveScoreType_t type ) )
+
 // Returns player-selected team, even if active team is temporarily overriden by borg assimilation.
 MOD_FUNCTION_DEF( RealSessionTeam, team_t, ( int clientNum ) )
 
@@ -190,6 +197,9 @@ MOD_FUNCTION_DEF( ModClientCommand, qboolean, ( int clientNum, const char *cmd )
 
 // Allows mods to add values to the mod config configstring.
 MOD_FUNCTION_DEF( AddModConfigInfo, void, ( char *info ) )
+
+// Allows mods to adjust attributes sent to clients via "scores" command.
+MOD_FUNCTION_DEF( AdjustScoreboardAttributes, int, ( int clientNum, scoreboardAttribute_t saType, int defaultValue ) )
 
 // Check if suicide is allowed. If not, prints notification to client.
 MOD_FUNCTION_DEF( CheckSuicideAllowed, qboolean, ( int clientNum ) )

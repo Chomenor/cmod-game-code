@@ -13,7 +13,6 @@ static vec3_t	playerMins = {-15, -15, -24};
 static vec3_t	playerMaxs = {15, 15, 32};
 
 int		actionHeroClientNum = -1;
-int		noJoinLimit = 0;
 clInitStatus_t clientInitialStatus[MAX_CLIENTS];
 
 void G_RandomActionHero( int ignoreClientNum )
@@ -539,50 +538,41 @@ void SetClientViewAngle( gentity_t *ent, vec3_t angle ) {
 	VectorCopy (ent->s.angles, ent->client->ps.viewangles);
 }
 
-void SetScore( gentity_t *ent, int score );
-void EliminationRespawn( gentity_t *ent, char *team )
-{
-	ent->flags &= ~FL_NOTARGET;
-	ent->s.eFlags &= ~EF_NODRAW;
-	ent->client->ps.eFlags &= ~EF_NODRAW;
-	ent->s.eFlags &= ~EF_ELIMINATED;
-	ent->client->ps.eFlags &= ~EF_ELIMINATED;
-	ent->r.svFlags &= ~SVF_ELIMINATED;
-	ClientSpawn(ent, CST_RESPAWN);
-	/*
-	int oldScore;
-	oldScore = ent->client->ps.persistant[PERS_SCORE];
-	SetTeam( ent, ent->team );
-	SetScore( ent, oldScore );
-	*/
+/*
+================
+(ModFN) SpectatorClient
+
+Returns whether specified client is currently in spectator mode.
+================
+*/
+qboolean ModFNDefault_SpectatorClient( int clientNum ) {
+	if ( G_AssertConnectedClient( clientNum ) && level.clients[clientNum].sess.sessionTeam == TEAM_SPECTATOR ) {
+		return qtrue;
+	}
+
+	return qfalse;
 }
 
-void EliminationSpectate( gentity_t *ent )
-{
-	modfn.CopyToBodyQue (ent - g_entities);
+/*
+================
+(ModFN) EffectiveScore
 
-	ClientSpawn(ent, CST_RESPAWN);
-	ent->takedamage = qfalse;
-	ent->r.contents = 0;
-	ent->flags |= FL_NOTARGET;
-	ent->s.eFlags |= EF_NODRAW;
-	ent->client->ps.eFlags |= EF_NODRAW;
-	ent->client->ps.pm_type = PM_NORMAL;//PM_SPECTATOR;
-	ent->s.eFlags |= EF_ELIMINATED;//FIXME:  this is not being reliably SENT!!!!!!
-	ent->client->ps.eFlags |= EF_ELIMINATED;
-	ent->r.svFlags |= SVF_ELIMINATED;//just in case
-	VectorSet( ent->r.mins, -4, -4, -16 );
-	VectorSet( ent->r.maxs, 4, 4, -8 );
-	ent->client->ps.weapon = 0;
-	ent->client->ps.stats[STAT_WEAPONS] = 0;
-	/*
-	int oldScore;
-	oldScore = ent->client->ps.persistant[PERS_SCORE];
-	ent->team = (char *)TeamName( ent->client->sess.sessionTeam );
-	SetTeam( ent, "spectator");
-	SetScore( ent, oldScore );
-	//FIXME: specator mode when dead kind of freaky if trying to follow
-	*/
+Returns effective score values to use for client.
+================
+*/
+int ModFNDefault_EffectiveScore( int clientNum, effectiveScoreType_t type ) {
+	if ( !G_AssertConnectedClient( clientNum ) ) {
+		return 0;
+	} else if ( type == EST_SCOREBOARD && modfn.SpectatorClient( clientNum ) &&
+			level.clients[clientNum].sess.spectatorState == SPECTATOR_FOLLOW ) {
+		// If currently spectating and following somebody, allow showing the score of player
+		// being followed in scoreboard. This matches the original behavior and can be useful
+		// as a way to tell which player somebody is following.
+	} else if ( level.clients[clientNum].sess.sessionTeam == TEAM_SPECTATOR ) {
+		return 0;
+	}
+
+	return level.clients[clientNum].ps.persistant[PERS_SCORE];
 }
 
 /*
@@ -614,16 +604,6 @@ pclass_t ModFNDefault_RealSessionClass( int clientNum ) {
 */
 LOGFUNCTION_EVOID( ModFNDefault_ClientRespawn, ( int clientNum ), ( clientNum ), clientNum, "G_MODFN_CLIENTRESPAWN G_CLIENTSTATE" ) {
 	gentity_t *ent = &g_entities[clientNum];
-
-	if ( g_pModElimination.integer != 0 )
-	{//no players respawn when in elimination
-		if ( !(level.intermissiontime && level.intermissiontime != -1) )
-		{//don't do this once intermission has begun
-			EliminationSpectate( ent );
-		}
-		return;
-	}
-
 	modfn.CopyToBodyQue( clientNum );
 	ClientSpawn(ent, CST_RESPAWN);
 }
@@ -1840,12 +1820,29 @@ LOGFUNCTION_VOID( ModFNDefault_SpawnCenterPrintMessage, ( int clientNum, clientS
 
 	if ( client->sess.sessionTeam == TEAM_SPECTATOR )
 	{//spectators just get the title of the game
-		if ( g_pModElimination.integer )
+		switch ( g_gametype.integer )
 		{
-			trap_SendServerCommand( clientNum, "cp \"Elimination\"" );
+		case GT_FFA:				// free for all
+			trap_SendServerCommand( clientNum, "cp \"Free For All\"" );
+			break;
+		case GT_TOURNAMENT:		// one on one tournament
+			trap_SendServerCommand( clientNum, "cp \"Tournament\"" );
+			break;
+		case GT_SINGLE_PLAYER:	// single player tournament
+			trap_SendServerCommand( clientNum, "cp \"SoloMatch\"" );
+			break;
+		case GT_TEAM:			// team deathmatch
+			trap_SendServerCommand( clientNum, "cp \"Team Holomatch\"" );
+			break;
+		case GT_CTF:				// capture the flag
+			trap_SendServerCommand( clientNum, "cp \"Capture the Flag\"" );
+			break;
 		}
-		else
-		{
+	}
+	else
+	{
+		if ( !clientInitialStatus[clientNum].initialized )
+		{//first time coming in
 			switch ( g_gametype.integer )
 			{
 			case GT_FFA:				// free for all
@@ -1865,56 +1862,22 @@ LOGFUNCTION_VOID( ModFNDefault_SpawnCenterPrintMessage, ( int clientNum, clientS
 				break;
 			}
 		}
-	}
-	else
-	{
-		if ( g_pModElimination.integer )
+		if ( clientNum == actionHeroClientNum )
 		{
-			if ( !clientInitialStatus[clientNum].initialized )
-			{//first time coming in
-				trap_SendServerCommand( clientNum, "cp \"Elimination\n\"" );
-			}
+			trap_SendServerCommand( clientNum, "cp \"You are the Action Hero!\"" );
 		}
-		else
-		{
+		else if ( actionHeroClientNum > -1 )
+		{//FIXME: this will make it so that those who spawn before the action hero won't be told who he is
 			if ( !clientInitialStatus[clientNum].initialized )
 			{//first time coming in
-				switch ( g_gametype.integer )
+				gentity_t *aH = &g_entities[actionHeroClientNum];
+				if ( aH != NULL && aH->client != NULL && aH->client->pers.netname[0] != 0 )
 				{
-				case GT_FFA:				// free for all
-					trap_SendServerCommand( clientNum, "cp \"Free For All\"" );
-					break;
-				case GT_TOURNAMENT:		// one on one tournament
-					trap_SendServerCommand( clientNum, "cp \"Tournament\"" );
-					break;
-				case GT_SINGLE_PLAYER:	// single player tournament
-					trap_SendServerCommand( clientNum, "cp \"SoloMatch\"" );
-					break;
-				case GT_TEAM:			// team deathmatch
-					trap_SendServerCommand( clientNum, "cp \"Team Holomatch\"" );
-					break;
-				case GT_CTF:				// capture the flag
-					trap_SendServerCommand( clientNum, "cp \"Capture the Flag\"" );
-					break;
+					trap_SendServerCommand( clientNum, va("cp \"Action Hero is %s!\"", aH->client->pers.netname) );
 				}
-			}
-			if ( clientNum == actionHeroClientNum )
-			{
-				trap_SendServerCommand( clientNum, "cp \"You are the Action Hero!\"" );
-			}
-			else if ( actionHeroClientNum > -1 )
-			{//FIXME: this will make it so that those who spawn before the action hero won't be told who he is
-				if ( !clientInitialStatus[clientNum].initialized )
-				{//first time coming in
-					gentity_t *aH = &g_entities[actionHeroClientNum];
-					if ( aH != NULL && aH->client != NULL && aH->client->pers.netname[0] != 0 )
-					{
-						trap_SendServerCommand( clientNum, va("cp \"Action Hero is %s!\"", aH->client->pers.netname) );
-					}
-					else
-					{
-						trap_SendServerCommand( clientNum, "cp \"Action Hero!\"" );
-					}
+				else
+				{
+					trap_SendServerCommand( clientNum, "cp \"Action Hero!\"" );
 				}
 			}
 		}
@@ -1977,7 +1940,7 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	*/
 
 	// find a spawn point
-	if ( client->sess.sessionTeam == TEAM_SPECTATOR ) {
+	if ( modfn.SpectatorClient( index ) ) {
 		spawnPoint = SelectSpectatorSpawnPoint( spawn_origin, spawn_angles );
 	} else if ( g_gametype.integer >= GT_TEAM ) {
 		spawnPoint = SelectCTFSpawnPoint( ent, client->sess.sessionTeam, spawnType != CST_RESPAWN,
@@ -1997,7 +1960,7 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	}
 
 	// try to avoid spawn kills
-	if ( client->sess.sessionTeam != TEAM_SPECTATOR ) {
+	if ( !modfn.SpectatorClient( index ) ) {
 		EF_ERR_ASSERT( spawnPoint );
 		modfn.PatchClientSpawn( index, &spawnPoint, spawn_origin, spawn_angles );
 	}
@@ -2074,7 +2037,7 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 
 	client->ps.ammo[WP_PHASER] = PHASER_AMMO_MAX;
 
-	if ( ent->client->sess.sessionTeam == TEAM_SPECTATOR || (ent->client->ps.eFlags&EF_ELIMINATED) ) {
+	if ( modfn.SpectatorClient( index ) ) {
 		ent->health = client->ps.stats[STAT_HEALTH] = client->ps.stats[STAT_MAX_HEALTH] = 100;
 
 		// Don't trip the out of ammo sound in CG_CheckAmmo
@@ -2132,7 +2095,7 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	ClientThink( ent-g_entities );
 
 	// positively link the client, even if the command times are weird
-	if ( ent->client->sess.sessionTeam != TEAM_SPECTATOR ) {
+	if ( !modfn.SpectatorClient( index ) ) {
 		BG_PlayerStateToEntityState( &client->ps, &ent->s, qtrue );
 		VectorCopy( ent->client->ps.origin, ent->r.currentOrigin );
 		trap_LinkEntity( ent );
@@ -2143,24 +2106,6 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 
 	// clear entity state values
 	BG_PlayerStateToEntityState( &client->ps, &ent->s, qtrue );
-
-	if ( ent->client->sess.sessionTeam != TEAM_SPECTATOR )
-	{
-		if ( g_pModElimination.integer )
-		{
-			if ( g_gametype.integer >= GT_TEAM )
-			{
-				if ( TeamCount( -1, TEAM_BLUE ) > 0 && TeamCount( -1, TEAM_RED ) > 0 )
-				{
-					noJoinLimit = g_noJoinTimeout.integer*1000;
-				}
-			}
-			else if ( TeamCount( -1, TEAM_FREE ) > 1 )
-			{
-				noJoinLimit = g_noJoinTimeout.integer*1000;
-			}
-		}
-	}
 
 	// send current class to client for UI team/class menu
 	if ( spawnType == CST_FIRSTTIME || spawnType == CST_MAPCHANGE || spawnType == CST_MAPRESTART
@@ -2173,8 +2118,7 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	modfn.SpawnCenterPrintMessage( index, spawnType );
 
 	// play transporter effect, but not for spectators or holodeck intro viewers
-	if ( !( ent->client->sess.sessionTeam == TEAM_SPECTATOR || (ent->client->ps.eFlags&EF_ELIMINATED) )
-			&& !( client->ps.introTime > level.time ) ) {
+	if ( !( modfn.SpectatorClient( index ) ) && !( client->ps.introTime > level.time ) ) {
 		modfn.SpawnTransporterEffect( index, spawnType );
 	}
 
@@ -2212,7 +2156,8 @@ void ClientDisconnect( int clientNum ) {
 
 	// stop any following clients
 	for ( i = 0 ; i < level.maxclients ; i++ ) {
-		if ( level.clients[i].sess.sessionTeam == TEAM_SPECTATOR
+		if ( level.clients[i].pers.connected >= CON_CONNECTING
+			&& modfn.SpectatorClient( i )
 			&& level.clients[i].sess.spectatorState == SPECTATOR_FOLLOW
 			&& level.clients[i].sess.spectatorClient == clientNum ) {
 			StopFollowing( &g_entities[i] );
@@ -2221,7 +2166,7 @@ void ClientDisconnect( int clientNum ) {
 
 	// send effect if they were completely connected
 	if ( ent->client->pers.connected == CON_CONNECTED
-		&& ent->client->sess.sessionTeam != TEAM_SPECTATOR ) {
+		&& !modfn.SpectatorClient( clientNum ) ) {
 		tent = G_TempEntity( ent->client->ps.origin, EV_PLAYER_TELEPORT_OUT );
 		tent->s.clientNum = clientNum;
 

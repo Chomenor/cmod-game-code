@@ -72,6 +72,10 @@ LOGFUNCTION_VOID( ModFNDefault_AddModConfigInfo, ( char *info ),
 		( info ), "G_MODFN_ADDMODCONFIGINFO" ) {
 }
 
+int ModFNDefault_AdjustScoreboardAttributes( int clientNum, scoreboardAttribute_t saType, int defaultValue ) {
+	return defaultValue;
+}
+
 LOGFUNCTION_VOID( ModFNDefault_TrapTrace, ( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs,
 		const vec3_t end, int passEntityNum, int contentmask, int modFlags ),
 		( results, start, mins, maxs, end, passEntityNum, contentmask, modFlags ), "G_MODFN_TRAPTRACE" ) {

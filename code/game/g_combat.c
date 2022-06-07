@@ -5,7 +5,6 @@
 #include "g_local.h"
 
 extern int	actionHeroClientNum;
-extern int	numKilled;
 extern void G_RandomActionHero( int ignoreClientNum );
 
 
@@ -28,34 +27,14 @@ void AddScore( gentity_t *ent, int score ) {
 	if ( level.warmupTime ) {
 		return;
 	}
+	if ( modfn.AdjustGeneralConstant( GC_DISABLE_ADDSCORE, 0 ) ) {
+		return;
+	}
 	ent->client->ps.persistant[PERS_SCORE] += score;
-	//don't add score to team score during elimination
-	if (g_gametype.integer == GT_TEAM && g_pModElimination.integer == 0 )
+	if (g_gametype.integer == GT_TEAM )
 	{//this isn't capture score
 		level.teamScores[ ent->client->ps.persistant[PERS_TEAM] ] += score;
 	}
-	CalculateRanks();
-}
-
-/*
-============
-SetScore
-
-============
-*/
-void SetScore( gentity_t *ent, int score ) {
-	if ( !ent )
-	{
-		return;
-	}
-	if ( !ent->client ) {
-		return;
-	}
-	// no scoring during pre-match warmup
-	if ( level.warmupTime ) {
-		return;
-	}
-	ent->client->ps.persistant[PERS_SCORE] = score;
 	CalculateRanks();
 }
 
@@ -264,7 +243,6 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	int			anim;
 	int			contents;
 	int			killer;
-	int			i;
 	char		*killerName, *obit;
 	gentity_t	*detpack = NULL;
 	char		*classname = NULL;
@@ -653,40 +631,6 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 			//respawn the new hero
 			//FIXME: or just give them full health and all the goodies?
 			modfn.ClientRespawn( actionHeroClientNum );
-		}
-	}
-	if ( g_pModElimination.integer != 0 && meansOfDeath != MOD_RESPAWN && meansOfDeath != MOD_KNOCKOUT )
-	{//in elimination, you get scored by when you died, but knockout just respawns you, not kill you
-		/*
-		if ( !numKilled )
-		{
-			trap_SendServerCommand( -1, "cp \"Elimination Has Begun!\"" );
-		}
-		*/
-		numKilled++;
-		self->r.svFlags |= SVF_ELIMINATED;
-		switch ( self->client->sess.sessionTeam )
-		{
-		case TEAM_RED:
-			level.teamScores[TEAM_BLUE]++;
-			break;
-		case TEAM_BLUE:
-			level.teamScores[TEAM_RED]++;
-			break;
-		}
-		//Now increment score for everyone else
-		if ( g_gametype.integer < GT_TEAM )
-		{
-			for ( i = 0; i < level.maxclients; i++ )
-			{
-				if ( &g_entities[i] != NULL && g_entities[i].client != NULL && g_entities[i].inuse )
-				{
-					if ( g_entities[i].client->sess.sessionTeam != TEAM_SPECTATOR && g_entities[i].health > 0 && !(g_entities[i].client->ps.eFlags&EF_ELIMINATED) )
-					{
-						SetScore( &g_entities[i], numKilled );
-					}
-				}
-			}
 		}
 	}
 

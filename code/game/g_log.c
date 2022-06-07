@@ -84,8 +84,8 @@ void G_LogExit( const char *string ) {
 		ping = cl->ps.ping < 999 ? cl->ps.ping : 999;
 
 		G_LogPrintf( "score: %i  ping: %i  client: %i %s\n",
-			cl->ps.persistant[PERS_SCORE], ping, level.sortedClients[i],
-			cl->pers.netname );
+			modfn.EffectiveScore( level.sortedClients[i], EST_REALSCORE ),
+			ping, level.sortedClients[i], cl->pers.netname );
 	}
 }
 
@@ -1337,7 +1337,7 @@ qboolean CalculateTeamMVP(gentity_t *ent)
 {
 	// To get MVP award you need to be the team MVP and have a score higher than 0
 	int MVP = GetTeamMVP( ent->client->sess.sessionTeam );
-	return ent - g_entities == MVP && ent->client->ps.persistant[PERS_SCORE] > 0;
+	return ent - g_entities == MVP && modfn.EffectiveScore( MVP, EST_REALSCORE ) > 0;
 }
 
 qboolean CalculateTeamDefender(gentity_t *ent)

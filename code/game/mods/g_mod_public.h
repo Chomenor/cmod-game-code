@@ -14,12 +14,23 @@ typedef enum {
 } join_allowed_type_t;
 
 typedef enum {
+	SA_ELIMINATED,
+} scoreboardAttribute_t;
+
+typedef enum {
+	EST_REALSCORE,
+	EST_SCOREBOARD,
+} effectiveScoreType_t;
+
+typedef enum {
 	GC_NONE,
 	GC_SKIP_RUN_MISSILE,
 	GC_EVENT_TIME_OFFSET,
 	GC_SKIP_SPECTATOR_DOOR_TELEPORT,
 	GC_ASSIMILATION_MODELS,
 	GC_DISABLE_TEAM_FORCE_BALANCE,
+	GC_INTERMISSION_DELAY_TIME,
+	GC_DISABLE_ADDSCORE,
 } generalConstant_t;
 
 typedef enum {

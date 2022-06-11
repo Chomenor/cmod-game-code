@@ -37,6 +37,26 @@ LOGFUNCTION_VOID( ModFNDefault_GenerateClientSessionInfo, ( int clientNum, info_
 
 /*
 ================
+(ModFN) GenerateClientSessionStructure
+================
+*/
+LOGFUNCTION_VOID( ModFNDefault_GenerateClientSessionStructure, ( int clientNum, clientSession_t *sess ),
+		( clientNum, sess ), "G_MODFN_GENERATECLIENTSESSIONSTRUCTURE" ) {
+	gclient_t *client = &level.clients[clientNum];
+
+	sess->sessionTeam = modfn.RealSessionTeam( clientNum );
+	sess->spectatorState = client->sess.spectatorState;
+	sess->spectatorClient = client->sess.spectatorClient;
+
+	if ( g_gametype.integer == GT_TOURNAMENT ) {
+		sess->spectatorTime = client->sess.spectatorTime;
+		sess->wins = client->sess.wins;
+		sess->losses = client->sess.losses;
+	}
+}
+
+/*
+================
 (ModFN) GenerateGlobalSessionInfo
 ================
 */
@@ -122,16 +142,21 @@ void G_WriteClientSessionData( gclient_t *client ) {
 	int clientNum = client - level.clients;
 	const char	*s;
 	const char	*var;
+	clientSession_t sess;
 	info_string_t info;
 
+	// Write session structure
+	memset( &sess, 0, sizeof( sess ) );
+	modfn.GenerateClientSessionStructure( clientNum, &sess );
+
 	s = va("%i %i %i %i %i %i %i",
-		modfn.RealSessionTeam( clientNum ),
-		modfn.RealSessionClass( clientNum ),
-		client->sess.spectatorTime,
-		client->sess.spectatorState,
-		client->sess.spectatorClient,
-		client->sess.wins,
-		client->sess.losses
+		sess.sessionTeam,
+		sess.sessionClass,
+		sess.spectatorTime,
+		sess.spectatorState,
+		sess.spectatorClient,
+		sess.wins,
+		sess.losses
 		);
 
 	var = va( "session%i", clientNum );
@@ -169,6 +194,9 @@ void G_ReadSessionData( gclient_t *client ) {
 		&client->sess.wins,
 		&client->sess.losses
 		);
+
+	// Make sure appropriate class is selected for mod
+	modfn.UpdateSessionClass( clientNum );
 
 	// Call mod initialization
 	{

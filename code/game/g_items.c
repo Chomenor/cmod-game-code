@@ -827,34 +827,6 @@ LOGFUNCTION_VOID( ModFNDefault_AddRegisteredItems, ( void ), (), "G_MODFN_ADDREG
 	RegisterItem( BG_FindItemForWeapon( WP_COMPRESSION_RIFLE ) );	//this is for the podium at the end, make sure we have the model
 
 	// okay!  Now, based on what game mods we have one, we need to register even more stuff by default:
-	if ( g_pModSpecialties.integer )
-	{	//weapons
-		RegisterItem( BG_FindItemForWeapon( WP_IMOD ) );	//PC_SNIPER
-		RegisterItem( BG_FindItemForWeapon( WP_TETRION_DISRUPTOR ) );	//PC_HEAVY
-		RegisterItem( BG_FindItemForWeapon( WP_QUANTUM_BURST ) );	//PC_HEAVY
-		RegisterItem( BG_FindItemForWeapon( WP_SCAVENGER_RIFLE ) );	//PC_DEMO
-		RegisterItem( BG_FindItemForWeapon( WP_GRENADE_LAUNCHER ) );//PC_DEMO
-		RegisterItem( BG_FindItemForWeapon( WP_DREADNOUGHT ) );		//PC_TECH
-		RegisterItem( BG_FindItemForWeapon( WP_VOYAGER_HYPO ) );	//PC_MEDIC
-		//items
-		RegisterItem( BG_FindItemForHoldable( HI_TRANSPORTER ) );	//PC_INFILTRATOR, PC_BORG
-		RegisterItem( BG_FindItemForHoldable( HI_DECOY ) );	//PC_SNIPER
-		RegisterItem( BG_FindItemForHoldable( HI_DETPACK ) );	//PC_DEMO
-		RegisterItem( BG_FindItemForHoldable( HI_MEDKIT ) );	//PC_MEDIC
-		RegisterItem( BG_FindItemForHoldable( HI_SHIELD ) );	//PC_TECH
-		//power ups
-		RegisterItem( BG_FindItemForPowerup( PW_HASTE ) );	//PC_INFILTRATOR
-		RegisterItem( BG_FindItemForPowerup( PW_REGEN ) );	//PC_MEDIC, PC_ACTIONHERO
-		RegisterItem( BG_FindItemForPowerup( PW_SEEKER ) );	//PC_TECH. PC_VIP
-		RegisterItem( BG_FindItemForPowerup( PW_INVIS ) );	//PC_TECH
-		//Tech power stations
-		G_ModelIndex( "models/mapobjects/dn/powercell.md3" );
-		G_ModelIndex( "models/mapobjects/dn/powercell2.md3" );
-		G_SoundIndex( "sound/player/suitenergy.wav" );
-		G_SoundIndex( "sound/weapons/noammo.wav" );
-		G_SoundIndex( "sound/weapons/explosions/cargoexplode.wav" );
-		G_SoundIndex( "sound/items/respawn1.wav" );
-	}
 	if ( g_pModActionHero.integer )
 	{
 		RegisterItem( BG_FindItemForWeapon( WP_IMOD ) );
@@ -911,11 +883,19 @@ LOGFUNCTION_RET( gitem_t *, ModFNDefault_CheckReplaceItem, ( gentity_t *ent, git
 	return item;
 }
 
-qboolean G_ItemSuppressed( int itemType, int itemTag )
-{
+/*
+================
+(ModFN) CheckItemSpawnDisabled
+
+Allows permanently removing an item during initial spawn.
+Returns qtrue to disable item, qfalse to spawn item normally.
+================
+*/
+LOGFUNCTION_RET( qboolean, ModFNDefault_CheckItemSpawnDisabled, ( gitem_t *item ),
+		( item ), "G_MODFN_CHECKITEMSPAWNDISABLED" ) {
 	if ( g_pModDisintegration.integer != 0 )
 	{//FIXME: instagib
-		switch( itemType )
+		switch( item->giType )
 		{
 		case IT_ARMOR://useless
 		case IT_WEAPON://only compression rifle
@@ -924,7 +904,7 @@ qboolean G_ItemSuppressed( int itemType, int itemTag )
 			return qtrue;
 			break;
 		case IT_HOLDABLE:
-			switch ( itemTag )
+			switch ( item->giTag )
 			{
 			case HI_MEDKIT:
 			case HI_DETPACK:
@@ -933,7 +913,7 @@ qboolean G_ItemSuppressed( int itemType, int itemTag )
 			}
 			break;
 		case IT_POWERUP:
-			switch ( itemTag )
+			switch ( item->giTag )
 			{
 			case PW_BATTLESUIT:
 			case PW_QUAD:
@@ -945,49 +925,8 @@ qboolean G_ItemSuppressed( int itemType, int itemTag )
 			break;
 		}
 	}
-	else if ( g_pModSpecialties.integer != 0 )
-	{
-		switch( itemType )
-		{
-		case IT_ARMOR://given to classes
-		case IT_WEAPON://spread out among classes
-		case IT_HOLDABLE://spread out among classes
-		case IT_HEALTH://given by medics
-		case IT_AMMO://given by technician
-			return qtrue;
-			break;
-		case IT_POWERUP:
-			switch ( itemTag )
-			{
-			case PW_HASTE:
-			case PW_INVIS:
-			case PW_REGEN:
-			case PW_SEEKER:
-				return qtrue;
-				break;
-			}
-			break;
-		}
-	}
+
 	return qfalse;
-}
-
-qboolean G_ItemClassnameSuppressed( char *itemname )
-{
-	gitem_t *item = NULL;
-	int		itemType = 0;
-	int		itemTag = 0;
-
-	item = BG_FindItemWithClassname( itemname );
-
-	if ( !item )
-	{
-		return qfalse;
-	}
-	itemType = item->giType;
-	itemTag = item->giTag;
-
-	return G_ItemSuppressed( itemType, itemTag );
 }
 
 /*
@@ -1001,7 +940,7 @@ be on an entity that hasn't spawned yet.
 ============
 */
 void G_SpawnItem (gentity_t *ent, gitem_t *item) {
-	if ( G_ItemSuppressed( item->giType, item->giTag ) )
+	if ( modfn.CheckItemSpawnDisabled( item ) )
 	{
 		return;
 	}

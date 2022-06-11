@@ -55,6 +55,11 @@ LOGFUNCTION_RET( int, ModFNDefault_AdjustPmoveConstant, ( pmoveConstant_t pmcTyp
 	return defaultValue;
 }
 
+LOGFUNCTION_RET( int, ModFNDefault_ModifyAmmoUsage, ( int defaultValue, int weapon, qboolean alt ),
+		( defaultValue, weapon, alt ), "G_MODFN_MODIFYAMMOUSAGE" ) {
+	return defaultValue;
+}
+
 int ModFNDefault_AdjustGeneralConstant( generalConstant_t gcType, int defaultValue ) {
 	return defaultValue;
 }

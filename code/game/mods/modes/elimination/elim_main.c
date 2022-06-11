@@ -474,6 +474,11 @@ LOGFUNCTION_VOID( ModElimination_Init, ( void ), (), "G_MOD_INIT G_ELIMINATION" 
 		modcfg.mods_enabled.elimination = qtrue;
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
+		// Support combining with other mods
+		if ( G_ModUtils_GetLatchedValue( "g_pModSpecialties", "0", 0 ) ) {
+			ModSpecialties_Init();
+		}
+
 		INIT_FN_STACKABLE( SpectatorClient );
 		INIT_FN_STACKABLE( AdjustScoreboardAttributes );
 		INIT_FN_OVERRIDE( EffectiveScore );

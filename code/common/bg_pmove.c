@@ -1746,7 +1746,13 @@ static void PM_Weapon( void ) {
 		{
 			// alt fire
 			// check for out of ammo
-			if ( pm->ps->ammo[pm->ps->weapon] < altAmmoUsage[pm->ps->weapon])
+			int ammoUsage = altAmmoUsage[pm->ps->weapon];
+#ifdef MODULE_GAME
+			if ( pm->modifyAmmoUsage ) {
+				ammoUsage = pm->modifyAmmoUsage( ammoUsage, pm->ps->weapon, qtrue );
+			}
+#endif
+			if ( pm->ps->ammo[pm->ps->weapon] < ammoUsage )
 			{
 				//FIXME: flash a message and sound that indicates not enough ammo
 //				PM_AddEvent( EV_NOAMMO_ALT );
@@ -1771,14 +1777,20 @@ static void PM_Weapon( void ) {
 			}
 			else
 			{
-				pm->ps->ammo[pm->ps->weapon] -= altAmmoUsage[pm->ps->weapon];
+				pm->ps->ammo[pm->ps->weapon] -= ammoUsage;
 				altfired = qtrue;
 			}
 		}
 		else
 		{
 			// check for out of ammo
-			if ( ! pm->ps->ammo[ pm->ps->weapon ] )
+			int ammoUsage = 1;
+#ifdef MODULE_GAME
+			if ( pm->modifyAmmoUsage ) {
+				ammoUsage = pm->modifyAmmoUsage( ammoUsage, pm->ps->weapon, qfalse );
+			}
+#endif
+			if ( pm->ps->ammo[pm->ps->weapon] < ammoUsage )
 			{
 				if ( pm->ps->weapon == WP_PHASER ) // phaser out of ammo is special case
 				{
@@ -1793,8 +1805,7 @@ static void PM_Weapon( void ) {
 			}
 			else
 			{
-				// main fire (always uses 1 ammo)
-				pm->ps->ammo[pm->ps->weapon]--;
+				pm->ps->ammo[pm->ps->weapon] -= ammoUsage;
 			}
 		}
 	}

@@ -44,6 +44,19 @@ LOGFUNCTION_SRET( unsigned int, PREFIX(WeaponPredictableRNG), ( int clientNum ),
 
 /*
 ==============
+ModPCClientPredict_AddWeaponConstant
+==============
+*/
+static void ModPCClientPredict_AddWeaponConstant( char *buffer, int bufSize, weaponConstant_t wc,
+		int defaultValue, const char *infoKey ) {
+	int value = modfn.AdjustWeaponConstant( wc, defaultValue );
+	if ( value != defaultValue ) {
+		Q_strcat( buffer, bufSize, va( " %s:%i", infoKey, value ) );
+	}
+}
+
+/*
+==============
 ModPCClientPredict_AddInfo
 ==============
 */
@@ -53,9 +66,7 @@ static void ModPCClientPredict_AddInfo( char *info ) {
 
 	if ( ModPingcomp_Static_ProjectileCompensationEnabled() ) {
 		Q_strcat( buffer, sizeof( buffer ), " proj:1" );
-		if ( g_pModSpecialties.integer ) {
-			Q_strcat( buffer, sizeof( buffer ), " tm:1" );
-		}
+		ModPCClientPredict_AddWeaponConstant( buffer, sizeof( buffer ), WC_USE_TRIPMINES, 0, "tm" );
 	}
 
 	Info_SetValueForKey( info, "weaponPredict", buffer );

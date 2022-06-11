@@ -29,8 +29,9 @@ LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 	}
 
 	// Initialize cvars
-	trap_Cvar_Register( NULL, "g_pModAssimilation", "0", CVAR_SERVERINFO );
-	trap_Cvar_Register( NULL, "g_pModElimination", "0", CVAR_SERVERINFO );
+	trap_Cvar_Register( NULL, "g_pModAssimilation", "0", CVAR_SERVERINFO | CVAR_LATCH );
+	trap_Cvar_Register( NULL, "g_pModSpecialties", "0", CVAR_SERVERINFO | CVAR_LATCH );
+	trap_Cvar_Register( NULL, "g_pModElimination", "0", CVAR_SERVERINFO | CVAR_LATCH );
 
 	// Default mods
 	if ( modsEnabled >= 2 ) {
@@ -46,5 +47,12 @@ LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 		ModElimination_Init();
 	} else if ( trap_Cvar_VariableIntegerValue( "g_pModAssimilation" ) ) {
 		ModAssimilation_Init();
+	} else if ( trap_Cvar_VariableIntegerValue( "g_pModSpecialties" ) ) {
+		ModSpecialties_Init();
 	}
+
+	// Make sure info cvars are set accurately
+	trap_Cvar_Set( "g_pModElimination", modcfg.mods_enabled.elimination ? "1" : "0" );
+	trap_Cvar_Set( "g_pModAssimilation", modcfg.mods_enabled.assimilation ? "1" : "0" );
+	trap_Cvar_Set( "g_pModSpecialties", modcfg.mods_enabled.specialties ? "1" : "0" );
 }

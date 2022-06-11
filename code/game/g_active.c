@@ -566,15 +566,6 @@ void ClientTimerActions( gentity_t *ent, int msec ) {
 				G_AddEvent( ent, EV_POWERUP_SEEKER_FIRE, 0 ); // draw the thingy
 			}
 		}
-
-		if ( !client->ps.stats[STAT_HOLDABLE_ITEM] )
-		{//holding nothing...
-			if ( client->sess.sessionClass == PC_DEMO && client->ps.stats[STAT_USEABLE_PLACED] > 0 )
-			{//demolitionist detpack countdown
-				client->ps.stats[STAT_USEABLE_PLACED]--;
-			}
-		}
-
 	}
 }
 
@@ -1617,6 +1608,7 @@ LOGFUNCTION_VOID( ModFNDefault_PmoveInit, ( int clientNum, pmove_t *pmove ), ( c
 	pmove->pointcontents = trap_PointContents;
 	pmove->debugLevel = g_debugMove.integer;
 	pmove->noFootsteps = ( g_dmflags.integer & DF_NO_FOOTSTEPS ) > 0;
+	pmove->modifyAmmoUsage = modfn.ModifyAmmoUsage;
 }
 
 /*
@@ -1872,16 +1864,6 @@ void ClientThink_real( gentity_t *ent ) {
 		msec = 200;
 	}
 	ClientTimerActions( ent, msec );
-
-	if ( ent->client->teleportTime > 0 && ent->client->teleportTime < level.time )
-	{
-		if ( ent->client->sess.sessionClass == PC_DEMO )
-		{//after an initial delay, the demo gets the detpack
-			G_GiveHoldable( ent->client, HI_DETPACK );//give it to me
-			ent->client->ps.stats[STAT_USEABLE_PLACED] = 0;//make sure I'm set up to be able to drop it
-			ent->client->teleportTime = 0;//don't ever give it to me again
-		}
-	}
 }
 
 /*

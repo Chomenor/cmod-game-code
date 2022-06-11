@@ -83,6 +83,7 @@ set src=game\mods\modes\assimilation&set name=assim_borg_adapt&call :compile
 set src=game\mods\modes\assimilation&set name=assim_borg_teleport&call :compile
 set src=game\mods\modes\assimilation&set name=assim_main&call :compile
 set src=game\mods\modes\elimination&set name=elim_main&call :compile
+set src=game\mods\modes\specialties&set name=specs_main&call :compile
 set src=common&set name=logging&call :compile
 set src=common&set name=vm_extensions&call :compile
 

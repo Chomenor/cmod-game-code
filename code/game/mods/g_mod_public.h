@@ -23,6 +23,12 @@ typedef enum {
 } effectiveScoreType_t;
 
 typedef enum {
+	EH_VISIBLE,
+	EH_DAMAGE,
+	EH_MAXHEALTH,
+} effectiveHandicapType_t;
+
+typedef enum {
 	GC_NONE,
 	GC_SKIP_RUN_MISSILE,
 	GC_EVENT_TIME_OFFSET,
@@ -31,11 +37,13 @@ typedef enum {
 	GC_DISABLE_TEAM_FORCE_BALANCE,
 	GC_INTERMISSION_DELAY_TIME,
 	GC_DISABLE_ADDSCORE,
+	GC_ALLOW_BOT_CLASS_SPECIFIER,
 } generalConstant_t;
 
 typedef enum {
 	WC_NONE,
 	WC_WELDER_SKIP_INITIAL_THINK,
+	WC_USE_TRIPMINES,
 } weaponConstant_t;
 
 typedef enum {

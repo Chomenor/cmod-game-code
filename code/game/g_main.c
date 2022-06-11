@@ -416,10 +416,6 @@ void G_InitModRules( void )
 	{//don't use up ammo in disintegration mode
 		altAmmoUsage[WP_COMPRESSION_RIFLE] = 0;
 	}
-	if ( g_pModSpecialties.integer != 0 )
-	{//tripwires use more ammo
-		altAmmoUsage[WP_GRENADE_LAUNCHER] = 3;
-	}
 }
 
 /*

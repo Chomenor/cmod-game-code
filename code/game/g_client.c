@@ -946,28 +946,29 @@ qboolean getNewSkin(const char *group, char *model, const char *color, const gcl
 	return qtrue;
 }
 
-void ClientMaxHealthForClass ( gclient_t *client, pclass_t pclass )
-{
-	switch( pclass )
-	{
-	case PC_INFILTRATOR:
-		client->pers.maxHealth = 50;
-		break;
-	case PC_HEAVY:
-		client->pers.maxHealth = 200;
-		break;
-	case PC_ACTIONHERO:
-		client->pers.maxHealth = 150;
-		break;
-	case PC_MEDIC:
-	case PC_SNIPER:
-	case PC_DEMO:
-	case PC_TECH:
-		client->pers.maxHealth = 100;
-		break;
-	default:
-		break;
+/*
+===========
+(ModFN) EffectiveHandicap
+
+Returns effective handicap values to use for client.
+============
+*/
+LOGFUNCTION_RET( int, ModFNDefault_EffectiveHandicap, ( int clientNum, effectiveHandicapType_t type ),
+		( clientNum, type ), "G_MODFN_EFFECTIVEHANDICAP" ) {
+	gclient_t *client = &level.clients[clientNum];
+
+	if ( client->sess.sessionClass == PC_ACTIONHERO ) {
+		if ( type == EH_DAMAGE || type == EH_MAXHEALTH ) {
+			return 150;
+		}
+		return 100;
 	}
+
+	if ( client->pers.handicap < 1 || client->pers.handicap > 100 ) {
+		return 100;
+	}
+
+	return client->pers.handicap;
 }
 
 /*
@@ -1036,14 +1037,9 @@ void ClientUserinfoChanged( int clientNum ) {
 		}
 	}
 
-	// set max health
-	client->pers.maxHealth = atoi( Info_ValueForKey( userinfo, "handicap" ) );
-	if ( client->pers.maxHealth < 1 || client->pers.maxHealth > 100 ) {
-		client->pers.maxHealth = 100;
-	}
-	//if you have a class, ignores handicap and 100 limit, sorry
-	ClientMaxHealthForClass( client, client->sess.sessionClass );
-	client->ps.stats[STAT_MAX_HEALTH] = client->pers.maxHealth;
+	// set handicap and max health
+	client->pers.handicap = atoi( Info_ValueForKey( userinfo, "handicap" ) );
+	client->ps.stats[STAT_MAX_HEALTH] = modfn.EffectiveHandicap( clientNum, EH_MAXHEALTH );
 
 	// set model
 	switch ( client->sess.sessionClass )
@@ -1310,12 +1306,12 @@ void ClientUserinfoChanged( int clientNum ) {
 	if ( ent->r.svFlags & SVF_BOT ) {
 		s = va("n\\%s\\t\\%i\\p\\%i\\model\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i\\skill\\%s",
 			client->pers.netname, client->sess.sessionTeam, client->sess.sessionClass, model, c1,
-			client->pers.maxHealth, client->sess.wins, client->sess.losses,
+			modfn.EffectiveHandicap( clientNum, EH_VISIBLE ), client->sess.wins, client->sess.losses,
 			Info_ValueForKey( userinfo, "skill" ) );
 	} else {
 		s = va("n\\%s\\t\\%i\\p\\%i\\model\\%s\\c1\\%s\\hc\\%i\\w\\%i\\l\\%i",
 			client->pers.netname, client->sess.sessionTeam, client->sess.sessionClass, model, c1,
-			client->pers.maxHealth, client->sess.wins, client->sess.losses );
+			modfn.EffectiveHandicap( clientNum, EH_VISIBLE ), client->sess.wins, client->sess.losses );
 	}
 
 	trap_SetConfigstring( CS_PLAYERS+clientNum, s );
@@ -1398,10 +1394,6 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 
 	// get and distribute relevent paramters
 	G_LogPrintf( "ClientConnect: %i\n", clientNum );
-	if ( g_pModSpecialties.integer == 0 && client->sess.sessionClass != PC_BORG )
-	{
-		client->sess.sessionClass = PC_NOCLASS;
-	}
 	ClientUserinfoChanged( clientNum );
 
 	// don't do the "xxx connected" messages if they were caried over from previous level
@@ -1520,44 +1512,6 @@ void ClientWeaponsForClass ( gclient_t *client, pclass_t pclass )
 {
 	switch ( pclass )
 	{
-	case PC_INFILTRATOR:
-		client->ps.stats[STAT_WEAPONS] = ( 1 << WP_PHASER );
-		client->ps.ammo[WP_PHASER] = PHASER_AMMO_MAX;
-		break;
-	case PC_SNIPER:
-		client->ps.stats[STAT_WEAPONS] = ( 1 << WP_IMOD );
-		client->ps.ammo[WP_IMOD] = Max_Ammo[WP_IMOD];
-		client->ps.stats[STAT_WEAPONS] |= ( 1 << WP_COMPRESSION_RIFLE );
-		client->ps.ammo[WP_COMPRESSION_RIFLE] = Max_Ammo[WP_COMPRESSION_RIFLE];
-		break;
-	case PC_HEAVY:
-		client->ps.stats[STAT_WEAPONS] |= ( 1 << WP_TETRION_DISRUPTOR );
-		client->ps.ammo[WP_TETRION_DISRUPTOR] = Max_Ammo[WP_TETRION_DISRUPTOR];
-		client->ps.stats[STAT_WEAPONS] |= ( 1 << WP_QUANTUM_BURST );
-		client->ps.ammo[WP_QUANTUM_BURST] = Max_Ammo[WP_QUANTUM_BURST];
-		break;
-	case PC_DEMO:
-		client->ps.stats[STAT_WEAPONS] = ( 1 << WP_SCAVENGER_RIFLE );
-		client->ps.ammo[WP_SCAVENGER_RIFLE] = Max_Ammo[WP_SCAVENGER_RIFLE];
-		client->ps.stats[STAT_WEAPONS] |= ( 1 << WP_GRENADE_LAUNCHER );
-		client->ps.ammo[WP_GRENADE_LAUNCHER] = Max_Ammo[WP_GRENADE_LAUNCHER];
-		break;
-	case PC_MEDIC:
-		client->ps.stats[STAT_WEAPONS] = ( 1 << WP_PHASER );
-		client->ps.ammo[WP_PHASER] = PHASER_AMMO_MAX;
-		client->ps.stats[STAT_WEAPONS] |= ( 1 << WP_VOYAGER_HYPO );
-		client->ps.ammo[WP_VOYAGER_HYPO] = client->ps.ammo[WP_PHASER];
-		break;
-	case PC_TECH:
-		client->ps.stats[STAT_WEAPONS] = ( 1 << WP_PHASER );
-		client->ps.ammo[WP_PHASER] = PHASER_AMMO_MAX;
-		client->ps.stats[STAT_WEAPONS] |= ( 1 << WP_DREADNOUGHT );
-		client->ps.ammo[WP_DREADNOUGHT] = Max_Ammo[WP_DREADNOUGHT];
-		break;
-	case PC_VIP:
-		client->ps.stats[STAT_WEAPONS] = ( 1 << WP_PHASER );
-		client->ps.ammo[WP_PHASER] = PHASER_AMMO_MAX;
-		break;
 	case PC_ACTIONHERO:
 		client->ps.stats[STAT_WEAPONS] = ( 1 << WP_PHASER );
 		client->ps.ammo[WP_PHASER] = PHASER_AMMO_MAX;
@@ -1578,7 +1532,6 @@ void ClientWeaponsForClass ( gclient_t *client, pclass_t pclass )
 		client->ps.stats[STAT_WEAPONS] |= ( 1 << WP_DREADNOUGHT );
 		client->ps.ammo[WP_DREADNOUGHT] = Max_Ammo[WP_DREADNOUGHT];
 		break;
-	case PC_NOCLASS:
 	default:
 		client->ps.stats[STAT_WEAPONS] = ( 1 << WP_PHASER );
 		client->ps.ammo[WP_PHASER] = PHASER_AMMO_MAX;
@@ -1588,80 +1541,10 @@ void ClientWeaponsForClass ( gclient_t *client, pclass_t pclass )
 
 void ClientArmorForClass ( gclient_t *client, pclass_t pclass )
 {
-	/*
-	gitem_t	*armor = BG_FindItem( "Personal Deflector Screen" );
-	gitem_t	*harmor = BG_FindItem( "Isokinetic Deflector Screen" );
-	assert( armor );
-	assert( harmor );
-	*/
-	/*
-	gitem_t	*bsuit = BG_FindItem( "Metaphasic Shielding" );
-	client->ps.stats[STAT_HOLDABLE_ITEM] = bsuit - bg_itemlist;
-	*/
-
 	switch ( pclass )
 	{
-	case PC_INFILTRATOR:
-		client->ps.stats[STAT_ARMOR] = 0;
-		break;
-	case PC_SNIPER:
-		client->ps.stats[STAT_ARMOR] = 25;
-		break;
-	case PC_HEAVY:
-		client->ps.stats[STAT_ARMOR] = 100;
-		break;
-	case PC_DEMO:
-		client->ps.stats[STAT_ARMOR] = 50;
-		break;
-	case PC_MEDIC://note: can also give health & armor & regen
-		client->ps.stats[STAT_ARMOR] = 75;
-		break;
-	case PC_TECH://note: can also give ammo & invis
-		client->ps.stats[STAT_ARMOR] = 50;
-		break;
-	case PC_VIP:
-		client->ps.stats[STAT_ARMOR] = 100;
-		break;
 	case PC_ACTIONHERO:
 		client->ps.stats[STAT_ARMOR] = 100;
-		break;
-	case PC_NOCLASS:
-	default:
-		break;
-	}
-}
-
-void ClientHoldablesForClass ( gclient_t *client, pclass_t pclass )
-{
-	switch ( pclass )
-	{
-	case PC_INFILTRATOR:
-		client->ps.stats[STAT_HOLDABLE_ITEM] = BG_FindItemForHoldable( HI_TRANSPORTER ) - bg_itemlist;
-		break;
-	case PC_SNIPER:
-		client->ps.stats[STAT_HOLDABLE_ITEM] = BG_FindItemForHoldable( HI_DECOY ) - bg_itemlist;
-		client->ps.stats[STAT_USEABLE_PLACED] = 0;
-		break;
-	case PC_HEAVY:
-		break;
-	case PC_DEMO:
-		//NOTE: instead of starting with the detpack, demo's get the detpack 10 seconds after spawning in
-		client->teleportTime = level.time + 10000;
-		client->ps.stats[STAT_USEABLE_PLACED] = 10;
-		/*
-		client->ps.stats[STAT_HOLDABLE_ITEM] = BG_FindItemForHoldable( HI_DETPACK ) - bg_itemlist;
-		client->ps.stats[STAT_USEABLE_PLACED] = 0;
-		*/
-		break;
-	case PC_MEDIC:
-		client->ps.stats[STAT_HOLDABLE_ITEM] = BG_FindItemForHoldable( HI_MEDKIT ) - bg_itemlist;
-		break;
-	case PC_TECH:
-		client->ps.stats[STAT_HOLDABLE_ITEM] = BG_FindItemForHoldable( HI_SHIELD ) - bg_itemlist;
-		break;
-	case PC_VIP:
-		break;
-	case PC_ACTIONHERO:
 		break;
 	case PC_NOCLASS:
 	default:
@@ -1671,40 +1554,10 @@ void ClientHoldablesForClass ( gclient_t *client, pclass_t pclass )
 
 void ClientPowerupsForClass ( gentity_t *ent, pclass_t pclass )
 {
-	gitem_t	*speed = BG_FindItemForPowerup( PW_HASTE );
 	gitem_t	*regen = BG_FindItemForPowerup( PW_REGEN );
-	gitem_t	*seeker = BG_FindItemForPowerup( PW_SEEKER );
 
 	switch ( pclass )
 	{
-	case PC_INFILTRATOR:
-		//INFILTRATOR gets permanent speed
-		ent->client->ps.powerups[speed->giTag] = level.time - ( level.time % 1000 );
-		ent->client->ps.powerups[speed->giTag] += 1800 * 1000;
-		break;
-	case PC_SNIPER:
-		break;
-	case PC_HEAVY:
-		break;
-	case PC_DEMO:
-		break;
-	case PC_MEDIC:
-		ent->client->ps.powerups[regen->giTag] = level.time - ( level.time % 1000 );
-		ent->client->ps.powerups[regen->giTag] += 1800 * 1000;
-		break;
-	case PC_TECH:
-		//tech gets permanent seeker
-		ent->client->ps.powerups[seeker->giTag] = level.time - ( level.time % 1000 );
-		ent->client->ps.powerups[seeker->giTag] += 1800 * 1000;
-		ent->count = 1;//can give away one invincibility
-		//can also place ammo stations, register the model and sound for them
-		G_ModelIndex( "models/mapobjects/dn/powercell.md3" );
-		G_SoundIndex( "sound/player/suitenergy.wav" );
-		break;
-	case PC_VIP:
-		ent->client->ps.powerups[seeker->giTag] = level.time - ( level.time % 1000 );
-		ent->client->ps.powerups[seeker->giTag] += 1800 * 1000;
-		break;
 	case PC_ACTIONHERO:
 		ent->client->ps.powerups[regen->giTag] = level.time - ( level.time % 1000 );
 		ent->client->ps.powerups[regen->giTag] += 1800 * 1000;
@@ -1728,7 +1581,6 @@ void G_StoreClientInitialStatus( gentity_t *ent )
 	}
 
 	clientInitialStatus[ent->s.number].initialized = qtrue;
-	ent->client->classChangeDebounceTime = 0;
 }
 
 /*
@@ -1742,15 +1594,7 @@ LOGFUNCTION_VOID( ModFNDefault_UpdateSessionClass, ( int clientNum ),
 		( clientNum ), "G_MODFN_UPDATESESSIONCLASS" ) {
 	gclient_t *client = &level.clients[clientNum];
 
-	if ( g_pModSpecialties.integer != 0 )
-	{
-		if ( client->sess.sessionClass == PC_NOCLASS )
-		{
-			client->sess.sessionClass = irandom( PC_INFILTRATOR, PC_TECH );
-			SetPlayerClassCvar(&g_entities[clientNum]);
-		}
-	}
-	else if ( g_pModActionHero.integer != 0 )
+	if ( g_pModActionHero.integer != 0 )
 	{
 		if ( clientNum == actionHeroClientNum )
 		{
@@ -1795,14 +1639,12 @@ LOGFUNCTION_VOID( ModFNDefault_SpawnConfigureClient, ( int clientNum ),
 	}
 	else
 	{
-		ClientMaxHealthForClass( client, pClass );
-		if ( pClass != PC_NOCLASS )
-		{//no health boost on spawn for playerclasses
-			ent->health = client->ps.stats[STAT_HEALTH] = client->ps.stats[STAT_MAX_HEALTH] = client->pers.maxHealth;
+		if ( pClass == PC_ACTIONHERO )
+		{
+			ent->health = client->ps.stats[STAT_HEALTH] = client->ps.stats[STAT_MAX_HEALTH];
 		}
 		ClientWeaponsForClass( client, pClass );
 		ClientArmorForClass( client, pClass );
-		ClientHoldablesForClass( client, pClass );
 		ClientPowerupsForClass( ent, pClass );
 	}
 }
@@ -1921,8 +1763,6 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	gentity_t	*spawnPoint;
 	int		flags;
 	int		savedPing;
-	pclass_t	pClass = PC_NOCLASS;
-	int		cCDT = 0;
 	pclass_t oClass = ent->client->sess.sessionClass;
 
 	index = ent - g_entities;
@@ -1977,13 +1817,7 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	for ( i = 0 ; i < MAX_PERSISTANT ; i++ ) {
 		persistant[i] = client->ps.persistant[i];
 	}
-	//okay, this is hacky, but we need to keep track of this, even if uninitialized first time you spawn, it will be stomped anyway
-	if ( client->classChangeDebounceTime )
-	{
-		cCDT = client->classChangeDebounceTime;
-	}
 	memset (client, 0, sizeof(*client));
-	client->classChangeDebounceTime = cCDT;
 	//
 	client->pers = saved;
 	client->sess = savedSess;
@@ -1999,7 +1833,6 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	client->airOutTime = level.time + 12000;
 
 	// clear entity values
-	client->ps.stats[STAT_MAX_HEALTH] = client->pers.maxHealth;
 	client->ps.eFlags = flags;
 	client->streakCount = 0;
 
@@ -2027,6 +1860,9 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 
 	client->ps.clientNum = index;
 
+	// Always set phaser ammo since it will count up anyway
+	client->ps.ammo[WP_PHASER] = PHASER_AMMO_MAX;
+
 	// Determine player class
 	modfn.UpdateSessionClass( index );
 	if ( oClass != client->sess.sessionClass )
@@ -2035,10 +1871,11 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	}
 	client->ps.persistant[PERS_CLASS] = client->sess.sessionClass;
 
-	client->ps.ammo[WP_PHASER] = PHASER_AMMO_MAX;
+	// Determine max health
+	client->ps.stats[STAT_MAX_HEALTH] = modfn.EffectiveHandicap( index, EH_MAXHEALTH );
 
 	if ( modfn.SpectatorClient( index ) ) {
-		ent->health = client->ps.stats[STAT_HEALTH] = client->ps.stats[STAT_MAX_HEALTH] = 100;
+		ent->health = client->ps.stats[STAT_HEALTH] = client->ps.stats[STAT_MAX_HEALTH];
 
 		// Don't trip the out of ammo sound in CG_CheckAmmo
 		client->ps.stats[STAT_WEAPONS] = 1 << WP_PHASER;

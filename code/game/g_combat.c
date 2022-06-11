@@ -69,7 +69,7 @@ void TossClientItems( gentity_t *self ) {
 	int			i;
 	gentity_t	*drop;
 
-	if ( g_pModDisintegration.integer == 0 && g_pModSpecialties.integer == 0 )
+	if ( g_pModDisintegration.integer == 0 )
 	{//not in playerclass game mode and not in disintegration mode (okay to drop weap)
 		// drop the weapon if not a phaser
 		weapon = self->s.weapon;
@@ -106,13 +106,6 @@ void TossClientItems( gentity_t *self ) {
 			item = BG_FindItemForPowerup( i );
 			if ( !item || !modfn.CanItemBeDropped( item, self - g_entities ) ) {
 				continue;
-			}
-			if ( g_pModSpecialties.integer != 0 )
-			{//in playerclass game mode
-				if ( item->giType != IT_TEAM )
-				{//only drop the flag
-					continue;
-				}
 			}
 			drop = Drop_Item( self, item, angle );
 			// decide how many seconds it has left
@@ -713,6 +706,19 @@ LOGFUNCTION_RET( qboolean, ModFNDefault_CheckBorgAdapt, ( gentity_t *targ, genti
 
 /*
 ============
+(ModFN) KnockbackMass
+
+Returns mass value for knockback calculations.
+============
+*/
+LOGFUNCTION_RET( float, ModFNDefault_KnockbackMass, ( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+		vec3_t dir, vec3_t point, int damage, int dflags, int mod ),
+		( targ, inflictor, attacker, dir, point, damage, dflags, mod ), "G_MODFN_KNOCKBACKMASS G_DAMAGE" ) {
+	return 200;
+}
+
+/*
+============
 T_Damage
 
 targ		entity that is being damaged
@@ -781,7 +787,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	// reduce damage by the attacker's handicap value
 	// unless they are rocket jumping
 	if ( attacker->client && attacker != targ ) {
-		damage = damage * attacker->client->ps.stats[STAT_MAX_HEALTH] / 100;
+		damage = damage * modfn.EffectiveHandicap( attacker - g_entities, EH_DAMAGE ) / 100;
 	}
 
 	client = targ->client;
@@ -833,22 +839,9 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		if ( (dflags&DAMAGE_ALL_TEAMS) || (dflags&DAMAGE_RADIUS) || g_friendlyFire.integer || !attacker->client || !OnSameTeam (targ, attacker) )
 		{
 			vec3_t	kvel;
-			float	mass;
+			float	mass = modfn.KnockbackMass( targ, inflictor, attacker, dir, point, damage, dflags, mod );
 
 			// flying targets get pushed around a lot more.
-			switch ( targ->client->sess.sessionClass )
-			{
-			case PC_INFILTRATOR:
-				mass = 100;
-				break;
-			case PC_HEAVY:
-				mass = 400;
-				break;
-			default:
-				mass = 200;
-				break;
-			}
-
 			if (targ->client->ps.powerups[PW_FLIGHT])
 			{
 				mass *= 0.375;

@@ -2775,7 +2775,7 @@ void BotDeathmatchAI(bot_state_t *bs, float thinktime) {
 			Com_sprintf(buf, sizeof(buf), "team %s", bs->settings.team);
 			trap_EA_Command(bs->client, buf);
 		}
-		if ( g_pModSpecialties.integer ) {
+		if ( modfn.AdjustGeneralConstant( GC_ALLOW_BOT_CLASS_SPECIFIER, 0 ) ) {
 			Com_sprintf(buf, sizeof(buf), "class %s", bs->settings.pclass);
 			trap_EA_Command(bs->client, buf);
 		}

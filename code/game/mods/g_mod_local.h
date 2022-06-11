@@ -10,6 +10,7 @@
 
 typedef struct {
 	qboolean assimilation;
+	qboolean specialties;
 	qboolean elimination;
 } mods_enabled_t;
 
@@ -29,6 +30,7 @@ int G_ModUtils_GetLatchedValue( const char *cvar_name, const char *default_value
 
 void ModAssimilation_Init( void );
 void ModElimination_Init( void );
+void ModSpecialties_Init( void );
 
 /* ************************************************************************* */
 // Features - Modules loaded directly from G_ModsInit to add features

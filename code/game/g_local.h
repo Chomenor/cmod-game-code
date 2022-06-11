@@ -265,7 +265,7 @@ typedef struct {
 	qboolean	localClient;		// true if "ip" info key is "localhost"
 	qboolean	predictItemPickup;	// based on cg_predictItems userinfo
 	char		netname[MAX_NAME_LENGTH];
-	int			maxHealth;			// for handicapping
+	int			handicap;			// for handicapping and damage calculation
 	int			enterTime;			// level.time the client entered the game
 	playerTeamState_t teamState;	// status in teamplay games
 	int			voteCount;			// to prevent people from constantly calling votes
@@ -324,10 +324,6 @@ struct gclient_s {
 	int			timeResidual;
 	int			mod;				// means of death
 
-	//added for new game mods
-	int			teleportTime;		// Borg teleporting
-	int			classChangeDebounceTime;	// next time you can change classes
-	
 	qboolean	newExternalEvent;
 	qboolean	scoreUpdatePending;
 	qboolean	botDelayBegin;

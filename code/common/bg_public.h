@@ -184,6 +184,10 @@ typedef struct {
 	// Specialties infiltrator options (0 = revert to default)
 	float		infilJumpFactor;		// default: 2.0
 	float		infilAirAccelFactor;	// default: 2.0
+
+#ifdef MODULE_GAME
+	int			( *modifyAmmoUsage )( int defaultValue, int weapon, qboolean alt );
+#endif
 } pmove_t;
 
 // if a full pmove isn't done on the client, you can just update the angles

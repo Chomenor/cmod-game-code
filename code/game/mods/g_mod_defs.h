@@ -69,6 +69,9 @@ MOD_FUNCTION_DEF( SpectatorClient, qboolean, ( int clientNum ) )
 // Returns effective score values to use for client.
 MOD_FUNCTION_DEF( EffectiveScore, int, ( int clientNum, effectiveScoreType_t type ) )
 
+// Returns effective handicap values to use for client.
+MOD_FUNCTION_DEF( EffectiveHandicap, int, ( int clientNum, effectiveHandicapType_t type ) )
+
 // Returns player-selected team, even if active team is temporarily overriden by borg assimilation.
 MOD_FUNCTION_DEF( RealSessionTeam, team_t, ( int clientNum ) )
 
@@ -122,6 +125,10 @@ MOD_FUNCTION_DEF( WeaponPredictableRNG, unsigned int, ( int clientNum ) )
 // (damage, knockback, death, scoring, etc.)
 //////////////////////////
 
+// Returns mass for knockback calculations.
+MOD_FUNCTION_DEF( KnockbackMass, float, ( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+		vec3_t dir, vec3_t point, int damage, int dflags, int mod ) )
+
 // Deals damage from explosion-type sources.
 MOD_FUNCTION_DEF( RadiusDamage, qboolean, ( vec3_t origin, gentity_t *attacker, float damage, float radius,
 		gentity_t *ignore, int dflags, int mod ) )
@@ -135,6 +142,10 @@ MOD_FUNCTION_DEF( CopyToBodyQue, gentity_t *, ( int clientNum ) )
 
 // Allows replacing an item with a different item during initial map spawn.
 MOD_FUNCTION_DEF( CheckReplaceItem, gitem_t *, ( gentity_t *ent, gitem_t *item ) )
+
+// Allows permanently removing an item during initial spawn.
+// Returns qtrue to disable item, qfalse to spawn item normally.
+MOD_FUNCTION_DEF( CheckItemSpawnDisabled, qboolean, ( gitem_t *item ) )
 
 // Check if item can be tossed on death/disconnect.
 MOD_FUNCTION_DEF( CanItemBeDropped, qboolean, ( gitem_t *item, int clientNum ) )
@@ -161,6 +172,10 @@ MOD_FUNCTION_DEF( InitClientSession, void, ( int clientNum, qboolean initialConn
 // Generates client info string data to be written to cvar on match exit.
 MOD_FUNCTION_DEF( GenerateClientSessionInfo, void, ( int clientNum, info_string_t *info ) )
 
+// Generates session structure written to cvar on match exit. This data may be used by other mods
+// on servers that support mod switching, so compatibility should be taken into account.
+MOD_FUNCTION_DEF( GenerateClientSessionStructure, void, ( int clientNum, clientSession_t *sess ) )
+
 // Generates global info string data to be written to cvar on match exit.
 MOD_FUNCTION_DEF( GenerateGlobalSessionInfo, void, ( info_string_t *info ) )
 
@@ -180,6 +195,9 @@ MOD_FUNCTION_DEF( RunPlayerMove, void, ( int clientNum ) )
 // Process triggers and other operations after player move(s) have completed.
 // This may be called 0, 1, or multiple times per input usercmd depending on move partitioning.
 MOD_FUNCTION_DEF( PostPmoveActions, void, ( pmove_t *pmove, int clientNum, int oldEventSequence ) )
+
+// Adjust weapon ammo usage.
+MOD_FUNCTION_DEF( ModifyAmmoUsage, int, ( int defaultValue, int weapon, qboolean alt ) )
 
 //////////////////////////
 // misc

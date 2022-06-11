@@ -852,6 +852,11 @@ LOGFUNCTION_VOID( ModAssimilation_Init, ( void ), (), "G_MOD_INIT G_ASSIMILATION
 	if ( EF_WARN_ASSERT( !MOD_STATE ) ) {
 		modcfg.mods_enabled.assimilation = qtrue;
 
+		// Support combining with other mods
+		if ( G_ModUtils_GetLatchedValue( "g_pModSpecialties", "0", 0 ) ) {
+			ModSpecialties_Init();
+		}
+
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
 		MOD_STATE->borgQueenClientNum = -1;

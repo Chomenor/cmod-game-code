@@ -1020,7 +1020,7 @@ void WP_FireGrenade( gentity_t *ent, qboolean alt_fire )
 
 	if ( alt_fire )
 	{
-		if ( ent->client && ent->client->sess.sessionClass == PC_DEMO )
+		if ( ent->client && modfn.AdjustWeaponConstant( WC_USE_TRIPMINES, 0 ) )
 		{
 			//limit to 10 placed at any one time
 			//see how many there are now

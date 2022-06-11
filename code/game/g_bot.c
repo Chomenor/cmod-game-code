@@ -628,7 +628,7 @@ static void G_AddBot( const char *name, int skill, const char *team, const char 
 	Info_SetValueForKey( userinfo, "skill", va( "%i", skill ) );
 	Info_SetValueForKey( userinfo, "team", team );
 	if( pclass && *pclass ) {
-		if( g_pModSpecialties.integer ) {
+		if( modfn.AdjustGeneralConstant( GC_ALLOW_BOT_CLASS_SPECIFIER, 0 ) ) {
 			Info_SetValueForKey( userinfo, "class", pclass );
 		}
 	}

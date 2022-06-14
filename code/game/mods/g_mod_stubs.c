@@ -31,6 +31,10 @@ LOGFUNCTION_VOID( ModFNDefault_PreClientSpawn, ( int clientNum, clientSpawnType_
 		( clientNum, spawnType ), "G_MODFN_PRECLIENTSPAWN" ) {
 }
 
+LOGFUNCTION_VOID( ModFNDefault_PostClientSpawn, ( int clientNum, clientSpawnType_t spawnType ),
+		( clientNum, spawnType ), "G_MODFN_POSTCLIENTSPAWN" ) {
+}
+
 LOGFUNCTION_VOID( ModFNDefault_PrePlayerLeaveTeam, ( int clientNum, team_t oldTeam ),
 		( clientNum, oldTeam ), "G_MODFN_PREPLAYERLEAVETEAM" ) {
 }

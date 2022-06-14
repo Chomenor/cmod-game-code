@@ -52,6 +52,9 @@ MOD_FUNCTION_DEF( ClientRespawn, void, ( int clientNum ) )
 // Called when a player is spawning.
 MOD_FUNCTION_DEF( PreClientSpawn, void, ( int clientNum, clientSpawnType_t spawnType ) )
 
+// Called after a player finishes spawning.
+MOD_FUNCTION_DEF( PostClientSpawn, void, ( int clientNum, clientSpawnType_t spawnType ) )
+
 // Called when a player is leaving a team either due to team change or disconnect.
 MOD_FUNCTION_DEF( PrePlayerLeaveTeam, void, ( int clientNum, team_t oldTeam ) )
 

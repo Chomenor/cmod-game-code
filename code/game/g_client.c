@@ -3,8 +3,6 @@
 #include "g_local.h"
 #include "g_groups.h"
 
-extern void BroadcastClassChange( gclient_t *client, pclass_t oldPClass );
-
 // g_client.c -- client functions that don't happen every frame
 
 void G_StoreClientInitialStatus( gentity_t *ent );
@@ -12,87 +10,7 @@ void G_StoreClientInitialStatus( gentity_t *ent );
 static vec3_t	playerMins = {-15, -15, -24};
 static vec3_t	playerMaxs = {15, 15, 32};
 
-int		actionHeroClientNum = -1;
 clInitStatus_t clientInitialStatus[MAX_CLIENTS];
-
-void G_RandomActionHero( int ignoreClientNum )
-{
-	int i, numConnectedClients = 0;
-	int ahCandidates[MAX_CLIENTS];
-
-	if ( g_doWarmup.integer )
-	{
-		if ( level.warmupTime != 0 )
-		{
-			if ( level.warmupTime < 0 || level.time - level.startTime <= level.warmupTime )
-			{//don't choose one until warmup is done
-				return;
-			}
-		}
-	}
-	else if ( level.time - level.startTime <= 3000 )
-	{//don't choose one until 3 seconds into the game
-		return;
-	}
-
-	if ( g_pModActionHero.integer != 0 )
-	{
-		for ( i = 0; i < level.maxclients; i++ )
-		{
-			if ( i == ignoreClientNum )
-			{
-				continue;
-			}
-
-			if ( level.clients[i].pers.connected != CON_DISCONNECTED )
-			{
-				//note: these next few checks will mean that the first player to join (usually server client if a listen server) when a new map starts is *always* the AH
-				if ( &g_entities[i] != NULL && g_entities[i].client != NULL )
-				{
-					if ( level.clients[i].sess.sessionClass != PC_ACTIONHERO )
-					{
-						if ( level.clients[i].sess.sessionTeam != TEAM_SPECTATOR )
-						{
-							ahCandidates[numConnectedClients++] = i;
-						}
-					}
-				}
-			}
-		}
-		if ( !numConnectedClients )
-		{//WTF?!
-			return;
-		}
-		else
-		{
-			actionHeroClientNum = ahCandidates[ irandom( 0, (numConnectedClients-1) ) ];
-		}
-	}
-}
-
-void G_CheckReplaceActionHero( int clientNum )
-{
-	if ( clientNum == actionHeroClientNum )
-	{
-		G_RandomActionHero( clientNum );
-		if ( actionHeroClientNum >= 0 && actionHeroClientNum < level.maxclients )
-		{
-			// get and distribute relevent paramters
-			ClientUserinfoChanged( actionHeroClientNum );
-			ClientSpawn( &g_entities[actionHeroClientNum], CST_RESPAWN );
-		}//else ERROR!!!
-	}
-}
-
-void INeedAHero( void )
-{
-	G_RandomActionHero( actionHeroClientNum );
-	if ( actionHeroClientNum >= 0 && actionHeroClientNum < level.maxclients )
-	{// get and distribute relevent paramters
-		ClientUserinfoChanged( actionHeroClientNum );
-		ClientSpawn( &g_entities[actionHeroClientNum], CST_RESPAWN );
-	}//else ERROR!!!
-}
 
 /*QUAKED info_player_deathmatch (1 0 1) (-16 -16 -24) (16 16 32) initial
 potential spawning position for deathmatch games.
@@ -957,13 +875,6 @@ LOGFUNCTION_RET( int, ModFNDefault_EffectiveHandicap, ( int clientNum, effective
 		( clientNum, type ), "G_MODFN_EFFECTIVEHANDICAP" ) {
 	gclient_t *client = &level.clients[clientNum];
 
-	if ( client->sess.sessionClass == PC_ACTIONHERO ) {
-		if ( type == EH_DAMAGE || type == EH_MAXHEALTH ) {
-			return 150;
-		}
-		return 100;
-	}
-
 	if ( client->pers.handicap < 1 || client->pers.handicap > 100 ) {
 		return 100;
 	}
@@ -1508,66 +1419,6 @@ void ClientBegin( int clientNum ) {
 	G_ClearClientLog(clientNum);
 }
 
-void ClientWeaponsForClass ( gclient_t *client, pclass_t pclass )
-{
-	switch ( pclass )
-	{
-	case PC_ACTIONHERO:
-		client->ps.stats[STAT_WEAPONS] = ( 1 << WP_PHASER );
-		client->ps.ammo[WP_PHASER] = PHASER_AMMO_MAX;
-		client->ps.stats[STAT_WEAPONS] |= ( 1 << WP_COMPRESSION_RIFLE );
-		client->ps.ammo[WP_COMPRESSION_RIFLE] = Max_Ammo[WP_COMPRESSION_RIFLE];
-		client->ps.stats[STAT_WEAPONS] |= ( 1 << WP_IMOD );
-		client->ps.ammo[WP_IMOD] = Max_Ammo[WP_IMOD];
-		client->ps.stats[STAT_WEAPONS] |= ( 1 << WP_SCAVENGER_RIFLE );
-		client->ps.ammo[WP_SCAVENGER_RIFLE] = Max_Ammo[WP_SCAVENGER_RIFLE];
-		client->ps.stats[STAT_WEAPONS] |= ( 1 << WP_STASIS );
-		client->ps.ammo[WP_STASIS] = Max_Ammo[WP_STASIS];
-		client->ps.stats[STAT_WEAPONS] |= ( 1 << WP_GRENADE_LAUNCHER );
-		client->ps.ammo[WP_GRENADE_LAUNCHER] = Max_Ammo[WP_GRENADE_LAUNCHER];
-		client->ps.stats[STAT_WEAPONS] |= ( 1 << WP_TETRION_DISRUPTOR );
-		client->ps.ammo[WP_TETRION_DISRUPTOR] = Max_Ammo[WP_TETRION_DISRUPTOR];
-		client->ps.stats[STAT_WEAPONS] |= ( 1 << WP_QUANTUM_BURST );
-		client->ps.ammo[WP_QUANTUM_BURST] = Max_Ammo[WP_QUANTUM_BURST];
-		client->ps.stats[STAT_WEAPONS] |= ( 1 << WP_DREADNOUGHT );
-		client->ps.ammo[WP_DREADNOUGHT] = Max_Ammo[WP_DREADNOUGHT];
-		break;
-	default:
-		client->ps.stats[STAT_WEAPONS] = ( 1 << WP_PHASER );
-		client->ps.ammo[WP_PHASER] = PHASER_AMMO_MAX;
-		break;
-	}
-}
-
-void ClientArmorForClass ( gclient_t *client, pclass_t pclass )
-{
-	switch ( pclass )
-	{
-	case PC_ACTIONHERO:
-		client->ps.stats[STAT_ARMOR] = 100;
-		break;
-	case PC_NOCLASS:
-	default:
-		break;
-	}
-}
-
-void ClientPowerupsForClass ( gentity_t *ent, pclass_t pclass )
-{
-	gitem_t	*regen = BG_FindItemForPowerup( PW_REGEN );
-
-	switch ( pclass )
-	{
-	case PC_ACTIONHERO:
-		ent->client->ps.powerups[regen->giTag] = level.time - ( level.time % 1000 );
-		ent->client->ps.powerups[regen->giTag] += 1800 * 1000;
-		break;
-	case PC_NOCLASS:
-	default:
-		break;
-	}
-}
-
 void G_StoreClientInitialStatus( gentity_t *ent )
 {
 	if ( clientInitialStatus[ent->s.number].initialized )
@@ -1592,24 +1443,9 @@ Checks if current player class is valid, and picks a new one if necessary.
 */
 LOGFUNCTION_VOID( ModFNDefault_UpdateSessionClass, ( int clientNum ),
 		( clientNum ), "G_MODFN_UPDATESESSIONCLASS" ) {
+	// With no mods enabled, always use no class.
 	gclient_t *client = &level.clients[clientNum];
-
-	if ( g_pModActionHero.integer != 0 )
-	{
-		if ( clientNum == actionHeroClientNum )
-		{
-			client->sess.sessionClass = PC_ACTIONHERO;
-			BroadcastClassChange( client, PC_NOCLASS );
-		}
-		else if ( client->sess.sessionClass == PC_ACTIONHERO )
-		{//make sure to take action hero away from previous one
-			client->sess.sessionClass = PC_NOCLASS;
-		}
-	}
-	else
-	{
-		client->sess.sessionClass = PC_NOCLASS;
-	}
+	client->sess.sessionClass = PC_NOCLASS;
 }
 
 /*
@@ -1639,13 +1475,8 @@ LOGFUNCTION_VOID( ModFNDefault_SpawnConfigureClient, ( int clientNum ),
 	}
 	else
 	{
-		if ( pClass == PC_ACTIONHERO )
-		{
-			ent->health = client->ps.stats[STAT_HEALTH] = client->ps.stats[STAT_MAX_HEALTH];
-		}
-		ClientWeaponsForClass( client, pClass );
-		ClientArmorForClass( client, pClass );
-		ClientPowerupsForClass( ent, pClass );
+		client->ps.stats[STAT_WEAPONS] = ( 1 << WP_PHASER );
+		client->ps.ammo[WP_PHASER] = PHASER_AMMO_MAX;
 	}
 }
 
@@ -1704,25 +1535,6 @@ LOGFUNCTION_VOID( ModFNDefault_SpawnCenterPrintMessage, ( int clientNum, clientS
 				break;
 			}
 		}
-		if ( clientNum == actionHeroClientNum )
-		{
-			trap_SendServerCommand( clientNum, "cp \"You are the Action Hero!\"" );
-		}
-		else if ( actionHeroClientNum > -1 )
-		{//FIXME: this will make it so that those who spawn before the action hero won't be told who he is
-			if ( !clientInitialStatus[clientNum].initialized )
-			{//first time coming in
-				gentity_t *aH = &g_entities[actionHeroClientNum];
-				if ( aH != NULL && aH->client != NULL && aH->client->pers.netname[0] != 0 )
-				{
-					trap_SendServerCommand( clientNum, va("cp \"Action Hero is %s!\"", aH->client->pers.netname) );
-				}
-				else
-				{
-					trap_SendServerCommand( clientNum, "cp \"Action Hero!\"" );
-				}
-			}
-		}
 	}
 }
 
@@ -1771,13 +1583,6 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	trap_UnlinkEntity( ent );
 
 	modfn.PreClientSpawn( index, spawnType );
-
-	/*
-	if ( actionHeroClientNum == -1 )
-	{
-		G_RandomActionHero( -1 );
-	}
-	*/
 
 	// find a spawn point
 	if ( modfn.SpectatorClient( index ) ) {
@@ -1962,6 +1767,9 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	//store intial client values
 	//FIXME: when purposely change teams, this gets confused?
 	G_StoreClientInitialStatus( ent );
+	
+	// run any post-spawn actions
+	modfn.PostClientSpawn( index, spawnType );
 }
 
 
@@ -2049,12 +1857,6 @@ void ClientDisconnect( int clientNum ) {
 
 	//also remove any initial data
 	clientInitialStatus[clientNum].initialized = qfalse;
-
-	//If the action hero leaves, have to pick a new one...
-	if ( g_pModActionHero.integer != 0 )
-	{
-		G_CheckReplaceActionHero( clientNum );
-	}
 }
 
 

@@ -4,10 +4,6 @@
 
 #include "g_local.h"
 
-extern int	actionHeroClientNum;
-extern void G_RandomActionHero( int ignoreClientNum );
-
-
 /*
 ============
 AddScore
@@ -368,17 +364,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		else
 		{
 			attacker->client->pers.teamState.frags++;
-			if ( self->s.number == actionHeroClientNum && attacker )
-			{
-				if ( attacker->client )
-				{//killed by opponent
-					awardPoints = 5;//5 bonus
-				}
-			}
-			else
-			{
-				awardPoints = 1;
-			}
+			awardPoints = 1;
 
 			// check for two kills in a short amount of time
 			// if this is close enough to the last kill, give a reward sound
@@ -466,9 +452,8 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	Team_FragBonuses(self, inflictor, attacker);
 
 	// if client is in a nodrop area, don't drop anything (but return CTF flags!)
-	if ( !( contents & CONTENTS_NODROP ) && self->client->sess.sessionClass != PC_ACTIONHERO && meansOfDeath != MOD_SUICIDE && meansOfDeath != MOD_RESPAWN )
-	{//action hero doesn't drop stuff
-		//don't drop stuff in specialty mode
+	if ( !( contents & CONTENTS_NODROP ) && meansOfDeath != MOD_SUICIDE && meansOfDeath != MOD_RESPAWN )
+	{
 		TossClientItems( self );
 	}
 	else
@@ -604,28 +589,6 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	deathNum = ( deathNum + 1 ) % 3;
 
 	trap_LinkEntity (self);
-
-	if ( g_pModActionHero.integer != 0 )
-	{
-		if ( self->client && self->s.number == actionHeroClientNum )
-		{
-			//Make me no longer a hero... *sniff*...
-			self->client->ps.persistant[PERS_CLASS] = self->client->sess.sessionClass = PC_NOCLASS;
-			ClientUserinfoChanged( self->s.number );
-
-			if ( attacker && attacker->client && attacker != self )
-			{//killer of action hero becomes action hero
-				actionHeroClientNum = attacker->s.number;
-			}
-			else
-			{//other kind of hero death picks a random action hero
-				G_RandomActionHero( actionHeroClientNum );
-			}
-			//respawn the new hero
-			//FIXME: or just give them full health and all the goodies?
-			modfn.ClientRespawn( actionHeroClientNum );
-		}
-	}
 
 	if ( meansOfDeath != MOD_RESPAWN ) {
 		modfn.PostPlayerDie( self, inflictor, attacker, meansOfDeath, &awardPoints );

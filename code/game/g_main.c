@@ -1656,8 +1656,6 @@ Advances the non-player objects in the world
 ================
 */
 void CheckHealthInfoMessage( void );
-extern void INeedAHero( void );
-extern int actionHeroClientNum;
 void G_RunFrame( int levelTime ) {
 	int			i;
 	gentity_t	*ent;
@@ -1783,12 +1781,6 @@ end = trap_Milliseconds();
 
 	// cancel vote if timed out
 	CheckVote();
-
-	//keep looking for an actionHero if we don't have one yet
-	if ( actionHeroClientNum == -1 )
-	{
-		INeedAHero();
-	}
 
 	// run general mod activities
 	modfn.PostRunFrame();

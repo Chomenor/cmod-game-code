@@ -529,45 +529,6 @@ LOGFUNCTION_RET( qboolean, ModFNDefault_CheckJoinAllowed, ( int clientNum, join_
 
 /*
 =================
-BroadCastClassChange
-
-Let everyone know about a team change
-=================
-*/
-void BroadcastClassChange( gclient_t *client, pclass_t oldPClass )
-{
-	if ( level.exiting )
-	{//no need to do this during level changes
-		return;
-	}
-	switch( client->sess.sessionClass )
-	{
-	case PC_INFILTRATOR:
-		trap_SendServerCommand( -1, va("cp \"%.15s" S_COLOR_WHITE " is now an Infiltrator.\n\"", client->pers.netname) );
-		break;
-	case PC_SNIPER:
-		trap_SendServerCommand( -1, va("cp \"%.15s" S_COLOR_WHITE " is now a Sniper.\n\"", client->pers.netname) );
-		break;
-	case PC_HEAVY:
-		trap_SendServerCommand( -1, va("cp \"%.15s" S_COLOR_WHITE " is now a Heavy Weapons Specialist.\n\"", client->pers.netname) );
-		break;
-	case PC_DEMO:
-		trap_SendServerCommand( -1, va("cp \"%.15s" S_COLOR_WHITE " is now a Demolitionist.\n\"", client->pers.netname) );
-		break;
-	case PC_MEDIC:
-		trap_SendServerCommand( -1, va("cp \"%.15s" S_COLOR_WHITE " is now a Medic.\n\"", client->pers.netname) );
-		break;
-	case PC_TECH:
-		trap_SendServerCommand( -1, va("cp \"%.15s" S_COLOR_WHITE " is now a Technician.\n\"", client->pers.netname) );
-		break;
-	case PC_ACTIONHERO:
-		trap_SendServerCommand( -1, va("cp \"%.15s" S_COLOR_WHITE " is the Action Hero!\n\"", client->pers.netname) );
-		break;
-	}
-}
-
-/*
-=================
 SetTeam
 =================
 */

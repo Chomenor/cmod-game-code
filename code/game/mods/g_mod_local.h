@@ -12,6 +12,7 @@ typedef struct {
 	qboolean assimilation;
 	qboolean specialties;
 	qboolean elimination;
+	qboolean actionhero;
 } mods_enabled_t;
 
 typedef struct {
@@ -28,6 +29,7 @@ int G_ModUtils_GetLatchedValue( const char *cvar_name, const char *default_value
 // Modes - Modules loaded directly from G_ModsInit to change game mechanics
 /* ************************************************************************* */
 
+void ModActionHero_Init( void );
 void ModAssimilation_Init( void );
 void ModElimination_Init( void );
 void ModSpecialties_Init( void );

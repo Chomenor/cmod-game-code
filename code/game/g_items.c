@@ -825,18 +825,6 @@ LOGFUNCTION_VOID( ModFNDefault_AddRegisteredItems, ( void ), (), "G_MODFN_ADDREG
 	// players always start with the base weapon
 	RegisterItem( BG_FindItemForWeapon( WP_PHASER ) );
 	RegisterItem( BG_FindItemForWeapon( WP_COMPRESSION_RIFLE ) );	//this is for the podium at the end, make sure we have the model
-
-	// okay!  Now, based on what game mods we have one, we need to register even more stuff by default:
-	if ( g_pModActionHero.integer )
-	{
-		RegisterItem( BG_FindItemForWeapon( WP_IMOD ) );
-		RegisterItem( BG_FindItemForWeapon( WP_SCAVENGER_RIFLE ) );
-		RegisterItem( BG_FindItemForWeapon( WP_STASIS ) );
-		RegisterItem( BG_FindItemForWeapon( WP_GRENADE_LAUNCHER ) );
-		RegisterItem( BG_FindItemForWeapon( WP_TETRION_DISRUPTOR ) );
-		RegisterItem( BG_FindItemForWeapon( WP_QUANTUM_BURST ) );
-		RegisterItem( BG_FindItemForWeapon( WP_DREADNOUGHT ) );
-	}
 }
 
 /*

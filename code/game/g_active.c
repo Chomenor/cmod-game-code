@@ -1608,7 +1608,6 @@ LOGFUNCTION_VOID( ModFNDefault_PmoveInit, ( int clientNum, pmove_t *pmove ), ( c
 	pmove->pointcontents = trap_PointContents;
 	pmove->debugLevel = g_debugMove.integer;
 	pmove->noFootsteps = ( g_dmflags.integer & DF_NO_FOOTSTEPS ) > 0;
-	pmove->pModDisintegration = g_pModDisintegration.integer > 0;
 	pmove->modifyAmmoUsage = modfn.ModifyAmmoUsage;
 }
 

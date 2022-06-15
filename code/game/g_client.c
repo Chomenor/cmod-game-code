@@ -1460,24 +1460,15 @@ LOGFUNCTION_VOID( ModFNDefault_SpawnConfigureClient, ( int clientNum ),
 		( clientNum ), "G_MODFN_SPAWNCONFIGURECLIENT" ) {
 	gentity_t *ent = &g_entities[clientNum];
 	gclient_t *client = &level.clients[clientNum];
-	pclass_t pClass = client->sess.sessionClass;
+
+	client->ps.stats[STAT_WEAPONS] = ( 1 << WP_PHASER );
+	client->ps.ammo[WP_PHASER] = PHASER_AMMO_MAX;
 
 	// health will count down towards max_health
 	ent->health = client->ps.stats[STAT_HEALTH] = client->ps.stats[STAT_MAX_HEALTH] * 1.25;
 
 	// start with a small amount of armor as well
 	client->ps.stats[STAT_ARMOR] = client->ps.stats[STAT_MAX_HEALTH] * 0.25;
-
-	if ( g_pModDisintegration.integer != 0 )
-	{//this is instagib
-		client->ps.stats[STAT_WEAPONS] |= ( 1 << WP_COMPRESSION_RIFLE );
-		client->ps.ammo[WP_COMPRESSION_RIFLE] = Max_Ammo[WP_COMPRESSION_RIFLE];
-	}
-	else
-	{
-		client->ps.stats[STAT_WEAPONS] = ( 1 << WP_PHASER );
-		client->ps.ammo[WP_PHASER] = PHASER_AMMO_MAX;
-	}
 }
 
 /*

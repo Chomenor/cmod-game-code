@@ -153,7 +153,7 @@ int BotGoForAir(bot_state_t *bs, int tfl, bot_goal_t *ltg, float range) {
 			{
 				botRoamsOnly = qtrue;
 			}
-			if ( g_pModDisintegration.integer != 0 )
+			if ( modfn.AdjustGeneralConstant( GC_FORCE_BOTROAMSONLY, 0 ) )
 			{
 				botRoamsOnly = qtrue;
 			}
@@ -197,7 +197,7 @@ int BotNearbyGoal(bot_state_t *bs, int tfl, bot_goal_t *ltg, float range) {
 	{
 		botRoamsOnly = qtrue;
 	}
-	if ( g_pModDisintegration.integer != 0 )
+	if ( modfn.AdjustGeneralConstant( GC_FORCE_BOTROAMSONLY, 0 ) )
 	{
 		botRoamsOnly = qtrue;
 	}
@@ -278,7 +278,7 @@ int BotGetItemLongTermGoal(bot_state_t *bs, int tfl, bot_goal_t *goal) {
 		{
 			botRoamsOnly = qtrue;
 		}
-		if ( g_pModDisintegration.integer != 0 )
+		if ( modfn.AdjustGeneralConstant( GC_FORCE_BOTROAMSONLY, 0 ) )
 		{
 			botRoamsOnly = qtrue;
 		}

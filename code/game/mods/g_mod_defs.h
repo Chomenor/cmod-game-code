@@ -128,7 +128,11 @@ MOD_FUNCTION_DEF( WeaponPredictableRNG, unsigned int, ( int clientNum ) )
 // (damage, knockback, death, scoring, etc.)
 //////////////////////////
 
-// Returns mass for knockback calculations.
+// Allows adding or modifying damage flags.
+MOD_FUNCTION_DEF( ModifyDamageFlags, int, ( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+		vec3_t dir, vec3_t point, int damage, int dflags, int mod ) )
+
+	// Returns mass for knockback calculations.
 MOD_FUNCTION_DEF( KnockbackMass, float, ( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		vec3_t dir, vec3_t point, int damage, int dflags, int mod ) )
 

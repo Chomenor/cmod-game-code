@@ -881,39 +881,6 @@ Returns qtrue to disable item, qfalse to spawn item normally.
 */
 LOGFUNCTION_RET( qboolean, ModFNDefault_CheckItemSpawnDisabled, ( gitem_t *item ),
 		( item ), "G_MODFN_CHECKITEMSPAWNDISABLED" ) {
-	if ( g_pModDisintegration.integer != 0 )
-	{//FIXME: instagib
-		switch( item->giType )
-		{
-		case IT_ARMOR://useless
-		case IT_WEAPON://only compression rifle
-		case IT_HEALTH://useless
-		case IT_AMMO://only compression rifle ammo
-			return qtrue;
-			break;
-		case IT_HOLDABLE:
-			switch ( item->giTag )
-			{
-			case HI_MEDKIT:
-			case HI_DETPACK:
-				return qtrue;
-				break;
-			}
-			break;
-		case IT_POWERUP:
-			switch ( item->giTag )
-			{
-			case PW_BATTLESUIT:
-			case PW_QUAD:
-			case PW_REGEN:
-			case PW_SEEKER:
-				return qtrue;
-				break;
-			}
-			break;
-		}
-	}
-
 	return qfalse;
 }
 

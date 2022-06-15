@@ -12,6 +12,7 @@ typedef struct {
 	qboolean assimilation;
 	qboolean specialties;
 	qboolean elimination;
+	qboolean disintegration;
 	qboolean actionhero;
 } mods_enabled_t;
 
@@ -31,6 +32,7 @@ int G_ModUtils_GetLatchedValue( const char *cvar_name, const char *default_value
 
 void ModActionHero_Init( void );
 void ModAssimilation_Init( void );
+void ModDisintegration_Init( void );
 void ModElimination_Init( void );
 void ModSpecialties_Init( void );
 

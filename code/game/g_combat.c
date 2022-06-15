@@ -65,33 +65,30 @@ void TossClientItems( gentity_t *self ) {
 	int			i;
 	gentity_t	*drop;
 
-	if ( g_pModDisintegration.integer == 0 )
-	{//not in playerclass game mode and not in disintegration mode (okay to drop weap)
-		// drop the weapon if not a phaser
-		weapon = self->s.weapon;
+	// drop the weapon if not a phaser
+	weapon = self->s.weapon;
 
-		// make a special check to see if they are changing to a new
-		// weapon that isn't the mg or gauntlet.  Without this, a client
-		// can pick up a weapon, be killed, and not drop the weapon because
-		// their weapon change hasn't completed yet and they are still holding the MG.
-		if ( weapon == WP_PHASER )
-		{
-			if ( self->client->ps.weaponstate == WEAPON_DROPPING ) {
-				weapon = self->client->pers.cmd.weapon;
-			}
-			if ( !( self->client->ps.stats[STAT_WEAPONS] & ( 1 << weapon ) ) ) {
-				weapon = WP_NONE;
-			}
+	// make a special check to see if they are changing to a new
+	// weapon that isn't the mg or gauntlet.  Without this, a client
+	// can pick up a weapon, be killed, and not drop the weapon because
+	// their weapon change hasn't completed yet and they are still holding the MG.
+	if ( weapon == WP_PHASER )
+	{
+		if ( self->client->ps.weaponstate == WEAPON_DROPPING ) {
+			weapon = self->client->pers.cmd.weapon;
 		}
+		if ( !( self->client->ps.stats[STAT_WEAPONS] & ( 1 << weapon ) ) ) {
+			weapon = WP_NONE;
+		}
+	}
 
-		if ( weapon > WP_PHASER && self->client->ps.ammo[ weapon ] ) {
-			// find the item type for this weapon
-			item = BG_FindItemForWeapon( weapon );
+	if ( weapon > WP_PHASER && self->client->ps.ammo[ weapon ] ) {
+		// find the item type for this weapon
+		item = BG_FindItemForWeapon( weapon );
 
-			// spawn the item
-			if ( modfn.CanItemBeDropped( item, self - g_entities ) ) {
-				Drop_Item( self, item, 0 );
-			}
+		// spawn the item
+		if ( modfn.CanItemBeDropped( item, self - g_entities ) ) {
+			Drop_Item( self, item, 0 );
 		}
 	}
 
@@ -731,6 +728,9 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	if ( !attacker ) {
 		attacker = &g_entities[ENTITYNUM_WORLD];
 	}
+
+	// allow mods to change damage flags
+	dflags = modfn.ModifyDamageFlags( targ, inflictor, attacker, dir, point, damage, dflags, mod );
 
 	// shootable doors / buttons don't actually have any health
 	if ( targ->s.eType == ET_MOVER && Q_stricmp("func_breakable", targ->classname) != 0 && Q_stricmp("misc_model_breakable", targ->classname) != 0)

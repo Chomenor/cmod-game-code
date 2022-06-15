@@ -13,7 +13,7 @@ extern void G_MissileImpact( gentity_t *ent, trace_t *trace);
 
 #define MAX_BEAM_HITS	4
 
-#define DMG_VAR			(flrandom(0.8,1.2))
+#define DMG_VAR			( modfn.AdjustWeaponConstant( WC_USE_RANDOM_DAMAGE, 1 ) ? flrandom(0.8,1.2) : 1.0f )
 
 #define WEAPON_TRACE( results, start, mins, maxs, end, passEntityNum, contentmask ) \
 		modfn.TrapTrace( results, start, mins, maxs, end, passEntityNum, contentmask, MOD_TRACE_WEAPON )
@@ -32,9 +32,9 @@ extern void G_MissileImpact( gentity_t *ent, trace_t *trace);
 #define	CRIFLE_DAMAGE				16		// 20
 #define CRIFLE_MAIN_SPLASH_RADIUS	64
 #define CRIFLE_MAIN_SPLASH_DMG		16		// 20
-#define CRIFLE_ALTDAMAGE			85		// 100
-#define CRIFLE_ALT_SPLASH_RADIUS	32
-#define CRIFLE_ALT_SPLASH_DMG		10
+#define CRIFLE_ALTDAMAGE			modfn.AdjustWeaponConstant( WC_CRIFLE_ALTDAMAGE, 85 )
+#define CRIFLE_ALT_SPLASH_RADIUS	modfn.AdjustWeaponConstant( WC_CRIFLE_ALT_SPLASH_RADIUS, 32 )
+#define CRIFLE_ALT_SPLASH_DMG		modfn.AdjustWeaponConstant( WC_CRIFLE_ALT_SPLASH_DMG, 10 )
 
 // Imod
 #define	IMOD_DAMAGE					20		// 32
@@ -269,15 +269,6 @@ void WP_FireCompressionRifle ( gentity_t *ent, qboolean alt_fire )
 	qboolean	render_impact = qtrue;
 	int			mod;
 	int			dflags = DAMAGE_NOT_ARMOR_PIERCING;
-
-	if ( g_pModDisintegration.integer != 0 )
-	{
-		alt_fire = qtrue;//this should already be set
-		damage = 1000;
-		splashDmg = 0;
-		splashRadius = 0;
-		dflags = DAMAGE_NO_ARMOR|DAMAGE_NO_INVULNERABILITY;
-	}
 
 	VectorMA (muzzle, MAXRANGE_CRIFLE, forward, end);
 

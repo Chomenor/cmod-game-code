@@ -54,6 +54,12 @@ int ModFNDefault_AdjustWeaponConstant( weaponConstant_t wcType, int defaultValue
 LOGFUNCTION_VOID( ModFNDefault_PostFireProjectile, ( gentity_t *projectile ), ( projectile ), "G_MODFN_POSTFIREPROJECTILE" ) {
 }
 
+LOGFUNCTION_RET( int, ModFNDefault_ModifyDamageFlags, ( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+		vec3_t dir, vec3_t point, int damage, int dflags, int mod ),
+		( targ, inflictor, attacker, dir, point, damage, dflags, mod ), "G_MODFN_MODIFYDAMAGEFLAGS" ) {
+	return dflags;
+}
+
 LOGFUNCTION_RET( int, ModFNDefault_AdjustPmoveConstant, ( pmoveConstant_t pmcType, int defaultValue ),
 		( pmcType, defaultValue ), "G_MODFN_ADJUSTPMOVECONSTANT" ) {
 	return defaultValue;

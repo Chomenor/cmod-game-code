@@ -409,15 +409,6 @@ static void G_UpdateCvars( void ) {
 	}
 }
 
-extern int altAmmoUsage[];
-void G_InitModRules( void )
-{
-	if ( g_pModDisintegration.integer != 0 )
-	{//don't use up ammo in disintegration mode
-		altAmmoUsage[WP_COMPRESSION_RIFLE] = 0;
-	}
-}
-
 /*
 ============
 G_InitGame
@@ -543,8 +534,6 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 		BotAILoadMap( restart );
 		G_InitBots( restart );
 	}
-
-	G_InitModRules();
 
 	// initialize warmup
 	if ( G_WarmupLength() && !level.warmupRestarting ) {

@@ -1116,8 +1116,8 @@ qboolean CalculateTactician(gentity_t *ent, int *kills)
 	int			killsWithWeapon[WP_NUM_WEAPONS];
 	int			playTime = (level.time - ent->client->pers.enterTime)/60000;
 
-	if ( g_pModDisintegration.integer )
-	{//duh, only 1 weapon
+	if ( modfn.AdjustGeneralConstant( GC_DISABLE_TACTICIAN, 0 ) )
+	{
 		return qfalse;
 	}
 	if ( modfn.IsBorgQueen( ent - g_entities ) )

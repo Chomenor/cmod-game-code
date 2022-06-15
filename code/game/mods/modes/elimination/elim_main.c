@@ -475,7 +475,9 @@ LOGFUNCTION_VOID( ModElimination_Init, ( void ), (), "G_MOD_INIT G_ELIMINATION" 
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
 		// Support combining with other mods
-		if ( G_ModUtils_GetLatchedValue( "g_pModSpecialties", "0", 0 ) ) {
+		if ( G_ModUtils_GetLatchedValue( "g_pModDisintegration", "0", 0 ) ) {
+			ModDisintegration_Init();
+		} else if ( G_ModUtils_GetLatchedValue( "g_pModSpecialties", "0", 0 ) ) {
 			ModSpecialties_Init();
 		}
 

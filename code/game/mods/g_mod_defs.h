@@ -37,6 +37,9 @@ MOD_FUNCTION_DEF( MatchStateTransition, void, ( matchState_t oldState, matchStat
 //   can trigger intermission even if they make CheckEnoughPlayers false.
 MOD_FUNCTION_DEF( CheckExitRules, void, ( void ) )
 
+// Execute change to next round or map when intermission completes.
+MOD_FUNCTION_DEF( ExitLevel, void, ( void ) )
+
 //////////////////////////
 // client events
 // (connection, spawn, disconnect, etc.)

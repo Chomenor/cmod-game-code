@@ -9,6 +9,7 @@
 // Shared Variables
 
 typedef struct {
+	qboolean tournament;
 	qboolean assimilation;
 	qboolean specialties;
 	qboolean elimination;
@@ -35,6 +36,7 @@ void ModAssimilation_Init( void );
 void ModDisintegration_Init( void );
 void ModElimination_Init( void );
 void ModSpecialties_Init( void );
+void ModTournament_Init( void );
 
 /* ************************************************************************* */
 // Features - Modules loaded directly from G_ModsInit to add features

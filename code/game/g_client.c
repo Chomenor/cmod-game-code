@@ -1383,11 +1383,9 @@ void ClientBegin( int clientNum ) {
 	// locate ent at a spawn point
 	ClientSpawn( ent, spawnType );
 
-	if ( client->sess.sessionTeam != TEAM_SPECTATOR && g_holoIntro.integer==0 )
-	{
-		if ( g_gametype.integer != GT_TOURNAMENT ) {
-			trap_SendServerCommand( -1, va("print \"%s" S_COLOR_WHITE " entered the game\n\"", client->pers.netname) );
-		}
+	if ( client->sess.sessionTeam != TEAM_SPECTATOR && !g_holoIntro.integer &&
+			!modfn.AdjustGeneralConstant( GC_SKIP_ENTER_GAME_PRINT, 0 ) ) {
+		trap_SendServerCommand( -1, va("print \"%s" S_COLOR_WHITE " entered the game\n\"", client->pers.netname) );
 	}
 	G_LogPrintf( "ClientBegin: %i\n", clientNum );
 
@@ -1489,9 +1487,6 @@ LOGFUNCTION_VOID( ModFNDefault_SpawnCenterPrintMessage, ( int clientNum, clientS
 		case GT_FFA:				// free for all
 			trap_SendServerCommand( clientNum, "cp \"Free For All\"" );
 			break;
-		case GT_TOURNAMENT:		// one on one tournament
-			trap_SendServerCommand( clientNum, "cp \"Tournament\"" );
-			break;
 		case GT_SINGLE_PLAYER:	// single player tournament
 			trap_SendServerCommand( clientNum, "cp \"SoloMatch\"" );
 			break;
@@ -1511,9 +1506,6 @@ LOGFUNCTION_VOID( ModFNDefault_SpawnCenterPrintMessage, ( int clientNum, clientS
 			{
 			case GT_FFA:				// free for all
 				trap_SendServerCommand( clientNum, "cp \"Free For All\"" );
-				break;
-			case GT_TOURNAMENT:		// one on one tournament
-				trap_SendServerCommand( clientNum, "cp \"Tournament\"" );
 				break;
 			case GT_SINGLE_PLAYER:	// single player tournament
 				trap_SendServerCommand( clientNum, "cp \"SoloMatch\"" );
@@ -1812,13 +1804,6 @@ void ClientDisconnect( int clientNum ) {
 	}
 
 	G_LogPrintf( "ClientDisconnect: %i\n", clientNum );
-
-	// if we are playing in tourney mode and losing, give a win to the other player
-	if ( g_gametype.integer == GT_TOURNAMENT && !level.intermissiontime
-		&& !level.warmupTime && level.sortedClients[1] == clientNum ) {
-		level.clients[ level.sortedClients[0] ].sess.wins++;
-		ClientUserinfoChanged( level.sortedClients[0] );
-	}
 
 	trap_UnlinkEntity (ent);
 	ent->s.modelindex = 0;

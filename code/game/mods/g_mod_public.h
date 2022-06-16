@@ -40,6 +40,7 @@ typedef enum {
 	GC_ALLOW_BOT_CLASS_SPECIFIER,
 	GC_FORCE_BOTROAMSONLY,
 	GC_DISABLE_TACTICIAN,
+	GC_SKIP_ENTER_GAME_PRINT,
 } generalConstant_t;
 
 typedef enum {

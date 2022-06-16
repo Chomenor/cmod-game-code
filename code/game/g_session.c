@@ -47,12 +47,6 @@ LOGFUNCTION_VOID( ModFNDefault_GenerateClientSessionStructure, ( int clientNum, 
 	sess->sessionTeam = modfn.RealSessionTeam( clientNum );
 	sess->spectatorState = client->sess.spectatorState;
 	sess->spectatorClient = client->sess.spectatorClient;
-
-	if ( g_gametype.integer == GT_TOURNAMENT ) {
-		sess->spectatorTime = client->sess.spectatorTime;
-		sess->wins = client->sess.wins;
-		sess->losses = client->sess.losses;
-	}
 }
 
 /*
@@ -237,26 +231,10 @@ void G_InitSessionData( gclient_t *client, char *userinfo ) {
 		if ( value[0] == 's' ) {
 			// a willing spectator, not a waiting-in-line
 			sess->sessionTeam = TEAM_SPECTATOR;
+		} else if ( modfn.CheckJoinAllowed( clientNum, CJA_AUTOJOIN, TEAM_FREE ) ) {
+			sess->sessionTeam = TEAM_FREE;
 		} else {
-			switch ( g_gametype.integer ) {
-			default:
-			case GT_FFA:
-			case GT_SINGLE_PLAYER:
-				if ( !modfn.CheckJoinAllowed( clientNum, CJA_AUTOJOIN, TEAM_FREE ) ) {
-					sess->sessionTeam = TEAM_SPECTATOR;
-				} else {
-					sess->sessionTeam = TEAM_FREE;
-				}
-				break;
-			case GT_TOURNAMENT:
-				// if the game is full, go into a waiting mode
-				if ( level.numNonSpectatorClients >= 2 ) {
-					sess->sessionTeam = TEAM_SPECTATOR;
-				} else {
-					sess->sessionTeam = TEAM_FREE;
-				}
-				break;
-			}
+			sess->sessionTeam = TEAM_SPECTATOR;
 		}
 	}
 

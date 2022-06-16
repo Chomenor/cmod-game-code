@@ -62,9 +62,6 @@ vmCvar_t bot_interbreedwrite;
 
 qboolean	bot_setupComplete = qfalse;
 
-void ExitLevel( void );
-
-
 /*
 ==================
 BotAI_Print
@@ -461,7 +458,7 @@ void BotInterbreeding(void) {
 	//make sure we are in tournament mode
 	if (gametype != GT_TOURNAMENT) {
 		trap_Cvar_Set("g_gametype", va("%d", GT_TOURNAMENT));
-		ExitLevel();
+		G_ExitLevel();
 		return;
 	}
 	//shutdown all the bots

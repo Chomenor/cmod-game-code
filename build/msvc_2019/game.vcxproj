@@ -281,6 +281,7 @@
     <ClCompile Include="..\..\code\game\mods\modes\elimination\elim_main.c" />
     <ClCompile Include="..\..\code\game\mods\modes\mode_actionhero.c" />
     <ClCompile Include="..\..\code\game\mods\modes\mode_disintegration.c" />
+    <ClCompile Include="..\..\code\game\mods\modes\mode_tournament.c" />
     <ClCompile Include="..\..\code\game\mods\modes\specialties\specs_main.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

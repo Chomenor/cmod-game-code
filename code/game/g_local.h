@@ -613,6 +613,7 @@ void G_RegisterTrackedCvar( trackedCvar_t *tc, const char *cvarName, const char 
 void G_RegisterCvarCallback( trackedCvar_t *tc, void ( *callback )( trackedCvar_t *tc ), qboolean callNow );
 void G_UpdateTrackedCvar( trackedCvar_t *tc );
 void FindIntermissionPoint( void );
+void G_ExitLevel( void );
 void G_RunThink (gentity_t *ent);
 void SendScoreboardMessageToAllClients( void );
 void G_SetMatchState( matchState_t matchState );

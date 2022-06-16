@@ -598,11 +598,6 @@ qboolean SetTeam( gentity_t *ent, char *s ) {
 		team = TEAM_FREE;
 	}
 
-	if ( g_gametype.integer == GT_TOURNAMENT
-		&& level.numNonSpectatorClients >= 2 ) {
-		team = TEAM_SPECTATOR;
-	}
-
 	// ignore redundant change
 	if ( team == client->sess.sessionTeam && team != TEAM_SPECTATOR ) {
 		return qfalse;
@@ -699,11 +694,6 @@ void Cmd_Team_f( gentity_t *ent ) {
 
 	trap_Argv( 1, s, sizeof( s ) );
 
-	// if they are playing a tournement game, count as a loss
-	if ( g_gametype.integer == GT_TOURNAMENT && ent->client->sess.sessionTeam == TEAM_FREE ) {
-		ent->client->sess.losses++;
-	}
-
 	//if this is a manual change, not an assimilation, uninitialize the clInitStatus data
 	clientInitialStatus[ent->s.number].initialized = qfalse;
 	SetTeam( ent, s );
@@ -755,11 +745,6 @@ void Cmd_Follow_f( gentity_t *ent ) {
 		return;
 	}
 
-	// if they are playing a tournement game, count as a loss
-	if ( g_gametype.integer == GT_TOURNAMENT && ent->client->sess.sessionTeam == TEAM_FREE ) {
-		ent->client->sess.losses++;
-	}
-
 	// first set them to spectator
 	if ( !modfn.SpectatorClient( ent - g_entities ) ) {
 		SetTeam( ent, "spectator" );
@@ -783,10 +768,6 @@ void Cmd_FollowCycle_f( gentity_t *ent, int dir ) {
 		return;
 	}
 
-	// if they are playing a tournement game, count as a loss
-	if ( g_gametype.integer == GT_TOURNAMENT && ent->client->sess.sessionTeam == TEAM_FREE ) {
-		ent->client->sess.losses++;
-	}
 	// first set them to spectator
 	if ( !modfn.SpectatorClient( ent - g_entities ) ) {
 		SetTeam( ent, "spectator" );

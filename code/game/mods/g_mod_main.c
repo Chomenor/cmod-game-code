@@ -29,6 +29,7 @@ LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 	}
 
 	// Initialize cvars
+	trap_Cvar_Register( NULL, "g_gametype", "0", CVAR_SERVERINFO | CVAR_LATCH );
 	trap_Cvar_Register( NULL, "g_pModAssimilation", "0", CVAR_SERVERINFO | CVAR_LATCH );
 	trap_Cvar_Register( NULL, "g_pModDisintegration", "0", CVAR_SERVERINFO | CVAR_LATCH );
 	trap_Cvar_Register( NULL, "g_pModActionHero", "0", CVAR_SERVERINFO | CVAR_LATCH );
@@ -45,7 +46,9 @@ LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 	}
 
 	// Game modes
-	if ( trap_Cvar_VariableIntegerValue( "g_pModElimination" ) ) {
+	if ( trap_Cvar_VariableIntegerValue( "g_gametype" ) == 1 ) {
+		ModTournament_Init();
+	} else if ( trap_Cvar_VariableIntegerValue( "g_pModElimination" ) ) {
 		ModElimination_Init();
 	} else if ( trap_Cvar_VariableIntegerValue( "g_pModAssimilation" ) ) {
 		ModAssimilation_Init();

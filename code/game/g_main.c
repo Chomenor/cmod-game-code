@@ -623,110 +623,6 @@ PLAYER COUNTING / SCORE SORTING
 ========================================================================
 */
 
-/*
-=============
-AddTournamentPlayer
-
-If there are less than two tournament players, put a
-spectator in the game and restart
-=============
-*/
-void AddTournamentPlayer( void ) {
-	int			i;
-	gclient_t	*client;
-	gclient_t	*nextInLine;
-
-	if ( level.numPlayingClients >= 2 ) {
-		return;
-	}
-
-	// never change during intermission
-	if ( level.intermissiontime ) {
-		return;
-	}
-
-	nextInLine = NULL;
-
-	for ( i = 0 ; i < level.maxclients ; i++ ) {
-		client = &level.clients[i];
-		if ( client->pers.connected != CON_CONNECTED ) {
-			continue;
-		}
-		if ( client->sess.sessionTeam != TEAM_SPECTATOR ) {
-			continue;
-		}
-		// never select the dedicated follow or scoreboard clients
-		if ( client->sess.spectatorState == SPECTATOR_SCOREBOARD ||
-			client->sess.spectatorClient < 0  ) {
-			continue;
-		}
-
-		if ( !nextInLine || client->sess.spectatorTime < nextInLine->sess.spectatorTime ) {
-			nextInLine = client;
-		}
-	}
-
-	if ( !nextInLine ) {
-		return;
-	}
-
-	level.warmupTime = -1;
-
-	// set them to free-for-all team
-	SetTeam( &g_entities[ nextInLine - level.clients ], "f" );
-}
-
-
-/*
-=======================
-RemoveTournamentLoser
-
-Make the loser a spectator at the back of the line
-=======================
-*/
-void RemoveTournamentLoser( void ) {
-	int			clientNum;
-
-	if ( level.numPlayingClients != 2 ) {
-		return;
-	}
-
-	clientNum = level.sortedClients[1];
-
-	if ( level.clients[ clientNum ].pers.connected != CON_CONNECTED ) {
-		return;
-	}
-
-	// make them a spectator
-	SetTeam( &g_entities[ clientNum ], "s" );
-}
-
-
-/*
-=======================
-AdjustTournamentScores
-
-=======================
-*/
-void AdjustTournamentScores( void ) {
-	int			clientNum;
-
-	clientNum = level.sortedClients[0];
-	if ( level.clients[ clientNum ].pers.connected == CON_CONNECTED ) {
-		level.clients[ clientNum ].sess.wins++;
-		ClientUserinfoChanged( clientNum );
-	}
-
-	clientNum = level.sortedClients[1];
-	if ( level.clients[ clientNum ].pers.connected == CON_CONNECTED ) {
-		level.clients[ clientNum ].sess.losses++;
-		ClientUserinfoChanged( clientNum );
-	}
-
-}
-
-
-
 #define SELECT_LOWER if ( va < vb ) return -1; if ( vb < va ) return 1;
 #define SELECT_HIGHER if ( va > vb ) return -1; if ( vb > va ) return 1;
 
@@ -1027,11 +923,6 @@ void BeginIntermission( void ) {
 		return;		// already active
 	}
 
-	// if in tournament mode, change the wins / losses
-	if ( g_gametype.integer == GT_TOURNAMENT ) {
-		AdjustTournamentScores();
-	}
-
 	level.intermissiontime = level.time;
 	FindIntermissionPoint();
 
@@ -1083,37 +974,31 @@ void G_ClearObjectives( void )
 	tent->r.svFlags |= SVF_BROADCAST;
 	tent->s.eventParm = 0;//tells it to clear all
 }
+
 /*
 =============
-ExitLevel
+(ModFN) ExitLevel
 
-When the intermission has been exited, the server is either killed
-or moved to a new level based on the "nextmap" cvar
-
+Execute change to next round or map when intermission completes.
 =============
 */
-void ExitLevel (void) {
-	level.exiting = qtrue;
-
-	//bot interbreeding
-	BotInterbreedEndMatch();
-
-	G_ClearObjectives();
-
-	// if we are running a tournement map, kick the loser to spectator status,
-	// which will automatically grab the next spectator and restart
-	if ( g_gametype.integer == GT_TOURNAMENT ) {
-		if ( !level.warmupRestarting ) {
-			RemoveTournamentLoser();
-			trap_SendConsoleCommand( EXEC_APPEND, "map_restart 0\n" );
-		}
-		return;
-	}
-
+LOGFUNCTION_VOID( ModFNDefault_ExitLevel, ( void ), (), "G_MATCHSTATE" ) {
 	trap_SendConsoleCommand( EXEC_APPEND, "vstr nextmap\n" );
-	level.intermissiontime = 0;
 }
 
+/*
+=============
+G_ExitLevel
+
+Wrapper for ExitLevel modfn.
+=============
+*/
+LOGFUNCTION_VOID( G_ExitLevel, ( void ), (), "G_MATCHSTATE" ) {
+	level.exiting = qtrue;
+	BotInterbreedEndMatch();
+	G_ClearObjectives();
+	modfn.ExitLevel();
+}
 
 /*
 =================
@@ -1194,7 +1079,7 @@ void CheckIntermissionExit( void ) {
 
 	// if everyone wants to go, go now
 	if ( !notReady ) {
-		ExitLevel();
+		G_ExitLevel();
 		return;
 	}
 
@@ -1210,7 +1095,7 @@ void CheckIntermissionExit( void ) {
 		return;
 	}
 
-	ExitLevel();
+	G_ExitLevel();
 }
 
 /*
@@ -1534,53 +1419,6 @@ static void G_CheckMatchState( void ) {
 	}
 }
 
-/*
-=============
-CheckTournement
-
-Once a frame, check for changes in tournement player state
-=============
-*/
-void CheckTournement( void ) {
-	if ( g_gametype.integer == GT_TOURNAMENT && level.matchState == MS_WAITING_FOR_PLAYERS && level.numPlayingClients == 1 ) {
-		int			i;
-		gclient_t	*client;
-		gclient_t	*nextInLine;
-		nextInLine = NULL;
-
-		for ( i = 0 ; i < level.maxclients ; i++ ) {
-			client = &level.clients[i];
-			if ( client->pers.connected != CON_CONNECTED ) {
-				continue;
-			}
-			if ( client->sess.sessionTeam != TEAM_SPECTATOR ) {
-				continue;
-			}
-			// never select the dedicated follow or scoreboard clients
-			if ( client->sess.spectatorState == SPECTATOR_SCOREBOARD || client->sess.spectatorClient < 0  ) {
-				continue;
-			}
-
-			if ( !nextInLine || client->sess.spectatorTime < nextInLine->sess.spectatorTime ) {
-				nextInLine = client;
-			}
-		}
-
-		if ( !nextInLine ) {
-			return;
-		}
-
-		// set them to free-for-all team
-		SetTeam( &g_entities[ nextInLine - level.clients ], "f" );
-
-		// if player is being put in mid-match and warmup is disabled, make game is restarted
-		if ( level.time - level.startTime > 1000 && G_WarmupLength() <= 0 ) {
-			trap_SendConsoleCommand( EXEC_APPEND, "map_restart 0\n" );
-			level.exiting = qtrue;
-		}
-	}
-}
-
 
 /*
 ==================
@@ -1758,9 +1596,6 @@ end = trap_Milliseconds();
 	if ( level.exiting ) {
 		return;
 	}
-
-	// see if it is time to do a tournement restart
-	CheckTournement();
 
 	// update to team status?
 	CheckTeamStatus();

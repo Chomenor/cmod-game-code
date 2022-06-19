@@ -8,7 +8,8 @@
 #include "g_local.h"
 
 
-#define POOLSIZE	(512 * 1024)
+#define POOLSIZE	( 768 * 1024 )
+#define PADDING_MASK	( sizeof( void * ) - 1 )
 
 static char		memoryPool[POOLSIZE];
 static int		allocPoint;
@@ -17,7 +18,8 @@ void *G_Alloc( int size ) {
 	char	*p;
 
 	if ( g_debugAlloc.integer ) {
-		G_Printf( "G_Alloc of %i bytes (%i left)\n", size, POOLSIZE - allocPoint - ( ( size + 31 ) & ~31 ) );
+		G_Printf( "G_Alloc of %i bytes (%i left)\n", size,
+				POOLSIZE - allocPoint - ( ( size + PADDING_MASK ) & ~PADDING_MASK ) );
 	}
 
 	if ( allocPoint + size > POOLSIZE ) {
@@ -27,7 +29,7 @@ void *G_Alloc( int size ) {
 
 	p = &memoryPool[allocPoint];
 
-	allocPoint += ( size + 31 ) & ~31;
+	allocPoint += ( size + PADDING_MASK ) & ~PADDING_MASK;
 
 	return p;
 }

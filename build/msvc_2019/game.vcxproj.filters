@@ -102,9 +102,6 @@
     <ClInclude Include="..\..\code\game\g_cvar_defs.h">
       <Filter>game</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\code\game\g_groups.h">
-      <Filter>game</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\code\game\g_local.h">
       <Filter>game</Filter>
     </ClInclude>
@@ -266,6 +263,12 @@
     <ClCompile Include="..\..\code\game\mods\components\comp_holdable_transporter.c">
       <Filter>game\mods\components</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\components\comp_model_groups.c">
+      <Filter>game\mods\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\components\comp_model_selection.c">
+      <Filter>game\mods\components</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\code\game\mods\components\comp_pending_item.c">
       <Filter>game\mods\components</Filter>
     </ClCompile>
@@ -279,6 +282,9 @@
       <Filter>game\mods\features</Filter>
     </ClCompile>
     <ClCompile Include="..\..\code\game\mods\features\feat_spect_passthrough.c">
+      <Filter>game\mods\features</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\features\feat_team_groups.c">
       <Filter>game\mods\features</Filter>
     </ClCompile>
     <ClCompile Include="..\..\code\game\mods\features\pingcomp\pc_client_predict.c">
@@ -327,6 +333,9 @@
       <Filter>game\mods\modes\assimilation</Filter>
     </ClCompile>
     <ClCompile Include="..\..\code\game\mods\modes\assimilation\assim_main.c">
+      <Filter>game\mods\modes\assimilation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\modes\assimilation\assim_models.c">
       <Filter>game\mods\modes\assimilation</Filter>
     </ClCompile>
     <ClCompile Include="..\..\code\game\mods\modes\elimination\elim_main.c">

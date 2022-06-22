@@ -113,6 +113,9 @@ MOD_FUNCTION_DEF( SpawnCenterPrintMessage, void, ( int clientNum, clientSpawnTyp
 // Play transporter effect when player spawns.
 MOD_FUNCTION_DEF( SpawnTransporterEffect, void, ( int clientNum, clientSpawnType_t spawnType ) )
 
+// Retrieves player model string for client, performing any mod conversions as needed.
+MOD_FUNCTION_DEF( GetPlayerModel, void, ( int clientNum, const char *userinfo, char *output, unsigned int outputSize ) )
+
 //////////////////////////
 // weapon related
 //////////////////////////
@@ -248,3 +251,11 @@ MOD_FUNCTION_DEF( CheckBorgAdapt, qboolean, ( gentity_t *targ, gentity_t *inflic
 // Checks whether specific client is the borg queen. Always returns false if not in Assimilation mode.
 // Also returns false if not a valid client number, so is valid to call for any entity.
 MOD_FUNCTION_DEF( IsBorgQueen, qboolean, ( int clientNum ) )
+
+//////////////////////////
+// internal
+// (only called from mod code)
+//////////////////////////
+
+// Called after main mod initialization is complete.
+MOD_FUNCTION_DEF( PostModInit, void, ( void ) )

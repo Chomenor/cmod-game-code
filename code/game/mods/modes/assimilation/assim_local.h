@@ -2,3 +2,4 @@
 
 void ModAssimBorgAdapt_Init( void );
 void ModAssimBorgTeleport_Init( void );
+void ModAssimModels_Init( void );

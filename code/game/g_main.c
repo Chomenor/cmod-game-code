@@ -6,14 +6,8 @@
 #endif
 
 #include "g_local.h"
-#include "g_groups.h"
 
 level_locals_t	level;
-extern char	races[256];	//this is evil!
-
-group_list_t	group_list[MAX_GROUP_MEMBERS];
-int 			group_count;
-
 gentity_t		g_entities[MAX_GENTITIES];
 gclient_t		g_clients[MAX_CLIENTS];
 
@@ -102,7 +96,8 @@ void QDECL G_DedPrintf( const char *fmt, ... ) {
 	vsprintf (text, fmt, argptr);
 	va_end (argptr);
 
-	if ( g_dedicated.integer ) {
+	// support calling before cvar init completed
+	if ( g_dedicated.handle ? g_dedicated.integer : trap_Cvar_VariableIntegerValue( "dedicated" ) ) {
 		trap_Printf( text );
 	}
 }
@@ -116,94 +111,6 @@ void QDECL G_Error( const char *fmt, ... ) {
 	va_end (argptr);
 
 	trap_Error( text );
-}
-
-void G_initGroupsList(void)
-{
-	char	filename[MAX_QPATH];
-	char	dirlist[2048];
-	int		i;
-	char*	dirptr;
-	char*	race_list;
-	int		numdirs;
-	int		dirlen;
-
-	memset(group_list, 0, sizeof(group_list));
-	group_count = 0;
-
-	// search through each and every skin we can find
-	numdirs = trap_FS_GetFileList("models/players2", "/", dirlist, 2048 );
-	dirptr  = dirlist;
-	for (i=0; i<numdirs ; i++,dirptr+=dirlen+1)
-	{
-		dirlen = strlen(dirptr);
-
-		if (dirlen && dirptr[dirlen-1]=='/')
-		{
-			dirptr[dirlen-1]='\0';
-		}
-
-		if (!strcmp(dirptr,".") || !strcmp(dirptr,".."))
-		{
-			continue;
-		}
-
-		if (group_count == MAX_GROUP_MEMBERS)
-		{
-			G_Printf("Number of possible models larger than group array - limiting to first %d models\n", MAX_GROUP_MEMBERS);
-			break;
-		}
-		// work out racename to
-		Com_sprintf(filename, sizeof(filename), "models/players2/%s/groups.cfg", dirptr);
-		race_list = BG_RegisterRace(filename);
-
-		Q_strncpyz( group_list[group_count].name, dirptr , sizeof(group_list[0].name) );
-		Q_strncpyz( group_list[group_count++].text, race_list , sizeof(group_list[0].text) );
-	}
-}
-
-
-
-#define MAX_GROUP_FILE_SIZE	5000
-char *G_searchGroupList(const char *name)
-{
-	char	*text_p = NULL, *slash = NULL;
-	char	text[MAX_GROUP_FILE_SIZE];
-	int		i;
-	char	mod_name[200];
-
-	memset (races, 0, sizeof(races));
-	memset (text, 0, sizeof(text));
-
-	// check to see if there is a '/' in the name
-	Q_strncpyz(mod_name, name, sizeof(mod_name));
-	slash = strstr( mod_name, "/" );
-	if ( slash != NULL )
-	{//drop the slash and everything after it for the purpose of finding the model name in th group
-		*slash = 0;
-	}
-
-	// find the name in the group list
-	for (i=0; i<group_count; i++)
-	{
-		if (!Q_stricmp(mod_name, group_list[i].name))
-		{
-			text_p = group_list[i].text;
-			break;
-		}
-	}
-
-	// did we find this group in the list?
-	if (i == group_count)
-	{
-		Com_sprintf(races, sizeof(races), "unknown");
-	}
-	else
-	{
-		Com_sprintf(races, sizeof(races), text_p);
-	}
-	return races;
-
 }
 
 
@@ -450,8 +357,6 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	G_RegisterCvars();
 
 	G_ProcessIPBans();
-
-	G_initGroupsList();
 
 	BG_LoadItemNames();
 

@@ -101,3 +101,6 @@ LOGFUNCTION_RET( qboolean, ModFNDefault_IsBorgQueen, ( int clientNum ),
 		( clientNum ), "G_MODFN_ISBORGQUEEN" ) {
 	return qfalse;
 }
+
+LOGFUNCTION_VOID( ModFNDefault_PostModInit, ( void ), (), "G_MODFN_POSTMODINIT" ) {
+}

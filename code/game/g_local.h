@@ -690,6 +690,7 @@ int GetFavoriteWeaponForClient(int nClient);
 // g_client.c
 //
 char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot );
+void SetSkinForModel( const char *model, const char *skin, char *output, unsigned int size );
 void ClientUserinfoChanged( int clientNum );
 void ClientDisconnect( int clientNum );
 void ClientBegin( int clientNum );

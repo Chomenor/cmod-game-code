@@ -1,7 +1,6 @@
 // Copyright (C) 1999-2000 Id Software, Inc.
 //
 #include "g_local.h"
-#include "g_groups.h"
 
 // g_client.c -- client functions that don't happen every frame
 
@@ -684,184 +683,38 @@ static void ClientCleanName( const char *in, char *out, int outSize ) {
 
 /*
 ===========
-legalSkin
+SetSkinForModel
 
-Compare a list of races with an incoming race name.
-Used to decide if in a CTF game where a race is specified for a given team if a skin is actually already legal.
+Converts model name to <model>/<skin> format, stripping existing skin if it already exists.
+Can be called with null skin to just get the model name.
 ===========
 */
-qboolean legalSkin(const char *race_list, const char *race)
-{
-	char current_race_name[125];
-	const char *s = race_list;
-	const char *max_place = race_list + strlen(race_list);
-	const char *marker;
+void SetSkinForModel( const char *model, const char *skin, char *output, unsigned int size ) {
+	char temp[256];
+	char *p;
+	Q_strncpyz( temp, model, sizeof( temp ) );
+	p = strchr( temp, '/' );
+	if ( p )
+		*p = '\0';
 
-	memset(current_race_name, 0, sizeof(current_race_name));
-	// look through the list till it's empty
-	while (s < max_place)
-	{
-		marker = s;
-		// figure out from where we are where the next ',' or 0 is
-		while (*s != ',' && *s != 0)
-		{
-			s++;
-		}
-
-		// copy just that name
-		Q_strncpyz(current_race_name, marker, (s-marker)+1);
-
-		// avoid the comma or increment us past the end of the string so we fail the main while loop
-		s++;
-
-		// compare and see if this race is the same as the one we want
-		if (!Q_stricmp(current_race_name, race))
-		{
-			return qtrue;
-		}
+	if ( skin ) {
+		Com_sprintf( output, size, "%s/%s", temp, skin );
+	} else {
+		Q_strncpyz( output, temp, size );
 	}
-	return qfalse;
-}
-
-
-/*
-===========
-randomSkin
-
-given a race name, go find all the skins that use it, and randomly select one
-===========
-*/
-
-void randomSkin(const char* race, char* model, int current_team, int clientNum)
-{
-	char	skinsForRace[MAX_SKINS_FOR_RACE][128];
-	int		howManySkins = 0;
-	int		i,x;
-	int		temp;
-	int		skin_count_check;
-	char	skinNamesAlreadyUsed[16][128];
-	int		current_skin_count = 0;
-	gentity_t	*ent = NULL;
-	char	userinfo[MAX_INFO_STRING];
-	char	temp_model[MAX_QPATH];
-
-	memset(skinsForRace, 0, sizeof(skinsForRace));
-	memset(skinNamesAlreadyUsed, 0, sizeof(skinNamesAlreadyUsed));
-
-	// first up, check to see if we want to select a skin from someone that's already playing on this guys team
-	skin_count_check = g_random_skin_limit.integer;
-	if (skin_count_check)
-	{
-		// sanity check the skins to compare against count
-		if (skin_count_check > 16)
-		{
-			skin_count_check = 16;
-		}
-
-		// now construct an array of the names already used
-		for (i=0; i<g_maxclients.integer; i++)
-		{
-			// did we find enough skins to grab a random one from yet?
-			if (current_skin_count == skin_count_check)
-			{
-				break;
-			}
-
-			ent = g_entities + i;
-			if (!ent->inuse || i == clientNum)
-				continue;
-
-			// no, so look at the next one, and see if it's in the list we are constructing
-			// same team?
-			if 	(ent->client && ent->client->sess.sessionTeam == current_team)
-			{
-				// so what's this clients model then?
-				trap_GetUserinfo( i, userinfo, sizeof( userinfo ) );
-				Q_strncpyz( temp_model, Info_ValueForKey (userinfo, "model"), sizeof( temp_model ) );
-
-				// check the name
-				for (x = 0; x< current_skin_count; x++)
-				{
-					// are we the same?
-					if (!Q_stricmp(skinNamesAlreadyUsed[x], temp_model))
-					{
-						// yeah - ok we already got this one
-						break;
-					}
-				}
-
-				// ok, did we match anything?
-				if (x == current_skin_count)
-				{
-					// no - better add this name in
-					Q_strncpyz(skinNamesAlreadyUsed[current_skin_count], temp_model, sizeof(skinNamesAlreadyUsed[current_skin_count]));
-					current_skin_count++;
-				}
-			}
-		}
-
-		// ok, array constructed. Did we get enough?
-		if (current_skin_count >= skin_count_check)
-		{
-			// yeah, we did - so select a skin from one of these then
-			temp = rand() % current_skin_count;
-			Q_strncpyz( model, skinNamesAlreadyUsed[temp], MAX_QPATH );
-			ForceClientSkin(model, "");
-			return;
-		}
-	}
-
-	// search through each and every skin we can find
-	for (i=0; i<group_count && howManySkins < MAX_SKINS_FOR_RACE; i++)
-	{
-
-		// if this models race list contains the race we want, then add it to the list
-		if (legalSkin(group_list[i].text, race))
-		{
-			Q_strncpyz( skinsForRace[howManySkins++], group_list[i].name , 128 );
-		}
-	}
-
-	// set model to a random one
-	if (howManySkins)
-	{
-		temp = rand() % howManySkins;
-		Q_strncpyz( model, skinsForRace[temp], MAX_QPATH );
-	}
-	else
-	{
-		model[0] = 0;
-	}
-
 }
 
 /*
 ===========
-getNewSkin
+(ModFN) GetPlayerModel
 
-Go away and actually get a random new skin based on a group name
+Retrieves player model string for client, performing any mod conversions as needed.
 ============
 */
-qboolean getNewSkin(const char *group, char *model, const char *color, const gclient_t *client, int clientNum)
-{
-	char	*temp_string;
-
-	// go away and get what ever races this skin is attached to.
-	// remove blue or red name
-	ForceClientSkin(model, "");
-
-	temp_string = G_searchGroupList(model);
-
-	// are any of the races legal for this team race?
-	if (legalSkin(temp_string, group))
-	{
-		ForceClientSkin(model, color);
-		return qfalse;
-	}
-
-	//if we got this far, then we need to reset the skin to something appropriate
-	randomSkin(group, model, client->sess.sessionTeam, clientNum);
-	return qtrue;
+LOGFUNCTION_VOID( ModFNDefault_GetPlayerModel,
+		( int clientNum, const char *userinfo, char *output, unsigned int outputSize ),
+		( clientNum, userinfo, output, outputSize ), "G_MODFN_GETPLAYERMODEL" ) {
+	Q_strncpyz( output, Info_ValueForKey( userinfo, "model" ), outputSize );
 }
 
 /*
@@ -895,14 +748,12 @@ if desired.
 */
 void ClientUserinfoChanged( int clientNum ) {
 	gentity_t *ent;
-	char	*s, *oldModel;
+	char	*s;
 	char	model[MAX_QPATH];
 	char	oldname[MAX_STRING_CHARS];
 	gclient_t	*client;
 	char	*c1;
 	char	userinfo[MAX_INFO_STRING];
-	qboolean	reset;
-	char	*sex;
 
 	model[0] = 0;
 
@@ -953,252 +804,16 @@ void ClientUserinfoChanged( int clientNum ) {
 	client->ps.stats[STAT_MAX_HEALTH] = modfn.EffectiveHandicap( clientNum, EH_MAXHEALTH );
 
 	// set model
-	switch ( client->sess.sessionClass )
-	{
-	//FIXME: somehow map these into some text file that points to a specific model for each class?
-	//OR give them a choice in the menu somehow?
-	case PC_INFILTRATOR:
-		//FIXME: someone else?  Male/female choice?  Random?
-		oldModel = Info_ValueForKey( userinfo, "model" );
-		if ( legalSkin( G_searchGroupList( oldModel ), "male"  ) )
-		{
-			Q_strncpyz( model, "munro", sizeof( model ) );
-		}
-		else if ( legalSkin( G_searchGroupList( oldModel ), "female"  ) )
-		{
-			Q_strncpyz( model, "alexandria", sizeof( model ) );
-		}
-		else
-		{
-			Q_strncpyz( model, "munro", sizeof( model ) );
-		}
-		break;
-	case PC_SNIPER:
-		Q_strncpyz( model, "telsia", sizeof( model ) );
-		break;
-	case PC_HEAVY:
-		Q_strncpyz( model, "biessman", sizeof( model ) );
-		break;
-	case PC_DEMO:
-		Q_strncpyz( model, "chang", sizeof( model ) );
-		break;
-	case PC_MEDIC://note: can also give health & armor & regen
-		Q_strncpyz( model, "jurot", sizeof( model ) );
-		break;
-	case PC_TECH://note: can also give ammo & invis
-		Q_strncpyz( model, "chell", sizeof( model ) );
-		break;
-	case PC_VIP:
-		//FIXME: an admiral maybe?
-		Q_strncpyz( model, "neelix", sizeof( model ) );
-		break;
-	case PC_BORG:
-		//randomly pick one from Borg group
-		if ( modfn.IsBorgQueen( clientNum ) )
-		{
-			Q_strncpyz( model, "borgqueen", sizeof( model ) );
-		}
-		else
-		{//make sure it doesn't randomly pick the Borg Queen or any other inappropriate models
-			oldModel = Info_ValueForKey( userinfo, "model" );
-			if ( Q_strncmp( "borgqueen", oldModel, 9 ) == 0 || legalSkin(G_searchGroupList( oldModel ), "borg" ) == qfalse )
-			{//not using a Borg skin
-				//try to match sex
-				if ( Q_strncmp( "borgqueen", oldModel, 9 ) == 0 )
-				{
-					sex = Info_ValueForKey( userinfo, "sex" );
-				}
-				else if ( legalSkin( G_searchGroupList( oldModel ), "male"  ) )
-				{
-					sex = "m";
-				}
-				else if ( legalSkin( G_searchGroupList( oldModel ), "female"  ) )
-				{
-					sex = "f";
-				}
-				else
-				{
-					sex = "";
-				}
-
-				if ( Q_strncmp( "janeway", oldModel, 7 ) == 0 )
-				{
-					Q_strncpyz( model, "borg-janeway", sizeof( model ) );
-				}
-				else if ( Q_strncmp( "torres", oldModel, 6 ) == 0 )
-				{
-					Q_strncpyz( model, "borg-torres", sizeof( model ) );
-				}
-				else if ( Q_strncmp( "tuvok", oldModel, 5 ) == 0 )
-				{
-					Q_strncpyz( model, "borg-tuvok", sizeof( model ) );
-				}
-				else if ( Q_strncmp( "seven", oldModel, 5 ) == 0 )
-				{
-					Q_strncpyz( model, "sevenofnine", sizeof( model ) );
-				}
-
-				while ( !model[0] || Q_strncmp( "borgqueen", model, 9 ) == 0 )
-				{
-					//if being assimilated, try to match the character/sex?
-					model[0] = 0;
-					getNewSkin( "Borg", model, "default", client, clientNum );
-					if ( sex[0] == 'm' )
-					{
-						getNewSkin( "BorgMale", model, "default", client, clientNum );
-					}
-					else if ( sex[0] == 'f' )
-					{
-						getNewSkin( "BorgFemale", model, "default", client, clientNum );
-					}
-					else
-					{
-						getNewSkin( "Borg", model, "default", client, clientNum );
-					}
-				}
-			}
-			else
-			{//using a borg model
-				Q_strncpyz( model, Info_ValueForKey (userinfo, "model"), sizeof( model ) );
-			}
-		}
-		break;
-	case PC_ACTIONHERO:
-	case PC_NOCLASS:
-	default:
-		Q_strncpyz( model, Info_ValueForKey (userinfo, "model"), sizeof( model ) );
-		break;
+	*model = '\0';
+	modfn.GetPlayerModel( clientNum, userinfo, model, sizeof( model ) );
+	if ( *model == '\0' ) {
+		Q_strncpyz( model, "munro/red", sizeof( model ) );
 	}
 
-	// team
-	if ( client->sess.sessionClass != PC_BORG )
-	{//borg class doesn't need to use team color
-		switch( client->sess.sessionTeam ) {
-		case TEAM_RED:
-			// decide if we are going to have to reset a skin cos it's not applicable to a race selected
-			if (g_gametype.integer < GT_TEAM || !Q_stricmp("", g_team_group_red.string))
-			{
-				if ( modfn.AdjustGeneralConstant( GC_ASSIMILATION_MODELS, 0 ) && legalSkin(G_searchGroupList( model ), "borg" ) == qtrue )
-				{//if you're trying to be a Borg and not a borg playerclass, then pick a different model
-					getNewSkin("HazardTeam", model, "red", client, clientNum);
-					ForceClientSkin(model, "red");
-					// change the value in out local copy, then update it on the server
-					Info_SetValueForKey(userinfo, "model", model);
-					trap_SetUserinfo(clientNum, userinfo);
-				}
-				else
-				{
-					ForceClientSkin(model, "red");
-				}
-				break;
-			}
-			// at this point, we are playing CTF and there IS a race specified for this game
-			else
-			{
-				if ( modfn.AdjustGeneralConstant( GC_ASSIMILATION_MODELS, 0 ) && Q_stricmp( "borg", g_team_group_blue.string ) == 0 )
-				{//team model is set to borg, but that is now allowed, pick a different "race"
-					reset = getNewSkin("HazardTeam", model, "blue", client, clientNum);
-				}
-				else
-				{// go away and get what ever races this skin is attached to.
-					reset = getNewSkin(g_team_group_red.string, model, "red", client, clientNum);
-				}
-
-				// did we get a model name back?
-				if (!model[0])
-				{
-					// no - this almost certainly means we had a bogus race is the g_team_group_team cvar
-					// so reset it to starfleet and try it again
-					Com_Printf("WARNING! - Red Group %s is unknown - resetting Red Group to Allow Any Group\n", g_team_group_red.string);
-					trap_Cvar_Set("g_team_group_red", "");
-					G_UpdateTrackedCvar( &g_team_group_red );
-
-					// Since we are allow any group now, just get his normal model and carry on
-					Q_strncpyz( model, Info_ValueForKey (userinfo, "model"), sizeof( model ) );
-					ForceClientSkin(model, "red");
-					reset = qfalse;
-				}
-
-				if (reset)
-				{
-					trap_SendServerCommand( -1, va("print \"In-appropriate skin selected for %s on team %s\nSkin selection overridden from skin %s to skin %s\n\"",
-						client->pers.netname, g_team_group_red.string, Info_ValueForKey (userinfo, "model"), model));
-					ForceClientSkin(model, "red");
-					// change the value in out local copy, then update it on the server
-					Info_SetValueForKey(userinfo, "model", model);
-					trap_SetUserinfo(clientNum, userinfo);
-				}
-				break;
-			}
-		case TEAM_BLUE:
-			// decide if we are going to have to reset a skin cos it's not applicable to a race selected
-			if (g_gametype.integer < GT_TEAM || !Q_stricmp("", g_team_group_blue.string))
-			{
-				if ( modfn.AdjustGeneralConstant( GC_ASSIMILATION_MODELS, 0 ) && legalSkin(G_searchGroupList( model ), "borg" ) == qtrue )
-				{//if you're trying to be a Borg and not a borg playerclass, then pick a different model
-					getNewSkin("HazardTeam", model, "blue", client, clientNum);
-					ForceClientSkin(model, "blue");
-					// change the value in out local copy, then update it on the server
-					Info_SetValueForKey(userinfo, "model", model);
-					trap_SetUserinfo(clientNum, userinfo);
-				}
-				else
-				{
-					ForceClientSkin(model, "blue");
-				}
-				break;
-			}
-			// at this point, we are playing CTF and there IS a race specified for this game
-			else
-			{
-				if ( modfn.AdjustGeneralConstant( GC_ASSIMILATION_MODELS, 0 ) && Q_stricmp( "borg", g_team_group_blue.string ) == 0 )
-				{//team model is set to borg, but that is now allowed, pick a different "race"
-					reset = getNewSkin("HazardTeam", model, "blue", client, clientNum);
-				}
-				else
-				{
-					// go away and get what ever races this skin is attached to.
-					reset = getNewSkin(g_team_group_blue.string, model, "blue", client, clientNum);
-				}
-
-				// did we get a model name back?
-				if (!model[0])
-				{
-					// no - this almost certainly means we had a bogus race is the g_team_group_team cvar
-					// so reset it to klingon and try it again
-					Com_Printf("WARNING! - Blue Group %s is unknown - resetting Blue Group to Allow Any Group\n", g_team_group_blue.string);
-					trap_Cvar_Set("g_team_group_blue", "");
-					G_UpdateTrackedCvar( &g_team_group_blue );
-
-					// Since we are allow any group now, just get his normal model and carry on
-					Q_strncpyz( model, Info_ValueForKey (userinfo, "model"), sizeof( model ) );
-					ForceClientSkin(model, "blue");
-					reset = qfalse;
-				}
-
-				if (reset)
-				{
-					trap_SendServerCommand( -1, va("print \"In-appropriate skin selected for %s on team %s\nSkin selection overridden from skin %s to skin %s\n\"",
-						client->pers.netname, g_team_group_blue.string, Info_ValueForKey (userinfo, "model"), model));
-					ForceClientSkin(model, "blue");
-					// change the value in out local copy, then update it on the server
-					Info_SetValueForKey(userinfo, "model", model);
-					trap_SetUserinfo(clientNum, userinfo);
-				}
-				break;
-			}
-
-		}
-		if ( g_gametype.integer >= GT_TEAM && client->sess.sessionTeam == TEAM_SPECTATOR ) {
-			// don't ever use a default skin in teamplay, it would just waste memory
-			ForceClientSkin(model, "red");
-		}
-	}
-	else
-	{
-		ForceClientSkin(model, "default");
-		Info_SetValueForKey(userinfo, "model", model);
-		trap_SetUserinfo(clientNum, userinfo);
+	if ( client->sess.sessionTeam == TEAM_RED ) {
+		SetSkinForModel( model, "red", model, sizeof( model ) );
+	} else if ( client->sess.sessionTeam == TEAM_BLUE ) {
+		SetSkinForModel( model, "blue", model, sizeof( model ) );
 	}
 
 	// colors

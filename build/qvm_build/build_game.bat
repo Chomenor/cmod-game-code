@@ -64,11 +64,14 @@ set src=game\mods&set name=g_mod_main&call :compile
 set src=game\mods&set name=g_mod_stubs&call :compile
 set src=game\mods&set name=g_mod_utils&call :compile
 set src=game\mods\components&set name=comp_holdable_transporter&call :compile
+set src=game\mods\components&set name=comp_model_groups&call :compile
+set src=game\mods\components&set name=comp_model_selection&call :compile
 set src=game\mods\components&set name=comp_pending_item&call :compile
 set src=game\mods\features&set name=feat_altswap_handler&call :compile
 set src=game\mods\features&set name=feat_player_move&call :compile
 set src=game\mods\features&set name=feat_spect_passthrough&call :compile
 set src=game\mods\features&set name=feat_spawn_protect&call :compile
+set src=game\mods\features&set name=feat_team_groups&call :compile
 set src=game\mods\features\pingcomp&set name=pc_client_predict&call :compile
 set src=game\mods\features\pingcomp&set name=pc_dead_move&call :compile
 set src=game\mods\features\pingcomp&set name=pc_instant_weapons&call :compile
@@ -85,6 +88,7 @@ set src=game\mods\modes&set name=mode_tournament&call :compile
 set src=game\mods\modes\assimilation&set name=assim_borg_adapt&call :compile
 set src=game\mods\modes\assimilation&set name=assim_borg_teleport&call :compile
 set src=game\mods\modes\assimilation&set name=assim_main&call :compile
+set src=game\mods\modes\assimilation&set name=assim_models&call :compile
 set src=game\mods\modes\elimination&set name=elim_main&call :compile
 set src=game\mods\modes\specialties&set name=specs_main&call :compile
 set src=common&set name=logging&call :compile

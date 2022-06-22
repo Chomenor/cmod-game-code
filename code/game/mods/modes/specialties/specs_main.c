@@ -19,6 +19,7 @@ typedef struct {
 static struct {
 	specialties_client_t clients[MAX_CLIENTS];
 	trackedCvar_t g_classChangeDebounceTime;
+	PlayerModels_ConvertPlayerModel_t Prev_ConvertPlayerModel;
 
 	// For mod function stacking
 	ModFNType_InitClientSession Prev_InitClientSession;
@@ -557,6 +558,48 @@ LOGFUNCTION_SRET( int, PREFIX(ModifyAmmoUsage), ( int defaultValue, int weapon, 
 
 /*
 ================
+(ModFN) ConvertPlayerModel
+
+Set special player models for specialties classes.
+================
+*/
+LOGFUNCTION_SVOID( PREFIX(ConvertPlayerModel),
+		( int clientNum, const char *userinfo, const char *source_model, char *output, unsigned int outputSize ),
+		( clientNum, userinfo, source_model, output, outputSize ), "G_MODFN_CONVERTPLAYERMODEL" ) {
+	gclient_t *client = &level.clients[clientNum];
+	char *oldModel;
+
+	switch ( client->sess.sessionClass ) {
+		case PC_INFILTRATOR:
+			oldModel = Info_ValueForKey( userinfo, "model" );
+			if ( ModModelGroups_Shared_ListContainsRace( ModModelGroups_Shared_SearchGroupList( oldModel ), "female" ) ) {
+				Q_strncpyz( output, "alexandria", outputSize );
+			} else {
+				Q_strncpyz( output, "munro", outputSize );
+			}
+			return;
+		case PC_SNIPER:
+			Q_strncpyz( output, "telsia", outputSize );
+			return;
+		case PC_HEAVY:
+			Q_strncpyz( output, "biessman", outputSize );
+			return;
+		case PC_DEMO:
+			Q_strncpyz( output, "chang", outputSize );
+			return;
+		case PC_MEDIC:
+			Q_strncpyz( output, "jurot", outputSize );
+			return;
+		case PC_TECH:
+			Q_strncpyz( output, "chell", outputSize );
+			return;
+		default:
+			MOD_STATE->Prev_ConvertPlayerModel( clientNum, userinfo, source_model, output, outputSize );
+	}
+}
+
+/*
+================
 ModSpecialties_Init
 ================
 */
@@ -578,6 +621,11 @@ LOGFUNCTION_VOID( ModSpecialties_Init, ( void ), (), "G_MOD_INIT G_SPECIALTIES" 
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
 		G_RegisterTrackedCvar( &MOD_STATE->g_classChangeDebounceTime, "g_classChangeDebounceTime", "180", CVAR_ARCHIVE, qfalse );
+
+		ModModelGroups_Init();
+		ModModelSelection_Init();
+		MOD_STATE->Prev_ConvertPlayerModel = ModModelSelection_shared->ConvertPlayerModel;
+		ModModelSelection_shared->ConvertPlayerModel = ModSpecialties_ConvertPlayerModel;
 
 		// Register mod functions
 		INIT_FN_STACKABLE( InitClientSession );

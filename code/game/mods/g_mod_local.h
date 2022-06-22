@@ -26,6 +26,7 @@ extern mod_config_t modcfg;
 // Utils
 
 int G_ModUtils_GetLatchedValue( const char *cvar_name, const char *default_value, int flags );
+char *G_ModUtils_AllocateString( const char *string );
 
 /* ************************************************************************* */
 // Modes - Modules loaded directly from G_ModsInit to change game mechanics
@@ -46,6 +47,7 @@ void ModAltSwapHandler_Init( void );
 void ModPingcomp_Init( void );
 void ModPlayerMove_Init( void );
 void ModSpawnProtect_Init( void );
+void ModTeamGroups_Init( void );
 void ModSpectPassThrough_Init( void );
 
 //
@@ -54,11 +56,19 @@ void ModSpectPassThrough_Init( void );
 
 qboolean ModPingcomp_Static_PingCompensationEnabled( void );
 
+//
+// Team Groups (feat_team_groups.c)
+//
+
+void ModTeamGroups_Shared_ForceConfigStrings( const char *redGroup, const char *blueGroup );
+
 /* ************************************************************************* */
 // Components - Modules generally only loaded by other modules
 /* ************************************************************************* */
 
 void ModHoldableTransporter_Init( void );
+void ModModelGroups_Init( void );
+void ModModelSelection_Init( void );
 void ModPendingItem_Init( void );
 
 //
@@ -74,6 +84,32 @@ typedef struct {
 } ModHoldableTransporter_config_t;
 
 extern ModHoldableTransporter_config_t *ModHoldableTransporter_config;
+
+//
+// Player model groups (comp_model_groups.c)
+//
+
+char *ModModelGroups_Shared_SearchGroupList(const char *name);
+qboolean ModModelGroups_Shared_ListContainsRace(const char *race_list, const char *race);
+void ModModelGroups_Shared_RandomModelForRace( const char *race, char *model, unsigned int size );
+
+//
+// Player model selection (comp_model_selection.c)
+//
+
+// Performs processing/conversion of player model to fit mod requirements. Writes empty string to use random model instead.
+typedef void ( *PlayerModels_ConvertPlayerModel_t )( int clientNum, const char *userinfo, const char *source_model,
+		char *output, unsigned int outputSize );
+
+// Generates a random model which meets mod requirements. Called when convert function returns empty string.
+typedef void ( *PlayerModels_RandomPlayerModel_t )( int clientNum, const char *userinfo, char *output, unsigned int outputSize );
+
+typedef struct {
+	PlayerModels_ConvertPlayerModel_t ConvertPlayerModel;
+	PlayerModels_RandomPlayerModel_t RandomPlayerModel;
+} ModModelSelection_shared_t;
+
+extern ModModelSelection_shared_t *ModModelSelection_shared;
 
 //
 // Pending item handling (g_mod_pending_item.c)

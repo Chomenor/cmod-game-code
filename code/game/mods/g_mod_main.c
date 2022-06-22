@@ -37,6 +37,7 @@ LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 	trap_Cvar_Register( NULL, "g_pModElimination", "0", CVAR_SERVERINFO | CVAR_LATCH );
 
 	// Default mods
+	ModTeamGroups_Init();
 	if ( modsEnabled >= 2 ) {
 		ModPlayerMove_Init();
 		ModAltSwapHandler_Init();
@@ -66,4 +67,6 @@ LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 	trap_Cvar_Set( "g_pModActionHero", modcfg.mods_enabled.actionhero ? "1" : "0" );
 	trap_Cvar_Set( "g_pModDisintegration", modcfg.mods_enabled.disintegration ? "1" : "0" );
 	trap_Cvar_Set( "g_pModSpecialties", modcfg.mods_enabled.specialties ? "1" : "0" );
+
+	modfn.PostModInit();
 }

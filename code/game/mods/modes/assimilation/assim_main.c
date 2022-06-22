@@ -105,11 +105,9 @@ LOGFUNCTION_SVOID( ModAssimilation_SetBorgColor, ( team_t team, const char *reas
 			MOD_STATE->borgTeam == TEAM_RED ? "red" : "blue", reason );
 
 	if ( team == TEAM_RED ) {
-		trap_SetConfigstring( CS_RED_GROUP, "Borg" );
-		trap_SetConfigstring( CS_BLUE_GROUP, g_team_group_blue.string );
+		ModTeamGroups_Shared_ForceConfigStrings( "Borg", NULL );
 	} else {
-		trap_SetConfigstring( CS_RED_GROUP, g_team_group_red.string );
-		trap_SetConfigstring( CS_BLUE_GROUP, "Borg" );
+		ModTeamGroups_Shared_ForceConfigStrings( NULL, "Borg" );
 	}
 }
 
@@ -119,6 +117,8 @@ ModAssimilation_DetermineBorgColor
 ================
 */
 LOGFUNCTION_SVOID( ModAssimilation_DetermineBorgColor, ( qboolean restarting ), ( restarting ), "G_ASSIMILATION" ) {
+	char buffer[256];
+
 	// Maps can force a certain borg team, along with a queen spawn point, via a
 	// "team_CTF_redplayer" or "team_CTF_blueplayer" entity with spawnflags 1.
 	// For example, on map "hm_borgattack" borg team is always red.
@@ -134,11 +134,13 @@ LOGFUNCTION_SVOID( ModAssimilation_DetermineBorgColor, ( qboolean restarting ), 
 	// Borg team can also be set via team group cvar. In the original implementation
 	// these checks are case sensitive and may not take effect in certain situations,
 	// but for the most part this matches the original EF behavior.
-	if ( !Q_stricmpn( "Borg", g_team_group_red.string, 4 ) ) {
+	trap_Cvar_VariableStringBuffer( "g_team_group_red", buffer, sizeof( buffer ) );
+	if ( !Q_stricmpn( "Borg", buffer, 4 ) ) {
 		ModAssimilation_SetBorgColor( TEAM_RED, "team group setting" );
 		return;
 	}
-	if ( !Q_stricmpn( "Borg", g_team_group_blue.string, 4 ) ) {
+	trap_Cvar_VariableStringBuffer( "g_team_group_blue", buffer, sizeof( buffer ) );
+	if ( !Q_stricmpn( "Borg", buffer, 4 ) ) {
 		ModAssimilation_SetBorgColor( TEAM_BLUE, "team group setting" );
 		return;
 	}
@@ -772,8 +774,6 @@ LOGFUNCTION_SRET( qboolean, PREFIX(ModClientCommand), ( int clientNum, const cha
 ==================
 */
 static int PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defaultValue ) {
-	if ( gcType == GC_ASSIMILATION_MODELS )
-		return 1;
 	if ( gcType == GC_DISABLE_TEAM_FORCE_BALANCE )
 		return 1;
 
@@ -887,9 +887,13 @@ LOGFUNCTION_VOID( ModAssimilation_Init, ( void ), (), "G_MOD_INIT G_ASSIMILATION
 		INIT_FN_STACKABLE( PostRunFrame );
 		INIT_FN_STACKABLE( MatchStateTransition );
 
+		// Support ModTeamGroups_Shared_ForceConfigStrings function
+		ModTeamGroups_Init();
+
 		// Support modules
 		ModAssimBorgAdapt_Init();
 		ModAssimBorgTeleport_Init();
+		ModAssimModels_Init();
 
 		// Always set g_gametype 3
 		trap_Cvar_Set( "g_gametype", "3" );

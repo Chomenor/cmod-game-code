@@ -505,6 +505,7 @@ Prints info messages to client during ClientSpawn.
 LOGFUNCTION_SVOID( PREFIX(SpawnCenterPrintMessage), ( int clientNum, clientSpawnType_t spawnType ),
 		( clientNum, spawnType ), "G_MODFN_SPAWNCENTERPRINTMESSAGE" ) {
 	gclient_t *client = &level.clients[clientNum];
+	assimilation_client_t *modclient = &MOD_STATE->clients[clientNum];
 
 	if ( clientNum == MOD_STATE->borgQueenClientNum ) {
 		trap_SendServerCommand( clientNum, "cp \"Assimilation:\nYou Are the Queen!\n\"" );
@@ -514,7 +515,7 @@ LOGFUNCTION_SVOID( PREFIX(SpawnCenterPrintMessage), ( int clientNum, clientSpawn
 		trap_SendServerCommand( clientNum, "cp \"Assimilation\"" );
 	}
 
-	else if ( spawnType != CST_RESPAWN ) {
+	else if ( spawnType != CST_RESPAWN && !modclient->assimilated ) {
 		if ( client->sess.sessionClass == PC_BORG ) {
 			trap_SendServerCommand( clientNum, "cp \"Assimilation:\nAssimilate all enemies!\n\"" );
 		}

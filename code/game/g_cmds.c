@@ -2,9 +2,6 @@
 //
 #include "g_local.h"
 
-
-extern clInitStatus_t clientInitialStatus[];
-
 /*
 ==================
 DeathmatchScoreboardMessage
@@ -694,8 +691,6 @@ void Cmd_Team_f( gentity_t *ent ) {
 
 	trap_Argv( 1, s, sizeof( s ) );
 
-	//if this is a manual change, not an assimilation, uninitialize the clInitStatus data
-	clientInitialStatus[ent->s.number].initialized = qfalse;
 	SetTeam( ent, s );
 }
 

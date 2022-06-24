@@ -696,11 +696,6 @@ void ClientDisconnect( int clientNum );
 void ClientBegin( int clientNum );
 void ClientCommand( int clientNum );
 
-typedef struct
-{
-	qboolean initialized;
-} clInitStatus_t;
-
 //
 // g_active.c
 //

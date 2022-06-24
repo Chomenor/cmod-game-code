@@ -4,12 +4,8 @@
 
 // g_client.c -- client functions that don't happen every frame
 
-void G_StoreClientInitialStatus( gentity_t *ent );
-
 static vec3_t	playerMins = {-15, -15, -24};
 static vec3_t	playerMaxs = {15, 15, 32};
-
-clInitStatus_t clientInitialStatus[MAX_CLIENTS];
 
 /*QUAKED info_player_deathmatch (1 0 1) (-16 -16 -24) (16 16 32) initial
 potential spawning position for deathmatch games.
@@ -1032,21 +1028,6 @@ void ClientBegin( int clientNum ) {
 	G_ClearClientLog(clientNum);
 }
 
-void G_StoreClientInitialStatus( gentity_t *ent )
-{
-	if ( clientInitialStatus[ent->s.number].initialized )
-	{//already set
-		return;
-	}
-
-	if ( ent->client->sess.sessionTeam == TEAM_SPECTATOR )
-	{//don't store their data if they're just a spectator
-		return;
-	}
-
-	clientInitialStatus[ent->s.number].initialized = qtrue;
-}
-
 /*
 ===========
 (ModFN) UpdateSessionClass
@@ -1095,43 +1076,20 @@ LOGFUNCTION_VOID( ModFNDefault_SpawnCenterPrintMessage, ( int clientNum, clientS
 		( clientNum, spawnType ), "G_MODFN_SPAWNCENTERPRINTMESSAGE" ) {
 	gclient_t *client = &level.clients[clientNum];
 
-	if ( client->sess.sessionTeam == TEAM_SPECTATOR )
-	{//spectators just get the title of the game
-		switch ( g_gametype.integer )
-		{
-		case GT_FFA:				// free for all
-			trap_SendServerCommand( clientNum, "cp \"Free For All\"" );
-			break;
-		case GT_SINGLE_PLAYER:	// single player tournament
-			trap_SendServerCommand( clientNum, "cp \"SoloMatch\"" );
-			break;
-		case GT_TEAM:			// team deathmatch
-			trap_SendServerCommand( clientNum, "cp \"Team Holomatch\"" );
-			break;
-		case GT_CTF:				// capture the flag
-			trap_SendServerCommand( clientNum, "cp \"Capture the Flag\"" );
-			break;
-		}
-	}
-	else
-	{
-		if ( !clientInitialStatus[clientNum].initialized )
-		{//first time coming in
-			switch ( g_gametype.integer )
-			{
-			case GT_FFA:				// free for all
+	if ( spawnType != CST_RESPAWN || client->sess.sessionTeam == TEAM_SPECTATOR ) {
+		switch ( g_gametype.integer ) {
+			case GT_FFA:
 				trap_SendServerCommand( clientNum, "cp \"Free For All\"" );
 				break;
-			case GT_SINGLE_PLAYER:	// single player tournament
+			case GT_SINGLE_PLAYER:
 				trap_SendServerCommand( clientNum, "cp \"SoloMatch\"" );
 				break;
-			case GT_TEAM:			// team deathmatch
+			case GT_TEAM:
 				trap_SendServerCommand( clientNum, "cp \"Team Holomatch\"" );
 				break;
-			case GT_CTF:				// capture the flag
+			case GT_CTF:
 				trap_SendServerCommand( clientNum, "cp \"Capture the Flag\"" );
 				break;
-			}
 		}
 	}
 }
@@ -1361,10 +1319,6 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	if ( !( modfn.SpectatorClient( index ) ) && !( client->ps.introTime > level.time ) ) {
 		modfn.SpawnTransporterEffect( index, spawnType );
 	}
-
-	//store intial client values
-	//FIXME: when purposely change teams, this gets confused?
-	G_StoreClientInitialStatus( ent );
 	
 	// run any post-spawn actions
 	modfn.PostClientSpawn( index, spawnType );
@@ -1445,9 +1399,6 @@ void ClientDisconnect( int clientNum ) {
 
 	// kef -- if this guy contributed to any of our kills/deaths/weapons logs, clean 'em out
 	G_ClearClientLog(clientNum);
-
-	//also remove any initial data
-	clientInitialStatus[clientNum].initialized = qfalse;
 }
 
 

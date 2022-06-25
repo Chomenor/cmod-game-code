@@ -1299,9 +1299,6 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 		trap_LinkEntity( ent );
 	}
 
-	// run the presend to set anything else
-	ClientEndFrame( ent );
-
 	// clear entity state values
 	BG_PlayerStateToEntityState( &client->ps, &ent->s, qtrue );
 

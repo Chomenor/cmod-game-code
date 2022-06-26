@@ -251,7 +251,6 @@ LOGFUNCTION_SVOID( ModAssimilation_SetQueen, ( int clientNum ), ( clientNum ), "
 		int oldQueen = MOD_STATE->borgQueenClientNum;
 		MOD_STATE->borgQueenClientNum = -1;
 		if ( level.clients[oldQueen].pers.connected == CON_CONNECTED ) {
-			ClientUserinfoChanged( oldQueen );
 			ClientSpawn( &g_entities[oldQueen], CST_RESPAWN );
 		}
 	}
@@ -259,7 +258,6 @@ LOGFUNCTION_SVOID( ModAssimilation_SetQueen, ( int clientNum ), ( clientNum ), "
 	if ( clientNum != -1 && G_AssertConnectedClient( clientNum ) ) {
 		// Set new queen
 		MOD_STATE->borgQueenClientNum = clientNum;
-		ClientUserinfoChanged( MOD_STATE->borgQueenClientNum );
 		ClientSpawn( &g_entities[clientNum], CST_RESPAWN );
 	}
 }

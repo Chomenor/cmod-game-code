@@ -251,7 +251,6 @@ LOGFUNCTION_SVOID( ModSpecialties_SetClassCmd, ( int clientNum ), ( clientNum ),
 
 	client->sess.sessionClass = pclass;
 	ModSpecialties_BroadcastClassChange( client );
-	ClientUserinfoChanged( clientNum );
 
 	// Kill him (makes sure he loses flags, etc)
 	player_die( ent, NULL, NULL, 100000, MOD_RESPAWN );

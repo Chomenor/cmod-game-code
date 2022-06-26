@@ -635,9 +635,6 @@ qboolean SetTeam( gentity_t *ent, char *s ) {
 
 	BroadcastTeamChange( client, oldTeam );
 
-	// get and distribute relevent paramters
-	ClientUserinfoChanged( clientNum );
-
 	ClientBegin( clientNum );
 
 	return qtrue;

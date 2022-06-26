@@ -735,11 +735,12 @@ LOGFUNCTION_RET( int, ModFNDefault_EffectiveHandicap, ( int clientNum, effective
 ===========
 ClientUserinfoChanged
 
-Called from ClientConnect when the player first connects and
-directly by the server system when the player updates a userinfo variable.
+Processes userinfo updates from the client, which includes values such as name, model, handicap, etc.
+and updates configstrings to share the data with other clients.
 
-The game can override any of the settings and call trap_SetUserinfo
-if desired.
+This should be called any time characteristics such as class or team are changed that might affect
+the data set by this function. This function should be safe to call at any time and should not have
+any effect if nothing has changed.
 ============
 */
 void ClientUserinfoChanged( int clientNum ) {
@@ -836,9 +837,17 @@ void ClientUserinfoChanged( int clientNum ) {
 			modfn.EffectiveHandicap( clientNum, EH_VISIBLE ), client->sess.wins, client->sess.losses );
 	}
 
-	trap_SetConfigstring( CS_PLAYERS+clientNum, s );
+	// only bother to update if something changed, to reduce excess log messages
+	{
+		char buffer[1024];
+		trap_GetConfigstring( CS_PLAYERS + clientNum, buffer, sizeof( buffer ) );
+		buffer[sizeof( buffer ) - 1] = '\0';
 
-	G_LogPrintf( "ClientUserinfoChanged: %i %s\n", clientNum, s );
+		if ( strcmp( buffer, s ) ) {
+			trap_SetConfigstring( CS_PLAYERS + clientNum, s );
+			G_LogPrintf( "ClientUserinfoChanged: %i %s\n", clientNum, s );
+		}
+	}
 }
 
 
@@ -1131,7 +1140,6 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	gentity_t	*spawnPoint;
 	int		flags;
 	int		savedPing;
-	pclass_t oClass = ent->client->sess.sessionClass;
 
 	index = ent - g_entities;
 	client = ent->client;
@@ -1226,10 +1234,6 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 
 	// Determine player class
 	modfn.UpdateSessionClass( index );
-	if ( oClass != client->sess.sessionClass )
-	{//need to send the class change
-		ClientUserinfoChanged( index );
-	}
 	client->ps.persistant[PERS_CLASS] = client->sess.sessionClass;
 
 	// Determine max health
@@ -1316,9 +1320,12 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	if ( !( modfn.SpectatorClient( index ) ) && !( client->ps.introTime > level.time ) ) {
 		modfn.SpawnTransporterEffect( index, spawnType );
 	}
-	
+
 	// run any post-spawn actions
 	modfn.PostClientSpawn( index, spawnType );
+
+	// check for userinfo changes
+	ClientUserinfoChanged( index );
 }
 
 

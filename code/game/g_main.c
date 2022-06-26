@@ -727,33 +727,37 @@ void SendScoreboardMessageToAllClients( void ) {
 MoveClientToIntermission
 
 When the intermission starts, this will be called for all players.
-If a new client connects, this will be called after the spawn function.
+If a new client connects, this will be called from the spawn function.
 ========================
 */
 void MoveClientToIntermission( gentity_t *ent ) {
+	gclient_t *client = ent->client;
+
 	// take out of follow mode if needed
-	if ( modfn.SpectatorClient( ent - g_entities ) && ent->client->sess.spectatorState == SPECTATOR_FOLLOW ) {
+	if ( modfn.SpectatorClient( ent - g_entities ) && client->sess.spectatorState == SPECTATOR_FOLLOW ) {
 		StopFollowing( ent );
 	}
 
+	// reset client
+	trap_UnlinkEntity( ent );
+	G_ResetClient( ent - g_entities );
 
 	// move to the spot
 	VectorCopy( level.intermission_origin, ent->s.origin );
 	VectorCopy( level.intermission_origin, ent->client->ps.origin );
 	VectorCopy (level.intermission_angle, ent->client->ps.viewangles);
 	ent->client->ps.pm_type = PM_INTERMISSION;
-	ent->client->ps.eFlags ^= EF_TELEPORT_BIT;
 
-	// clean up powerup info
-	memset( ent->client->ps.powerups, 0, sizeof(ent->client->ps.powerups) );
-
-	ent->client->ps.eFlags = 0;
 	ent->s.eFlags = 0;
 	ent->s.eType = ET_GENERAL;
 	ent->s.modelindex = 0;
 	ent->s.loopSound = 0;
 	ent->s.event = 0;
 	ent->r.contents = 0;
+
+	// Don't trip the out of ammo sound in CG_CheckAmmo
+	client->ps.stats[STAT_WEAPONS] = 1 << WP_PHASER;
+	client->ps.ammo[WP_PHASER] = 100;
 }
 
 /*
@@ -788,29 +792,6 @@ void FindIntermissionPoint( void ) {
 
 /*
 ==================
-ClearFiringFlags
-==================
-*/
-void ClearFiringFlags()
-{
-	int i = 0;
-	gentity_t	*ent = NULL;
-
-	for (i=0 ; i< level.maxclients ; i++)
-	{
-		ent = g_entities + i;
-		if (!ent->inuse)
-			continue;
-		// clear the firing flag
-		if (ent->client)
-		{
-			ent->client->ps.eFlags &= ~EF_FIRING;
-		}
-	}
-}
-
-/*
-==================
 BeginIntermission
 ==================
 */
@@ -831,11 +812,6 @@ void BeginIntermission( void ) {
 	level.intermissiontime = level.time;
 	FindIntermissionPoint();
 
-	// kef -- make sure none of the players are still firing (cuz we don't want weapons fx going off while
-	//they're on the podium)
-	ClearFiringFlags();
-
-
 	// cdr - Want to generate victory pads for all game types  - except level shots (gametype 10)
 	UpdateTournamentInfo();
 	if (!doingLevelshot)
@@ -847,20 +823,7 @@ void BeginIntermission( void ) {
 		client = g_entities + i;
 		if (!client->inuse)
 			continue;
-		// respawn if dead
-		if ( BG_BorgTransporting( &client->client->ps ) )
-		{//in borg teleport fly around mode, turn it off
-			client->client->ps.stats[STAT_USEABLE_PLACED] = 0;
-			client->client->ps.stats[STAT_HOLDABLE_ITEM] = 0;
-			client->client->ps.eFlags &= ~EF_NODRAW;
-			client->s.eFlags &= ~EF_NODRAW;
-			client->flags &= ~FL_NOTARGET;
-		}
-		if (client->health <= 0) {
-			modfn.ClientRespawn(i);
-		}
 		MoveClientToIntermission( client );
-
 	}
 
 	// send the current scoring to all clients

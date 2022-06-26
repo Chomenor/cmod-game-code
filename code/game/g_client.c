@@ -1039,6 +1039,35 @@ void ClientBegin( int clientNum ) {
 
 /*
 ===========
+G_ResetClient
+
+Resets non-persistant parts of client structure.
+============
+*/
+void G_ResetClient( int clientNum ) {
+	gclient_t *client = &level.clients[clientNum];
+	clientPersistant_t pers = client->pers;
+	clientSession_t sess = client->sess;
+	int ping = client->ps.ping;
+	int commandTime = client->ps.commandTime;
+	int flags = client->ps.eFlags & ( EF_TELEPORT_BIT | EF_VOTED );
+	int ps_persistant[MAX_PERSISTANT];
+	memcpy( ps_persistant, client->ps.persistant, sizeof( ps_persistant ) );
+
+	memset( client, 0, sizeof( *client ) );
+
+	client->pers = pers;
+	client->sess = sess;
+	client->ps.ping = ping;
+	client->ps.commandTime = commandTime;
+	client->ps.eFlags = flags;
+	memcpy( client->ps.persistant, ps_persistant, sizeof( client->ps.persistant ) );
+
+	client->ps.clientNum = clientNum;
+}
+
+/*
+===========
 (ModFN) UpdateSessionClass
 
 Checks if current player class is valid, and picks a new one if necessary.
@@ -1134,12 +1163,7 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	vec3_t	spawn_origin, spawn_angles;
 	gclient_t	*client;
 	int		i;
-	clientPersistant_t	saved;
-	clientSession_t		savedSess;
-	int		persistant[MAX_PERSISTANT];
 	gentity_t	*spawnPoint;
-	int		flags;
-	int		savedPing;
 
 	index = ent - g_entities;
 	client = ent->client;
@@ -1147,6 +1171,13 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	trap_UnlinkEntity( ent );
 
 	modfn.PreClientSpawn( index, spawnType );
+
+	// during intermission just put the client in viewing spot
+	if ( level.intermissiontime ) {
+		MoveClientToIntermission( ent );
+		modfn.SpawnCenterPrintMessage( index, spawnType );
+		return;
+	}
 
 	// find a spawn point
 	if ( modfn.SpectatorClient( index ) ) {
@@ -1175,35 +1206,16 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	}
 
 	// toggle the teleport bit so the client knows to not lerp
-	flags = ent->client->ps.eFlags & (EF_TELEPORT_BIT | EF_VOTED);
-	flags ^= EF_TELEPORT_BIT;
+	client->ps.eFlags ^= EF_TELEPORT_BIT;
 
 	// clear everything but the persistant data
-
-	saved = client->pers;
-	savedSess = client->sess;
-	savedPing = client->ps.ping;
-	for ( i = 0 ; i < MAX_PERSISTANT ; i++ ) {
-		persistant[i] = client->ps.persistant[i];
-	}
-	memset (client, 0, sizeof(*client));
-	//
-	client->pers = saved;
-	client->sess = savedSess;
-	client->ps.ping = savedPing;
-	for ( i = 0 ; i < MAX_PERSISTANT ; i++ ) {
-		client->ps.persistant[i] = persistant[i];
-	}
+	G_ResetClient( index );
 
 	// increment the spawncount so the client will detect the respawn
 	client->ps.persistant[PERS_SPAWN_COUNT]++;
 	client->ps.persistant[PERS_TEAM] = client->sess.sessionTeam;
 
 	client->airOutTime = level.time + 12000;
-
-	// clear entity values
-	client->ps.eFlags = flags;
-	client->streakCount = 0;
 
 	ent->s.groundEntityNum = ENTITYNUM_NONE;
 	ent->client = &level.clients[index];
@@ -1226,8 +1238,6 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 
 	trap_GetUsercmd( client - level.clients, &ent->client->pers.cmd );
 	SetClientViewAngle( ent, spawn_angles );
-
-	client->ps.clientNum = index;
 
 	// Always set phaser ammo since it will count up anyway
 	client->ps.ammo[WP_PHASER] = PHASER_AMMO_MAX;
@@ -1273,20 +1283,16 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	client->ps.torsoAnim = TORSO_STAND;
 	client->ps.legsAnim = LEGS_IDLE;
 
-	if ( level.intermissiontime ) {
-		MoveClientToIntermission( ent );
-	} else {
-		// fire the targets of the spawn point
-		G_UseTargets( spawnPoint, ent );
+	// fire the targets of the spawn point
+	G_UseTargets( spawnPoint, ent );
 
-		// select the highest weapon number available, after any
-		// spawn given items have fired
-		client->ps.weapon = 1;
-		for ( i = WP_NUM_WEAPONS - 1 ; i > 0 ; i-- ) {
-			if ( client->ps.stats[STAT_WEAPONS] & ( 1 << i ) ) {
-				client->ps.weapon = i;
-				break;
-			}
+	// select the highest weapon number available, after any
+	// spawn given items have fired
+	client->ps.weapon = 1;
+	for ( i = WP_NUM_WEAPONS - 1 ; i > 0 ; i-- ) {
+		if ( client->ps.stats[STAT_WEAPONS] & ( 1 << i ) ) {
+			client->ps.weapon = i;
+			break;
 		}
 	}
 

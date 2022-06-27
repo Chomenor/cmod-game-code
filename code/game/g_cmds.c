@@ -649,13 +649,41 @@ to free floating spectator mode
 =================
 */
 void StopFollowing( gentity_t *ent ) {
-	ent->client->ps.persistant[ PERS_TEAM ] = ent->client->sess.sessionTeam;
-	ent->client->sess.spectatorState = SPECTATOR_FREE;
-	ent->client->ps.pm_flags &= ~PMF_FOLLOW;
-	ent->r.svFlags &= ~SVF_BOT;
-	ent->client->ps.clientNum = ent - g_entities;
-	//don't be dead
-	ent->client->ps.stats[STAT_HEALTH] = ent->client->ps.stats[STAT_MAX_HEALTH];
+	gclient_t *client = ent->client;
+	vec3_t old_origin;
+	vec3_t old_viewAngles;
+	int old_ping = client->ps.ping;
+	int old_rank = client->ps.persistant[PERS_RANK];
+
+	client->sess.spectatorState = SPECTATOR_FREE;
+	VectorCopy( client->ps.origin, old_origin );
+	VectorSet( old_viewAngles, client->ps.viewangles[0], client->ps.viewangles[1], 0.0f );
+	
+	memset( &client->ps, 0, sizeof( client->ps ) );
+	client->ps.persistant[PERS_TEAM] = client->sess.sessionTeam;
+	client->ps.stats[STAT_HEALTH] = client->ps.stats[STAT_MAX_HEALTH] = 100;
+	client->ps.clientNum = ent - g_entities;
+	client->ps.ping = old_ping;
+	if ( g_gametype.integer >= GT_TEAM ) {
+		client->ps.persistant[PERS_RANK] = old_rank;
+	}
+
+	// Make sure we have a valid commandTime
+	client->ps.commandTime = client->pers.cmd.serverTime;
+	if ( client->ps.commandTime < level.time - 1000 ) {
+		client->ps.commandTime = level.time - 1000;
+	} else if ( client->ps.commandTime > level.time + 200 ) {
+		client->ps.commandTime = level.time + 200;
+	}
+
+	// Don't trip the out of ammo sound in CG_CheckAmmo
+	client->ps.stats[STAT_WEAPONS] = 1 << WP_PHASER;
+	client->ps.ammo[WP_PHASER] = PHASER_AMMO_MAX;
+
+	// Keep the origin and view angle from the player that was being followed
+	VectorCopy( old_origin, client->ps.origin );
+	PM_UpdateViewAngles( &client->ps, &client->pers.cmd );
+	SetClientViewAngle( ent, old_viewAngles );
 }
 
 /*

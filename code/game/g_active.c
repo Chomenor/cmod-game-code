@@ -1926,7 +1926,11 @@ void SpectatorClientEndFrame( gentity_t *ent ) {
 		if ( clientNum >= 0 ) {
 			cl = &level.clients[ clientNum ];
 			if ( cl->pers.connected == CON_CONNECTED && !modfn.SpectatorClient( clientNum ) ) {
+				// transfer playerstate from followed client
+				// don't modify ping
+				int ping = ent->client->ps.ping;
 				ent->client->ps = cl->ps;
+				ent->client->ps.ping = ping;
 				ent->client->ps.pm_flags |= PMF_FOLLOW;
 				return;
 			} else {

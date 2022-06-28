@@ -858,8 +858,6 @@ ClientConnect
 Called when a player begins connecting to the server.
 Called again for every map change or tournement restart.
 
-The session information will be valid after exit.
-
 Return NULL if the client should be allowed, otherwise return
 a string with the reason for denial.
 
@@ -909,7 +907,7 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 	client->pers.firstTime = firstTime;
 
 	// read or initialize the session data
-	if ( firstTime || level.newSession ) {
+	if ( firstTime ) {
 		G_InitSessionData( client, userinfo );
 	} else {
 		G_ReadSessionData( client );

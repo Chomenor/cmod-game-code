@@ -366,9 +366,6 @@ typedef struct {
 	int			teamScores[TEAM_NUM_TEAMS];
 	int			lastTeamLocationTime;		// last time of client team location update
 
-	qboolean	newSession;				// don't use any old session data, because
-										// we changed gametype
-
 	// if different than TEAM_FREE, force this team as winner in CalculateRanks
 	team_t		forceWinningTeam;
 
@@ -726,7 +723,6 @@ void G_RetrieveGlobalSessionInfo( info_string_t *output );
 int G_RetrieveGlobalSessionValue( const char *key );
 void G_ReadSessionData( gclient_t *client );
 void G_InitSessionData( gclient_t *client, char *userinfo );
-void G_InitWorldSession( void );
 void G_WriteSessionData( void );
 
 //

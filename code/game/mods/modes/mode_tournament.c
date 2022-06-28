@@ -164,7 +164,7 @@ static void ModTournament_CheckAddPlayers( void ) {
 	gclient_t	*client;
 	gclient_t	*nextInLine;
 
-	if ( level.numPlayingClients != 1 ) {
+	if ( level.numPlayingClients >= 2 ) {
 		return;
 	}
 

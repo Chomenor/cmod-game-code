@@ -189,6 +189,24 @@ void G_ReadSessionData( gclient_t *client ) {
 		&client->sess.losses
 		);
 
+	// Reset when switching to/from tournament mode
+	if ( ( g_gametype.integer == GT_TOURNAMENT ) != ( trap_Cvar_VariableIntegerValue( "session" ) == GT_TOURNAMENT ) ) {
+		client->sess.sessionTeam = TEAM_SPECTATOR;
+		client->sess.wins = 0;
+		client->sess.losses = 0;
+	}
+
+	// Make sure appropriate team is selected for gametype
+	if ( g_gametype.integer >= GT_TEAM ) {
+		if ( client->sess.sessionTeam != TEAM_RED && client->sess.sessionTeam != TEAM_BLUE ) {
+			client->sess.sessionTeam = TEAM_SPECTATOR;
+		}
+	} else {
+		if ( client->sess.sessionTeam != TEAM_SPECTATOR ) {
+			client->sess.sessionTeam = TEAM_FREE;
+		}
+	}
+
 	// Make sure appropriate class is selected for mod
 	modfn.UpdateSessionClass( clientNum );
 
@@ -250,27 +268,6 @@ void G_InitSessionData( gclient_t *client, char *userinfo ) {
 	}
 }
 
-
-/*
-==================
-G_InitWorldSession
-
-==================
-*/
-void G_InitWorldSession( void ) {
-	char	s[MAX_STRING_CHARS];
-	int			gt;
-
-	trap_Cvar_VariableStringBuffer( "session", s, sizeof(s) );
-	gt = atoi( s );
-
-	// if the gametype changed since the last session, don't use any
-	// client sessions
-	if ( g_gametype.integer != gt ) {
-		level.newSession = qtrue;
-		G_Printf( "Gametype changed, clearing session data.\n" );
-	}
-}
 
 /*
 ==================

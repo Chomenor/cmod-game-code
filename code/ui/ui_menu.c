@@ -458,7 +458,7 @@ M_InitialSetupMenu_Key
 */
 static sfxHandle_t M_InitialSetupMenu_Key (int key)
 {
-	if (key == K_ESCAPE)
+	if (key == K_ESCAPE || key == K_MOUSE2)
 	{
 		return(0);
 	}

@@ -48,21 +48,37 @@ intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, 
 		G_ShutdownGame( arg0 );
 		return 0;
 	case GAME_CLIENT_CONNECT:
+		if ( level.clients[arg0].pers.connected != CON_DISCONNECTED ) {
+			// Engine can call this during reconnects without calling disconnect first.
+			// Call ClientDisconnect here to to make sure flags are returned, etc.
+			G_DedPrintf( "GAME_CLIENT_CONNECT: Reconnecting active client %i\n", arg0 );
+			ClientDisconnect( arg0 );
+		}
 		return (intptr_t)ClientConnect( arg0, arg1, arg2 );
 	case GAME_CLIENT_THINK:
-		ClientThink( arg0 );
+		if ( EF_WARN_ASSERT( level.clients[arg0].pers.connected == CON_CONNECTED ) ) {
+			ClientThink( arg0 );
+		}
 		return 0;
 	case GAME_CLIENT_USERINFO_CHANGED:
-		ClientUserinfoChanged( arg0 );
+		if ( EF_WARN_ASSERT( level.clients[arg0].pers.connected >= CON_CONNECTING ) ) {
+			ClientUserinfoChanged( arg0 );
+		}
 		return 0;
 	case GAME_CLIENT_DISCONNECT:
-		ClientDisconnect( arg0 );
+		if ( EF_WARN_ASSERT( level.clients[arg0].pers.connected >= CON_CONNECTING ) ) {
+			ClientDisconnect( arg0 );
+		}
 		return 0;
 	case GAME_CLIENT_BEGIN:
-		ClientBegin( arg0 );
+		if ( EF_WARN_ASSERT( level.clients[arg0].pers.connected == CON_CONNECTING ) ) {
+			ClientBegin( arg0 );
+		}
 		return 0;
 	case GAME_CLIENT_COMMAND:
-		ClientCommand( arg0 );
+		if ( EF_WARN_ASSERT( level.clients[arg0].pers.connected >= CON_CONNECTING ) ) {
+			ClientCommand( arg0 );
+		}
 		return 0;
 	case GAME_RUN_FRAME:
 		G_RunFrame( arg0 );

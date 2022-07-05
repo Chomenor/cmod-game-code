@@ -77,3 +77,5 @@ CVAR_DEF( g_team_group_red, "g_team_group_red", "", CVAR_LATCH, qfalse )		// Use
 CVAR_DEF( g_team_group_blue, "g_team_group_blue", "", CVAR_LATCH, qfalse )		// Used to have CVAR_ARCHIVE
 CVAR_DEF( g_random_skin_limit, "g_random_skin_limit", "4", CVAR_ARCHIVE, qfalse )
 CVAR_DEF( g_noJoinTimeout, "g_noJoinTimeout", "120", CVAR_ARCHIVE, qfalse )
+
+CVAR_DEF( bot_minplayers, "bot_minplayers", "0", CVAR_SERVERINFO, qfalse )

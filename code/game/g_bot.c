@@ -9,9 +9,13 @@ static int		g_numBots;
 static char		*g_botInfos[MAX_BOTS];
 
 
-int				g_numArenas;
+static int		g_numArenas;
 static char		*g_arenaInfos[MAX_ARENAS];
 
+
+// Enables announcing each bot one by one in single player.
+// Normally disabled in EF 1.20.
+// #define USE_BOT_DELAY
 
 #define BOT_BEGIN_DELAY_BASE		2000
 #define BOT_BEGIN_DELAY_INCREMENT	2000
@@ -25,8 +29,6 @@ typedef struct {
 
 static int				botBeginDelay;
 static botSpawnQueue_t	botSpawnQueue[BOT_SPAWN_QUEUE_DEPTH];
-
-vmCvar_t bot_minplayers;
 
 
 /*
@@ -205,67 +207,70 @@ static void PlayerIntroSound( const char *modelAndSkin ) {
 
 /*
 ===============
+G_CountBotInstances
+
+Check if a certain bot is already in the game.
+===============
+*/
+static int G_CountBotInstances( const char *netname, int team ) {
+	int i;
+	gclient_t *cl;
+	int count = 0;
+
+	for ( i = 0; i < g_maxclients.integer; i++ ) {
+		cl = level.clients + i;
+		if ( cl->pers.connected != CON_DISCONNECTED && ( g_entities[i].r.svFlags & SVF_BOT ) &&
+				( team < 0 || modfn.RealSessionTeam( i ) == team ) && !Q_stricmp( cl->pers.netname, netname ) ) {
+			++count;
+		}
+	}
+
+	return count;
+}
+
+/*
+===============
 G_AddRandomBot
 ===============
 */
 void G_AddRandomBot( int team ) {
-	int		i, n, num, skill;
+	qboolean avoidExisting = qtrue;
+	int		n, num, skill;
 	char	*value, netname[MAX_NAME_LENGTH], *teamstr;
-	gclient_t	*cl;
 
+	if ( !g_numBots ) {
+		return;
+	}
+
+	// look for bots not already in the game
 	num = 0;
 	for ( n = 0; n < g_numBots ; n++ ) {
 		value = Info_ValueForKey( g_botInfos[n], "name" );
-		//
-		for ( i=0 ; i< g_maxclients.integer ; i++ ) {
-			cl = level.clients + i;
-			if ( cl->pers.connected != CON_CONNECTED ) {
-				continue;
-			}
-			if ( !(g_entities[i].r.svFlags & SVF_BOT) ) {
-				continue;
-			}
-			if ( team >= 0 && modfn.RealSessionTeam( i ) != team ) {
-				continue;
-			}
-			if ( !Q_stricmp( value, cl->pers.netname ) ) {
-				break;
-			}
-		}
-		if (i >= g_maxclients.integer) {
+		if ( !G_CountBotInstances( value, team ) ) {
 			num++;
 		}
 	}
-	num = random() * num;
+
+	// if none found, select from all available bots
+	if ( !num ) {
+		num = g_numBots;
+		avoidExisting = qfalse;
+	}
+
+	num = rand() % num + 1;
 	for ( n = 0; n < g_numBots ; n++ ) {
 		value = Info_ValueForKey( g_botInfos[n], "name" );
-		//
-		for ( i=0 ; i< g_maxclients.integer ; i++ ) {
-			cl = level.clients + i;
-			if ( cl->pers.connected != CON_CONNECTED ) {
-				continue;
-			}
-			if ( !(g_entities[i].r.svFlags & SVF_BOT) ) {
-				continue;
-			}
-			if ( team >= 0 && modfn.RealSessionTeam( i ) != team ) {
-				continue;
-			}
-			if ( !Q_stricmp( value, cl->pers.netname ) ) {
-				break;
-			}
-		}
-		if (i >= g_maxclients.integer) {
+		if ( !avoidExisting || !G_CountBotInstances( value, team ) ) {
 			num--;
 			if (num <= 0) {
 				skill = trap_Cvar_VariableIntegerValue( "g_spSkill" );
 				if (team == TEAM_RED) teamstr = "red";
 				else if (team == TEAM_BLUE) teamstr = "blue";
-				else teamstr = "";
+				else teamstr = "auto";
 				strncpy(netname, value, sizeof(netname)-1);
 				netname[sizeof(netname)-1] = '\0';
 				Q_CleanStr(netname);
-				trap_SendConsoleCommand( EXEC_INSERT, va("addbot %s %i %s %i\n", netname, skill, teamstr, 0) );
+				trap_SendConsoleCommand( EXEC_INSERT, va("addbot \"%s\" %i %s\n", netname, skill, teamstr) );
 				return;
 			}
 		}
@@ -279,7 +284,6 @@ G_RemoveRandomBot
 */
 int G_RemoveRandomBot( int team ) {
 	int i;
-	char netname[MAX_NAME_LENGTH];
 	gclient_t	*cl;
 
 	for ( i=0 ; i< g_maxclients.integer ; i++ ) {
@@ -293,9 +297,7 @@ int G_RemoveRandomBot( int team ) {
 		if ( team >= 0 && modfn.RealSessionTeam( i ) != team ) {
 			continue;
 		}
-		strcpy(netname, cl->pers.netname);
-		Q_CleanStr(netname);
-		trap_SendConsoleCommand( EXEC_INSERT, va("kick \"%s\"\n", netname) );
+		trap_SendConsoleCommand( EXEC_INSERT, va("kick \"%i\"\n", i) );
 		return qtrue;
 	}
 	return qfalse;
@@ -313,7 +315,7 @@ int G_CountHumanPlayers( int team ) {
 	num = 0;
 	for ( i=0 ; i< g_maxclients.integer ; i++ ) {
 		cl = level.clients + i;
-		if ( cl->pers.connected != CON_CONNECTED ) {
+		if ( cl->pers.connected == CON_DISCONNECTED ) {
 			continue;
 		}
 		if ( g_entities[i].r.svFlags & SVF_BOT ) {
@@ -333,28 +335,19 @@ G_CountBotPlayers
 ===============
 */
 int G_CountBotPlayers( int team ) {
-	int i, n, num;
+	int i, num;
 	gclient_t	*cl;
 
 	num = 0;
 	for ( i=0 ; i< g_maxclients.integer ; i++ ) {
 		cl = level.clients + i;
-		if ( cl->pers.connected != CON_CONNECTED ) {
+		if ( cl->pers.connected == CON_DISCONNECTED ) {
 			continue;
 		}
 		if ( !(g_entities[i].r.svFlags & SVF_BOT) ) {
 			continue;
 		}
 		if ( team >= 0 && modfn.RealSessionTeam( i ) != team ) {
-			continue;
-		}
-		num++;
-	}
-	for( n = 0; n < BOT_SPAWN_QUEUE_DEPTH; n++ ) {
-		if( !botSpawnQueue[n].spawnTime ) {
-			continue;
-		}
-		if ( botSpawnQueue[n].spawnTime > level.time ) {
 			continue;
 		}
 		num++;
@@ -378,7 +371,6 @@ void G_CheckMinimumPlayers( void ) {
 		return;
 	}
 	checkminimumplayers_time = level.time;
-	trap_Cvar_Update(&bot_minplayers);
 	minplayers = bot_minplayers.integer;
 	if (minplayers <= 0) return;
 
@@ -513,6 +505,17 @@ qboolean G_BotConnect( int clientNum, qboolean restart ) {
 	settings.skill = atoi( Info_ValueForKey( userinfo, "skill" ) );
 	Q_strncpyz( settings.team, Info_ValueForKey( userinfo, "team" ), sizeof(settings.team) );
 	Q_strncpyz( settings.pclass, Info_ValueForKey( userinfo, "class" ), sizeof(settings.pclass) );
+	
+	if ( Q_stricmp( settings.team, "red" ) && Q_stricmp( settings.team, "blue" ) ) {
+		// Only set valid teams
+		settings.team[0] = '\0';
+	}
+	
+	if ( !settings.team[0] && level.clients[clientNum].sess.sessionTeam == TEAM_SPECTATOR ) {
+		// If team is not set, and bot is currently spectator (after the session init which
+		// should already have been done at this point), have the bot try to auto join.
+		Q_strncpyz( settings.team, "auto", sizeof( settings.team ) );
+	}
 
 	if (!BotAISetupClient( clientNum, &settings )) {
 		trap_DropClient( clientNum, "BotAISetupClient failed" );
@@ -611,26 +614,13 @@ static void G_AddBot( const char *name, int skill, const char *team, const char 
 	}
 
 	// initialize the bot settings
-	if( !team || !*team ) {
-		if( g_gametype.integer == GT_TEAM || g_gametype.integer == GT_CTF) {
-			if( PickTeam(clientNum) == TEAM_RED) {
-				team = "red";
-			}
-			else {
-				team = "blue";
-			}
-		}
-		else {
-			team = "red";
-		}
-	}
 	Info_SetValueForKey( userinfo, "characterfile", Info_ValueForKey( botinfo, "aifile" ) );
 	Info_SetValueForKey( userinfo, "skill", va( "%i", skill ) );
-	Info_SetValueForKey( userinfo, "team", team );
-	if( pclass && *pclass ) {
-		if( modfn.AdjustGeneralConstant( GC_ALLOW_BOT_CLASS_SPECIFIER, 0 ) ) {
-			Info_SetValueForKey( userinfo, "class", pclass );
-		}
+	if( team && *team ) {
+		Info_SetValueForKey( userinfo, "team", team );
+	}
+	if( pclass && *pclass && modfn.AdjustGeneralConstant( GC_ALLOW_BOT_CLASS_SPECIFIER, 0 ) ) {
+		Info_SetValueForKey( userinfo, "class", pclass );
 	}
 
 	bot = &g_entities[ clientNum ];
@@ -676,7 +666,7 @@ void Svcmd_AddBot_f( void ) {
 	// name
 	trap_Argv( 1, name, sizeof( name ) );
 	if ( !name[0] ) {
-		trap_Printf( "Usage: Addbot <botname> [skill 1-4] [team] [msec delay] [altname]\n" );
+		trap_Printf( "Usage: Addbot <botname> [skill 1-4] [team] [class] [msec delay] [altname]\n" );
 		return;
 	}
 
@@ -795,7 +785,11 @@ static void G_SpawnBots( char *botList, int baseDelay ) {
 
 		// we must add the bot this way, calling G_AddBot directly at this stage
 		// does "Bad Things"
-		trap_SendConsoleCommand( EXEC_INSERT, va("addbot %s %i free %i\n", bot, skill, delay) );
+#ifdef USE_BOT_DELAY
+		trap_SendConsoleCommand( EXEC_INSERT, va("addbot %s %i free \"\" %i\n", bot, skill, delay) );
+#else
+		trap_SendConsoleCommand( EXEC_INSERT, va("addbot %s %i free \"\" 0\n", bot, skill) );
+#endif
 
 		delay += BOT_BEGIN_DELAY_INCREMENT;
 	}
@@ -920,11 +914,10 @@ void G_InitBots( qboolean restart ) {
 	char		serverinfo[MAX_INFO_STRING];
 
 	G_LoadBots();
-	G_LoadArenas();
-
-	trap_Cvar_Register( &bot_minplayers, "bot_minplayers", "0", CVAR_SERVERINFO );
 
 	if( g_gametype.integer == GT_SINGLE_PLAYER ) {
+		G_LoadArenas();
+
 		trap_GetServerinfo( serverinfo, sizeof(serverinfo) );
 		Q_strncpyz( map, Info_ValueForKey( serverinfo, "mapname" ), sizeof(map) );
 		arenainfo = G_GetArenaInfoByMap( map );

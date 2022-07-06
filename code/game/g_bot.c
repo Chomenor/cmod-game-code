@@ -844,23 +844,26 @@ static void G_LoadBots( void ) {
 
 	g_numBots = 0;
 
-	trap_Cvar_Register( &botsFile, "g_botsFile", "", CVAR_INIT|CVAR_ROM );
+	// If g_botsFile is set, load bots exclusively from this file, like Gladiator mod.
+	trap_Cvar_Register( &botsFile, "g_botsFile", "", CVAR_LATCH );
 	if( *botsFile.string ) {
 		G_LoadBotsFromFile(botsFile.string);
 	}
-	else {
+
+	if ( !g_numBots ) {
 		G_LoadBotsFromFile("scripts/bots.txt");
+
+		// get all bots from .bot files
+		numdirs = trap_FS_GetFileList("scripts", ".bot", dirlist, 1024 );
+		dirptr  = dirlist;
+		for (i = 0; i < numdirs; i++, dirptr += dirlen+1) {
+			dirlen = strlen(dirptr);
+			strcpy(filename, "scripts/");
+			strcat(filename, dirptr);
+			G_LoadBotsFromFile(filename);
+		}
 	}
 
-	// get all bots from .bot files
-	numdirs = trap_FS_GetFileList("scripts", ".bot", dirlist, 1024 );
-	dirptr  = dirlist;
-	for (i = 0; i < numdirs; i++, dirptr += dirlen+1) {
-		dirlen = strlen(dirptr);
-		strcpy(filename, "scripts/");
-		strcat(filename, dirptr);
-		G_LoadBotsFromFile(filename);
-	}
 	trap_Printf( va( "%i bots parsed\n", g_numBots ) );
 }
 

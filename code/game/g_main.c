@@ -1151,7 +1151,7 @@ Determines whether to reset warmup to "waiting for players" state.
 */
 static qboolean G_CheckEnoughPlayers( void ) {
 	if ( g_gametype.integer >= GT_TEAM ) {
-		if ( TeamCount( -1, TEAM_BLUE ) < 1 || TeamCount( -1, TEAM_RED ) < 1 ) {
+		if ( TeamCount( -1, TEAM_BLUE, qfalse ) < 1 || TeamCount( -1, TEAM_RED, qfalse ) < 1 ) {
 			return qfalse;
 		}
 	} else {

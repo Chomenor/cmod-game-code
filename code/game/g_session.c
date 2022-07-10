@@ -236,7 +236,8 @@ void G_InitSessionData( gclient_t *client, char *userinfo ) {
 	// initial team determination
 	if ( g_gametype.integer >= GT_TEAM )
 	{//Team holomatch or CTF
-		if ( g_teamAutoJoin.integer && modfn.CheckJoinAllowed( clientNum, CJA_AUTOJOIN, TEAM_FREE ) ) {
+		if ( g_teamAutoJoin.integer && !( g_entities[clientNum].r.svFlags & SVF_BOT ) &&
+				modfn.CheckJoinAllowed( clientNum, CJA_AUTOJOIN, TEAM_FREE ) ) {
 			sess->sessionTeam = PickTeam( -1 );
 		} else {
 			// always spawn as spectator in team games

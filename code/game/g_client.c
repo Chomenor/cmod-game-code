@@ -528,11 +528,14 @@ TeamCount
 Returns number of players on a team
 ================
 */
-team_t TeamCount( int ignoreClientNum, int team ) {
+int TeamCount( int ignoreClientNum, team_t team, qboolean ignoreBots ) {
 	int		i;
 	int		count = 0;
 
 	for ( i = 0 ; i < level.maxclients ; i++ ) {
+		if ( ignoreBots && ( g_entities[i].r.svFlags & SVF_BOT ) ) {
+			continue;
+		}
 		if ( i == ignoreClientNum ) {
 			continue;
 		}
@@ -557,8 +560,8 @@ PickTeam
 team_t PickTeam( int ignoreClientNum ) {
 	int		counts[TEAM_NUM_TEAMS];
 
-	counts[TEAM_BLUE] = TeamCount( ignoreClientNum, TEAM_BLUE );
-	counts[TEAM_RED] = TeamCount( ignoreClientNum, TEAM_RED );
+	counts[TEAM_BLUE] = TeamCount( ignoreClientNum, TEAM_BLUE, qtrue );
+	counts[TEAM_RED] = TeamCount( ignoreClientNum, TEAM_RED, qtrue );
 
 	if ( counts[TEAM_BLUE] > counts[TEAM_RED] ) {
 		return TEAM_RED;

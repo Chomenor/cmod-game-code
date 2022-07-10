@@ -560,7 +560,7 @@ void FireSeeker( gentity_t *owner, gentity_t *target, vec3_t origin);
 //
 // g_client.c
 //
-team_t TeamCount( int ignoreClientNum, int team );
+int TeamCount( int ignoreClientNum, team_t team, qboolean ignoreBots );
 team_t PickTeam( int ignoreClientNum );
 void SetClientViewAngle( gentity_t *ent, vec3_t angle );
 gentity_t *SelectSpawnPoint ( vec3_t avoidPoint, vec3_t origin, vec3_t angles, qboolean useHumanSpots, qboolean useBotSpots );

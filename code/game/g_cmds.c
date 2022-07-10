@@ -571,11 +571,12 @@ qboolean SetTeam( gentity_t *ent, char *s ) {
 			team = PickTeam( clientNum );
 		}
 
-		if ( g_teamForceBalance.integer && !modfn.AdjustGeneralConstant( GC_DISABLE_TEAM_FORCE_BALANCE, 0 ) ) {
+		if ( g_teamForceBalance.integer && !( ent->r.svFlags & SVF_BOT ) &&
+				!modfn.AdjustGeneralConstant( GC_DISABLE_TEAM_FORCE_BALANCE, 0 ) ) {
 			int		counts[TEAM_NUM_TEAMS];
 
-			counts[TEAM_BLUE] = TeamCount( clientNum, TEAM_BLUE );
-			counts[TEAM_RED] = TeamCount( clientNum, TEAM_RED );
+			counts[TEAM_BLUE] = TeamCount( clientNum, TEAM_BLUE, qtrue );
+			counts[TEAM_RED] = TeamCount( clientNum, TEAM_RED, qtrue );
 
 			// We allow a spread of two
 			if ( team == TEAM_RED && counts[TEAM_RED] - counts[TEAM_BLUE] > 1 ) {

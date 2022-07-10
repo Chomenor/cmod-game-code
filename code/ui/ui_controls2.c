@@ -3554,7 +3554,9 @@ Controls_RawMouseEvent
 */
 static void Controls_RawMouseEvent (void* ptr, int event)
 {
-	VMExt_GVCommandInt( va( "cmd_set_raw_mouse %i", s_controls.rawmouse.curvalue ), 0 );
+	if ( event == QM_ACTIVATED ) {
+		VMExt_GVCommandInt( va( "cmd_set_raw_mouse %i", s_controls.rawmouse.curvalue ), 0 );
+	}
 }
 
 /*

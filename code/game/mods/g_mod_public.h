@@ -40,6 +40,7 @@ typedef enum {
 	GC_FORCE_BOTROAMSONLY,
 	GC_DISABLE_TACTICIAN,
 	GC_SKIP_ENTER_GAME_PRINT,
+	GC_DISABLE_BOT_ADDING,			// Skip normal bot_minplayers handling
 } generalConstant_t;
 
 typedef enum {

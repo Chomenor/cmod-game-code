@@ -44,6 +44,7 @@ void ModTournament_Init( void );
 /* ************************************************************************* */
 
 void ModAltSwapHandler_Init( void );
+void ModBotAdding_Init( void );
 void ModPingcomp_Init( void );
 void ModPlayerMove_Init( void );
 void ModSpawnProtect_Init( void );

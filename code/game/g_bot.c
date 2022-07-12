@@ -370,6 +370,9 @@ void G_CheckMinimumPlayers( void ) {
 	if (checkminimumplayers_time > level.time - 10000) {
 		return;
 	}
+	if ( modfn.AdjustGeneralConstant( GC_DISABLE_BOT_ADDING, 0 ) ) {
+		return;
+	}
 	checkminimumplayers_time = level.time;
 	minplayers = bot_minplayers.integer;
 	if (minplayers <= 0) return;

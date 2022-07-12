@@ -44,6 +44,7 @@ LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 		ModPingcomp_Init();
 		ModSpectPassThrough_Init();
 		ModSpawnProtect_Init();
+		ModBotAdding_Init();
 	}
 
 	// Game modes

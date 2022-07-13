@@ -658,7 +658,7 @@ void StopFollowing( gentity_t *ent ) {
 
 	client->sess.spectatorState = SPECTATOR_FREE;
 	VectorCopy( client->ps.origin, old_origin );
-	VectorSet( old_viewAngles, client->ps.viewangles[0], client->ps.viewangles[1], 0.0f );
+	VectorCopy( client->ps.viewangles, old_viewAngles );
 	
 	memset( &client->ps, 0, sizeof( client->ps ) );
 	client->ps.persistant[PERS_TEAM] = client->sess.sessionTeam;

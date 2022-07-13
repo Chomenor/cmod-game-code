@@ -1181,7 +1181,8 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	}
 
 	// find a spawn point
-	if ( modfn.SpectatorClient( index ) ) {
+	if ( client->sess.sessionTeam == TEAM_SPECTATOR ) {
+		// actual spectators (not just eliminated) get a special location
 		spawnPoint = SelectSpectatorSpawnPoint( spawn_origin, spawn_angles );
 	} else if ( g_gametype.integer >= GT_TEAM ) {
 		spawnPoint = SelectCTFSpawnPoint( ent, client->sess.sessionTeam, spawnType != CST_RESPAWN,

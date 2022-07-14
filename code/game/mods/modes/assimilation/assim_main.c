@@ -26,6 +26,8 @@ typedef struct {
 static struct {
 	assimilation_client_t clients[MAX_CLIENTS];
 	
+	trackedCvar_t g_preferNonBotQueen;
+
 	// Current match state
 	int borgQueenClientNum;		// -1 if not selected
 	int joinLimitTime;	// Time when there were enough players to start the game (0 if not started)
@@ -288,11 +290,25 @@ LOGFUNCTION_SVOID( ModAssimilation_CheckReplaceQueen, ( void ), (), "" ) {
 		int count = 0;
 		int i;
 
-		for ( i = 0; i < level.maxclients; i++ ) {
-			gclient_t *client = &level.clients[i];
-			if ( client->pers.connected == CON_CONNECTED && client->sess.sessionTeam != TEAM_SPECTATOR &&
-					client->sess.sessionTeam == MOD_STATE->borgTeam ) {
-				candidates[count++] = i;
+		// Look for human players.
+		if ( MOD_STATE->g_preferNonBotQueen.integer ) {
+			for ( i = 0; i < level.maxclients; i++ ) {
+				gclient_t *client = &level.clients[i];
+				if ( client->pers.connected == CON_CONNECTED && !modfn.SpectatorClient( i ) &&
+						client->sess.sessionTeam == MOD_STATE->borgTeam && !( g_entities[i].r.svFlags & SVF_BOT ) ) {
+					candidates[count++] = i;
+				}
+			}
+		}
+
+		// If no humans, or g_preferNonBotQueen disabled, search for any borg players.
+		if ( !count ) {
+			for ( i = 0; i < level.maxclients; i++ ) {
+				gclient_t *client = &level.clients[i];
+				if ( client->pers.connected == CON_CONNECTED && !modfn.SpectatorClient( i ) &&
+						client->sess.sessionTeam == MOD_STATE->borgTeam ) {
+					candidates[count++] = i;
+				}
 			}
 		}
 
@@ -850,15 +866,15 @@ ModAssimilation_Init
 LOGFUNCTION_VOID( ModAssimilation_Init, ( void ), (), "G_MOD_INIT G_ASSIMILATION" ) {
 	if ( EF_WARN_ASSERT( !MOD_STATE ) ) {
 		modcfg.mods_enabled.assimilation = qtrue;
+		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
+
+		MOD_STATE->borgQueenClientNum = -1;
+		G_RegisterTrackedCvar( &MOD_STATE->g_preferNonBotQueen, "g_preferNonBotQueen", "1", 0, qfalse );
 
 		// Support combining with other mods
 		if ( G_ModUtils_GetLatchedValue( "g_pModSpecialties", "0", 0 ) ) {
 			ModSpecialties_Init();
 		}
-
-		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
-
-		MOD_STATE->borgQueenClientNum = -1;
 
 		// Register mod functions
 		INIT_FN_BASE( IsBorgQueen );

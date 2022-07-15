@@ -68,7 +68,6 @@ static int Preferences_OffOnCustomNone_Names[] =
 #define ID_DRAWFPS				141
 #define ID_DRAWGUN				142
 #define ID_MOTIONBOB			143
-#define ID_SIMPLESKY			144
 
 
 
@@ -79,7 +78,6 @@ typedef struct {
 	menulist_s			textlanguage;
 	menulist_s			voicelanguage;
 	menulist_s			identifytarget;
-	menulist_s			simplesky;
 	menulist_s			forcemodel;
 	menulist_s			drawteamoverlay;
 	menulist_s			drawtimer;
@@ -135,7 +133,6 @@ static void Preferences_SetMenuItems( void )
 
 	s_preferences.currentcrosshair		= (int)trap_Cvar_VariableValue( "cg_drawCrosshair" ) % NUM_CROSSHAIRS;
 	s_preferences.identifytarget.curvalue	= trap_Cvar_VariableValue( "cg_drawCrosshairNames" ) != 0;
-	s_preferences.simplesky.curvalue		= trap_Cvar_VariableValue ( "r_fastsky" ) != 0;
 	s_preferences.forcemodel.curvalue		= trap_Cvar_VariableValue( "cg_forcemodel" ) != 0;
 	s_preferences.drawteamoverlay.curvalue	= Com_Clamp( 0, 3, trap_Cvar_VariableValue( "cg_drawTeamOverlay" ) );
 	s_preferences.drawtimer.curvalue		= trap_Cvar_VariableValue( "cg_drawTimer" ) != 0;
@@ -226,10 +223,6 @@ static void Preferences_Event( void* ptr, int notification )
 
 	case ID_IDENTIFYTARGET:
 		trap_Cvar_SetValue( "cg_drawCrosshairNames", s_preferences.identifytarget.curvalue );
-		break;
-
-	case ID_SIMPLESKY:
-		trap_Cvar_SetValue( "r_fastsky", s_preferences.simplesky.curvalue );
 		break;
 
 	case ID_FORCEMODEL:
@@ -494,23 +487,6 @@ static void GameOptions_MenuInit( void )
 	s_preferences.identifytarget.width					= width;
 
 	y += inc;
-	s_preferences.simplesky.generic.type			= MTYPE_SPINCONTROL;
-	s_preferences.simplesky.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
-	s_preferences.simplesky.generic.x				= x;
-	s_preferences.simplesky.generic.y				= y;
-	s_preferences.simplesky.generic.callback		= Preferences_Event;
-	s_preferences.simplesky.generic.id				= ID_SIMPLESKY;
-	s_preferences.simplesky.textEnum				= MBT_SIMPLE_SKY;
-	s_preferences.simplesky.textcolor				= CT_BLACK;
-	s_preferences.simplesky.textcolor2				= CT_WHITE;
-	s_preferences.simplesky.color					= CT_DKPURPLE1;
-	s_preferences.simplesky.color2					= CT_LTPURPLE1;
-	s_preferences.simplesky.textX					= MENU_BUTTON_TEXT_X;
-	s_preferences.simplesky.textY					= MENU_BUTTON_TEXT_Y;
-	s_preferences.simplesky.listnames				= s_OffOnNone_Names;
-	s_preferences.simplesky.width					= width;
-
-	y += inc;
 	s_preferences.forcemodel.generic.type			= MTYPE_SPINCONTROL;
 	s_preferences.forcemodel.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_preferences.forcemodel.generic.x				= x;
@@ -685,7 +661,6 @@ static void GameOptions_MenuInit( void )
 	Preferences_SetMenuItems();
 
 	Menu_AddItem( &s_gameoptions.menu, &s_preferences.identifytarget );
-	Menu_AddItem( &s_gameoptions.menu, &s_preferences.simplesky );
 	Menu_AddItem( &s_gameoptions.menu, &s_preferences.forcemodel );
 	Menu_AddItem( &s_gameoptions.menu, &s_preferences.drawteamoverlay );
 	Menu_AddItem( &s_gameoptions.menu, &s_preferences.allowdownload );

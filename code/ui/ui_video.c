@@ -198,6 +198,7 @@ typedef struct
 	menulist_s		flares;
 	menulist_s		wallmarks;
 	menulist_s		dynamiclights;
+	menulist_s		simplesky;
 	menulist_s		simpleitems;
 	menulist_s		synceveryframe;
 	menulist_s		anisotropic;
@@ -3233,6 +3234,10 @@ static void VideoData2_Event( void* ptr, int notification )
 		trap_Cvar_SetValue( "r_dynamiclight", s_videodata2.dynamiclights.curvalue );
 	}
 
+	else if ( ptr == &s_videodata2.simplesky ) {
+		trap_Cvar_SetValue( "r_fastsky", s_videodata2.simplesky.curvalue );
+	}
+
 	else if ( ptr == &s_videodata2.simpleitems ) {
 		trap_Cvar_SetValue( "cg_simpleItems", s_videodata2.simpleitems.curvalue );
 	}
@@ -3284,6 +3289,12 @@ static void VideoData2_MenuInit( void )
 
 	x = 175;
 	y = 183;
+
+	if ( !suppressViewSize && !videoEngineConfig.anisotropicFilteringVideoMenu ) {
+		// need some extra space
+		y = 176;
+	}
+
 	s_videodata2.aspectCorrection.generic.type			= MTYPE_SPINCONTROL;
 	s_videodata2.aspectCorrection.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_videodata2.aspectCorrection.generic.x				= x;
@@ -3446,6 +3457,22 @@ static void VideoData2_MenuInit( void )
 	s_videodata2.dynamiclights.listnames			= s_OffOnNone_Names;
 	
 	y += inc;
+	s_videodata2.simplesky.generic.type				= MTYPE_SPINCONTROL;
+	s_videodata2.simplesky.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
+	s_videodata2.simplesky.generic.x				= x;
+	s_videodata2.simplesky.generic.y				= y;
+	s_videodata2.simplesky.generic.name				= GRAPHIC_BUTTONRIGHT;
+	s_videodata2.simplesky.generic.callback			= VideoData2_Event;
+	s_videodata2.simplesky.color					= CT_DKPURPLE1;
+	s_videodata2.simplesky.color2					= CT_LTPURPLE1;
+	s_videodata2.simplesky.textX					= MENU_BUTTON_TEXT_X;
+	s_videodata2.simplesky.textY					= MENU_BUTTON_TEXT_Y;
+	s_videodata2.simplesky.textEnum					= MBT_SIMPLE_SKY;
+	s_videodata2.simplesky.textcolor				= CT_BLACK;
+	s_videodata2.simplesky.textcolor2				= CT_WHITE;
+	s_videodata2.simplesky.listnames				= s_OffOnNone_Names;
+
+	y += inc;
 	s_videodata2.simpleitems.generic.type			= MTYPE_SPINCONTROL;
 	s_videodata2.simpleitems.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
 	s_videodata2.simpleitems.generic.x				= x;
@@ -3505,6 +3532,7 @@ static void VideoData2_MenuInit( void )
 	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.flares);
 	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.wallmarks);
 	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.dynamiclights);
+	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.simplesky);
 	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.simpleitems);
 	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.synceveryframe);
 	if ( !videoEngineConfig.anisotropicFilteringVideoMenu ) {
@@ -3590,6 +3618,7 @@ static void	UI_VideoData2SettingsGetCvars()
 	s_videodata2.flares.curvalue = trap_Cvar_VariableValue( "r_flares" ) ? 1 : 0;
 	s_videodata2.wallmarks.curvalue = trap_Cvar_VariableValue( "cg_marks" ) ? 1 : 0;
 	s_videodata2.dynamiclights.curvalue = trap_Cvar_VariableValue( "r_dynamiclight" ) ? 1 : 0;
+	s_videodata2.simplesky.curvalue = trap_Cvar_VariableValue( "r_fastsky" ) ? 1 : 0;
 	s_videodata2.simpleitems.curvalue = trap_Cvar_VariableValue( "cg_simpleItems" ) ? 1 : 0;
 	s_videodata2.synceveryframe.curvalue = trap_Cvar_VariableValue( "r_finish" ) ? 1 : 0;
 	s_videodata2.anisotropic.curvalue = UI_GetAnisotropyLevel();

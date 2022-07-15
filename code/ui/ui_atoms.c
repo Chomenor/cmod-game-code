@@ -2066,8 +2066,10 @@ void UI_LoadMenuText()
 	menu_normal_text[MNT_IGNORES] = "IGNORED PLAYERS";
 	menu_normal_text[MNT_IGNORES_PLAYERLIST] = "PLAYERLIST";
 	menu_normal_text[MNT_OTHER_KEYS_SETUP] = "OTHER KEYS CONFIGURE";
-	menu_normal_text[MNT_SHORTCUT_QUIT] = "QUIT";
+	menu_normal_text[MNT_SHORTCUT_VOTE_YES] = "VOTE YES";
+	menu_normal_text[MNT_SHORTCUT_VOTE_NO] = "VOTE NO";
 	menu_normal_text[MNT_SHORTCUT_MINIMIZE] = "MINIMIZE";
+	menu_normal_text[MNT_SHORTCUT_QUIT] = "QUIT";
 	menu_normal_text[MNT_BROWSER_PLAYER_COUNT] = "PLAYER COUNT";
 	menu_normal_text[MNT_BROWSER_HUMANS_ONLY] = "HUMAN PLAYERS ONLY";
 	menu_normal_text[MNT_BROWSER_BOTS_AND_HUMANS] = "BOTS OR HUMANS";
@@ -2098,8 +2100,10 @@ void UI_LoadMenuText()
 		menu_normal_text[MNT_IGNORES] = "IGNORIERTE SPIELER";
 		menu_normal_text[MNT_IGNORES_PLAYERLIST] = "SPIELERLISTE";
 		menu_normal_text[MNT_OTHER_KEYS_SETUP] = "ANDERE TASTEN-SETUP";
-		menu_normal_text[MNT_SHORTCUT_QUIT] = "VERLASSEN";
+		menu_normal_text[MNT_SHORTCUT_VOTE_YES] = "STIMME JA";
+		menu_normal_text[MNT_SHORTCUT_VOTE_NO] = "STIMME NEIN";
 		menu_normal_text[MNT_SHORTCUT_MINIMIZE] = "MINIMIEREN";
+		menu_normal_text[MNT_SHORTCUT_QUIT] = "VERLASSEN";
 		menu_normal_text[MNT_BROWSER_PLAYER_COUNT] = "SPIELERZAHL";
 		menu_normal_text[MNT_BROWSER_HUMANS_ONLY] = "NUR MENSCHLICHE SPIELER";
 		menu_normal_text[MNT_BROWSER_BOTS_AND_HUMANS] = "BOTS ODER MENSCHEN";
@@ -2138,8 +2142,10 @@ void UI_LoadMenuText()
 		menu_normal_text[MNT_IGNORES] = "JOUEURS IGNOREE";
 		menu_normal_text[MNT_IGNORES_PLAYERLIST] = "LISTE DES JOUEURS";
 		menu_normal_text[MNT_OTHER_KEYS_SETUP] = "CONFIG. AUTRES CLÉS";
-		menu_normal_text[MNT_SHORTCUT_QUIT] = "QUITTER";
+		menu_normal_text[MNT_SHORTCUT_VOTE_YES] = "VOTE OUI";
+		menu_normal_text[MNT_SHORTCUT_VOTE_NO] = "VOTE NON";
 		menu_normal_text[MNT_SHORTCUT_MINIMIZE] = "MINIMISER";
+		menu_normal_text[MNT_SHORTCUT_QUIT] = "QUITTER";
 		menu_normal_text[MNT_BROWSER_PLAYER_COUNT] = "NOMBRE DE JOUEURS";
 		menu_normal_text[MNT_BROWSER_HUMANS_ONLY] = "JOUEURS HUMAINS UNIQUEMENT";
 		menu_normal_text[MNT_BROWSER_BOTS_AND_HUMANS] = "BOTS OU HUMAINS";

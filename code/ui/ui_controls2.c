@@ -803,8 +803,10 @@ typedef struct
 #define ID_OBJECTIVES	36
 #define ID_IGNORE		37
 #define ID_UNIGNORE		38
-#define ID_QUIT			39
-#define ID_MINIMIZE		40
+#define ID_VOTEYES		39
+#define ID_VOTENO		40
+#define ID_MINIMIZE		41
+#define ID_QUIT			42
 
 #define ID_USE			1
 
@@ -898,8 +900,10 @@ typedef struct
 	menuaction_s		chat4;
 	menuaction_s		ignore;
 	menuaction_s		unignore;
-	menuaction_s		quit;
+	menuaction_s		voteyes;
+	menuaction_s		voteno;
 	menuaction_s		minimize;
+	menuaction_s		quit;
 	menulist_s			joyenable;
 	menuslider_s		joythreshold;
 	int					section;
@@ -961,8 +965,10 @@ static bind_t g_bindings[] =
 	{"+analysis",		MNT_SHORTCUT_OBJECTIVES,	ID_OBJECTIVES,	ANIM_IDLE,		-1,				-1,		-1, -1,MNT_SHORTCUT_KEY},
 	{"ignore",			MNT_SHORTCUT_IGNORE,			ID_IGNORE,		ANIM_IDLE,		-1,			-1,		-1, -1,MNT_SHORTCUT_KEY},
 	{"unignore",		MNT_SHORTCUT_UNIGNORE,			ID_UNIGNORE,		ANIM_IDLE,		-1,			-1,		-1, -1,MNT_SHORTCUT_KEY},
-	{"quit",			MNT_SHORTCUT_QUIT,			ID_QUIT,		ANIM_IDLE,		-1,			-1,		-1, -1,MNT_SHORTCUT_KEY},
+	{"vote yes",		MNT_SHORTCUT_VOTE_YES,		ID_VOTEYES,	ANIM_IDLE,		-1,			-1,		-1, -1,MNT_SHORTCUT_KEY},
+	{"vote no",			MNT_SHORTCUT_VOTE_NO,		ID_VOTENO,	ANIM_IDLE,		-1,			-1,		-1, -1,MNT_SHORTCUT_KEY},
 	{"minimize",		MNT_SHORTCUT_MINIMIZE,		ID_MINIMIZE,	ANIM_IDLE,		-1,			-1,		-1, -1,MNT_SHORTCUT_KEY},
+	{"quit",			MNT_SHORTCUT_QUIT,			ID_QUIT,		ANIM_IDLE,		-1,			-1,		-1, -1,MNT_SHORTCUT_KEY},
 	{(char*)NULL,		0,							0,				0,				-1,				-1,		-1,	-1,0},
 };
 
@@ -1026,8 +1032,10 @@ static void* g_command_controls[] =
 	&s_controls.gesture,
 	&s_controls.ignore,
 	&s_controls.unignore,
-	&s_controls.quit,
+	&s_controls.voteyes,
+	&s_controls.voteno,
 	&s_controls.minimize,
+	&s_controls.quit,
 	NULL,
 };
 
@@ -4327,7 +4335,7 @@ static void ControlsCommand_MenuInit( void )
 	s_controlscommand_menu.descX				= MENU_DESC_X;
 	s_controlscommand_menu.descY				= MENU_DESC_Y;
 	s_controlscommand_menu.listX				= 170;
-	s_controlscommand_menu.listY				= 188;
+	s_controlscommand_menu.listY				= 184;
 	s_controlscommand_menu.titleX				= MENU_TITLE_X;
 	s_controlscommand_menu.titleY				= MENU_TITLE_Y;
 	s_controlscommand_menu.titleI				= MNT_CONTROLSMENU_TITLE;
@@ -4383,17 +4391,29 @@ static void ControlsCommand_MenuInit( void )
 	s_controls.unignore.generic.ownerdraw	= Controls_DrawKeyBinding;
 	s_controls.unignore.generic.id 			= ID_UNIGNORE;
 
-	s_controls.quit.generic.type			= MTYPE_ACTION;
-	s_controls.quit.generic.flags			= QMF_LEFT_JUSTIFY|QMF_HIGHLIGHT_IF_FOCUS;
-	s_controls.quit.generic.callback		= Controls_ActionEvent;
-	s_controls.quit.generic.ownerdraw		= Controls_DrawKeyBinding;
-	s_controls.quit.generic.id 				= ID_QUIT;
+	s_controls.voteyes.generic.type			= MTYPE_ACTION;
+	s_controls.voteyes.generic.flags		= QMF_LEFT_JUSTIFY|QMF_HIGHLIGHT_IF_FOCUS;
+	s_controls.voteyes.generic.callback		= Controls_ActionEvent;
+	s_controls.voteyes.generic.ownerdraw	= Controls_DrawKeyBinding;
+	s_controls.voteyes.generic.id 			= ID_VOTEYES;
+
+	s_controls.voteno.generic.type			= MTYPE_ACTION;
+	s_controls.voteno.generic.flags			= QMF_LEFT_JUSTIFY|QMF_HIGHLIGHT_IF_FOCUS;
+	s_controls.voteno.generic.callback		= Controls_ActionEvent;
+	s_controls.voteno.generic.ownerdraw		= Controls_DrawKeyBinding;
+	s_controls.voteno.generic.id 			= ID_VOTENO;
 
 	s_controls.minimize.generic.type		= MTYPE_ACTION;
 	s_controls.minimize.generic.flags		= QMF_LEFT_JUSTIFY|QMF_HIGHLIGHT_IF_FOCUS;
 	s_controls.minimize.generic.callback	= Controls_ActionEvent;
 	s_controls.minimize.generic.ownerdraw	= Controls_DrawKeyBinding;
 	s_controls.minimize.generic.id 			= ID_MINIMIZE;
+
+	s_controls.quit.generic.type			= MTYPE_ACTION;
+	s_controls.quit.generic.flags			= QMF_LEFT_JUSTIFY|QMF_HIGHLIGHT_IF_FOCUS;
+	s_controls.quit.generic.callback		= Controls_ActionEvent;
+	s_controls.quit.generic.ownerdraw		= Controls_DrawKeyBinding;
+	s_controls.quit.generic.id 				= ID_QUIT;
 
 	s_attack_waiting_action.generic.type			= MTYPE_ACTION;
 	s_attack_waiting_action.generic.flags			= QMF_HIDDEN;
@@ -4422,10 +4442,12 @@ static void ControlsCommand_MenuInit( void )
 	Menu_AddItem( &s_controlscommand_menu, ( void * )&s_controls.gesture);
 	Menu_AddItem( &s_controlscommand_menu, ( void * )&s_controls.ignore);
 	Menu_AddItem( &s_controlscommand_menu, ( void * )&s_controls.unignore);
-	Menu_AddItem( &s_controlscommand_menu, ( void * )&s_controls.quit);
+	Menu_AddItem( &s_controlscommand_menu, ( void * )&s_controls.voteyes);
+	Menu_AddItem( &s_controlscommand_menu, ( void * )&s_controls.voteno);
 	if ( controlsEngineConfig.supportMinimize ) {
 		Menu_AddItem( &s_controlscommand_menu, ( void * )&s_controls.minimize);
 	}
+	Menu_AddItem( &s_controlscommand_menu, ( void * )&s_controls.quit);
 	Menu_AddItem( &s_controlscommand_menu, ( void * )&s_attack_waiting_action);
 
 	// initialize the configurable cvars

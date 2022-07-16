@@ -97,7 +97,9 @@ MOD_FUNCTION_DEF( CheckRespawnTime, qboolean, ( int clientNum, qboolean voluntar
 // client misc
 //////////////////////////
 
-// Checks selected player spawn point for spawn killing, and corrects it if needed.
+// Attempt to correct missing or spawn killing player spawn point. *spawn may be NULL if the standard
+// spawn selection failed to find any spawn points, otherwise the selected spawn point will be checked
+// for spawn killing and potentially replaced. clientNum can be -1 if not specified.
 MOD_FUNCTION_DEF( PatchClientSpawn, void, ( int clientNum, gentity_t **spawn, vec3_t origin, vec3_t angles ) )
 
 // Checks if current player class is valid, and sets a new one if necessary.

@@ -224,11 +224,15 @@ replace it with a different or shifted spawn point.
 */
 LOGFUNCTION_SVOID( PREFIX(PatchClientSpawn), ( int clientNum, gentity_t **spawn, vec3_t origin, vec3_t angles ),
 		( clientNum, spawn, origin, angles ), "G_MODFN_PATCHCLIENTSPAWN" ) {
-	if ( SpotWouldTelefrag( origin ) ) {
+	if ( !*spawn || SpotWouldTelefrag( origin ) ) {
 		if ( SP_DEBUG ) {
-			G_Printf( "spawn protect: Attempting to patch invalid spawn for client %i\n", clientNum );
+			if ( clientNum >= 0 ) {
+				G_Printf( "spawn protect: Attempting to patch invalid spawn for client %i.\n", clientNum );
+			} else {
+				G_Printf( "spawn protect: Attempting to patch invalid spawn.\n" );
+			}
 		}
-		if ( level.clients[clientNum].sess.sessionTeam == TEAM_RED ) {
+		if ( clientNum >= 0 && level.clients[clientNum].sess.sessionTeam == TEAM_RED ) {
 			const char *list1[] = { "team_CTF_redplayer", "team_CTF_redspawn", NULL };
 			const char *list2[] = { "info_player_deathmatch", NULL };
 			if ( ModSpawnProtect_SelectSpawn( list1, spawn, origin, angles ) ) {
@@ -237,7 +241,7 @@ LOGFUNCTION_SVOID( PREFIX(PatchClientSpawn), ( int clientNum, gentity_t **spawn,
 			if ( ModSpawnProtect_SelectSpawn( list2, spawn, origin, angles ) ) {
 				return;
 			}
-		} else if ( level.clients[clientNum].sess.sessionTeam == TEAM_BLUE ) {
+		} else if ( clientNum >= 0 && level.clients[clientNum].sess.sessionTeam == TEAM_BLUE ) {
 			const char *list1[] = { "team_CTF_blueplayer", "team_CTF_bluespawn", NULL };
 			const char *list2[] = { "info_player_deathmatch", NULL };
 			if ( ModSpawnProtect_SelectSpawn( list1, spawn, origin, angles ) ) {

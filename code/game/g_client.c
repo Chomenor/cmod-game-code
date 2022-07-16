@@ -178,9 +178,13 @@ gentity_t *SelectSpawnPoint ( vec3_t avoidPoint, vec3_t origin, vec3_t angles, q
 		}
 	}
 
-	// find a single player start spot
 	if (!spot) {
-		G_Error( "Couldn't find a spawn point" );
+		// give mods a chance to find a spawn
+		modfn.PatchClientSpawn( -1, &spot, origin, angles );
+		if (!spot) {
+			G_Error( "Couldn't find a spawn point" );
+		}
+		return spot;
 	}
 
 	VectorCopy (spot->s.origin, origin);

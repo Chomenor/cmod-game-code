@@ -1754,9 +1754,6 @@ void DreadnoughtBurstThink(gentity_t *ent)
 				VectorMA(ent->movedir, -1.25*dot, tr.plane.normal, ent->movedir);
 				VectorNormalize(ent->movedir);
 
-				// Make sure we store a next think time, else the effect could stick around forever...
-				ent->nextthink = level.time + DN_ALT_THINK_TIME;
-
 				if (!recursion)
 				{	// NOTE RECURSION HERE.
 					int oldThink = ent->nextthink;

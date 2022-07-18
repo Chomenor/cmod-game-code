@@ -640,11 +640,7 @@ void FinishSpawningItem( gentity_t *ent ) {
 	if ( ent->item->giType == IT_POWERUP ) {
 		float	respawn;
 
-#ifdef _DEBUG
-		respawn = 1;		// This makes powerups spawn immediately in debug.
-#else // _DEBUG
 		respawn = 45 + crandom() * 15;
-#endif // _DEBUG
 
 		ent->s.eFlags |= EF_NODRAW;
 		ent->r.contents = 0;

@@ -866,8 +866,8 @@ void SaveRegisteredItems( void ) {
 Allows replacing an item with a different item during initial spawn.
 ================
 */
-LOGFUNCTION_RET( gitem_t *, ModFNDefault_CheckReplaceItem, ( gentity_t *ent, gitem_t *item ),
-		( ent, item ), "G_MODFN_CHECKREPLACEITEM" ) {
+LOGFUNCTION_RET( gitem_t *, ModFNDefault_CheckReplaceItem, ( gitem_t *item ),
+		( item ), "G_MODFN_CHECKREPLACEITEM" ) {
 	return item;
 }
 
@@ -895,16 +895,22 @@ be on an entity that hasn't spawned yet.
 ============
 */
 void G_SpawnItem (gentity_t *ent, gitem_t *item) {
-	if ( modfn.CheckItemSpawnDisabled( item ) )
-	{
+	// This should now only be called from G_CallSpawn during map initialization.
+	EF_WARN_ASSERT( level.spawning );
+
+	item = modfn.CheckReplaceItem( item );
+	ent->classname = item->classname;
+
+	if ( modfn.CheckItemSpawnDisabled( item ) ) {
+		G_FreeEntity( ent );
 		return;
 	}
-	item = modfn.CheckReplaceItem( ent, item );
 
 	G_SpawnFloat( "random", "0", &ent->random );
 	G_SpawnFloat( "wait", "0", &ent->wait );
 
 	RegisterItem( item );
+
 	ent->item = item;
 	// some movers spawn on the second frame, so delay item
 	// spawns until the third frame so they can ride trains

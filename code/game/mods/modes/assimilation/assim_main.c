@@ -691,19 +691,16 @@ LOGFUNCTION_SRET( qboolean, PREFIX(CheckRespawnTime), ( int clientNum, qboolean 
 Replace tetrion weapon with imod.
 ================
 */
-LOGFUNCTION_SRET( gitem_t *, PREFIX(CheckReplaceItem), ( gentity_t *ent, gitem_t *item ),
-		( ent, item ), "G_MODFN_CHECKREPLACEITEM" ) {
-	item = MOD_STATE->Prev_CheckReplaceItem( ent, item );
+LOGFUNCTION_SRET( gitem_t *, PREFIX(CheckReplaceItem), ( gitem_t *item ), ( item ), "G_MODFN_CHECKREPLACEITEM" ) {
+	item = MOD_STATE->Prev_CheckReplaceItem( item );
 
 	switch ( item->giTag ) {
 		case WP_SCAVENGER_RIFLE:
 		case WP_TETRION_DISRUPTOR:
 			switch ( item->giType ) {
 				case IT_WEAPON:
-					ent->classname = "weapon_imod";
 					return BG_FindItemForWeapon( WP_IMOD );
 				case IT_AMMO:
-					ent->classname = "ammo_imod";
 					return BG_FindItemForAmmo( WP_IMOD );
 			}
 	}

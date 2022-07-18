@@ -156,7 +156,7 @@ MOD_FUNCTION_DEF( CopyToBodyQue, gentity_t *, ( int clientNum ) )
 //////////////////////////
 
 // Allows replacing an item with a different item during initial map spawn.
-MOD_FUNCTION_DEF( CheckReplaceItem, gitem_t *, ( gentity_t *ent, gitem_t *item ) )
+MOD_FUNCTION_DEF( CheckReplaceItem, gitem_t *, ( gitem_t *item ) )
 
 // Allows permanently removing an item during initial spawn.
 // Returns qtrue to disable item, qfalse to spawn item normally.

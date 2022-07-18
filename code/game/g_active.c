@@ -685,7 +685,7 @@ qboolean PlaceDetpack(gentity_t *ent)
 	{
 		// got enough room so place the detpack
 		detpack = G_Spawn();
-		G_SpawnItem(detpack, detpackItem);
+		detpack->item = detpackItem;
 		detpack->physicsBounce = 0.0f;//detpacks are *not* bouncy
 		VectorMA(ent->client->ps.origin, detDistance + mins[0], fwd, detpack->s.origin);
 		if ( !FinishSpawningDetpack(detpack, detpackItem - bg_itemlist) )
@@ -1296,7 +1296,7 @@ qboolean PlaceDecoy(gentity_t *ent)
 	{
 		//--------------------------- SPAWN AND PLACE DECOY ON GROUND
 		decoy = G_Spawn();
-		G_SpawnItem(decoy, decoyItem);				// Generate it as an item, temporarly
+		decoy->item = decoyItem;
 		decoy->physicsBounce = 0.0f;//decoys are *not* bouncy
 		VectorMA(ent->client->ps.origin, detDistance + mins[0], fwd, decoy->s.origin);
 		decoy->r.mins[2] = mins[2];//keep it off the floor

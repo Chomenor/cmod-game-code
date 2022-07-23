@@ -1593,66 +1593,76 @@ void CalculateAwards(gentity_t *ent, char *msg)
 #ifdef LOGGING_WEAPONS
 	char		buf1[AWARDS_MSG_LENGTH], buf2[AWARDS_MSG_LENGTH];
 	int			awardFlags = 0, efficiency = 0, stuffUsed = 0, kills = 0, streak = 0, teamAwards = 0;
+	int			awardCount = 0;		// maximum of 4 awards, to avoid issues with buggy cgame AW_SPPostgameMenu_f
 
 	memset(buf1, 0, AWARDS_MSG_LENGTH);
 	memset(buf2, 0, AWARDS_MSG_LENGTH);
-	if (CalculateEfficiency(ent, &efficiency))
+	if (CalculateEfficiency(ent, &efficiency) && awardCount < 4)
 	{
 		awardFlags |= (1<<AWARD_EFFICIENCY);
 		Com_sprintf(buf1, AWARDS_MSG_LENGTH, " %d", efficiency);
+		++awardCount;
 	}
-	if (CalculateSharpshooter(ent, &kills))
+	if (CalculateSharpshooter(ent, &kills) && awardCount < 4)
 	{
 		awardFlags |= (1<<AWARD_SHARPSHOOTER);
 		strcpy(buf2, buf1);
 		Com_sprintf(buf1, AWARDS_MSG_LENGTH, "%s %d", buf2, kills);
+		++awardCount;
 	}
-	if (CalculateUntouchable(ent))
+	if (CalculateUntouchable(ent) && awardCount < 4)
 	{
 		awardFlags |= (1<<AWARD_UNTOUCHABLE);
 		strcpy(buf2, buf1);
 		Com_sprintf(buf1, AWARDS_MSG_LENGTH, "%s %d", buf2, 0);
+		++awardCount;
 	}
-	if (CalculateLogistics(ent, &stuffUsed))
+	if (CalculateLogistics(ent, &stuffUsed) && awardCount < 4)
 	{
 		awardFlags |= (1<<AWARD_LOGISTICS);
 		strcpy(buf2, buf1);
 		Com_sprintf(buf1, AWARDS_MSG_LENGTH, "%s %d", buf2, stuffUsed);
+		++awardCount;
 	}
-	if (CalculateTactician(ent, &kills))
+	if (CalculateTactician(ent, &kills) && awardCount < 4)
 	{
 		awardFlags |= (1<<AWARD_TACTICIAN);
 		strcpy(buf2, buf1);
 		Com_sprintf(buf1, AWARDS_MSG_LENGTH, "%s %d", buf2, kills);
+		++awardCount;
 	}
-	if (CalculateDemolitionist(ent, &kills))
+	if (CalculateDemolitionist(ent, &kills) && awardCount < 4)
 	{
 		awardFlags |= (1<<AWARD_DEMOLITIONIST);
 		strcpy(buf2, buf1);
 		Com_sprintf(buf1, AWARDS_MSG_LENGTH, "%s %d", buf2, kills);
+		++awardCount;
 	}
 	streak = CalculateStreak(ent);
-	if (streak)
+	if (streak && awardCount < 4)
 	{
 		awardFlags |= (1<<AWARD_STREAK);
 		strcpy(buf2, buf1);
 		Com_sprintf(buf1, AWARDS_MSG_LENGTH, "%s %d", buf2, streak);
+		++awardCount;
 	}
 	if (g_gametype.integer >= GT_TEAM)
 	{
 		teamAwards = CalculateTeamAward(ent);
-		if (teamAwards)
+		if (teamAwards && awardCount < 4)
 		{
 			awardFlags |= (1<<AWARD_TEAM);
 			strcpy(buf2, buf1);
 			Com_sprintf(buf1, AWARDS_MSG_LENGTH, "%s %d", buf2, teamAwards);
+			++awardCount;
 		}
 	}
-	if (CalculateSection31Award(ent))
+	if (CalculateSection31Award(ent) && awardCount < 4)
 	{
 		awardFlags |= (1<<AWARD_SECTION31);
 		strcpy(buf2, buf1);
 		Com_sprintf(buf1, AWARDS_MSG_LENGTH, "%s %d", buf2, 0);
+		++awardCount;
 	}
 	strcpy(buf2, msg);
 	Com_sprintf( msg, AWARDS_MSG_LENGTH, "%s %d%s", buf2, awardFlags, buf1);

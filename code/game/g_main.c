@@ -71,7 +71,10 @@ intptr_t vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, 
 		}
 		return 0;
 	case GAME_CLIENT_BEGIN:
-		if ( EF_WARN_ASSERT( level.clients[arg0].pers.connected == CON_CONNECTING ) ) {
+		// It is possible for client to already be spawned via "team" command, which
+		// happens when starting game from the menu. Don't do anything here in this case.
+		EF_WARN_ASSERT( level.clients[arg0].pers.connected >= CON_CONNECTING );
+		if ( level.clients[arg0].pers.connected == CON_CONNECTING ) {
 			ClientBegin( arg0 );
 		}
 		return 0;

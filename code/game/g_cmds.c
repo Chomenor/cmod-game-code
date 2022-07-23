@@ -1014,10 +1014,10 @@ void Cmd_GameCommand_f( gentity_t *ent ) {
 	trap_Argv( 2, str, sizeof( str ) );
 	order = atoi( str );
 
-	if ( player < 0 || player >= MAX_CLIENTS ) {
+	if ( !G_IsConnectedClient( player ) ) {
 		return;
 	}
-	if ( order < 0 || order > sizeof(gc_orders)/sizeof(char *) ) {
+	if ( order < 0 || order >= sizeof(gc_orders)/sizeof(char *) ) {
 		return;
 	}
 	G_Say( ent, &g_entities[player], SAY_TELL, gc_orders[order] );
@@ -1191,12 +1191,18 @@ void ClientCommand( int clientNum ) {
 	char	cmd[MAX_TOKEN_CHARS];
 
 	ent = g_entities + clientNum;
-	if ( !ent->client ) {
+	if ( ent->client->pers.connected == CON_DISCONNECTED ) {
 		return;		// not fully in game yet
 	}
 
 
 	trap_Argv( 0, cmd, sizeof( cmd ) );
+
+	// Team command can be called for connecting client when starting game from UI,
+	// but there shouldn't be a need for any other commands
+	if ( ent->client->pers.connected == CON_CONNECTING && Q_stricmp( cmd, "team" ) ) {
+		return;
+	}
 
 	// Check if any mods have special handling of this command
 	if ( modfn.ModClientCommand( clientNum, cmd ) ) {

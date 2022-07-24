@@ -226,6 +226,7 @@ MOD_FUNCTION_DEF( AdjustGeneralConstant, int, ( generalConstant_t gcType, int de
 MOD_FUNCTION_DEF( ModConsoleCommand, qboolean, ( const char *cmd ) )
 
 // Allows mods to handle client commands. Returns qtrue to suppress normal handling of command.
+// Can be called for connecting clients and during intermission.
 MOD_FUNCTION_DEF( ModClientCommand, qboolean, ( int clientNum, const char *cmd ) )
 
 // Allows mods to add values to the mod config configstring.

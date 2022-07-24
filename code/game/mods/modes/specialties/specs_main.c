@@ -269,7 +269,9 @@ Handle class command.
 */
 LOGFUNCTION_SRET( qboolean, PREFIX(ModClientCommand), ( int clientNum, const char *cmd ),
 		( clientNum, cmd ), "G_MODFN_MODCLIENTCOMMAND" ) {
-	if ( !Q_stricmp( cmd, "class" ) && !level.intermissiontime ) {
+	gclient_t *client = &level.clients[clientNum];
+
+	if ( !Q_stricmp( cmd, "class" ) && !level.intermissiontime && client->pers.connected == CON_CONNECTED ) {
 		if ( trap_Argc() != 2 ) {
 			ModSpecialties_TellClassCmd( clientNum );
 		} else {

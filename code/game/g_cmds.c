@@ -1198,14 +1198,14 @@ void ClientCommand( int clientNum ) {
 
 	trap_Argv( 0, cmd, sizeof( cmd ) );
 
-	// Team command can be called for connecting client when starting game from UI,
-	// but there shouldn't be a need for any other commands
-	if ( ent->client->pers.connected == CON_CONNECTING && Q_stricmp( cmd, "team" ) ) {
+	// Check if any mods have special handling of this command
+	if ( modfn.ModClientCommand( clientNum, cmd ) ) {
 		return;
 	}
 
-	// Check if any mods have special handling of this command
-	if ( modfn.ModClientCommand( clientNum, cmd ) ) {
+	// Team command can be called for connecting client when starting game from UI,
+	// but there shouldn't be a need for any other commands
+	if ( ent->client->pers.connected == CON_CONNECTING && Q_stricmp( cmd, "team" ) ) {
 		return;
 	}
 

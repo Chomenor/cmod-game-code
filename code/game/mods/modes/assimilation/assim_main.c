@@ -768,7 +768,10 @@ Handle class command for borg (which can't change class directly).
 */
 LOGFUNCTION_SRET( qboolean, PREFIX(ModClientCommand), ( int clientNum, const char *cmd ),
 		( clientNum, cmd ), "G_MODFN_MODCLIENTCOMMAND" ) {
-	if ( !Q_stricmp( cmd, "class" ) && !level.intermissiontime && level.clients[clientNum].sess.sessionClass == PC_BORG ) {
+	gclient_t *client = &level.clients[clientNum];
+
+	if ( !Q_stricmp( cmd, "class" ) && !level.intermissiontime &&
+			client->pers.connected == CON_CONNECTED && client->sess.sessionClass == PC_BORG ) {
 		if ( trap_Argc() != 2 ) {
 			trap_SendServerCommand( clientNum, "print \"class: Borg\n\"" );
 		} else {

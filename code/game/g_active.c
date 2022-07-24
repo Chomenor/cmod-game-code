@@ -1521,7 +1521,9 @@ G_ExternalizePlayerEvent
 */
 void G_ExternalizePlayerEvent( gentity_t *ent, int event, int eventParm ) {
 	event &= ~EV_EVENT_BITS;
-	if ( EF_WARN_ASSERT( event ) ) {
+	// event could be null if it was cleared in G_RunFrame before reaching this,
+	// which is possible if the server is lagging
+	if ( event ) {
 		int bits = ent->s.event & EV_EVENT_BITS;
 		bits = ( bits + EV_EVENT_BIT1 ) & EV_EVENT_BITS;
 		ent->s.event = event | bits;

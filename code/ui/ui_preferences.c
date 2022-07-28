@@ -687,4 +687,3 @@ void UI_GameOptionsMenu( void )
 
 	UI_PushMenu( &s_gameoptions.menu );
 }
-

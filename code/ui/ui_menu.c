@@ -2755,4 +2755,3 @@ void UI_QuitMenu( void )
 
 	UI_PushMenu( &s_quit.menu );
 }
-

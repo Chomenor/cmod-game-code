@@ -337,4 +337,3 @@ void CG_InitConsoleCommands( void ) {
 	trap_AddCommand ("unignore");
 	trap_AddCommand ("unignoreall");
 }
-

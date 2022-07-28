@@ -122,4 +122,3 @@
 #define CHARACTERISTIC_ALERTNESS					46	//float [0, 1]
 //how much the bot fires it's weapon
 #define CHARACTERISTIC_FIRETHROTTLE					47	//float [0, 1]
-

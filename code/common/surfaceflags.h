@@ -57,4 +57,3 @@
 #define	SURF_ALPHASHADOW		0x10000	// do per-pixel light shadow casting in q3map
 #define	SURF_NODLIGHT			0x20000	// don't dlight even if solid (solid lava, skies)
 #define SURF_FORCEFIELD			0x40000	// the surface in question is a forcefield
-

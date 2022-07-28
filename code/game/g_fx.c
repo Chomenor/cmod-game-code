@@ -385,4 +385,3 @@ void SP_fx_drip( gentity_t	*ent )
 
 	trap_LinkEntity( ent );
 }
-

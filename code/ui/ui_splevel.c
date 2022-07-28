@@ -1687,5 +1687,3 @@ void UI_SPChooseMenu( void )
 	UI_PushMenu( &s_spchoose.menu );
 	Menu_SetCursorToItem( &s_spchoose.menu, &s_spchoose.preset );
 }
-
-

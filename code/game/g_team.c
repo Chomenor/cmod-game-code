@@ -1018,6 +1018,3 @@ void SP_team_CTF_bluespawn(gentity_t *ent) {
 		ent->use = spawnpoint_toggle_active;
 	}
 }
-
-
-

@@ -1041,5 +1041,3 @@ void UI_PlayerModelMenu(int menuFrom)
 
 	Menu_SetCursorToItem( &s_playermodel.menu, &s_playermodel.pics[s_playermodel.selectedmodel % MAX_MODELSPERPAGE] );
 }
-
-

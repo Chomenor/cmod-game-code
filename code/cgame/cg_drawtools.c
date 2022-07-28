@@ -1069,4 +1069,3 @@ void CG_LoadFonts(void)
 	holdBuf = CG_ParseFontParms( holdBuf,propMapBig);
 
 }
-

@@ -544,4 +544,3 @@ void UI_SoundMenu( void)
 
 	UI_PushMenu( &soundOptionsInfo.menu);
 }
-

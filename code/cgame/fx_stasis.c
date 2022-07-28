@@ -481,5 +481,3 @@ void FX_StasisWeaponHitWall( vec3_t origin, vec3_t dir, int size )
 	}
 	trap_S_StartSound( origin, ENTITYNUM_WORLD, CHAN_AUTO, weaponInfo->mainHitSound );
 }
-
-

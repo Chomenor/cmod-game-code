@@ -1416,5 +1416,3 @@ void ClientDisconnect( int clientNum ) {
 	// kef -- if this guy contributed to any of our kills/deaths/weapons logs, clean 'em out
 	G_ClearClientLog(clientNum);
 }
-
-

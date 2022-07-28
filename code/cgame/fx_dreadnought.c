@@ -306,5 +306,3 @@ void FX_DreadnoughtShotMiss( vec3_t end, vec3_t dir )
 
 	FX_AddSprite( end, NULL, qfalse, flrandom(40,60), -50, 1.0, 0.0, random() * 360, 0, 500, cgs.media.blueParticleShader );
 }
-
-

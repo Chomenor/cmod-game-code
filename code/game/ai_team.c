@@ -780,4 +780,3 @@ void BotTeamAI(bot_state_t *bs) {
 		}
 	}
 }
-

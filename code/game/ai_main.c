@@ -1362,4 +1362,3 @@ int BotAIShutdown( int restart ) {
 	}
 	return qtrue;
 }
-

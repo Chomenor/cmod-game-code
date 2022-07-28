@@ -2027,4 +2027,3 @@ int AINode_Battle_NBG(bot_state_t *bs) {
 	//
 	return qtrue;
 }
-

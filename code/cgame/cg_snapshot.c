@@ -391,4 +391,3 @@ void CG_ProcessSnapshots( void ) {
 	}
 
 }
-

@@ -2861,4 +2861,3 @@ void UI_ChooseServerTypeMenu( void )
 	UI_PushMenu( &g_chooseservertype.menu );
 
 }
-

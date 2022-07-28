@@ -414,4 +414,3 @@ void UI_FontsMenu( void)
 
 	UI_PushMenu( &s_fonts_menu);
 }
-

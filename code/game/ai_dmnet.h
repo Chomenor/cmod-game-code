@@ -42,4 +42,3 @@ int AINode_Battle_NBG(bot_state_t *bs);
 
 void BotResetNodeSwitches(void);
 void BotDumpNodeSwitches(bot_state_t *bs);
-

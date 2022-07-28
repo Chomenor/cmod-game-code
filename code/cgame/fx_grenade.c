@@ -139,6 +139,3 @@ void FX_GrenadeShrapnelBits( vec3_t start  )
 	FX_AddSpawner( start, zero, NULL, NULL, qfalse, 300,
 							0, FX_GRENADE_ALT_STICK_TIME, GrenadeBeep, 10 );
 }
-
-
-

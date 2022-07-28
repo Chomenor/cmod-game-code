@@ -498,4 +498,3 @@ void UI_PlayerSettingsMenu(int menuFrom)
 	PlayerSettings_MenuInit(menuFrom);
 	UI_PushMenu( &s_playersettings.menu );
 }
-

@@ -698,4 +698,3 @@ int G_RadiusList ( vec3_t origin, float radius,	gentity_t *ignore, qboolean take
 	// we are done, return how many we found
 	return(ent_count);
 }
-

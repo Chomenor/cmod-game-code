@@ -1828,4 +1828,3 @@ void QDECL G_ClearClientLog(int client)
 		G_WeaponLogItems[client][i] = 0;
 	}
 }
-

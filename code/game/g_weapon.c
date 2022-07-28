@@ -2541,6 +2541,3 @@ void FireSeeker( gentity_t *owner, gentity_t *target, vec3_t origin)
 	// for now I'm just using the scavenger bullet.
 	FireScavengerBullet( owner, origin, dir );
 }
-
-
-

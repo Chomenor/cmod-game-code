@@ -447,4 +447,3 @@ qboolean	ConsoleCommand( void ) {
 
 	return qfalse;
 }
-

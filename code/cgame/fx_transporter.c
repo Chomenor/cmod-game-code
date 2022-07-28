@@ -112,4 +112,3 @@ void FX_TransporterPad( vec3_t origin )
 
 	FX_AddSpawner( origin, up, NULL, NULL, qfalse, 1000, 0, 0, TransporterPad, 0 );
 }
-

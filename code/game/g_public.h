@@ -382,4 +382,3 @@ typedef enum {
 
 	BOTAI_START_FRAME				// ( int time );
 } gameExport_t;
-

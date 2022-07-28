@@ -278,4 +278,3 @@ void		testPrintFloat( char *string, float f ) {
 int trap_MemoryRemaining( void ) {
 	return syscall( CG_MEMORY_REMAINING );
 }
-

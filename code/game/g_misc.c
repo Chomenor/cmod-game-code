@@ -420,4 +420,3 @@ Fires at either the target or the current direction.
 void SP_shooter_grenade( gentity_t *ent ) {
 	InitShooter( ent, WP_GRENADE_LAUNCHER);
 }
-

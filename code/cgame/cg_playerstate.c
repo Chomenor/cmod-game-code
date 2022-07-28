@@ -485,4 +485,3 @@ void CG_TransitionPlayerState( playerState_t *ps, playerState_t *ops ) {
 	CG_CheckDamageDealt(ps, ops);
 #endif //_DEBUG
 }
-

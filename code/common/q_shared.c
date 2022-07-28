@@ -1068,9 +1068,3 @@ void Info_SetValueForKey_Size( char *s, const char *key, const char *value, int 
 
 	strcat (s, newi);
 }
-
-
-
-//====================================================================
-
-

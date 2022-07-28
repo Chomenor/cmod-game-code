@@ -423,5 +423,3 @@ void UI_ServerInfoMenu( void )
 
 	UI_PushMenu( &s_serverinfo.menu );
 }
-
-

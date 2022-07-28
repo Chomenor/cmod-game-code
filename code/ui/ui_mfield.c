@@ -485,5 +485,3 @@ sfxHandle_t MenuField_Key( menufield_s* m, int* key )
 
 	return (0);
 }
-
-

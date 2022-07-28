@@ -4478,4 +4478,3 @@ static void UI_ControlsCommandMenu( void )
 
 	UI_PushMenu( &s_controlscommand_menu );
 }
-

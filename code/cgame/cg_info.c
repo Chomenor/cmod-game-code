@@ -845,4 +845,3 @@ void CG_DrawObjectiveInformation( void )
 
 	Objectives_Draw(cent);
 }
-

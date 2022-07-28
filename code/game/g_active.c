@@ -2038,5 +2038,3 @@ void ClientEndFrame( gentity_t *ent ) {
 	BG_PlayerStateToEntityState( &ent->client->ps, &ent->s, qtrue );
 	G_ExternalizePlayerEvents( ent - g_entities );
 }
-
-

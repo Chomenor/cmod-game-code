@@ -3642,4 +3642,3 @@ void UI_VideoData2SettingsMenu( void )
 
 	UI_PushMenu( &s_videodata2.menu );
 }
-

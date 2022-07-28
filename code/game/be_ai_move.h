@@ -105,4 +105,3 @@ void BotSetBrushModelTypes(void);
 int BotSetupMoveAI(void);
 //shutdown movement AI
 void BotShutdownMoveAI(void);
-

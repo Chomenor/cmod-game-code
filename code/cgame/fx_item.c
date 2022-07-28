@@ -264,5 +264,3 @@ void FX_DrawPortableShield(centity_t *cent)
 		}
 	}
 }
-
-

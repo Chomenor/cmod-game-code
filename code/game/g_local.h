@@ -270,6 +270,7 @@ typedef struct {
 	playerTeamState_t teamState;	// status in teamplay games
 	int			voteCount;			// to prevent people from constantly calling votes
 	qboolean	teamInfo;			// send team overlay updates?
+	int			suicideTime;		// last suicide time, to prevent excessive suicides
 	pclass_t	uiClass;			// last class sent to client via "pclass" command
 } clientPersistant_t;
 

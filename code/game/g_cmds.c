@@ -389,15 +389,14 @@ void Cmd_LevelShot_f( gentity_t *ent ) {
 Check if suicide is allowed. If not, prints notification to client.
 =================
 */
-int lastKillTime[MAX_CLIENTS];
 LOGFUNCTION_RET( qboolean, ModFNDefault_CheckSuicideAllowed, ( int clientNum ),
 		( clientNum ), "G_MODFN_CHECKSUICIDEALLOWED" ) {
 	gclient_t *client = &level.clients[clientNum];
 
-	if( lastKillTime[clientNum] > level.time - 30000 ) {
+	if( client->pers.suicideTime && client->pers.suicideTime > level.time - 30000 ) {
 		// can't flood-kill
 		trap_SendServerCommand( clientNum, va("cp \"Cannot suicide for %d seconds",
-			(lastKillTime[clientNum]-(level.time-30000))/1000 ) );
+			(client->pers.suicideTime-(level.time-30000))/1000 ) );
 		return qfalse;
 	}
 
@@ -409,13 +408,12 @@ LOGFUNCTION_RET( qboolean, ModFNDefault_CheckSuicideAllowed, ( int clientNum ),
 Cmd_Kill_f
 =================
 */
-int lastKillTime[MAX_CLIENTS];
 void Cmd_Kill_f( gentity_t *ent ) {
 	if ( !modfn.SpectatorClient( ent - g_entities ) && modfn.CheckSuicideAllowed( ent - g_entities ) ) {
-		lastKillTime[ent - g_entities] = level.time;
+		ent->client->pers.suicideTime = level.time;
 		ent->flags &= ~FL_GODMODE;
 		ent->client->ps.stats[STAT_HEALTH] = ent->health = 0;
-		player_die (ent, ent, ent, 100000, MOD_SUICIDE);
+		player_die( ent, ent, ent, 100000, MOD_SUICIDE );
 	}
 }
 

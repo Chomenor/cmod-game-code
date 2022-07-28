@@ -341,7 +341,6 @@ G_InitGame
 
 ============
 */
-extern int lastKillTime[];
 void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	int					i;
 
@@ -360,11 +359,6 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	level.matchState = MS_INIT;
 	level.restartClientsPending = ( restart && G_RetrieveGlobalSessionValue( "numConnected" ) );
 	level.warmupRestarting = ( restart && G_RetrieveGlobalSessionValue( "warmupRestarting" ) );
-
-	for ( i = 0; i < MAX_CLIENTS; i++ )
-	{
-		lastKillTime[i] = level.time-30000;
-	}
 
 	G_ModsInit();
 

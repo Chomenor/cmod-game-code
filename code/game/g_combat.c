@@ -26,11 +26,14 @@ void AddScore( gentity_t *ent, int score ) {
 	if ( modfn.AdjustGeneralConstant( GC_DISABLE_ADDSCORE, 0 ) ) {
 		return;
 	}
+
 	ent->client->ps.persistant[PERS_SCORE] += score;
-	if (g_gametype.integer == GT_TEAM )
-	{//this isn't capture score
-		level.teamScores[ ent->client->ps.persistant[PERS_TEAM] ] += score;
+
+	if ( g_gametype.integer == GT_TEAM ) {
+		// this isn't capture score
+		level.teamScores[ent->client->ps.persistant[PERS_TEAM]] += score;
 	}
+
 	CalculateRanks();
 }
 
@@ -232,11 +235,8 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	char		*killerName, *obit;
 	gentity_t	*detpack = NULL;
 	char		*classname = NULL;
-	int			BottomlessPitDeath;
 	static		int deathNum;
 	int			awardPoints = 0;	// Amount of points to give/take from attacker (or self if attacker is non-client).
-
-
 
 	if ( self->client->ps.pm_type == PM_DEAD ) {
 		return;
@@ -247,43 +247,15 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	}
 
 	self->client->ps.pm_type = PM_DEAD;
+	if ( self->health > 0 ) {
+		self->health = 0;
+	}
 	//need to copy health here because pm_type was getting reset to PM_NORMAL if ClientThink_real was called before the STAT_HEALTH was updated
 	self->client->ps.stats[STAT_HEALTH] = self->health;
 
-	// check if we are in a NODROP Zone and died from a TRIGGER HURT
-	//  if so, we assume that this resulted from a fall to a "bottomless pit" and
-	//  treat it differently...
-	//
-	//  Any problems with other places in the code?
-	//
-	BottomlessPitDeath = 0;	// initialize
-
 	contents = trap_PointContents( self->r.currentOrigin, -1 );
-	if ( ( contents & CONTENTS_NODROP ) && (meansOfDeath == MOD_TRIGGER_HURT) )
-	{
-		BottomlessPitDeath = 1;
-	//	G_AddEvent( EV_FALL_FAR );
-	//	G_AddEvent( self, EV_FALL_FAR, 0 );
-//		self->s.eFlags |= EF_NODRAW;
 
-	}
-
-	// if this dead guy had already dropped the first stage of a transporter, remove that transporter
-/*
-	classname = BG_FindClassnameForHoldable(HI_TRANSPORTER);
-	if (classname)
-	{
-		gentity_t	*trans = NULL;
-		while ((trans = G_Find (trans, FOFS(classname), classname)) != NULL)
-		{
-			if (trans->parent == self)
-			{
-				G_FreeEntity(trans);
-			}
-		}
-	}
-*/
-	// similarly, if El Corpso here has already dropped a detpack, blow it up
+	// if already dropped a detpack, blow it up
 	classname = BG_FindClassnameForHoldable(HI_DETPACK);
 	if (classname)
 	{
@@ -522,11 +494,14 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 		( ( self->client->ps.legsAnim & ANIM_TOGGLEBIT ) ^ ANIM_TOGGLEBIT ) | anim;
 	self->client->ps.torsoAnim =
 		( ( self->client->ps.torsoAnim & ANIM_TOGGLEBIT ) ^ ANIM_TOGGLEBIT ) | anim;
-	if ( (BottomlessPitDeath==1) && (killer == ENTITYNUM_WORLD))
+
+	// check if we are in a NODROP Zone and died from a TRIGGER HURT
+	//  if so, we assume that this resulted from a fall to a "bottomless pit" and
+	//  treat it differently...
+	//
+	//  Any problems with other places in the code?
+	if ( ( contents & CONTENTS_NODROP ) && meansOfDeath == MOD_TRIGGER_HURT && killer == ENTITYNUM_WORLD )
 	{
-		//G_AddEvent( self, EV_FALL_FAR, killer ); ?? Need to play falling SF now, or
-		// use designer trigger??
-		//FIXME: need *some* kind of death anim!
 	}
 	else
 	{
@@ -631,10 +606,6 @@ int CheckArmor (gentity_t *ent, int damage, int dflags)
 	{
 		protectionFactor = PIERCED_ARMOR_PROTECTION;
 	}
-//	else if (dflags & DAMAGE_SUPER_ARMOR_PIERCING)
-//	{
-//		protectionFactor = SUPER_PIERCED_ARMOR_PROTECTION;
-//	}
 
 	count = client->ps.stats[STAT_ARMOR];
 	save = ceil( damage * protectionFactor );
@@ -679,7 +650,7 @@ LOGFUNCTION_RET( float, ModFNDefault_KnockbackMass, ( gentity_t *targ, gentity_t
 
 /*
 ============
-T_Damage
+G_Damage
 
 targ		entity that is being damaged
 inflictor	entity that is causing the damage
@@ -693,19 +664,17 @@ knockback	force to be applied against targ as a result of the damage
 
 inflictor, attacker, dir, and point can be NULL for environmental effects
 
-dflags		these flags are used to control how T_Damage works
+dflags		these flags are used to control how G_Damage works
 	DAMAGE_RADIUS			damage was indirect (from a nearby explosion)
 	DAMAGE_NO_ARMOR			armor does not protect from this damage
 	DAMAGE_NO_KNOCKBACK		do not affect velocity, just view angles
 	DAMAGE_NO_PROTECTION	kills godmode, armor, everything
 ============
 */
-
 void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 				vec3_t dir, vec3_t point, int damage, int dflags, int mod ) {
-	gclient_t	*client;
+	gclient_t	*client = targ->client;
 	int			take;
-	int			save;
 	int			asave;
 	int			knockback;
 	qboolean	bFriend = (targ && attacker)?OnSameTeam( targ, attacker ):qfalse;
@@ -716,7 +685,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		return;
 	}
 
-	// the intermission has allready been qualified for, so don't
+	// the intermission has already been qualified for, so don't
 	// allow any extra scoring
 	if ( level.intermissionQueued ) {
 		return;
@@ -752,8 +721,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	if ( attacker->client && attacker != targ ) {
 		damage = damage * modfn.EffectiveHandicap( attacker - g_entities, EH_DAMAGE ) / 100;
 	}
-
-	client = targ->client;
 
 	if ( client )
 	{
@@ -884,7 +851,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		damage = 1;
 	}
 	take = damage;
-	save = 0;
 
 	// save some from armor
 	asave = CheckArmor (targ, take, dflags);
@@ -906,7 +872,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		}
 		client->damage_armor += asave;
 		client->damage_blood += take;
-		client->damage_knockback += knockback;
 		if ( dir ) {
 			VectorCopy ( dir, client->damage_from );
 			client->damage_fromWorld = qfalse;

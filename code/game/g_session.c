@@ -154,7 +154,6 @@ void G_WriteClientSessionData( gclient_t *client ) {
 		);
 
 	var = va( "session%i", clientNum );
-
 	trap_Cvar_Set( var, s );
 
 	// Write session info
@@ -234,8 +233,8 @@ void G_InitSessionData( gclient_t *client, char *userinfo ) {
 	sess = &client->sess;
 
 	// initial team determination
-	if ( g_gametype.integer >= GT_TEAM )
-	{//Team holomatch or CTF
+	if ( g_gametype.integer >= GT_TEAM ) {
+		// Team holomatch or CTF
 		if ( g_teamAutoJoin.integer && !( g_entities[clientNum].r.svFlags & SVF_BOT ) &&
 				modfn.CheckJoinAllowed( clientNum, CJA_AUTOJOIN, TEAM_FREE ) ) {
 			sess->sessionTeam = PickTeam( -1 );
@@ -244,8 +243,9 @@ void G_InitSessionData( gclient_t *client, char *userinfo ) {
 			sess->sessionTeam = TEAM_SPECTATOR;
 		}
 	}
-	else
-	{//FFA, tournament or sp
+
+	else {
+		// FFA, tournament or sp
 		value = Info_ValueForKey( userinfo, "team" );
 		if ( value[0] == 's' ) {
 			// a willing spectator, not a waiting-in-line

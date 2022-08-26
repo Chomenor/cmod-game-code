@@ -583,28 +583,10 @@ team_t PickTeam( int ignoreClientNum ) {
 	return irandom( TEAM_RED, TEAM_BLUE );
 }
 
-/*
-===========
-ForceClientSkin
-
-Forces a client's skin (for teamplay)
-===========
-*/
-void ForceClientSkin(char *model, const char *skin ) {
-	char *p;
-
-	if ((p = strchr(model, '/')) != NULL) {
-		*p = 0;
-	}
-
-	Q_strcat(model, MAX_QPATH, "/");
-	Q_strcat(model, MAX_QPATH, skin);
-}
-
 
 /*
 ===========
-ClientCheckName
+ClientCleanName
 ============
 */
 static void ClientCleanName( const char *in, char *out, int outSize ) {
@@ -758,8 +740,6 @@ void ClientUserinfoChanged( int clientNum ) {
 	gclient_t	*client;
 	char	*c1;
 	char	userinfo[MAX_INFO_STRING];
-
-	model[0] = 0;
 
 	ent = g_entities + clientNum;
 	client = ent->client;
@@ -1164,23 +1144,20 @@ Initializes all non-persistant parts of playerState
 ============
 */
 void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
-	int		index;
+	int		clientNum = ent - g_entities;
+	gclient_t	*client = ent->client;
 	vec3_t	spawn_origin, spawn_angles;
-	gclient_t	*client;
 	int		i;
 	gentity_t	*spawnPoint;
 
-	index = ent - g_entities;
-	client = ent->client;
-
 	trap_UnlinkEntity( ent );
 
-	modfn.PreClientSpawn( index, spawnType );
+	modfn.PreClientSpawn( clientNum, spawnType );
 
 	// during intermission just put the client in viewing spot
 	if ( level.intermissiontime ) {
 		MoveClientToIntermission( ent );
-		modfn.SpawnCenterPrintMessage( index, spawnType );
+		modfn.SpawnCenterPrintMessage( clientNum, spawnType );
 		return;
 	}
 
@@ -1206,16 +1183,16 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	}
 
 	// try to avoid spawn kills
-	if ( !modfn.SpectatorClient( index ) ) {
+	if ( !modfn.SpectatorClient( clientNum ) ) {
 		EF_ERR_ASSERT( spawnPoint );
-		modfn.PatchClientSpawn( index, &spawnPoint, spawn_origin, spawn_angles );
+		modfn.PatchClientSpawn( clientNum, &spawnPoint, spawn_origin, spawn_angles );
 	}
 
 	// toggle the teleport bit so the client knows to not lerp
 	client->ps.eFlags ^= EF_TELEPORT_BIT;
 
 	// clear everything but the persistant data
-	G_ResetClient( index );
+	G_ResetClient( clientNum );
 
 	// increment the spawncount so the client will detect the respawn
 	client->ps.persistant[PERS_SPAWN_COUNT]++;
@@ -1224,7 +1201,7 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	client->airOutTime = level.time + 12000;
 
 	ent->s.groundEntityNum = ENTITYNUM_NONE;
-	ent->client = &level.clients[index];
+	ent->client = &level.clients[clientNum];
 	ent->takedamage = qtrue;
 	ent->inuse = qtrue;
 	ent->classname = "player";
@@ -1249,28 +1226,23 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	client->ps.ammo[WP_PHASER] = PHASER_AMMO_MAX;
 
 	// Determine player class
-	modfn.UpdateSessionClass( index );
+	modfn.UpdateSessionClass( clientNum );
 	client->ps.persistant[PERS_CLASS] = client->sess.sessionClass;
 
 	// Determine max health
-	client->ps.stats[STAT_MAX_HEALTH] = modfn.EffectiveHandicap( index, EH_MAXHEALTH );
+	client->ps.stats[STAT_MAX_HEALTH] = modfn.EffectiveHandicap( clientNum, EH_MAXHEALTH );
 
-	if ( modfn.SpectatorClient( index ) ) {
+	if ( modfn.SpectatorClient( clientNum ) ) {
 		ent->health = client->ps.stats[STAT_HEALTH] = client->ps.stats[STAT_MAX_HEALTH];
 
 		// Don't trip the out of ammo sound in CG_CheckAmmo
 		client->ps.stats[STAT_WEAPONS] = 1 << WP_PHASER;
 	} else {
 		// Perform class-specific configuration
-		modfn.SpawnConfigureClient( index );
+		modfn.SpawnConfigureClient( clientNum );
 
 		G_KillBox( ent );
 		trap_LinkEntity (ent);
-
-		// force the base weapon up
-		client->ps.weapon = WP_PHASER;
-		client->ps.weaponstate = WEAPON_READY;
-
 	}
 
 	// don't allow full run speed for a bit
@@ -1309,14 +1281,11 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	ClientThink( ent-g_entities );
 
 	// positively link the client, even if the command times are weird
-	if ( !modfn.SpectatorClient( index ) ) {
+	if ( !modfn.SpectatorClient( clientNum ) ) {
 		BG_PlayerStateToEntityState( &client->ps, &ent->s, qtrue );
 		VectorCopy( ent->client->ps.origin, ent->r.currentOrigin );
 		trap_LinkEntity( ent );
 	}
-
-	// clear entity state values
-	BG_PlayerStateToEntityState( &client->ps, &ent->s, qtrue );
 
 	// send current class to client for UI team/class menu
 	if ( spawnType == CST_FIRSTTIME || spawnType == CST_MAPCHANGE || spawnType == CST_MAPRESTART
@@ -1326,20 +1295,19 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	}
 
 	// print spawn messages
-	modfn.SpawnCenterPrintMessage( index, spawnType );
+	modfn.SpawnCenterPrintMessage( clientNum, spawnType );
 
 	// play transporter effect, but not for spectators or holodeck intro viewers
-	if ( !( modfn.SpectatorClient( index ) ) && !( client->ps.introTime > level.time ) ) {
-		modfn.SpawnTransporterEffect( index, spawnType );
+	if ( !( modfn.SpectatorClient( clientNum ) ) && !( client->ps.introTime > level.time ) ) {
+		modfn.SpawnTransporterEffect( clientNum, spawnType );
 	}
 
 	// run any post-spawn actions
-	modfn.PostClientSpawn( index, spawnType );
+	modfn.PostClientSpawn( clientNum, spawnType );
 
 	// check for userinfo changes
-	ClientUserinfoChanged( index );
+	ClientUserinfoChanged( clientNum );
 }
-
 
 /*
 ===========
@@ -1370,9 +1338,9 @@ void ClientDisconnect( int clientNum ) {
 	// stop any following clients
 	for ( i = 0 ; i < level.maxclients ; i++ ) {
 		if ( level.clients[i].pers.connected >= CON_CONNECTING
-			&& modfn.SpectatorClient( i )
-			&& level.clients[i].sess.spectatorState == SPECTATOR_FOLLOW
-			&& level.clients[i].sess.spectatorClient == clientNum ) {
+				&& modfn.SpectatorClient( i )
+				&& level.clients[i].sess.spectatorState == SPECTATOR_FOLLOW
+				&& level.clients[i].sess.spectatorClient == clientNum ) {
 			StopFollowing( &g_entities[i] );
 		}
 	}

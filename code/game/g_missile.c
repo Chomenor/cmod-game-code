@@ -83,14 +83,6 @@ void tripwireThink ( gentity_t *ent )
 	}
 }
 
-void tripmine_explode( gentity_t *self )
-{
-	G_TempEntity ( self->s.origin, EV_GRENADE_EXPLODE );
-	G_RadiusDamage( self->s.origin, self->enemy?self->enemy:self->parent, self->splashDamage, self->splashRadius, self, DAMAGE_ALL_TEAMS, MOD_GRENADE_ALT_SPLASH );
-	//FIXME: clear me from owner's list of tripmines
-	G_FreeEntity(self);
-}
-
 void tripmine_delayed_explode( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath )
 {
 	self->enemy = attacker;

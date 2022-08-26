@@ -2771,11 +2771,11 @@ void BotDeathmatchAI(bot_state_t *bs, float thinktime) {
 		Info_SetValueForKey(userinfo, "sex", gender);
 		trap_SetUserinfo(bs->client, userinfo);
 		//set the team
-		if ( g_gametype.integer != GT_TOURNAMENT ) {
+		if ( g_gametype.integer != GT_TOURNAMENT && bs->settings.team[0] ) {
 			Com_sprintf(buf, sizeof(buf), "team %s", bs->settings.team);
 			trap_EA_Command(bs->client, buf);
 		}
-		if ( modfn.AdjustGeneralConstant( GC_ALLOW_BOT_CLASS_SPECIFIER, 0 ) ) {
+		if ( modfn.AdjustGeneralConstant( GC_ALLOW_BOT_CLASS_SPECIFIER, 0 ) && bs->settings.pclass[0] ) {
 			Com_sprintf(buf, sizeof(buf), "class %s", bs->settings.pclass);
 			trap_EA_Command(bs->client, buf);
 		}

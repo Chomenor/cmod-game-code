@@ -630,7 +630,6 @@ void	COM_BeginParseSession( void );
 int		COM_GetCurrentParseLine( void );
 char	*COM_Parse( char **data_p );
 char	*COM_ParseExt( char **data_p, qboolean allowLineBreak );
-//int		COM_ParseInfos( char *buf, int max, char infos[][MAX_INFO_STRING] );
 
 // data is an in/out parm, returns a parsed out token
 

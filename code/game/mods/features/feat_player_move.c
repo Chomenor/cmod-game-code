@@ -8,7 +8,7 @@
 * g_pMoveTriggerMode - process touch triggers after every move fragment (0 = disabled, 1 = enabled)
 *    This prevents lag tricks to drop through kill areas in certain maps.
 * g_noJumpKeySlowdown - don't reduce acceleration when jump key is held midair (0 = disabled, 1 = enabled)
-*    In the original game, holding the jump key for longer when jumping reduces stafe jumping
+*    In the original game, holding the jump key for longer when jumping reduces strafe jumping
 *    effectiveness. Enabling this options cancels this effect so strafe jumping has full
 *    acceleration regardless of how long the jump key is held.
 */

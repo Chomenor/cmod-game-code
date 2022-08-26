@@ -28,11 +28,6 @@ void Team_InitGame(void)
 
 	Team_SetFlagStatus( TEAM_RED, FLAG_ATBASE );
 	Team_SetFlagStatus( TEAM_BLUE, FLAG_ATBASE );
-
-	// set config strings for what the two teams are for use in the cgame that renders the CTF flags
-	trap_SetConfigstring( CS_RED_GROUP, g_team_group_red.string);
-	trap_SetConfigstring( CS_BLUE_GROUP, g_team_group_blue.string);
-
 }
 
 int OtherTeam(int team) {

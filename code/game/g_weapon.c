@@ -9,10 +9,6 @@ static	float	s_quadFactor;
 static	vec3_t	forward, right, up;
 static	vec3_t	muzzle;
 
-extern void G_MissileImpact( gentity_t *ent, trace_t *trace);
-
-#define MAX_BEAM_HITS	4
-
 #define DMG_VAR			( modfn.AdjustWeaponConstant( WC_USE_RANDOM_DAMAGE, 1 ) ? flrandom(0.8,1.2) : 1.0f )
 
 #define WEAPON_TRACE( results, start, mins, maxs, end, passEntityNum, contentmask ) \
@@ -714,7 +710,6 @@ void WP_FireScavenger( gentity_t *ent, qboolean alt_fire )
 */
 
 #define STASIS_VELOCITY		1100	//800	//650
-#define STASIS_VELOCITY2	1000
 // #define STASIS_SPREAD		5.0		//2.5	//1.8	// Keep the spread relatively small so that you can get multiple projectile impacts when a badie is close
 #define STASIS_SPREAD		0.085f		// Roughly equivalent to sin(5 deg).
 
@@ -1749,7 +1744,6 @@ void DreadnoughtBurstThink(gentity_t *ent)
 			}
 			else
 			{
-
 				// Bounce off the surface just a little
 				VectorMA(ent->movedir, -1.25*dot, tr.plane.normal, ent->movedir);
 				VectorNormalize(ent->movedir);

@@ -177,9 +177,8 @@ damage values to that client for pain blends and kicks, and
 global pain sound events for all clients.
 ===============
 */
-void P_DamageFeedback( gentity_t *player ) {
+static void G_DamageFeedback( gentity_t *player ) {
 	gclient_t	*client;
-	float	count;
 	vec3_t	angles;
 
 	client = player->client;
@@ -188,13 +187,8 @@ void P_DamageFeedback( gentity_t *player ) {
 	}
 
 	// total points of damage shot at the player this frame
-	count = client->damage_blood + client->damage_armor;
-	if ( count == 0 ) {
+	if ( client->damage_blood + client->damage_armor == 0 ) {
 		return;		// didn't take any damage
-	}
-
-	if ( count > 255 ) {
-		count = 255;
 	}
 
 	// send the information to the client
@@ -236,7 +230,6 @@ void P_DamageFeedback( gentity_t *player ) {
 	//
 	client->damage_blood = 0;
 	client->damage_armor = 0;
-	client->damage_knockback = 0;
 }
 
 
@@ -1715,7 +1708,7 @@ LOGFUNCTION_VOID( ModFNDefault_RunPlayerMove, ( int clientNum ), ( clientNum ), 
 SpectatorThink
 =================
 */
-void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
+static void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 	gclient_t	*client;
 
 	client = ent->client;
@@ -1741,7 +1734,7 @@ void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 
 /*
 ==============
-ClientThink
+ClientThink_real
 
 This will be called once for each client frame, which will
 usually be a couple times for each server frame on fast clients.
@@ -2021,7 +2014,7 @@ void ClientEndFrame( gentity_t *ent ) {
 	P_WorldEffects (ent);
 
 	// apply all the damage taken this frame
-	P_DamageFeedback (ent);
+	G_DamageFeedback (ent);
 
 	// add the EF_CONNECTION flag if we haven't gotten commands recently
 	if ( level.time - ent->client->lastCmdTime > 1000 ) {

@@ -281,7 +281,7 @@ void G_RegisterCvarCallback( trackedCvar_t *tc, void ( *callback )( trackedCvar_
 G_UpdateTrackedCvar
 =================
 */
-void G_UpdateTrackedCvar( trackedCvar_t *tc ) {
+static void G_UpdateTrackedCvar( trackedCvar_t *tc ) {
 	int oldModificationCount = tc->modificationCount;
 	trap_Cvar_Update( (vmCvar_t *)tc );
 
@@ -399,12 +399,10 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	G_LogWeaponInit();
 
 	// initialize all entities for this game
-	memset( g_entities, 0, MAX_GENTITIES * sizeof(g_entities[0]) );
 	level.gentities = g_entities;
 
 	// initialize all clients for this game
 	level.maxclients = g_maxclients.integer;
-	memset( g_clients, 0, MAX_CLIENTS * sizeof(g_clients[0]) );
 	level.clients = g_clients;
 
 	// set client fields on player ents
@@ -639,7 +637,7 @@ void CalculateRanks( void ) {
 
 	// set the rank value for all clients that are connected and not spectators
 	if ( g_gametype.integer >= GT_TEAM ) {
-		// in team games, rank is just the order of the teams, 0=red, 1=blue, 2=tied
+		// in team games, PERS_RANK just indicates winning team: 0=red, 1=blue, 2=tied
 		int rankValue;
 		if ( level.forceWinningTeam == TEAM_RED ) {
 			level.winningTeam = TEAM_RED;
@@ -662,6 +660,7 @@ void CalculateRanks( void ) {
 			cl = &level.clients[ level.sortedClients[i] ];
 			cl->ps.persistant[PERS_RANK] = rankValue;
 		}
+
 	} else {
 		rank = -1;
 		score = 0;
@@ -809,12 +808,7 @@ BeginIntermission
 void BeginIntermission( void ) {
 	int			i;
 	gentity_t	*client;
-	qboolean	doingLevelshot;
-
-	if (level.intermissiontime == -1)
-		doingLevelshot = qtrue;
-	else
-		doingLevelshot = qfalse;
+	qboolean	doingLevelshot = level.intermissiontime == -1;
 
 	if ( level.intermissiontime && level.intermissiontime != -1 ) {
 		return;		// already active
@@ -1018,7 +1012,7 @@ LOGFUNCTION_VOID( ModFNDefault_CheckExitRules, ( void ), (), "G_MODFN_CHECKEXITR
 		return;
 	}
 
-	if ( g_timelimit.integer && !level.warmupTime )
+	if ( g_timelimit.integer )
 	{//check timelimit
 		if ( level.time - level.startTime >= g_timelimit.integer*60000 ) {
 			// check for sudden death
@@ -1217,10 +1211,8 @@ void G_SetMatchState( matchState_t matchState ) {
 	if ( level.matchState != matchState ) {
 		matchState_t oldState = level.matchState;
 
-		if ( g_dedicated.integer ) {
-			G_Printf( "matchstate: Transitioning from %s to %s\n",
-					G_MatchStateString( level.matchState ), G_MatchStateString( matchState ) );
-		}
+		G_DedPrintf( "matchstate: Transitioning from %s to %s\n",
+				G_MatchStateString( level.matchState ), G_MatchStateString( matchState ) );
 
 		level.matchState = matchState;
 		modfn.MatchStateTransition( oldState, matchState );
@@ -1250,7 +1242,8 @@ static void G_CheckMatchState( void ) {
 
 	} else if ( level.matchState == MS_INTERMISSION_QUEUED ) {
 		// queued intermission - check for transition to actual intermission
-		if ( level.time - level.intermissionQueued >= modfn.AdjustGeneralConstant( GC_INTERMISSION_DELAY_TIME, 2000 ) ) {
+		if ( level.time - level.intermissionQueued >=
+				modfn.AdjustGeneralConstant( GC_INTERMISSION_DELAY_TIME, INTERMISSION_DELAY_TIME ) ) {
 			level.intermissionQueued = 0;
 			BeginIntermission();
 		}
@@ -1328,7 +1321,6 @@ void CheckVote( void ) {
 
 }
 
-
 /*
 =============
 G_RunThink
@@ -1367,7 +1359,6 @@ void G_RunFrame( int levelTime ) {
 	gentity_t	*ent;
 	int			msec;
 	qboolean	skipRunMissile = modfn.AdjustGeneralConstant( GC_SKIP_RUN_MISSILE, 0 ) ? qtrue : qfalse;
-int start, end;
 
 	// if we are waiting for the level to restart, do nothing
 	if ( level.exiting ) {
@@ -1387,7 +1378,6 @@ int start, end;
 	//
 	// go through all allocated objects
 	//
-start = trap_Milliseconds();
 	ent = &g_entities[0];
 	for (i=0 ; i<level.num_entities ; i++, ent++) {
 		if ( !ent->inuse ) {
@@ -1458,9 +1448,7 @@ start = trap_Milliseconds();
 
 		G_RunThink( ent );
 	}
-end = trap_Milliseconds();
 
-start = trap_Milliseconds();
 	// perform final fixups on the players
 	ent = &g_entities[0];
 	for (i=0 ; i < level.maxclients ; i++, ent++ ) {
@@ -1468,7 +1456,6 @@ start = trap_Milliseconds();
 			ClientEndFrame( ent );
 		}
 	}
-end = trap_Milliseconds();
 
 	// check for transitions between warmup, intermission, and match states
 	G_CheckMatchState();
@@ -1476,11 +1463,8 @@ end = trap_Milliseconds();
 		return;
 	}
 
-	// update to team status?
+	// update team status and send health info messages
 	CheckTeamStatus();
-
-	// update to health status
-	//CheckHealthInfoMessage();//done from inside CheckTeamStatus now
 
 	// cancel vote if timed out
 	CheckVote();

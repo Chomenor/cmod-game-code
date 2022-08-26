@@ -51,11 +51,9 @@ Override trace function for spectators.
 */
 LOGFUNCTION_SVOID( PREFIX(PmoveInit), ( int clientNum, pmove_t *pmove ),
 		( clientNum, pmove ), "G_MODFN_PMOVEINIT" ) {
-	const gclient_t *client = &level.clients[clientNum];
-
 	MOD_STATE->Prev_PmoveInit( clientNum, pmove );
 
-	if ( client->sess.sessionTeam == TEAM_SPECTATOR || ( client->ps.eFlags & EF_ELIMINATED ) ) {
+	if ( modfn.SpectatorClient( clientNum ) ) {
 		MOD_STATE->Prev_Trace = pmove->trace;
 		pmove->trace = ModSpectPassThrough_Trace;
 	}

@@ -4,7 +4,6 @@
 * Definitions shared with main game code.
 */
 
-void G_ModCoreInit( void );
 void G_ModsInit( void );
 
 typedef enum {

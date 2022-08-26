@@ -21,9 +21,6 @@
 
 #define	INTERMISSION_DELAY_TIME	2000
 
-#define SNAPVECTOR_GRAV_LIMIT 100
-#define SNAPVECTOR_GRAV_LIMIT_STR "100"
-
 // gentity->flags
 #define	FL_GODMODE				0x00000010
 #define	FL_NOTARGET				0x00000020
@@ -235,11 +232,6 @@ typedef struct {
 	float		lastFireTime;
 } playerTeamState_t;
 
-// the auto following clients don't follow a specific client
-// number, but instead follow the first two active players
-#define	FOLLOW_ACTIVE1	-1
-#define	FOLLOW_ACTIVE2	-2
-
 // client data that stays across multiple levels or tournament restarts
 // this is achieved by writing all the data to cvar strings at game shutdown
 // time and reading them back at connection time.  Anything added here
@@ -255,8 +247,8 @@ typedef struct {
 
 #define	MAX_VOTE_COUNT		3
 
-// client data that stays across multiple respawns, but is cleared
-// on each level change or team change at ClientBegin()
+// client data that stays across multiple respawns and team changes, but is cleared
+// on game reset (map change or map restart)
 typedef struct {
 	clientConnected_t	connected;
 	qboolean	firstTime;			// whether client just joined, rather than came through a map change or restart
@@ -296,7 +288,6 @@ struct gclient_s {
 	// shotgun blasts give a single big kick
 	int			damage_armor;		// damage absorbed by armor
 	int			damage_blood;		// damage taken out of health
-	int			damage_knockback;	// impact damage
 	vec3_t		damage_from;		// origin for vector calculation
 	qboolean	damage_fromWorld;	// if true, don't use the damage_from vector
 
@@ -323,7 +314,6 @@ struct gclient_s {
 	// timeResidual is used to handle events that happen every second
 	// like health / armor countdowns and regeneration
 	int			timeResidual;
-	int			mod;				// means of death
 
 	qboolean	newExternalEvent;
 	qboolean	scoreUpdatePending;
@@ -339,17 +329,15 @@ struct gclient_s {
 
 typedef struct {
 	struct gclient_s	*clients;		// [maxclients]
-
 	struct gentity_s	*gentities;
-	int			gentitySize;
-	int			num_entities;		// current number, <= MAX_GENTITIES
+	int			num_entities;			// current number, <= MAX_GENTITIES
 
 	matchState_t	matchState;
 	qboolean	hasRestarted;			// whether any map_restart has been done since map was loaded
 	qboolean	restartClientsPending;	// waiting for clients to be reconnected during map restart process
 	qboolean	exiting;				// waiting for a game module issued map change or restart to fire
 
-	int			warmupTime;				// -1 = "waiting for players", 0 = no warmup, >0 = time warmup ends
+	int			warmupTime;				// -1 = "waiting for players", 0 = not in warmup, >0 = time warmup ends
 	int			warmupLength;			// for detecting warmup length change
 	qboolean	warmupRestarting;		// currently in process of restarting due to end of warmup
 
@@ -412,7 +400,6 @@ typedef struct {
 	qboolean	locationLinked;			// target_locations get linked
 	gentity_t	*locationHead;			// head of the location list
 
-	int			numObjectives;			//
 	gentity_t	*borgQueenStartPoint;	// spawn point reserved for borg queen
 } level_locals_t;
 
@@ -432,11 +419,12 @@ char *G_NewString( const char *string );
 // g_cmds.c
 //
 void DeathmatchScoreboardMessage( gentity_t *ent );
-void StopFollowing( gentity_t *ent );
 void BroadcastTeamChange( gclient_t *client, int oldTeam );
 void SetPlayerClassCvar(gentity_t *ent);
 qboolean SetTeam( gentity_t *ent, char *s );
+void StopFollowing( gentity_t *ent );
 void Cmd_FollowCycle_f( gentity_t *ent, int dir );
+void ClientCommand( int clientNum );
 
 //
 // g_items.c
@@ -446,14 +434,9 @@ void G_RunItem( gentity_t *ent );
 void RespawnItem( gentity_t *ent );
 
 void UseHoldableItem( gentity_t *ent );
-void PrecacheItem (gitem_t *it);
 gentity_t *Drop_Item( gentity_t *ent, gitem_t *item, float angle );
-void SetRespawn (gentity_t *ent, float delay);
 void G_SpawnItem (gentity_t *ent, gitem_t *item);
 void FinishSpawningItem( gentity_t *ent );
-void Think_Weapon (gentity_t *ent);
-int ArmorIndex (gentity_t *ent);
-void	Add_Ammo (gentity_t *ent, int weapon, int count);
 void Touch_Item (gentity_t *ent, gentity_t *other, trace_t *trace);
 
 void RegisterItem( gitem_t *item );
@@ -467,8 +450,8 @@ qboolean G_IsConnectedClient( int clientNum );
 
 const char *G_MatchStateString( matchState_t matchState );
 
-int G_ModelIndex( char *name );
-int		G_SoundIndex( char *name );
+int G_ModelIndex( const char *name );
+int		G_SoundIndex( const char *name );
 void	G_TeamCommand( team_t team, char *cmd );
 void	G_KillBox (gentity_t *ent);
 gentity_t *G_Find (gentity_t *from, int fieldofs, const char *match);
@@ -484,7 +467,6 @@ void	G_Sound( gentity_t *ent, int soundIndex );
 void	G_FreeEntity( gentity_t *e );
 
 void	G_TouchTriggers (gentity_t *ent);
-void	G_TouchSolids (gentity_t *ent);
 
 float	*tv (float x, float y, float z);
 char	*vtos( const vec3_t v );
@@ -499,11 +481,13 @@ int G_RadiusList ( vec3_t origin, float radius,	gentity_t *ignore, qboolean take
 //
 // g_combat.c
 //
-qboolean CanDamage (gentity_t *targ, vec3_t origin);
-void G_Damage (gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_t dir, vec3_t point, int damage, int dflags, int mod);
-qboolean G_RadiusDamage (vec3_t origin, gentity_t *attacker, float damage, float radius, gentity_t *ignore, int dflags, int mod);
-void body_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath );
+void AddScore( gentity_t *ent, int score );
 void TossClientItems( gentity_t *self );
+void body_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath );
+void player_die (gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod);
+void G_Damage (gentity_t *targ, gentity_t *inflictor, gentity_t *attacker, vec3_t dir, vec3_t point, int damage, int dflags, int mod);
+qboolean CanDamage (gentity_t *targ, vec3_t origin);
+qboolean G_RadiusDamage (vec3_t origin, gentity_t *attacker, float damage, float radius, gentity_t *ignore, int dflags, int mod);
 
 // damage flags
 #define DAMAGE_RADIUS				0x00000001	// damage was indirect
@@ -521,12 +505,10 @@ void TossClientItems( gentity_t *self );
 //
 void G_RunMissile( gentity_t *ent );
 
-gentity_t *fire_blaster (gentity_t *self, vec3_t start, vec3_t aimdir);
 gentity_t *fire_plasma (gentity_t *self, vec3_t start, vec3_t aimdir);
 gentity_t *fire_quantum (gentity_t *self, vec3_t start, vec3_t aimdir);
 gentity_t *fire_grenade (gentity_t *self, vec3_t start, vec3_t aimdir);
 gentity_t *fire_rocket (gentity_t *self, vec3_t start, vec3_t dir);
-gentity_t *fire_grapple (gentity_t *self, vec3_t start, vec3_t dir);
 
 
 //
@@ -545,36 +527,35 @@ void trigger_teleporter_touch (gentity_t *self, gentity_t *other, trace_t *trace
 // g_misc.c
 //
 void TeleportPlayer2( gentity_t *player, vec3_t origin, vec3_t angles, tpType_t tpType, float speed );
-void TeleportPlayer( gentity_t *player, vec3_t origin, vec3_t angles, tpType_t tyType );
+void TeleportPlayer( gentity_t *player, vec3_t origin, vec3_t angles, tpType_t tpType );
 
 
 //
 // g_weapon.c
 //
-qboolean LogAccuracyHit( gentity_t *target, gentity_t *attacker );
-void CalcMuzzlePoint ( gentity_t *ent, vec3_t forward, vec3_t right, vec3_t up, vec3_t muzzlePoint, float projsize);
 void SnapVectorTowards( vec3_t v, vec3_t to );
 void DreadnoughtBurstThink(gentity_t *ent);
+qboolean LogAccuracyHit( gentity_t *target, gentity_t *attacker );
+void FireWeapon( gentity_t *ent, qboolean alt_fire );
 qboolean SeekerAcquiresTarget ( gentity_t *ent, vec3_t pos );
 void FireSeeker( gentity_t *owner, gentity_t *target, vec3_t origin);
 
 //
 // g_client.c
 //
+qboolean SpotWouldTelefrag( vec3_t origin );
+gentity_t *SelectSpawnPoint ( vec3_t avoidPoint, vec3_t origin, vec3_t angles, qboolean useHumanSpots, qboolean useBotSpots );
+void InitBodyQue (void);
+void SetClientViewAngle( gentity_t *ent, vec3_t angle );
 int TeamCount( int ignoreClientNum, team_t team, qboolean ignoreBots );
 team_t PickTeam( int ignoreClientNum );
-void SetClientViewAngle( gentity_t *ent, vec3_t angle );
-gentity_t *SelectSpawnPoint ( vec3_t avoidPoint, vec3_t origin, vec3_t angles, qboolean useHumanSpots, qboolean useBotSpots );
-void BeginIntermission (void);
-void InitClientPersistant (gclient_t *client);
-void InitClientResp (gclient_t *client);
-void InitBodyQue (void);
+void SetSkinForModel( const char *model, const char *skin, char *output, unsigned int size );
+void ClientUserinfoChanged( int clientNum );
+char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot );
+void ClientBegin( int clientNum );
 void G_ResetClient( int clientNum );
 void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType );
-void player_die (gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int mod);
-void AddScore( gentity_t *ent, int score );
-void CalculateRanks( void );
-qboolean SpotWouldTelefrag( vec3_t origin );
+void ClientDisconnect( int clientNum );
 
 //
 // g_svcmds.c
@@ -584,41 +565,22 @@ void G_ProcessIPBans(void);
 qboolean G_FilterPacket (char *from);
 
 //
-// g_weapon.c
-//
-void FireWeapon( gentity_t *ent, qboolean alt_fire );
-
-//
-// p_hud.c
-//
-void MoveClientToIntermission (gentity_t *client);
-void G_SetStats (gentity_t *ent);
-
-//
-// g_cmds.c
-//
-static void G_SayTo( gentity_t *ent, gentity_t *other, int mode, int color, const char *name, const char *message );
-
-//
-// g_pweapon.c
-//
-
-
-//
 // g_main.c
 //
-void G_UpdateModConfigInfo( void );
-void G_RegisterTrackedCvar( trackedCvar_t *tc, const char *cvarName, const char *defaultValue, int flags, qboolean announceChanges );
-void G_RegisterCvarCallback( trackedCvar_t *tc, void ( *callback )( trackedCvar_t *tc ), qboolean callNow );
-void G_UpdateTrackedCvar( trackedCvar_t *tc );
-void FindIntermissionPoint( void );
-void G_ExitLevel( void );
-void G_RunThink (gentity_t *ent);
-void SendScoreboardMessageToAllClients( void );
-void G_SetMatchState( matchState_t matchState );
 void QDECL G_Printf( const char *fmt, ... );
 void QDECL G_DedPrintf( const char *fmt, ... );
 void QDECL G_Error( const char *fmt, ... );
+void G_UpdateModConfigInfo( void );
+void G_RegisterTrackedCvar( trackedCvar_t *tc, const char *cvarName, const char *defaultValue, int flags, qboolean announceChanges );
+void G_RegisterCvarCallback( trackedCvar_t *tc, void ( *callback )( trackedCvar_t *tc ), qboolean callNow );
+void CalculateRanks( void );
+void SendScoreboardMessageToAllClients( void );
+void MoveClientToIntermission (gentity_t *client);
+void FindIntermissionPoint( void );
+void BeginIntermission (void);
+void G_ExitLevel( void );
+void G_SetMatchState( matchState_t matchState );
+void G_RunThink (gentity_t *ent);
 
 
 //
@@ -684,16 +646,6 @@ int GetWorstEnemyForClient(int nClient);
 int GetFavoriteWeaponForClient(int nClient);
 
 
-
-//
-// g_client.c
-//
-char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot );
-void SetSkinForModel( const char *model, const char *skin, char *output, unsigned int size );
-void ClientUserinfoChanged( int clientNum );
-void ClientDisconnect( int clientNum );
-void ClientBegin( int clientNum );
-void ClientCommand( int clientNum );
 
 //
 // g_active.c

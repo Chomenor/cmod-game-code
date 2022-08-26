@@ -473,6 +473,8 @@ LOGFUNCTION_SVOID( PREFIX(SpawnConfigureClient), ( int clientNum ), ( clientNum 
 	gclient_t *client = &level.clients[clientNum];
 	assimilation_client_t *modclient = &MOD_STATE->clients[clientNum];
 
+	MOD_STATE->Prev_SpawnConfigureClient( clientNum );
+
 	if ( client->sess.sessionClass == PC_BORG ) {
 		// Weapons
 		client->ps.stats[STAT_WEAPONS] = ( 1 << WP_BORG_ASSIMILATOR );
@@ -502,10 +504,6 @@ LOGFUNCTION_SVOID( PREFIX(SpawnConfigureClient), ( int clientNum ), ( clientNum 
 			// wants to reference it. Also gets copied to ent->s.eFlags via BG_PlayerStateToEntityState.
 			client->ps.eFlags |= EF_ASSIMILATED;
 		}
-	}
-
-	else {
-		MOD_STATE->Prev_SpawnConfigureClient( clientNum );
 	}
 }
 

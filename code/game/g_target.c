@@ -521,5 +521,4 @@ void SP_target_objective (gentity_t *self)
 	{
 		self->use = target_objective_use;
 	}
-	level.numObjectives++;
 }

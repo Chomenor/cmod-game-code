@@ -32,7 +32,7 @@ void DeathmatchScoreboardMessage( gentity_t *ent ) {
 		int scoreClientNum = level.sortedClients[i];
 		int		ping;
 
-		cl = &level.clients[level.sortedClients[i]];
+		cl = &level.clients[scoreClientNum];
 
 		if ( cl->pers.connected == CON_CONNECTING ) {
 			ping = -1;
@@ -40,15 +40,15 @@ void DeathmatchScoreboardMessage( gentity_t *ent ) {
 			ping = cl->ps.ping < 999 ? cl->ps.ping : 999;
 		}
 		Com_sprintf (entry, sizeof(entry),
-			" %i %i %i %i %i %i %i %i %i %i %i", level.sortedClients[i],
+			" %i %i %i %i %i %i %i %i %i %i %i", scoreClientNum,
 			modfn.EffectiveScore(scoreClientNum, EST_SCOREBOARD), ping,
 			(level.time - cl->pers.enterTime)/60000,
-			scoreFlags, g_entities[level.sortedClients[i]].s.powerups,
-//			GetFavoriteTargetForClient(level.sortedClients[i]),
-//			GetMaxKillsForClient(level.sortedClients[i]),
-			GetWorstEnemyForClient(level.sortedClients[i]),
-			GetMaxDeathsForClient(level.sortedClients[i]),
-			GetFavoriteWeaponForClient(level.sortedClients[i]),
+			scoreFlags, g_entities[scoreClientNum].s.powerups,
+//			GetFavoriteTargetForClient(scoreClientNum),
+//			GetMaxKillsForClient(scoreClientNum),
+			GetWorstEnemyForClient(scoreClientNum),
+			GetMaxDeathsForClient(scoreClientNum),
+			GetFavoriteWeaponForClient(scoreClientNum),
 			cl->ps.persistant[PERS_KILLED],
 			modfn.AdjustScoreboardAttributes(scoreClientNum, SA_ELIMINATED, 0) );
 		j = strlen(entry);
@@ -453,6 +453,13 @@ void BroadcastTeamChange( gclient_t *client, int oldTeam )
 	}
 }
 
+/*
+=================
+SetPlayerClassCvar
+
+Send current player class to client for UI team/class menu.
+=================
+*/
 void SetPlayerClassCvar(gentity_t *ent)
 {
 	gclient_t *client;
@@ -528,21 +535,16 @@ SetTeam
 =================
 */
 qboolean SetTeam( gentity_t *ent, char *s ) {
-	int					team, oldTeam;
-	gclient_t			*client;
-	int					clientNum;
-	spectatorState_t	specState;
-	int					specClient;
+	gclient_t			*client = ent->client;
+	team_t				team = TEAM_FREE;
+	team_t				oldTeam = client->sess.sessionTeam;
+	int					clientNum = client - level.clients;
+	spectatorState_t	specState = SPECTATOR_NOT;
+	int					specClient = 0;
 
 	//
 	// see what change is requested
 	//
-	client = ent->client;
-
-	clientNum = client - level.clients;
-	specClient = 0;
-
-	specState = SPECTATOR_NOT;
 	if ( !Q_stricmp( s, "scoreboard" ) || !Q_stricmp( s, "score" )  ) {
 		team = TEAM_SPECTATOR;
 		specState = SPECTATOR_SCOREBOARD;
@@ -559,7 +561,6 @@ qboolean SetTeam( gentity_t *ent, char *s ) {
 		specState = SPECTATOR_FREE;
 	} else if ( g_gametype.integer >= GT_TEAM ) {
 		// if running a team game, assign player to one of the teams
-		specState = SPECTATOR_NOT;
 		if ( !Q_stricmp( s, "red" ) || !Q_stricmp( s, "r" ) ) {
 			team = TEAM_RED;
 		} else if ( !Q_stricmp( s, "blue" ) || !Q_stricmp( s, "b" ) ) {
@@ -595,18 +596,14 @@ qboolean SetTeam( gentity_t *ent, char *s ) {
 	}
 
 	// ignore redundant change
-	if ( team == client->sess.sessionTeam && team != TEAM_SPECTATOR ) {
+	if ( team != TEAM_SPECTATOR && team == oldTeam ) {
 		return qfalse;
 	}
 
-	//
 	// decide if we will allow the change
-	//
-	oldTeam = client->sess.sessionTeam;
 	if ( team != TEAM_SPECTATOR && !modfn.CheckJoinAllowed( clientNum, CJA_SETTEAM, team ) ) {
 		return qfalse;
 	}
-
 
 	//
 	// execute the team change
@@ -618,8 +615,6 @@ qboolean SetTeam( gentity_t *ent, char *s ) {
 
 	if ( !modfn.SpectatorClient( clientNum ) ) {
 		// Kill him (makes sure he loses flags, etc)
-		ent->flags &= ~FL_GODMODE;
-		ent->client->ps.stats[STAT_HEALTH] = ent->health = 0;
 		player_die (ent, NULL, NULL, 100000, MOD_RESPAWN);
 	}
 
@@ -637,6 +632,46 @@ qboolean SetTeam( gentity_t *ent, char *s ) {
 	ClientBegin( clientNum );
 
 	return qtrue;
+}
+
+/*
+=================
+Cmd_Team_f
+=================
+*/
+void Cmd_Team_f( gentity_t *ent ) {
+	char		s[MAX_TOKEN_CHARS];
+
+	if ( trap_Argc() != 2 ) {
+		switch ( ent->client->sess.sessionTeam ) {
+		case TEAM_BLUE:
+			trap_SendServerCommand( ent-g_entities, "print \"Blue team\n\"" );
+			break;
+		case TEAM_RED:
+			trap_SendServerCommand( ent-g_entities, "print \"Red team\n\"" );
+			break;
+		case TEAM_FREE:
+			trap_SendServerCommand( ent-g_entities, "print \"Free team\n\"" );
+			break;
+		case TEAM_SPECTATOR:
+			trap_SendServerCommand( ent-g_entities, "print \"Spectator team\n\"" );
+			break;
+		}
+		return;
+	}
+
+	trap_Argv( 1, s, sizeof( s ) );
+
+	SetTeam( ent, s );
+}
+
+/*
+=================
+Cmd_Class_f
+=================
+*/
+static void Cmd_Class_f( gentity_t *ent ) {
+	trap_SendServerCommand( ent - g_entities, "print \"Specialty mode is not enabled.\n\"" );
 }
 
 /*
@@ -683,48 +718,6 @@ void StopFollowing( gentity_t *ent ) {
 	VectorCopy( old_origin, client->ps.origin );
 	PM_UpdateViewAngles( &client->ps, &client->pers.cmd );
 	SetClientViewAngle( ent, old_viewAngles );
-}
-
-/*
-=================
-Cmd_Team_f
-=================
-*/
-void Cmd_Team_f( gentity_t *ent ) {
-	int			oldTeam;
-	char		s[MAX_TOKEN_CHARS];
-
-	if ( trap_Argc() != 2 ) {
-		oldTeam = ent->client->sess.sessionTeam;
-		switch ( oldTeam ) {
-		case TEAM_BLUE:
-			trap_SendServerCommand( ent-g_entities, "print \"Blue team\n\"" );
-			break;
-		case TEAM_RED:
-			trap_SendServerCommand( ent-g_entities, "print \"Red team\n\"" );
-			break;
-		case TEAM_FREE:
-			trap_SendServerCommand( ent-g_entities, "print \"Free team\n\"" );
-			break;
-		case TEAM_SPECTATOR:
-			trap_SendServerCommand( ent-g_entities, "print \"Spectator team\n\"" );
-			break;
-		}
-		return;
-	}
-
-	trap_Argv( 1, s, sizeof( s ) );
-
-	SetTeam( ent, s );
-}
-
-/*
-=================
-Cmd_Class_f
-=================
-*/
-static void Cmd_Class_f( gentity_t *ent ) {
-	trap_SendServerCommand( ent - g_entities, "print \"Specialty mode is not enabled.\n\"" );
 }
 
 /*

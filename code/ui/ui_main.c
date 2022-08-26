@@ -254,7 +254,7 @@ cvarTable_t		cvarTable[] = {
 	{ &ui_k_language, "k_language", "", CVAR_ARCHIVE | CVAR_NORESTART},
 	{ &ui_playerclass, "ui_playerclass", "", CVAR_ARCHIVE},
 	{ &g_nojointimeout, "g_nojointimeout", "120", CVAR_ARCHIVE},
-	{ &ui_precacheweapons, "ui_precacheweapons", "0", CVAR_ARCHIVE}
+	{ &ui_precacheweapons, "ui_precacheweapons", "0", CVAR_ARCHIVE},
 };
 
 int		cvarTableSize = sizeof(cvarTable) / sizeof(cvarTable[0]);

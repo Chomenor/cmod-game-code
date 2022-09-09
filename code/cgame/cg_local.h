@@ -1538,40 +1538,6 @@ void CG_DrawInformation( void );
 qboolean CG_DrawScoreboard( void );
 void CG_DrawTourneyScoreboard( void );
 
-//
-// these lists need to be sync'ed with stuff under g_log in g_local.h
-//
-
-// awards
-typedef enum {
-	AWARD_EFFICIENCY,		// Accuracy
-	AWARD_SHARPSHOOTER,		// Most compression rifle frags
-	AWARD_UNTOUCHABLE,		// Perfect (no deaths)
-	AWARD_LOGISTICS,		// Most pickups
-	AWARD_TACTICIAN,		// Kills with all weapons
-	AWARD_DEMOLITIONIST,	// Most explosive damage kills
-	AWARD_STREAK,			// Ace/Expert/Master/Champion
-	AWARD_TEAM,				// MVP/Defender/Warrior/Carrier/Interceptor/Bravery
-	AWARD_SECTION31,		// All-around god
-	AWARD_MAX
-} awardType_t;
-
-typedef enum
-{
-	TEAM_NONE = 0,			// ha ha! you suck!
-	TEAM_MVP,				// most overall points
-	TEAM_DEFENDER,			// killed the most baddies near your flag
-	TEAM_WARRIOR,			// most frags
-	TEAM_CARRIER,			// infected the most people with plague
-	TEAM_INTERCEPTOR,		// returned your own flag the most
-	TEAM_BRAVERY,			// Red Shirt Award (tm). you died more than anybody.
-	TEAM_MAX
-} teamAward_e;
-
-//
-// above lists need to be sync'ed with stuff under g_log in g_local.h
-//
-
 typedef enum
 {
 	AWARD_STREAK_NONE = 0,
@@ -1581,9 +1547,6 @@ typedef enum
 	AWARD_STREAK_CHAMPION,
 	AWARD_STREAK_MAX
 } awardStreak_t;
-
-
-
 
 extern char	*cg_medalPicNames[];
 extern char	*cg_medalSounds[];

@@ -351,6 +351,30 @@ typedef enum {
 #define STREAK_MASTER		15
 #define STREAK_CHAMPION		20
 
+typedef enum {
+	AWARD_EFFICIENCY,		// Accuracy
+	AWARD_SHARPSHOOTER,		// Most compression rifle frags
+	AWARD_UNTOUCHABLE,		// Perfect (no deaths)
+	AWARD_LOGISTICS,		// Most pickups
+	AWARD_TACTICIAN,		// Kills with all weapons
+	AWARD_DEMOLITIONIST,	// Most explosive damage kills
+	AWARD_STREAK,			// Ace/Expert/Master/Champion
+	AWARD_TEAM,				// MVP/Defender/Warrior/Carrier/Interceptor/Bravery
+	AWARD_SECTION31,		// All-around god
+	AWARD_MAX
+} awardType_t;
+
+typedef enum {
+	TEAM_NONE = 0,			// ha ha! you suck!
+	TEAM_MVP,				// most overall points
+	TEAM_DEFENDER,			// killed the most baddies near your flag
+	TEAM_WARRIOR,			// most frags
+	TEAM_CARRIER,			// infected the most people with plague
+	TEAM_INTERCEPTOR,		// returned your own flag the most
+	TEAM_BRAVERY,			// Red Shirt Award (tm). you died more than anybody.
+	TEAM_MAX
+} teamAward_e;
+
 
 // entityState_t->event values
 // entity events are for effects that take place reletive

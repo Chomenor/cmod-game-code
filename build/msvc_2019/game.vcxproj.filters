@@ -108,9 +108,6 @@
     <ClInclude Include="..\..\code\game\g_public.h">
       <Filter>game</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\code\game\g_team.h">
-      <Filter>game</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\code\game\inv.h">
       <Filter>game</Filter>
     </ClInclude>

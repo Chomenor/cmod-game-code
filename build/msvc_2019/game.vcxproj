@@ -203,7 +203,6 @@
     <ClInclude Include="..\..\code\game\g_cvar_defs.h" />
     <ClInclude Include="..\..\code\game\g_local.h" />
     <ClInclude Include="..\..\code\game\g_public.h" />
-    <ClInclude Include="..\..\code\game\g_team.h" />
     <ClInclude Include="..\..\code\game\inv.h" />
     <ClInclude Include="..\..\code\game\match.h" />
     <ClInclude Include="..\..\code\game\mods\features\pingcomp\pc_local.h" />

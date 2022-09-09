@@ -367,8 +367,6 @@ typedef struct {
 
 	int			snd_fry;				// sound index for standing in lava
 
-	int			warmupModificationCount;	// for detecting if g_warmup is changed
-
 	qboolean	firstStrike;
 
 	// voting state
@@ -587,39 +585,6 @@ void G_RunThink (gentity_t *ent);
 // g_log.c
 //
 
-//
-// synchronized with cg_local.h via mental telepathy
-//
-typedef enum
-{
-	AWARD_EFFICIENCY = 0,	// Accuracy
-	AWARD_SHARPSHOOTER,		// Most compression rifle frags
-	AWARD_UNTOUCHABLE,		// Perfect (no deaths)
-	AWARD_LOGISTICS,		// Most pickups
-	AWARD_TACTICIAN,		// Kills with all weapons
-	AWARD_DEMOLITIONIST,	// Most explosive damage kills
-	AWARD_STREAK,			// Ace/Expert/Master/Champion
-	AWARD_TEAM,				// MVP/Defender/Warrior/Carrier/Interceptor/Bravery
-	AWARD_SECTION31,		// All-around god
-	AWARD_MAX
-} awardType_t;
-
-typedef enum
-{
-	TEAM_NONE = 0,			// ha ha! you suck!
-	TEAM_MVP,				// most overall points
-	TEAM_DEFENDER,			// killed the most baddies near your flag
-	TEAM_WARRIOR,			// most frags
-	TEAM_CARRIER,			// infected the most people with plague
-	TEAM_INTERCEPTOR,		// returned your own flag the most
-	TEAM_BRAVERY,			// Red Shirt Award (tm). you died more than anybody.
-	TEAM_MAX
-} teamAward_e;
-
-//
-// the above lists are synchronized with cg_local.h via mental telepathy
-//
-
 #define AWARDS_MSG_LENGTH		256
 
 void QDECL G_LogPrintf( const char *fmt, ... );
@@ -659,8 +624,19 @@ void Cmd_Ready_f (gentity_t *ent);
 //
 // g_team.c
 //
+void Team_InitGame(void);
 qboolean OnSameTeam( gentity_t *ent1, gentity_t *ent2 );
 void Team_CheckDroppedItem( gentity_t *dropped );
+void Team_FragBonuses(gentity_t *targ, gentity_t *inflictor, gentity_t *attacker);
+void Team_CheckHurtCarrier(gentity_t *targ, gentity_t *attacker);
+void Team_ReturnFlag(int team);
+void Team_FreeEntity(gentity_t *ent);
+void Team_DroppedFlagThink(gentity_t *ent);
+int Pickup_Team( gentity_t *ent, gentity_t *other );
+gentity_t *Team_GetLocation(gentity_t *ent);
+qboolean Team_GetLocationMsg(gentity_t *ent, char *loc, int loclen);
+gentity_t *SelectCTFSpawnPoint ( gentity_t *ent, team_t team, qboolean initialSpawn, vec3_t origin, vec3_t angles );
+void CheckTeamStatus(void);
 
 
 //
@@ -724,8 +700,6 @@ int BotAISetupClient( int client, bot_settings_t *settings );
 int BotAIShutdownClient( int client );
 int BotAIStartFrame( int time );
 
-
-#include "g_team.h" // teamplay specific stuff
 
 
 extern	level_locals_t	level;

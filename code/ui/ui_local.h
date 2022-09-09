@@ -1898,19 +1898,6 @@ void UI_NetworkOptionsMenu( void );
 //
 // ui_gameinfo.c
 //
-typedef enum {
-	AWARD_EFFICIENCY,		// Accuracy
-	AWARD_SHARPSHOOTER,		// Most compression rifle frags
-	AWARD_UNTOUCHABLE,		// Perfect (no deaths)
-	AWARD_LOGISTICS,		// Most pickups
-	AWARD_TACTICIAN,		// Kills with all weapons
-	AWARD_DEMOLITIONIST,	// Most explosive damage kills
-	AWARD_STREAK,			// Ace/Expert/Master/Champion
-	AWARD_TEAM,				// MVP/Defender/Warrior/Carrier/Interceptor/Bravery
-	AWARD_SECTION31,		// All-around god
-	AWARD_MAX
-} awardType_t;
-
 const char *UI_GetArenaInfoByNumber( int num );
 const char *UI_GetArenaInfoByMap( const char *map );
 const char *UI_GetSpecialArenaInfo( const char *tag );

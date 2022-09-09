@@ -17,25 +17,25 @@
 
 #include "g_local.h"
 #include "q_shared.h"
-#include "botlib.h"		//bot lib interface
-#include "be_aas.h"
-#include "be_ea.h"
-#include "be_ai_char.h"
-#include "be_ai_chat.h"
-#include "be_ai_gen.h"
-#include "be_ai_goal.h"
-#include "be_ai_move.h"
-#include "be_ai_weap.h"
+#include "bots/botlib.h"		//bot lib interface
+#include "bots/be_aas.h"
+#include "bots/be_ea.h"
+#include "bots/be_ai_char.h"
+#include "bots/be_ai_chat.h"
+#include "bots/be_ai_gen.h"
+#include "bots/be_ai_goal.h"
+#include "bots/be_ai_move.h"
+#include "bots/be_ai_weap.h"
 //
-#include "ai_main.h"
-#include "ai_dmq3.h"
-#include "ai_chat.h"
-#include "ai_cmd.h"
-#include "ai_dmnet.h"
+#include "bots/ai_main.h"
+#include "bots/ai_dmq3.h"
+#include "bots/ai_chat.h"
+#include "bots/ai_cmd.h"
+#include "bots/ai_dmnet.h"
 //
-#include "chars.h"
-#include "inv.h"
-#include "syn.h"
+#include "bots/chars.h"
+#include "bots/inv.h"
+#include "bots/syn.h"
 
 #define MAX_PATH		144
 

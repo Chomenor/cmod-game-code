@@ -30,12 +30,6 @@ set src=common&set name=bg_pmove&call :compile
 set src=common&set name=bg_slidemove&call :compile
 set src=common&set name=q_math&call :compile
 set src=common&set name=q_shared&call :compile
-set src=game&set name=ai_chat&call :compile
-set src=game&set name=ai_cmd&call :compile
-set src=game&set name=ai_dmnet&call :compile
-set src=game&set name=ai_dmq3&call :compile
-set src=game&set name=ai_main&call :compile
-set src=game&set name=ai_team&call :compile
 set src=game&set name=g_active&call :compile
 set src=game&set name=g_arenas&call :compile
 set src=game&set name=g_bot&call :compile
@@ -60,6 +54,12 @@ set src=game&set name=g_turrets&call :compile
 set src=game&set name=g_usable&call :compile
 set src=game&set name=g_utils&call :compile
 set src=game&set name=g_weapon&call :compile
+set src=game\bots&set name=ai_chat&call :compile
+set src=game\bots&set name=ai_cmd&call :compile
+set src=game\bots&set name=ai_dmnet&call :compile
+set src=game\bots&set name=ai_dmq3&call :compile
+set src=game\bots&set name=ai_main&call :compile
+set src=game\bots&set name=ai_team&call :compile
 set src=game\mods&set name=g_mod_main&call :compile
 set src=game\mods&set name=g_mod_stubs&call :compile
 set src=game\mods&set name=g_mod_utils&call :compile

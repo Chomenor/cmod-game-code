@@ -130,7 +130,7 @@ qboolean G_FilterPacket (char *from)
 {
 	int		i;
 	unsigned	in;
-	byte m[4];
+	byte m[4] = { 0 };
 	char *p;
 
 	i = 0;
@@ -147,6 +147,9 @@ qboolean G_FilterPacket (char *from)
 	}
 
 	in = *(unsigned *)m;
+	if ( !in ) {
+		return qfalse;
+	}
 
 	for (i=0 ; i<numIPFilters ; i++)
 		if ( (in & ipFilters[i].mask) == ipFilters[i].compare)

@@ -138,10 +138,7 @@ int BotAI_GetClientState( int clientNum, playerState_t *state ) {
 	gentity_t	*ent;
 
 	ent = &g_entities[clientNum];
-	if ( !ent->inuse ) {
-		return qfalse;
-	}
-	if ( !ent->client ) {
+	if ( !G_AssertConnectedClient( clientNum ) ) {
 		return qfalse;
 	}
 

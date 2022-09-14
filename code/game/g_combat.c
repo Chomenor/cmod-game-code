@@ -122,7 +122,6 @@ LookAtKiller
 */
 void LookAtKiller( gentity_t *self, gentity_t *inflictor, gentity_t *attacker ) {
 	vec3_t		dir;
-	vec3_t		angles;
 
 	if ( attacker && attacker != self ) {
 		VectorSubtract (attacker->s.pos.trBase, self->s.pos.trBase, dir);
@@ -134,10 +133,6 @@ void LookAtKiller( gentity_t *self, gentity_t *inflictor, gentity_t *attacker ) 
 	}
 
 	self->client->ps.stats[STAT_DEAD_YAW] = vectoyaw ( dir );
-
-	angles[YAW] = vectoyaw ( dir );
-	angles[PITCH] = 0;
-	angles[ROLL] = 0;
 }
 
 /*
@@ -560,8 +555,6 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	// globally cycle through the different death animations
 	deathNum = ( deathNum + 1 ) % 3;
 
-	trap_LinkEntity (self);
-
 	if ( meansOfDeath != MOD_RESPAWN ) {
 		modfn.PostPlayerDie( self, inflictor, attacker, meansOfDeath, &awardPoints );
 	}
@@ -575,6 +568,8 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	}
 
 	CalculateRanks();
+
+	trap_LinkEntity (self);
 }
 
 

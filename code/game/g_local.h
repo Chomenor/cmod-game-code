@@ -103,7 +103,7 @@ struct gentity_s {
 
 	struct gclient_s	*client;			// NULL if not a client
 
-	qboolean	inuse;
+	qboolean	inuse;				// in the case of clients, should equal client->pers.connected == CON_CONNECTED
 
 	char		*classname;			// set in QuakeEd
 	int			spawnflags;			// set in QuakeEd

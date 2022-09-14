@@ -58,7 +58,7 @@ int adjustRespawnTime(float respawnTime)
 		respawnTime = 1.0;
 	}
 
-	return ((int)respawnTime);
+	return (tonextint(respawnTime));
 }
 
 

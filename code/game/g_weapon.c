@@ -2454,8 +2454,8 @@ qboolean SeekerAcquiresTarget ( gentity_t *ent, vec3_t pos )
 {
 	vec3_t		seekerPos;
 	float		angle;
-	int			entityList[MAX_CLIENTS]; // targets within inital radius
-	int			visibleTargets[MAX_CLIENTS]; // final filtered target list
+	int			entityList[MAX_GENTITIES]; // targets within inital radius
+	int			visibleTargets[MAX_GENTITIES]; // final filtered target list
 	int			numListedEntities;
 	int			i, e;
 	gentity_t	*target;

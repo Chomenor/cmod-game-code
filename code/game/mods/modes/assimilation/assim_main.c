@@ -26,6 +26,7 @@ typedef struct {
 static struct {
 	assimilation_client_t clients[MAX_CLIENTS];
 	
+	trackedCvar_t g_noJoinTimeout;
 	trackedCvar_t g_preferNonBotQueen;
 
 	// Current match state
@@ -185,7 +186,8 @@ static qboolean ModAssimilation_MatchLocked( void ) {
 			return qtrue;
 		}
 
-		else if ( g_noJoinTimeout.integer > 0 && level.time >= MOD_STATE->joinLimitTime + ( g_noJoinTimeout.integer * 1000 ) ) {
+		else if ( MOD_STATE->g_noJoinTimeout.integer > 0 &&
+				level.time >= MOD_STATE->joinLimitTime + ( MOD_STATE->g_noJoinTimeout.integer * 1000 ) ) {
 			return qtrue;
 		}
 	}
@@ -867,6 +869,7 @@ LOGFUNCTION_VOID( ModAssimilation_Init, ( void ), (), "G_MOD_INIT G_ASSIMILATION
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
 		MOD_STATE->borgQueenClientNum = -1;
+		G_RegisterTrackedCvar( &MOD_STATE->g_noJoinTimeout, "g_noJoinTimeout", "120", CVAR_ARCHIVE, qfalse );
 		G_RegisterTrackedCvar( &MOD_STATE->g_preferNonBotQueen, "g_preferNonBotQueen", "1", 0, qfalse );
 
 		// Support combining with other mods

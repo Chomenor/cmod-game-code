@@ -72,6 +72,5 @@ CVAR_DEF( g_language, "g_language", "", CVAR_ARCHIVE, qfalse )
 
 CVAR_DEF( g_holoIntro, "g_holoIntro", "1", CVAR_ARCHIVE, qfalse )
 CVAR_DEF( g_ghostRespawn, "g_ghostRespawn", "5", CVAR_ARCHIVE, qfalse )		// How long the player is ghosted, in seconds.
-CVAR_DEF( g_noJoinTimeout, "g_noJoinTimeout", "120", CVAR_ARCHIVE, qfalse )
 
 CVAR_DEF( bot_minplayers, "bot_minplayers", "0", CVAR_SERVERINFO, qfalse )

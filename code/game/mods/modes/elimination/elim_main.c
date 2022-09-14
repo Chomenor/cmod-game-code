@@ -19,6 +19,7 @@ typedef struct {
 
 static struct {
 	elimination_client_t clients[MAX_CLIENTS];
+	trackedCvar_t g_noJoinTimeout;
 
 	// Current round state
 	int numEliminated;
@@ -89,7 +90,8 @@ qboolean ModElimination_Shared_MatchLocked( void ) {
 			return qtrue;
 		}
 
-		else if ( g_noJoinTimeout.integer > 0 && level.time >= MOD_STATE->joinLimitTime + ( g_noJoinTimeout.integer * 1000 ) ) {
+		else if ( MOD_STATE->g_noJoinTimeout.integer > 0 &&
+				level.time >= MOD_STATE->joinLimitTime + ( MOD_STATE->g_noJoinTimeout.integer * 1000 ) ) {
 			return qtrue;
 		}
 	}
@@ -473,6 +475,8 @@ LOGFUNCTION_VOID( ModElimination_Init, ( void ), (), "G_MOD_INIT G_ELIMINATION" 
 	if ( EF_WARN_ASSERT( !MOD_STATE ) ) {
 		modcfg.mods_enabled.elimination = qtrue;
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
+
+		G_RegisterTrackedCvar( &MOD_STATE->g_noJoinTimeout, "g_noJoinTimeout", "120", CVAR_ARCHIVE, qfalse );
 
 		// Support combining with other mods
 		if ( G_ModUtils_GetLatchedValue( "g_pModDisintegration", "0", 0 ) ) {

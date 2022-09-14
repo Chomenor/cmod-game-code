@@ -901,11 +901,10 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 	}
 
 	if( isBot ) {
-		ent->r.svFlags |= SVF_BOT;
-		ent->inuse = qtrue;
 		if( !G_BotConnect( clientNum, !firstTime ) ) {
 			return "BotConnectfailed";
 		}
+		ent->r.svFlags |= SVF_BOT;
 	}
 
 	// get and distribute relevent paramters
@@ -947,6 +946,8 @@ void ClientBegin( int clientNum ) {
 	gclient_t	*client = &level.clients[clientNum];
 	int			flags;
 	clientSpawnType_t spawnType;
+
+	EF_WARN_ASSERT( client->pers.connected >= CON_CONNECTING );
 
 	if( client->botDelayBegin ) {
 		G_QueueBotBegin( clientNum );
@@ -1149,6 +1150,15 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	vec3_t	spawn_origin, spawn_angles;
 	int		i;
 	gentity_t	*spawnPoint;
+	static qboolean recursive = qfalse;
+
+	EF_WARN_ASSERT( client->pers.connected == CON_CONNECTED );
+
+	// no recursive calls
+	if ( !EF_WARN_ASSERT( !recursive ) ) {
+		return;
+	}
+	recursive = qtrue;
 
 	trap_UnlinkEntity( ent );
 
@@ -1158,6 +1168,8 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	if ( level.intermissiontime ) {
 		MoveClientToIntermission( ent );
 		modfn.SpawnCenterPrintMessage( clientNum, spawnType );
+
+		recursive = qfalse;
 		return;
 	}
 
@@ -1307,6 +1319,8 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 
 	// check for userinfo changes
 	ClientUserinfoChanged( clientNum );
+
+	recursive = qfalse;
 }
 
 /*

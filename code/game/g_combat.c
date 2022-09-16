@@ -836,6 +836,12 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		}
 	}
 
+	// Disable damage if g_dmgmult is set to 0, rather than having all damages converted to 1.
+	// Allows admins to disable all damage, similar to Gladiator mod.
+	if ( g_dmgmult.value <= 0.0f && mod != MOD_TELEFRAG ) {
+		return;
+	}
+
 	// always give half damage if hurting self
 	// calculated after knockback, so rocket jumping works
 	if ( targ == attacker) {

@@ -73,6 +73,7 @@ set src=game\mods\features&set name=feat_player_move&call :compile
 set src=game\mods\features&set name=feat_spect_passthrough&call :compile
 set src=game\mods\features&set name=feat_spawn_protect&call :compile
 set src=game\mods\features&set name=feat_team_groups&call :compile
+set src=game\mods\features&set name=feat_voting&call :compile
 set src=game\mods\features\pingcomp&set name=pc_client_predict&call :compile
 set src=game\mods\features\pingcomp&set name=pc_dead_move&call :compile
 set src=game\mods\features\pingcomp&set name=pc_instant_weapons&call :compile

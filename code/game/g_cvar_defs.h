@@ -60,8 +60,6 @@ CVAR_DEF( g_motd, "g_motd", "", 0, qfalse )
 CVAR_DEF( g_podiumDist, "g_podiumDist", "80", 0, qfalse )
 CVAR_DEF( g_podiumDrop, "g_podiumDrop", "70", 0, qfalse )
 
-CVAR_DEF( g_allowVote, "g_allowVote", "1", CVAR_SERVERINFO, qfalse )
-
 #if 0
 CVAR_DEF( g_debugForward, "g_debugForward", "0", 0, qfalse )
 CVAR_DEF( g_debugRight, "g_debugRight", "0", 0, qfalse )

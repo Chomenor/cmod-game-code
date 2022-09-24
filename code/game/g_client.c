@@ -1036,7 +1036,7 @@ void G_ResetClient( int clientNum ) {
 	clientSession_t sess = client->sess;
 	int ping = client->ps.ping;
 	int commandTime = client->ps.commandTime;
-	int flags = client->ps.eFlags & ( EF_TELEPORT_BIT | EF_VOTED );
+	int flags = client->ps.eFlags & EF_TELEPORT_BIT;
 	int ps_persistant[MAX_PERSISTANT];
 	memcpy( ps_persistant, client->ps.persistant, sizeof( ps_persistant ) );
 

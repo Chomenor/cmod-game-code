@@ -50,6 +50,7 @@ void ModPlayerMove_Init( void );
 void ModSpawnProtect_Init( void );
 void ModTeamGroups_Init( void );
 void ModSpectPassThrough_Init( void );
+void ModVoting_Init( void );
 
 //
 // Ping Compensation (pc_main.c)

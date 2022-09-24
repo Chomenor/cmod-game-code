@@ -613,7 +613,6 @@ void CalculateRanks( void ) {
 	level.numConnectedClients = 0;
 	level.numNonSpectatorClients = 0;
 	level.numPlayingClients = 0;
-	level.numVotingClients = 0;		// don't count bots
 	for ( i = 0 ; i < level.maxclients ; i++ ) {
 		if ( level.clients[i].pers.connected != CON_DISCONNECTED ) {
 			level.sortedClients[level.numConnectedClients] = i;
@@ -624,9 +623,6 @@ void CalculateRanks( void ) {
 
 				if ( level.clients[i].pers.connected == CON_CONNECTED ) {
 					level.numPlayingClients++;
-					if ( !(g_entities[i].r.svFlags & SVF_BOT) ) {
-						level.numVotingClients++;
-					}
 				}
 			}
 		}
@@ -1293,35 +1289,6 @@ static void G_CheckMatchState( void ) {
 
 
 /*
-==================
-CheckVote
-==================
-*/
-void CheckVote( void ) {
-	if ( !level.voteTime ) {
-		return;
-	}
-	if ( level.time - level.voteTime >= VOTE_TIME ) {
-		trap_SendServerCommand( -1, "print \"Vote failed.\n\"" );
-	} else {
-		if ( level.voteYes > level.numVotingClients/2 ) {
-			// execute the command, then remove the vote
-			trap_SendServerCommand( -1, "print \"Vote passed.\n\"" );
-			trap_SendConsoleCommand( EXEC_APPEND, va("%s\n", level.voteString ) );
-		} else if ( level.voteNo >= level.numVotingClients/2 ) {
-			// same behavior as a timeout
-			trap_SendServerCommand( -1, "print \"Vote failed.\n\"" );
-		} else {
-			// still waiting for a majority
-			return;
-		}
-	}
-	level.voteTime = 0;
-	trap_SetConfigstring( CS_VOTE_TIME, "" );
-
-}
-
-/*
 =============
 G_RunThink
 
@@ -1465,9 +1432,6 @@ void G_RunFrame( int levelTime ) {
 
 	// update team status and send health info messages
 	CheckTeamStatus();
-
-	// cancel vote if timed out
-	CheckVote();
 
 	// run general mod activities
 	modfn.PostRunFrame();

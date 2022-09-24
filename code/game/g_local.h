@@ -245,8 +245,6 @@ typedef struct {
 	int			wins, losses;		// tournament stats
 } clientSession_t;
 
-#define	MAX_VOTE_COUNT		3
-
 // client data that stays across multiple respawns and team changes, but is cleared
 // on game reset (map change or map restart)
 typedef struct {
@@ -260,7 +258,6 @@ typedef struct {
 	int			handicap;			// for handicapping and damage calculation
 	int			enterTime;			// level.time the client entered the game
 	playerTeamState_t teamState;	// status in teamplay games
-	int			voteCount;			// to prevent people from constantly calling votes
 	qboolean	teamInfo;			// send team overlay updates?
 	int			suicideTime;		// last suicide time, to prevent excessive suicides
 	pclass_t	uiClass;			// last class sent to client via "pclass" command
@@ -368,13 +365,6 @@ typedef struct {
 	int			snd_fry;				// sound index for standing in lava
 
 	qboolean	firstStrike;
-
-	// voting state
-	char		voteString[MAX_STRING_CHARS];
-	int			voteTime;				// level.time vote was called
-	int			voteYes;
-	int			voteNo;
-	int			numVotingClients;		// set by CalculateRanks
 
 	// spawn variables
 	qboolean	spawning;				// the G_Spawn*() functions are valid

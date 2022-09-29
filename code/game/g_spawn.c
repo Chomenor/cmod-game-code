@@ -627,5 +627,8 @@ void G_SpawnEntitiesFromString( void ) {
 		G_SpawnGEntityFromSpawnVars();
 	}
 
+	// update jump pad trajectories if gravity changes
+	G_RegisterCvarCallback( &g_gravity, G_RecalculateJumpPads, qfalse );
+
 	level.spawning = qfalse;			// any future calls to G_Spawn*() will be errors
 }

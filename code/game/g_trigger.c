@@ -266,6 +266,24 @@ void SP_target_push( gentity_t *self ) {
 }
 
 /*
+=================
+G_RecalculateJumpPads
+
+Recalculate trigger_push and target_push trajectories to account for g_gravity changes.
+=================
+*/
+void G_RecalculateJumpPads( trackedCvar_t *cv ) {
+	int i;
+	for ( i = 0; i < MAX_GENTITIES; ++i ) {
+		gentity_t *ent = &g_entities[i];
+		if ( ent->inuse && ent->target && ( !Q_stricmp( ent->classname, "trigger_push" ) ||
+				!Q_stricmp( ent->classname, "target_push" ) ) ) {
+			AimAtTarget( ent );
+		}
+	}
+}
+
+/*
 ==============================================================================
 
 trigger_teleport

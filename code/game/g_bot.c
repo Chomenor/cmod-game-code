@@ -450,6 +450,12 @@ void G_CheckBotSpawn( void ) {
 		if ( botSpawnQueue[n].spawnTime > level.time ) {
 			continue;
 		}
+		if ( level.clients[botSpawnQueue[n].clientNum].pers.connected != CON_CONNECTING ||
+				!( g_entities[botSpawnQueue[n].clientNum].r.svFlags & SVF_BOT ) ) {
+			// bot might have been kicked before being spawned
+			botSpawnQueue[n].spawnTime = 0;
+			continue;
+		}
 		ClientBegin( botSpawnQueue[n].clientNum );
 		botSpawnQueue[n].spawnTime = 0;
 
@@ -508,11 +514,6 @@ qboolean G_BotConnect( int clientNum, qboolean restart ) {
 	settings.skill = atoi( Info_ValueForKey( userinfo, "skill" ) );
 	Q_strncpyz( settings.team, Info_ValueForKey( userinfo, "team" ), sizeof(settings.team) );
 	Q_strncpyz( settings.pclass, Info_ValueForKey( userinfo, "class" ), sizeof(settings.pclass) );
-	
-	if ( Q_stricmp( settings.team, "red" ) && Q_stricmp( settings.team, "blue" ) ) {
-		// Only set valid teams
-		settings.team[0] = '\0';
-	}
 	
 	if ( !settings.team[0] && level.clients[clientNum].sess.sessionTeam == TEAM_SPECTATOR ) {
 		// If team is not set, and bot is currently spectator (after the session init which
@@ -870,20 +871,6 @@ static void G_LoadBots( void ) {
 	trap_Printf( va( "%i bots parsed\n", g_numBots ) );
 }
 
-
-
-/*
-===============
-G_GetBotInfoByNumber
-===============
-*/
-char *G_GetBotInfoByNumber( int num ) {
-	if( num < 0 || num >= g_numBots ) {
-		trap_Printf( va( S_COLOR_RED "Invalid bot number: %i\n", num ) );
-		return NULL;
-	}
-	return g_botInfos[num];
-}
 
 
 /*

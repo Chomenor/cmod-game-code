@@ -47,7 +47,6 @@ bot_waypoint_t *botai_freewaypoints;
 
 //NOTE: not using a cvars which can be updated because the game should be reloaded anyway
 int gametype;		//game type
-int maxclients;		//maximum number of clients
 
 vmCvar_t bot_grapple;
 vmCvar_t bot_rocketjump;
@@ -87,7 +86,7 @@ int BotCTFTeam(bot_state_t *bs) {
 	char info[1024];
 
 	if (gametype != GT_CTF) return CTF_TEAM_NONE;
-	if (bs->client < 0 || bs->client >= MAX_CLIENTS) {
+	if (bs->client < 0 || bs->client >= level.maxclients) {
 		//BotAI_Print(PRT_ERROR, "BotCTFTeam: client out of range\n");
 		return qfalse;
 	}
@@ -121,12 +120,11 @@ EntityIsDead
 ==================
 */
 qboolean EntityIsDead(aas_entityinfo_t *entinfo) {
-	playerState_t ps;
-
-	if (entinfo->number >= 0 && entinfo->number < MAX_CLIENTS) {
-		//retrieve the current client state
-		BotAI_GetClientState( entinfo->number, &ps );
-		if (ps.pm_type != PM_NORMAL) return qtrue;
+	if (entinfo->number >= 0 && entinfo->number < level.maxclients) {
+		if ( level.clients[entinfo->number].pers.connected != CON_CONNECTED ||
+				level.clients[entinfo->number].ps.pm_type != PM_NORMAL ) {
+			return qtrue;
+		}
 	}
 	return qfalse;
 }
@@ -369,7 +367,7 @@ ClientName
 char *ClientName(int client, char *name, int size) {
 	char buf[MAX_INFO_STRING];
 
-	if (client < 0 || client >= MAX_CLIENTS) {
+	if (client < 0 || client >= level.maxclients) {
 		BotAI_Print(PRT_ERROR, "ClientName: client out of range\n");
 		return "[client out of range]";
 	}
@@ -388,7 +386,7 @@ ClientSkin
 char *ClientSkin(int client, char *skin, int size) {
 	char buf[MAX_INFO_STRING];
 
-	if (client < 0 || client >= MAX_CLIENTS) {
+	if (client < 0 || client >= level.maxclients) {
 		BotAI_Print(PRT_ERROR, "ClientSkin: client out of range\n");
 		return "[client out of range]";
 	}
@@ -406,11 +404,8 @@ ClientFromName
 int ClientFromName(char *name) {
 	int i;
 	char buf[MAX_INFO_STRING];
-	static int maxclients;
 
-	if (!maxclients)
-		maxclients = trap_Cvar_VariableIntegerValue("sv_maxclients");
-	for (i = 0; i < maxclients && i < MAX_CLIENTS; i++) {
+	for (i = 0; i < level.maxclients; i++) {
 		trap_GetConfigstring(CS_PLAYERS+i, buf, sizeof(buf));
 		Q_CleanStr( buf );
 		if (!Q_stricmp(Info_ValueForKey(buf, "n"), name)) return i;
@@ -656,7 +651,7 @@ qboolean BotShouldDetonateDetPack(bot_state_t *bs)
 	}
 
 	// determine who would be killed in the blast radius
-	for (botNum = 0; botNum < MAX_CLIENTS; botNum++)
+	for (botNum = 0; botNum < level.maxclients; botNum++)
 	{
 		BotEntityInfo(botNum, &botinfo);
 		if (!botinfo.valid) continue;
@@ -1347,11 +1342,11 @@ BotSameTeam
 int BotSameTeam(bot_state_t *bs, int entnum) {
 	char info1[1024], info2[1024];
 
-	if (bs->client < 0 || bs->client >= MAX_CLIENTS) {
+	if (bs->client < 0 || bs->client >= level.maxclients) {
 		//BotAI_Print(PRT_ERROR, "BotSameTeam: client out of range\n");
 		return qfalse;
 	}
-	if (entnum < 0 || entnum >= MAX_CLIENTS) {
+	if (entnum < 0 || entnum >= level.maxclients) {
 		//BotAI_Print(PRT_ERROR, "BotSameTeam: client out of range\n");
 		return qfalse;
 	}
@@ -1531,7 +1526,7 @@ int BotFindEnemy(bot_state_t *bs, int curenemy) {
 
 	//FIXME: This only finds lowest numbered enemy, not the closest or best!!!
 	// 6/15/00 dpk changed this
-	for (i = 0; i < maxclients && i < MAX_CLIENTS; i++) {
+	for (i = 0; i < level.maxclients; i++) {
 
 		if (i == bs->client) continue;
 		//if it's the current enemy
@@ -1618,7 +1613,7 @@ int BotTeamFlagCarrierVisible(bot_state_t *bs) {
 	float vis;
 	aas_entityinfo_t entinfo;
 
-	for (i = 0; i < maxclients && i < MAX_CLIENTS; i++) {
+	for (i = 0; i < level.maxclients; i++) {
 		if (i == bs->client) continue;
 		//
 		BotEntityInfo(i, &entinfo);
@@ -1990,7 +1985,7 @@ void BotCheckAttack(bot_state_t *bs) {
 	//if won't hit the enemy
 	if (trace.ent != bs->enemy) {
 		//if the entity is a client
-		if (trace.ent > 0 && trace.ent <= MAX_CLIENTS) {
+		if (trace.ent >= 0 && trace.ent < level.maxclients) {
 			//if a teammate is hit
 			if (BotSameTeam(bs, trace.ent)) return;
 		}
@@ -2070,7 +2065,7 @@ void BotMapScripts(bot_state_t *bs) {
 		}
 		shootbutton = qfalse;
 		//if an enemy is below this bounding box then shoot the button
-		for (i = 0; i < maxclients && i < MAX_CLIENTS; i++) {
+		for (i = 0; i < level.maxclients; i++) {
 
 			if (i == bs->client) continue;
 			//
@@ -2852,7 +2847,6 @@ void BotSetupDeathmatchAI(void) {
 	char model[128];
 
 	gametype = trap_Cvar_VariableIntegerValue("g_gametype");
-	maxclients = trap_Cvar_VariableIntegerValue("sv_maxclients");
 
 	trap_Cvar_Register(&bot_rocketjump, "bot_rocketjump", "1", 0);
 	trap_Cvar_Register(&bot_grapple, "bot_grapple", "0", 0);

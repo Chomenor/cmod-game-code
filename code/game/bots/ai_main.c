@@ -329,7 +329,7 @@ void BotTeamplayReport(void) {
 	char buf[MAX_INFO_STRING];
 
 	BotAI_Print(PRT_MESSAGE, S_COLOR_RED"RED\n");
-	for (i = 0; i < maxclients && i < MAX_CLIENTS; i++) {
+	for (i = 0; i < level.maxclients; i++) {
 		//
 		if ( !botstates[i] || !botstates[i]->inuse ) continue;
 		//
@@ -342,7 +342,7 @@ void BotTeamplayReport(void) {
 		}
 	}
 	BotAI_Print(PRT_MESSAGE, S_COLOR_BLUE"BLUE\n");
-	for (i = 0; i < maxclients && i < MAX_CLIENTS; i++) {
+	for (i = 0; i < level.maxclients; i++) {
 		//
 		if ( !botstates[i] || !botstates[i]->inuse ) continue;
 		//
@@ -367,7 +367,7 @@ void BotInterbreedBots(void) {
 	int i;
 
 	// get rankings for all the bots
-	for (i = 0; i < MAX_CLIENTS; i++) {
+	for (i = 0; i < level.maxclients; i++) {
 		if ( botstates[i] && botstates[i]->inuse ) {
 			ranks[i] = botstates[i]->num_kills * 2 - botstates[i]->num_deaths;
 		}
@@ -376,12 +376,12 @@ void BotInterbreedBots(void) {
 		}
 	}
 
-	if (trap_GeneticParentsAndChildSelection(MAX_CLIENTS, ranks, &parent1, &parent2, &child)) {
+	if (trap_GeneticParentsAndChildSelection(level.maxclients, ranks, &parent1, &parent2, &child)) {
 		trap_BotInterbreedGoalFuzzyLogic(botstates[parent1]->gs, botstates[parent2]->gs, botstates[child]->gs);
 		trap_BotMutateGoalFuzzyLogic(botstates[child]->gs, 1);
 	}
 	// reset the kills and deaths
-	for (i = 0; i < MAX_CLIENTS; i++) {
+	for (i = 0; i < level.maxclients; i++) {
 		if (botstates[i] && botstates[i]->inuse) {
 			botstates[i]->num_kills = 0;
 			botstates[i]->num_deaths = 0;
@@ -401,7 +401,7 @@ void BotWriteInterbreeded(char *filename) {
 	bestrank = 0;
 	bestbot = -1;
 	// get the best bot
-	for (i = 0; i < MAX_CLIENTS; i++) {
+	for (i = 0; i < level.maxclients; i++) {
 		if ( botstates[i] && botstates[i]->inuse ) {
 			rank = botstates[i]->num_kills * 2 - botstates[i]->num_deaths;
 		}
@@ -459,7 +459,7 @@ void BotInterbreeding(void) {
 		return;
 	}
 	//shutdown all the bots
-	for (i = 0; i < MAX_CLIENTS; i++) {
+	for (i = 0; i < level.maxclients; i++) {
 		if (botstates[i] && botstates[i]->inuse) {
 			BotAIShutdownClient(botstates[i]->client);
 		}
@@ -825,7 +825,7 @@ void BotScheduleBotThink(void) {
 
 	botnum = 0;
 
-	for( i = 0; i < MAX_CLIENTS; i++ ) {
+	for( i = 0; i < level.maxclients; i++ ) {
 		if( !botstates[i] || !botstates[i]->inuse ) {
 			continue;
 		}
@@ -942,7 +942,11 @@ int BotAIShutdownClient(int client) {
 	}
 
 	if (BotChat_ExitGame(bs)) {
+		// bypass game command connection checks so chat can go through
+		int oldConnected = level.clients[client].pers.connected;
+		level.clients[client].pers.connected = CON_CONNECTED;
 		trap_BotEnterChat(bs->cs, bs->client, CHAT_ALL);
+		level.clients[client].pers.connected = oldConnected;
 	}
 
 	trap_BotFreeMoveState(bs->ms);
@@ -1034,7 +1038,7 @@ int BotAILoadMap( int restart ) {
 		trap_BotLibLoadMap( mapname.string );
 	}
 
-	for (i = 0; i < MAX_CLIENTS; i++) {
+	for (i = 0; i < level.maxclients; i++) {
 		if (botstates[i] && botstates[i]->inuse) {
 			BotResetState( botstates[i] );
 			botstates[i]->setupcount = 4;
@@ -1079,7 +1083,7 @@ int BotAIStartFrame(int time) {
 
 	if (bot_pause.integer) {
 		// execute bot user commands every frame
-		for( i = 0; i < MAX_CLIENTS; i++ ) {
+		for( i = 0; i < level.maxclients; i++ ) {
 			if( !botstates[i] || !botstates[i]->inuse ) {
 				continue;
 			}
@@ -1157,7 +1161,7 @@ int BotAIStartFrame(int time) {
 			memset(&state, 0, sizeof(bot_entitystate_t));
 			//
 			VectorCopy(ent->r.currentOrigin, state.origin);
-			if (i < MAX_CLIENTS) {
+			if (i < level.maxclients) {
 				VectorCopy(ent->s.apos.trBase, state.angles);
 			} else {
 				VectorCopy(ent->r.currentAngles, state.angles);
@@ -1187,7 +1191,7 @@ int BotAIStartFrame(int time) {
 	}
 
 	// execute scheduled bot AI
-	for( i = 0; i < MAX_CLIENTS; i++ ) {
+	for( i = 0; i < level.maxclients; i++ ) {
 		if( !botstates[i] || !botstates[i]->inuse ) {
 			continue;
 		}
@@ -1207,7 +1211,7 @@ int BotAIStartFrame(int time) {
 
 
 	// execute bot user commands every frame
-	for( i = 0; i < MAX_CLIENTS; i++ ) {
+	for( i = 0; i < level.maxclients; i++ ) {
 		if( !botstates[i] || !botstates[i]->inuse ) {
 			continue;
 		}
@@ -1347,7 +1351,7 @@ int BotAIShutdown( int restart ) {
 	//if the game is restarted for a tournament
 	if ( restart ) {
 		//shutdown all the bots in the botlib
-		for (i = 0; i < MAX_CLIENTS; i++) {
+		for (i = 0; i < level.maxclients; i++) {
 			if (botstates[i] && botstates[i]->inuse) {
 				BotAIShutdownClient(botstates[i]->client);
 			}

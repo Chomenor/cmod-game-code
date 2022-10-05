@@ -230,16 +230,18 @@ static int G_CountBotInstances( const char *netname, int team ) {
 
 /*
 ===============
-G_AddRandomBot
+G_RandomBotInfo
+
+Selects random bot and returns bot info for it. Returns NULL on error.
 ===============
 */
-void G_AddRandomBot( int team ) {
+static char *G_RandomBotInfo( int team ) {
 	qboolean avoidExisting = qtrue;
-	int		n, num, skill;
-	char	*value, netname[MAX_NAME_LENGTH], *teamstr;
+	int		n, num;
+	char	*value;
 
 	if ( !g_numBots ) {
-		return;
+		return NULL;
 	}
 
 	// look for bots not already in the game
@@ -263,18 +265,30 @@ void G_AddRandomBot( int team ) {
 		if ( !avoidExisting || !G_CountBotInstances( value, team ) ) {
 			num--;
 			if (num <= 0) {
-				skill = trap_Cvar_VariableIntegerValue( "g_spSkill" );
-				if (team == TEAM_RED) teamstr = "red";
-				else if (team == TEAM_BLUE) teamstr = "blue";
-				else teamstr = "auto";
-				strncpy(netname, value, sizeof(netname)-1);
-				netname[sizeof(netname)-1] = '\0';
-				Q_CleanStr(netname);
-				trap_SendConsoleCommand( EXEC_INSERT, va("addbot \"%s\" %i %s\n", netname, skill, teamstr) );
-				return;
+				return g_botInfos[n];
 			}
 		}
 	}
+
+	return NULL;
+}
+
+/*
+===============
+G_AddRandomBot
+===============
+*/
+void G_AddRandomBot( int team ) {
+	int skill = trap_Cvar_VariableIntegerValue( "g_spSkill" );
+	char *teamstr = "auto";
+
+	if ( team == TEAM_RED ) {
+		teamstr = "red";
+	} else if ( team == TEAM_BLUE ) {
+		teamstr = "blue";
+	}
+
+	trap_SendConsoleCommand( EXEC_INSERT, va( "addbot random %i %s\n", skill, teamstr ) );
 }
 
 /*
@@ -552,8 +566,18 @@ static void G_AddBot( const char *name, int skill, const char *team, const char 
 	char			*model;
 	char			userinfo[MAX_INFO_STRING];
 
-	// get the botinfo from bots.txt
-	botinfo = G_GetBotInfoByName( name );
+	if ( !Q_stricmp( name, "random" ) ) {
+		// if team is specified, try to avoid picking a character already on that team
+		team_t teamVal = TEAM_FREE;
+		if ( !Q_stricmp( team, "red" ) ) {
+			teamVal = TEAM_RED;
+		} else if ( !Q_stricmp( team, "blue" ) ) {
+			teamVal = TEAM_BLUE;
+		}
+		botinfo = G_RandomBotInfo( teamVal );
+	} else {
+		botinfo = G_GetBotInfoByName( name );
+	}
 	if ( !botinfo ) {
 		G_Printf( S_COLOR_RED "Error: Bot '%s' not defined\n", name );
 		return;

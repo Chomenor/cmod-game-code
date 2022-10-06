@@ -561,18 +561,29 @@ PickTeam
 
 ================
 */
-team_t PickTeam( int ignoreClientNum ) {
-	int		counts[TEAM_NUM_TEAMS];
+team_t PickTeam( int clientNum ) {
+	int redPlayers = 0;
+	int bluePlayers = 0;
 
-	counts[TEAM_BLUE] = TeamCount( ignoreClientNum, TEAM_BLUE, qtrue );
-	counts[TEAM_RED] = TeamCount( ignoreClientNum, TEAM_RED, qtrue );
+	// try to pick team with least human players, unless we are adding a bot
+	if ( EF_WARN_ASSERT( clientNum >= 0 ) && !( g_entities[clientNum].r.svFlags & SVF_BOT ) ) {
+		bluePlayers = TeamCount( clientNum, TEAM_BLUE, qtrue );
+		redPlayers = TeamCount( clientNum, TEAM_RED, qtrue );
+	}
 
-	if ( counts[TEAM_BLUE] > counts[TEAM_RED] ) {
+	// still undetermined, so pick team with least players overall
+	if ( bluePlayers == redPlayers ) {
+		bluePlayers = TeamCount( clientNum, TEAM_BLUE, qfalse );
+		redPlayers = TeamCount( clientNum, TEAM_RED, qfalse );
+	}
+
+	if ( bluePlayers > redPlayers ) {
 		return TEAM_RED;
 	}
-	if ( counts[TEAM_RED] > counts[TEAM_BLUE] ) {
+	if ( redPlayers > bluePlayers ) {
 		return TEAM_BLUE;
 	}
+
 	// equal team count, so join the team with the lowest score
 	if ( level.teamScores[TEAM_BLUE] > level.teamScores[TEAM_RED] ) {
 		return TEAM_RED;

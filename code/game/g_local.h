@@ -537,7 +537,7 @@ gentity_t *SelectSpawnPoint ( vec3_t avoidPoint, vec3_t origin, vec3_t angles, q
 void InitBodyQue (void);
 void SetClientViewAngle( gentity_t *ent, vec3_t angle );
 int TeamCount( int ignoreClientNum, team_t team, qboolean ignoreBots );
-team_t PickTeam( int ignoreClientNum );
+team_t PickTeam( int clientNum );
 void SetSkinForModel( const char *model, const char *skin, char *output, unsigned int size );
 void ClientUserinfoChanged( int clientNum );
 char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot );

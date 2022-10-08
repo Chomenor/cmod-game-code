@@ -50,9 +50,15 @@ static void UI_RemoveBotsMenu_SetBotNames( void ) {
 	char	info[MAX_INFO_STRING];
 
 	for ( n = 0; (n < BOTS_VIEWABLE) && (removeBotsMenuInfo.baseBotNum + n < removeBotsMenuInfo.numBots); n++ ) {
-		trap_GetConfigString( CS_PLAYERS + removeBotsMenuInfo.botClientNums[removeBotsMenuInfo.baseBotNum + n], info, MAX_INFO_STRING );
-		Q_strncpyz( removeBotsMenuInfo.botnames[n], Info_ValueForKey( info, "n" ), sizeof(removeBotsMenuInfo.botnames[n]) );
-		Q_CleanStr( removeBotsMenuInfo.botnames[n] );
+		int clientNum = removeBotsMenuInfo.baseBotNum + n;
+		if ( clientNum >= 0 ) {
+			trap_GetConfigString( CS_PLAYERS + removeBotsMenuInfo.botClientNums[removeBotsMenuInfo.baseBotNum + n], info, MAX_INFO_STRING );
+			Q_strncpyz( removeBotsMenuInfo.botnames[n], Info_ValueForKey( info, "n" ), sizeof(removeBotsMenuInfo.botnames[n]) );
+			Q_CleanStr( removeBotsMenuInfo.botnames[n] );
+		} else {
+			// blanked out
+			*removeBotsMenuInfo.botnames[n] = '\0';
+		}
 	}
 
 }
@@ -64,14 +70,19 @@ UI_RemoveBotsMenu_DeleteEvent
 =================
 */
 static void UI_RemoveBotsMenu_DeleteEvent( void* ptr, int event ) {
-	if (event != QM_ACTIVATED) {
+	int *clientNum;
+	if ( event != QM_ACTIVATED || !removeBotsMenuInfo.numBots ) {
 		return;
 	}
 
-	trap_Cmd_ExecuteText( EXEC_APPEND, va("kick %i\n", removeBotsMenuInfo.botClientNums[removeBotsMenuInfo.baseBotNum + removeBotsMenuInfo.selectedBotNum]) );
+	clientNum = &removeBotsMenuInfo.botClientNums[removeBotsMenuInfo.baseBotNum + removeBotsMenuInfo.selectedBotNum];
+	if ( *clientNum >= 0 ) {
+		trap_Cmd_ExecuteText( EXEC_APPEND, va("kick %i\n", *clientNum ) );
 
-	// Blank out name on screen so they know it's been kicked
-	memset(removeBotsMenuInfo.botnames[removeBotsMenuInfo.baseBotNum + removeBotsMenuInfo.selectedBotNum],0,sizeof(removeBotsMenuInfo.botnames[removeBotsMenuInfo.baseBotNum + removeBotsMenuInfo.selectedBotNum]));
+		// Blank out name on screen so they know it's been kicked
+		*clientNum = -1;
+		UI_RemoveBotsMenu_SetBotNames();
+	}
 }
 
 
@@ -156,7 +167,7 @@ static void UI_RemoveBotsMenu_GetBots( void ) {
 	for( n = 0; n < numPlayers; n++ ) {
 		trap_GetConfigString( CS_PLAYERS + n, info, MAX_INFO_STRING );
 
-		isBot = atoi( Info_ValueForKey( info, "skill" ) );
+		isBot = *Info_ValueForKey( info, "skill" ) != '\0';
 		if( !isBot ) {
 			continue;
 		}
@@ -307,13 +318,17 @@ static void UI_RemoveBotsMenu_Init( void ) {
 	for( n = 0; n < count; n++ )
 	{
 		Menu_AddItem( &removeBotsMenuInfo.menu, &removeBotsMenuInfo.bots[n] );
+
+		// workaround to increase clickable width, as otherwise the width would be tied to
+		// the initial text width and become incorrect if text changes due to scrolling
+		removeBotsMenuInfo.bots[n].generic.right = removeBotsMenuInfo.bots[n].generic.left + 170;
 	}
 	Menu_AddItem( &removeBotsMenuInfo.menu, &removeBotsMenuInfo.delete );
 	Menu_AddItem( &removeBotsMenuInfo.menu, &removeBotsMenuInfo.back );
 
 	removeBotsMenuInfo.baseBotNum = 0;
 	removeBotsMenuInfo.selectedBotNum = 0;
-	removeBotsMenuInfo.bots[0].color = color_white;
+	removeBotsMenuInfo.bots[0].color = colorTable[CT_YELLOW];
 }
 
 

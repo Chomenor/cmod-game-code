@@ -271,7 +271,9 @@ LOGFUNCTION_SRET( qboolean, PREFIX(ModClientCommand), ( int clientNum, const cha
 		( clientNum, cmd ), "G_MODFN_MODCLIENTCOMMAND" ) {
 	gclient_t *client = &level.clients[clientNum];
 
-	if ( !Q_stricmp( cmd, "class" ) && !level.intermissiontime && client->pers.connected == CON_CONNECTED ) {
+	// Allow this command for connecting clients, because it can sometimes be called before
+	// GAME_CLIENT_BEGIN when starting the game from UI.
+	if ( !Q_stricmp( cmd, "class" ) && !level.intermissiontime && client->pers.connected >= CON_CONNECTING ) {
 		if ( trap_Argc() != 2 ) {
 			ModSpecialties_TellClassCmd( clientNum );
 		} else {

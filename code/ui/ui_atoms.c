@@ -1553,6 +1553,7 @@ UI_Refresh
 void UI_Refresh( int realtime )
 {
 	vec4_t color;
+	srand( realtime );
 
 	uis.frametime = realtime - uis.realtime;
 	uis.realtime  = realtime;

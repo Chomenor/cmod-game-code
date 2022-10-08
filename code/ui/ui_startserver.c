@@ -9,6 +9,8 @@ START SERVER MENU *****
 */
 #include "ui_local.h"
 
+#define DEFAULT_BOT_NAME		"--------"
+
 #define GAMESERVER_SELECT		"menu/art/maps_select"
 #define GAMESERVER_SELECTED		"menu/art/maps_selected"
 #define GAMESERVER_UNKNOWNMAP	"levelshots/unknownmap"
@@ -174,32 +176,19 @@ typedef struct
 } startserver_t;
 
 static startserver_t s_startserver;
-/*
-static const char *gametype_items[] = {
-	"Free For All",
-	"Team Deathmatch",
-	"Tournament",
-	"Capture the Flag",
-	0
-};
-*/
+
 
 static int gametype_items[] =
 {
 	MNT_TYPE_FREEFORALL,
 	MNT_TYPE_TEAMDEATHMATCH,
-	MNT_TYPE_TOURNAMENT,
 	MNT_TYPE_CAPTURETHEFLAG,
+	MNT_TYPE_TOURNAMENT,
 	0
 };
 
-
-// TS 10.12.2001
-static int gametype_remap[] = {GT_FFA, GT_TEAM, GT_TOURNAMENT, GT_CTF};
-//static int gametype_remap2[] = {0, 2, 0, 1, 3};
-
-// TS 10.12.2001
-static int gametype_remap2[] = {0, 0, 0, 0, 2};
+static int gametype_remap[] = {GT_FFA, GT_TEAM, GT_CTF, GT_TOURNAMENT};
+static int gametype_remap2[] = {0, 3, 0, 1, 2};
 
 
 
@@ -1424,6 +1413,8 @@ typedef enum
 	SO_NUM_PLAYER_CLASSES
 } soClassType_t;
 
+#define RANDOM_PLAYER_CLASS ( rand() % SO_NUM_PLAYER_CLASSES )
+
 typedef struct {
 	menuframework_s		menu;
 
@@ -1496,33 +1487,32 @@ static int dedicated_list[] =
 	0
 };
 
-/*
-static const char *playerType_list[] = {
-	"Open",
-	"Bot",
-	"----",
-	0
-};*/
-
 static int playerType_list[] =
 {
 	MNT_OPEN,
 	MNT_BOT,
-	MNT_CLOSED,
 	0
 };
-/*
-static const char *playerTeam_list[] = {
-	"Blue",
-	"Red",
-	0
+
+// must correspond to list above
+enum {
+	PT_OPEN,
+	PT_BOT,
 };
-*/
+
 static int playerTeam_list[] =
 {
 	MNT_TEAM_BLUE,
 	MNT_TEAM_RED,
 	0
+};
+
+// valid inputs to "team" command in English
+// elements must correspond to list above
+static const char *playerTeam_commandStrings[] =
+{
+	"blue",
+	"red",
 };
 
 static int playerClass_list[] =
@@ -1534,6 +1524,18 @@ static int playerClass_list[] =
 	MNT_PC_MEDIC,
 	MNT_PC_TECH,
 	0
+};
+
+// valid inputs to "class" command in English
+// elements must correspond to list above
+static const char *playerClass_commandStrings[] =
+{
+	"infiltrator",
+	"sniper",
+	"heavy",
+	"demo",
+	"medic",
+	"tech",
 };
 
 /*
@@ -1568,7 +1570,7 @@ static qboolean BotAlreadySelected( const char *checkName ) {
 	int		n;
 
 	for( n = 1; n < PLAYER_SLOTS; n++ ) {
-		if( s_serveroptions.playerType[n].curvalue != 1 ) {
+		if( s_serveroptions.playerType[n].curvalue != PT_BOT ) {
 			continue;
 		}
 		if( (s_serveroptions.gametype >= GT_TEAM) &&
@@ -1596,7 +1598,6 @@ ServerOptions_Start
 static void ServerOptions_Start( void ) {
 	int		timelimit;
 	int		fraglimit;
-	int		maxclients,holdMaxClients;
 	int		dedicated;
 	int		friendlyfire;
 	int		flaglimit;
@@ -1612,24 +1613,6 @@ static void ServerOptions_Start( void ) {
 	friendlyfire = s_serveroptions.friendlyfire.curvalue;
 	pure		 = s_serveroptions.pure.curvalue;
 	skill		 = s_serveroptions.botSkill.curvalue + 1;
-
-	holdMaxClients = Com_Clamp( 0, 64, trap_Cvar_VariableValue( "sv_maxclients" ));
-
-	//set maxclients
-	for( n = 0, maxclients = 0; n < PLAYER_SLOTS; n++ ) {
-		if( s_serveroptions.playerType[n].curvalue == 2 ) {
-			continue;
-		}
-		if( (s_serveroptions.playerType[n].curvalue == 1) && (s_serveroptions.playerNameBuffers[n][0] == 0) ) {
-			continue;
-		}
-		maxclients++;
-	}
-
-	if (holdMaxClients > maxclients)
-	{
-		maxclients = holdMaxClients;
-	}
 
 	switch( s_serveroptions.gametype ) {
 	case GT_FFA:
@@ -1659,7 +1642,7 @@ static void ServerOptions_Start( void ) {
   // TS 10.12.2001
 	trap_Cvar_Set("g_motd", s_serveroptions.motd.field.buffer );
 
-	trap_Cvar_SetValue( "sv_maxclients", Com_Clamp( 0, 64, maxclients ) );
+	trap_Cvar_SetValue( "sv_maxclients", Com_Clamp( 12, 64, trap_Cvar_VariableValue( "sv_maxclients" ) ) );
 	trap_Cvar_SetValue( "dedicated", Com_Clamp( 0, 2, dedicated ) );
 	trap_Cvar_SetValue ("timelimit", Com_Clamp( 0, timelimit, timelimit ) );
 	trap_Cvar_SetValue ("fraglimit", Com_Clamp( 0, fraglimit, fraglimit ) );
@@ -1674,33 +1657,39 @@ static void ServerOptions_Start( void ) {
 	// add bots
 	trap_Cmd_ExecuteText( EXEC_APPEND, "wait 3\n" );
 	for( n = 1; n < PLAYER_SLOTS; n++ ) {
-		if( s_serveroptions.playerType[n].curvalue != 1 ) {
+		const char *name = s_serveroptions.playerNameBuffers[n];
+		const char *team = "free";
+		if( s_serveroptions.playerType[n].curvalue != PT_BOT ) {
 			continue;
 		}
 		if( s_serveroptions.playerNameBuffers[n][0] == 0 ) {
 			continue;
 		}
-		if( s_serveroptions.playerNameBuffers[n][0] == '-' ) {
-			continue;
+		if( !strcmp( s_serveroptions.playerNameBuffers[n], DEFAULT_BOT_NAME ) ) {
+			name = "random";
 		}
 		if( s_serveroptions.gametype >= GT_TEAM ) {
-			Com_sprintf( buf, sizeof(buf), "addbot %s %i %s %s\n", s_serveroptions.playerNameBuffers[n], skill,
-				menu_normal_text[playerTeam_list[s_serveroptions.playerTeam[n].curvalue]], menu_normal_text[playerClass_list[s_serveroptions.playerClass[n].curvalue]] );
+			team = playerTeam_commandStrings[s_serveroptions.playerTeam[n].curvalue];
 		}
-		else {
-			Com_sprintf( buf, sizeof(buf), "addbot %s %i free %s\n", s_serveroptions.playerNameBuffers[n], skill, menu_normal_text[playerClass_list[s_serveroptions.playerClass[n].curvalue]] );
-		}
+		Com_sprintf( buf, sizeof(buf), "addbot %s %i %s %s\n", name, skill, team,
+				playerClass_commandStrings[s_serveroptions.playerClass[n].curvalue] );
 		trap_Cmd_ExecuteText( EXEC_APPEND, buf );
 	}
 
-	// set player's team
-	if( dedicated == 0 )
-	{
-		if ( s_serveroptions.gametype >= GT_TEAM ) {
-			trap_Cmd_ExecuteText( EXEC_APPEND, va( "wait 5; team %s; class %s\n", menu_normal_text[playerTeam_list[s_serveroptions.playerTeam[0].curvalue]], menu_normal_text[playerClass_list[s_serveroptions.playerClass[0].curvalue]] ) );
+	// set player's team and class
+	if ( dedicated == 0 ) {
+		const char *team = s_serveroptions.gametype >= GT_TEAM ?
+				playerTeam_commandStrings[s_serveroptions.playerTeam[0].curvalue] : NULL;
+		const char *pclass = s_serveroptions.specialties ?
+				playerClass_commandStrings[s_serveroptions.playerClass[0].curvalue] : NULL;
+		if ( team || pclass ) {
+			trap_Cmd_ExecuteText( EXEC_APPEND, "wait 5\n" );
 		}
-		else {
-			trap_Cmd_ExecuteText( EXEC_APPEND, va( "wait 5; class %s\n", menu_normal_text[playerClass_list[s_serveroptions.playerClass[0].curvalue]] ) );
+		if ( team ) {
+			trap_Cmd_ExecuteText( EXEC_APPEND, va( "team %s\n", team ) );
+		}
+		if ( pclass ) {
+			trap_Cmd_ExecuteText( EXEC_APPEND, va( "class %s\n", pclass ) );
 		}
 	}
 }
@@ -1713,36 +1702,14 @@ ServerOptions_InitPlayerItems
 */
 static void ServerOptions_InitPlayerItems( void ) {
 	int		n;
-	int		v;
 
-	// init types
-	if( s_serveroptions.multiplayer ) {
-		v = 0;	// open
-	}
-	else {
-		v = 1;	// bot
-	}
-
-	for( n = 0; n < PLAYER_SLOTS; n++ ) {
-		s_serveroptions.playerType[n].curvalue = v;
-	}
-
-	if( s_serveroptions.multiplayer && (s_serveroptions.gametype < GT_TEAM) ) {
-		for( n = 8; n < PLAYER_SLOTS; n++ ) {
-			s_serveroptions.playerType[n].curvalue = 2;
-		}
-	}
-
-	// if not a dedicated server, first slot is reserved for the human on the server
-	if( s_serveroptions.dedicated.curvalue == 0 )
-	{	// human
-		char buffer[32];
-		s_serveroptions.playerType[0].generic.flags |= QMF_INACTIVE;
-		s_serveroptions.playerType[0].curvalue = 0;
-		trap_Cvar_VariableStringBuffer( "name", buffer, sizeof(buffer) );
-		Q_CleanStr( buffer );
-		Q_strncpyz(s_serveroptions.playerNameBuffers[0], buffer, sizeof(s_serveroptions.playerNameBuffers[0]) );
-	}
+	// first slot is reserved for the human player
+	char buffer[32];
+	s_serveroptions.playerType[0].generic.flags |= QMF_INACTIVE;
+	s_serveroptions.playerType[0].curvalue = PT_OPEN;
+	trap_Cvar_VariableStringBuffer( "name", buffer, sizeof(buffer) );
+	Q_CleanStr( buffer );
+	Q_strncpyz(s_serveroptions.playerNameBuffers[0], buffer, sizeof(s_serveroptions.playerNameBuffers[0]) );
 
 	// init teams
 	if( s_serveroptions.gametype >= GT_TEAM )
@@ -1766,7 +1733,7 @@ static void ServerOptions_InitPlayerItems( void ) {
 	}
 	// init classes
 	for( n = 0; n < PLAYER_SLOTS; n++ ) {
-		s_serveroptions.playerClass[n].curvalue = 0;
+		s_serveroptions.playerClass[n].curvalue = RANDOM_PLAYER_CLASS;
 		if ( !s_serveroptions.specialties )	{
 			s_serveroptions.playerClass[n].generic.flags |= (QMF_INACTIVE|QMF_HIDDEN);
 		}
@@ -1779,19 +1746,11 @@ static void ServerOptions_InitPlayerItems( void ) {
 ServerOptions_SetPlayerItems
 =================
 */
-static int ServerOptions_SetPlayerItems( void ) {
+static void ServerOptions_SetPlayerItems( void ) {
 	int		start;
-	int		n,maxClients,holdmaxClients;
+	int		n;
 
-	// types
-//	for( n = 0; n < PLAYER_SLOTS; n++ ) {
-//		if( (!s_serveroptions.multiplayer) && (n > 0) && (s_serveroptions.playerType[n].curvalue == 0) ) {
-//			s_serveroptions.playerType[n].curvalue = 1;
-//		}
-//	}
-	holdmaxClients = Com_Clamp( 0, 64, trap_Cvar_VariableValue( "sv_maxclients" ));
-
-	// names
+	// host player slot
 	if( s_serveroptions.dedicated.curvalue == 0 )
 	{
 		s_serveroptions.player0.string = (char*)menu_normal_text[MNT_HUMAN];
@@ -1804,53 +1763,31 @@ static int ServerOptions_SetPlayerItems( void ) {
 		start = 0;
 	}
 
-	maxClients = start;
-	for( n = start; n < PLAYER_SLOTS; n++ )
-	{
-		if (s_serveroptions.playerType[n].curvalue < 2)
-		{
-			maxClients++;
+	for ( n = 0; n < PLAYER_SLOTS; n++ ) {
+		qboolean active = qfalse;
+		if ( ( n == 0 && !s_serveroptions.dedicated.curvalue ) ||
+				s_serveroptions.playerType[n].curvalue == PT_BOT ) {
+			active = qtrue;
 		}
 
-		if( s_serveroptions.playerType[n].curvalue == 1 )
-		{
+		if ( active ) {
 			s_serveroptions.playerName[n].generic.flags &= ~(QMF_INACTIVE|QMF_HIDDEN);
-		}
-		else {
+		} else {
 			s_serveroptions.playerName[n].generic.flags |= (QMF_INACTIVE|QMF_HIDDEN);
 		}
-	}
 
-	if (maxClients < holdmaxClients)
-	{
-		maxClients = holdmaxClients;
-	}
-
-	for( n = start; n < PLAYER_SLOTS; n++ ) {
-		if( s_serveroptions.playerType[n].curvalue == 2 || !s_serveroptions.specialties ) {
-			//specialties not on or... slot closed
-			s_serveroptions.playerClass[n].generic.flags |= (QMF_INACTIVE|QMF_HIDDEN);
-		}
-		else {
-			s_serveroptions.playerClass[n].generic.flags &= ~(QMF_INACTIVE|QMF_HIDDEN);
-		}
-	}
-
-	// teams
-	if( s_serveroptions.gametype < GT_TEAM ) {
-		return(maxClients);
-	}
-
-	for( n = start; n < PLAYER_SLOTS; n++ ) {
-		if( s_serveroptions.playerType[n].curvalue == 2 ) {
+		if ( s_serveroptions.gametype >= GT_TEAM ) {
+			s_serveroptions.playerTeam[n].generic.flags &= ~(QMF_INACTIVE|QMF_HIDDEN);
+		} else {
 			s_serveroptions.playerTeam[n].generic.flags |= (QMF_INACTIVE|QMF_HIDDEN);
 		}
-		else {
-			s_serveroptions.playerTeam[n].generic.flags &= ~(QMF_INACTIVE|QMF_HIDDEN);
+
+		if ( active && s_serveroptions.specialties ) {
+			s_serveroptions.playerClass[n].generic.flags &= ~(QMF_INACTIVE|QMF_HIDDEN);
+		} else {
+			s_serveroptions.playerClass[n].generic.flags |= (QMF_INACTIVE|QMF_HIDDEN);
 		}
 	}
-
-	return(maxClients);
 }
 
 
@@ -1861,8 +1798,6 @@ ServerOptions_Event
 */
 static void ServerOptions_Event( void* ptr, int event )
 {
-	int maxClients;
-
 	switch( ((menucommon_s*)ptr)->id ) {
 
 	case ID_PLAYER_TEAM:
@@ -1875,8 +1810,14 @@ static void ServerOptions_Event( void* ptr, int event )
 		if( event != QM_ACTIVATED ) {
 			break;
 		}
-		maxClients = ServerOptions_SetPlayerItems();
-		trap_Cvar_SetValue( "sv_maxclients", maxClients );
+		{
+			// Re-roll the random specialties class when enabling bots
+			int slot = (menulist_s *)ptr - s_serveroptions.playerType;
+			if ( slot >= 1 && slot < PLAYER_SLOTS && s_serveroptions.playerType[slot].curvalue == PT_BOT ) {
+				s_serveroptions.playerClass[slot].curvalue = RANDOM_PLAYER_CLASS;
+			}
+		}
+		ServerOptions_SetPlayerItems();
 		break;
 
 	case ID_MAXCLIENTS:
@@ -2003,13 +1944,11 @@ static void ServerOptions_LevelshotDraw( void *self ) {
 
 static void ServerOptions_InitBotNames( void ) {
 	int			count;
-	int			n;
 	const char	*arenaInfo;
 	const char	*botInfo;
 	char		*p;
 	char		*bot;
 	char		bots[MAX_INFO_STRING];
-	int			max;
 
 	if( s_serveroptions.gametype >= GT_TEAM ) {
 		Q_strncpyz( s_serveroptions.playerNameBuffers[1], "Janeway", 16 );
@@ -2017,11 +1956,6 @@ static void ServerOptions_InitBotNames( void ) {
 		if( s_serveroptions.gametype == GT_TEAM ) {
 			Q_strncpyz( s_serveroptions.playerNameBuffers[3], "Chakotay", 16 );
 		}
-		else {
-			s_serveroptions.playerType[3].curvalue = 2;
-		}
-		s_serveroptions.playerType[4].curvalue = 2;
-		s_serveroptions.playerType[5].curvalue = 2;
 
 		Q_strncpyz( s_serveroptions.playerNameBuffers[6], "Gowron", 16 );
 		Q_strncpyz( s_serveroptions.playerNameBuffers[7], "1_of_12", 16 );
@@ -2029,73 +1963,59 @@ static void ServerOptions_InitBotNames( void ) {
 		if( s_serveroptions.gametype == GT_TEAM ) {
 			Q_strncpyz( s_serveroptions.playerNameBuffers[9], "3_of_6", 16 );
 		}
-		else {
-			s_serveroptions.playerType[9].curvalue = 2;
-		}
-		s_serveroptions.playerType[10].curvalue = 2;
-		s_serveroptions.playerType[11].curvalue = 2;
-
-		return;
 	}
 
-	count = 1;	// skip the first slot, reserved for a human
+	else {
+		count = 1;	// skip the first slot, reserved for a human
 
-	// get info for this map
-	arenaInfo = UI_GetArenaInfoByMap( s_serveroptions.mapnamebuffer );
+		// get info for this map
+		arenaInfo = UI_GetArenaInfoByMap( s_serveroptions.mapnamebuffer );
 
-	// get the bot info - we'll seed with them if any are listed
-	Q_strncpyz( bots, Info_ValueForKey( arenaInfo, "bots" ), sizeof(bots) );
-	p = &bots[0];
-	while( *p && count < PLAYER_SLOTS ) {
-		//skip spaces
-		while( *p && *p == ' ' ) {
-			p++;
-		}
-		if( !p ) {
-			break;
-		}
+		// get the bot info - we'll seed with them if any are listed
+		Q_strncpyz( bots, Info_ValueForKey( arenaInfo, "bots" ), sizeof(bots) );
+		p = &bots[0];
+		while( *p && count < PLAYER_SLOTS ) {
+			//skip spaces
+			while( *p && *p == ' ' ) {
+				p++;
+			}
+			if( !p ) {
+				break;
+			}
 
-		// mark start of bot name
-		bot = p;
+			// mark start of bot name
+			bot = p;
 
-		// skip until space of null
-		while( *p && *p != ' ' ) {
-			p++;
-		}
-		if( *p ) {
-			*p++ = 0;
-		}
+			// skip until space of null
+			while( *p && *p != ' ' ) {
+				p++;
+			}
+			if( *p ) {
+				*p++ = 0;
+			}
 
-		botInfo = UI_GetBotInfoByName( bot );
-		bot = Info_ValueForKey( botInfo, "name" );
+			botInfo = UI_GetBotInfoByName( bot );
+			bot = Info_ValueForKey( botInfo, "name" );
 
-		Q_strncpyz( s_serveroptions.playerNameBuffers[count], bot, sizeof(s_serveroptions.playerNameBuffers[count]) );
-		count++;
+			Q_strncpyz( s_serveroptions.playerNameBuffers[count], bot, sizeof(s_serveroptions.playerNameBuffers[count]) );
+			count++;
+		}					
 	}
 
-	max = Com_Clamp( 0, 64, trap_Cvar_VariableValue( "sv_maxclients" ));
-
-	if (max > PLAYER_SLOTS)
-	{
-		max = PLAYER_SLOTS;
-	}
-
-	// set the rest of the bot slots to "---"
-	for( n = count; n < max; n++ ) {
-		strcpy( s_serveroptions.playerNameBuffers[n], "--------" );
-	}
-
-	// pad up to #8 as open slots
-	for( ;count < max; count++ ) {
-		s_serveroptions.playerType[count].curvalue = 0;
-	}
-
-	// close off the rest by default
-	for( ;count < PLAYER_SLOTS; count++ )
-	{
-//		if( s_serveroptions.playerType[count].curvalue == 1 ) {
-			s_serveroptions.playerType[count].curvalue = 2;
-//		}
+	for( count = 1; count < PLAYER_SLOTS; count++ ) {
+		if ( *s_serveroptions.playerNameBuffers[count] ) {
+			if ( !s_serveroptions.multiplayer ) {
+				// named bots are enabled by default in single player (coming through solo match->create match menu)
+				s_serveroptions.playerType[count].curvalue = PT_BOT;
+			} else {
+				// otherwise need to be manually enabled
+				s_serveroptions.playerType[count].curvalue = PT_OPEN;
+			}
+		} else {
+			// empty bot slots initialize to "---" and need to be manually enabled
+			strcpy( s_serveroptions.playerNameBuffers[count], DEFAULT_BOT_NAME );
+			s_serveroptions.playerType[count].curvalue = PT_OPEN;
+		}
 	}
 }
 
@@ -2149,10 +2069,10 @@ static void ServerOptions_SetMenuItems( void ) {
 
 	// get the player selections initialized
 	ServerOptions_InitPlayerItems();
-	ServerOptions_SetPlayerItems();
 
 	// seed bot names
 	ServerOptions_InitBotNames();
+
 	ServerOptions_SetPlayerItems();
 }
 
@@ -2271,13 +2191,9 @@ static void ServerOptions_MenuDraw (void)
 ServerOptions_MenuInit2
 =================
 */
-static void ServerOptions_MenuInit2( int specialties)
+static void ServerOptions_MenuInit2( void )
 {
-	int	assim,n;
-
-	assim = trap_Cvar_VariableValue( "g_pModAssimilation");
-
-	s_serveroptions.specialties = specialties;
+	int	assim = trap_Cvar_VariableValue( "g_pModAssimilation");
 
 	if (!assim)	// No points in assimilation
 	{
@@ -2298,18 +2214,8 @@ static void ServerOptions_MenuInit2( int specialties)
 		}
 	}
 
-
-	for( n = 0; n < PLAYER_SLOTS; n++ )
-	{
-		if ( specialties && s_serveroptions.playerType[n].curvalue != 2 )
-		{
-			s_serveroptions.playerClass[n].generic.flags	&= ~(QMF_INACTIVE|QMF_HIDDEN);
-		}
-		else
-		{
-			s_serveroptions.playerClass[n].generic.flags	|= (QMF_INACTIVE|QMF_HIDDEN);
-		}
-	}
+	// might need to add/remove class icons if specialties was enabled/disabled
+	ServerOptions_SetPlayerItems();
 }
 
 /*
@@ -2766,7 +2672,7 @@ static void ServerOptions_MenuInit( qboolean multiplayer )
 	Menu_AddItem( &s_serveroptions.menu, &s_serveroptions.go );
 
 	ServerOptions_SetMenuItems();
-	ServerOptions_MenuInit2(s_serveroptions.specialties);
+	ServerOptions_MenuInit2();
 }
 
 /*
@@ -2849,6 +2755,7 @@ typedef struct {
 	int				numpages;
 	int				selectedmodel;
 	int				sortedBotNums[MAX_BOTS];
+	char			currentSelection[16];
 	char			boticons[MAX_MODELSPERPAGE][MAX_QPATH];
 	char			botnames[MAX_MODELSPERPAGE][16];
 } botSelectInfo_t;
@@ -3087,8 +2994,8 @@ static void UI_BotSelectMenu_BotEvent( void* ptr, int event ) {
 	botSelectInfo.picbuttons[i].generic.flags &= ~QMF_PULSEIFFOCUS;
 	botSelectInfo.selectedmodel = botSelectInfo.modelpage * MAX_MODELSPERPAGE + i;
 
-	strcpy( botSelectInfo.chosenname.string, botSelectInfo.picnames[i].string);
-
+	Q_strncpyz( botSelectInfo.currentSelection, botSelectInfo.picnames[i].string,
+			sizeof( botSelectInfo.currentSelection ) );
 }
 
 
@@ -3133,7 +3040,11 @@ static void UI_BotSelectMenu_SelectEvent( void* ptr, int event )
 	UI_PopMenu();
 
 	s_serveroptions.newBot = qtrue;
-	Q_strncpyz( s_serveroptions.newBotName, botSelectInfo.botnames[botSelectInfo.selectedmodel % MAX_MODELSPERPAGE], 16 );
+	if ( *botSelectInfo.currentSelection ) {
+		Q_strncpyz( s_serveroptions.newBotName, botSelectInfo.currentSelection, sizeof( s_serveroptions.newBotName ) );
+	} else {
+		Q_strncpyz( s_serveroptions.newBotName, DEFAULT_BOT_NAME, sizeof( s_serveroptions.newBotName ) );
+	}
 }
 
 
@@ -3214,7 +3125,6 @@ static void UI_BotSelectMenu_Init( char *bot )
 {
 	int		i, j, k;
 	int		x, y,len;
-	static char chosennamebuffer[64];
 
 	memset( &botSelectInfo, 0 ,sizeof(botSelectInfo) );
 	botSelectInfo.menu.nitems = 0;
@@ -3374,7 +3284,7 @@ static void UI_BotSelectMenu_Init( char *bot )
 	botSelectInfo.chosenname.generic.flags = QMF_INACTIVE;
 	botSelectInfo.chosenname.generic.x	    = 212;
 	botSelectInfo.chosenname.generic.y	    = 351;
-	botSelectInfo.chosenname.string        = chosennamebuffer;
+	botSelectInfo.chosenname.string        = botSelectInfo.currentSelection;
 	botSelectInfo.chosenname.style         = UI_SMALLFONT;
 	botSelectInfo.chosenname.color         = colorTable[CT_LTBLUE2];
 
@@ -3593,8 +3503,8 @@ static void AdvancedServer_Update( void)
 	}
 	trap_Cvar_SetValue( "g_classChangeDebounceTime", holdInt );
 
-	ServerOptions_MenuInit2(s_advancedserver.specialties.curvalue);
-
+	s_serveroptions.specialties = s_advancedserver.specialties.curvalue;
+	ServerOptions_MenuInit2();
 }
 
 

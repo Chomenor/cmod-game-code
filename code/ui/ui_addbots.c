@@ -91,8 +91,12 @@ static void UI_AddBotsMenu_SetBotNames( void ) {
 
 	for ( n = 0; n < BOTS_VIEWABLE; n++ )
 	{
-		info = UI_GetBotInfoByNumber( addBotsMenuInfo.sortedBotNums[addBotsMenuInfo.baseBotNum + n] );
-		Q_strncpyz( addBotsMenuInfo.botnames[n], Info_ValueForKey( info, "name" ), sizeof(addBotsMenuInfo.botnames[n]) );
+		if ( addBotsMenuInfo.baseBotNum + n < 0 ) {
+			Q_strncpyz( addBotsMenuInfo.botnames[n], "Random", sizeof(addBotsMenuInfo.botnames[n]) );
+		} else {
+			info = UI_GetBotInfoByNumber( addBotsMenuInfo.sortedBotNums[addBotsMenuInfo.baseBotNum + n] );
+			Q_strncpyz( addBotsMenuInfo.botnames[n], Info_ValueForKey( info, "name" ), sizeof(addBotsMenuInfo.botnames[n]) );
+		}
 	}
 
 }
@@ -108,7 +112,7 @@ static void UI_AddBotsMenu_UpEvent( void* ptr, int event ) {
 		return;
 	}
 
-	if( addBotsMenuInfo.baseBotNum > 0 ) {
+	if( addBotsMenuInfo.baseBotNum > -1 ) {
 		addBotsMenuInfo.baseBotNum--;
 		UI_AddBotsMenu_SetBotNames();
 	}
@@ -457,9 +461,9 @@ static void UI_AddBotsMenu_Init( void )
 	addBotsMenuInfo.back.textcolor2				= CT_WHITE;
 
 
-	addBotsMenuInfo.baseBotNum = 0;
+	addBotsMenuInfo.baseBotNum = -1;
 	addBotsMenuInfo.selectedBotNum = 0;
-//	addBotsMenuInfo.bots[0].color = color_white;
+	addBotsMenuInfo.bots[0].color = colorTable[CT_YELLOW];
 
 	UI_AddBotsMenu_GetSortedBotNums();
 	UI_AddBotsMenu_SetBotNames();
@@ -469,6 +473,10 @@ static void UI_AddBotsMenu_Init( void )
 	for( n = 0; n < count; n++ )
 	{
 		Menu_AddItem( &addBotsMenuInfo.menu, &addBotsMenuInfo.bots[n] );
+
+		// workaround to increase clickable width, as otherwise the width would be tied to
+		// the initial text width and become incorrect if text changes due to scrolling
+		addBotsMenuInfo.bots[n].generic.right = addBotsMenuInfo.bots[n].generic.left + 170;
 	}
 	Menu_AddItem( &addBotsMenuInfo.menu, &addBotsMenuInfo.skill );
 	Menu_AddItem( &addBotsMenuInfo.menu, &addBotsMenuInfo.team );

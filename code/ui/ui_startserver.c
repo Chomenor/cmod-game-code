@@ -17,125 +17,32 @@ START SERVER MENU *****
 
 #define MAX_SKINS_FOR_RACE 128
 
-#define MAX_MAPROWS		2
-#define MAX_MAPCOLS		2
 #define MAX_MAPSPERPAGE	4
-
-#define MAX_SERVERMAPS	MAX_ARENAS
 
 #define MAX_NAMELENGTH	24
 
-#define ID_GAMETYPE				10
-#define ID_PICTURES				11	// 12, 13, 14
-#define ID_PREVPAGE				15
-#define ID_NEXTPAGE				16
-#define ID_STARTSERVERBACK		17
-#define ID_STARTSERVERNEXT		18
-#define ID_MAINMENU				100
+enum {
+	ID_GAMETYPE = 100,
+	ID_FILTER_MODE,
+	ID_PREVPAGE,
+	ID_NEXTPAGE,
+	ID_STARTSERVERBACK,
+	ID_STARTSERVERNEXT,
+	ID_MAINMENU,
 
-#define ID_AUTOJOIN					5
-#define ID_AUTOBALANCE				6
-#define ID_FRIENDLYFIRE				7
-#define ID_FALLINGDAMAGE			8
-#define ID_RESPAWNTIME				9
-#define ID_ADVMAXCLIENTS			10
-#define ID_RUNSPEED					11
-#define ID_GRAVITY					12
-#define ID_KNOCKBACK				13
-#define ID_DMGMULT					14
-#define ID_BOT_MINPLAYERS			15
-#define ID_ADAPTITEMRESPAWN			16
-#define ID_HOLODECKINTRO			17
-#define ID_FORCEPLAYERRESPAWN		18
-#define ID_RESPAWNINVULNERABILITY	19
-#define ID_DOWARMUP					20
-#define ID_BLUETEAM					21
-#define ID_REDTEAM					22
-#define ID_PMOD_ASSIMILIATION		23
-#define ID_PMOD_DISINTEGRATION		24
-#define ID_PMOD_ACTIONHERO			25
-#define ID_PMOD_SPECIALTIES			26
-#define ID_PMOD_ELIMINATION			27
-#define ID_PLAYER_TYPE			28
-#define ID_MAXCLIENTS			29
-#define ID_DEDICATED			30
-#define ID_GO					31
-#define ID_BACK					32
-#define ID_PLAYER_TEAM			33
-#define ID_ADVANCED				34
-#define	ID_NOJOINTIMEOUT		35
-#define	ID_CLASSCHANGETIMEOUT	36
-#define ID_PLAYER_CLASS			37
+	ID_PICTURES,
+	ID_PICTURES2,
+	ID_PICTURES3,
+	ID_PICTURES4,
 
-
-#define ERR_RESPAWNTIME				1
-#define ERR_MAXCLIENTS				2
-#define ERR_RUNSPEED				3
-#define ERR_GRAVITY					4
-#define ERR_KNOCKBACK				5
-#define ERR_DMGMULT					6
-#define ERR_BOT_MINPLAYERS			7
-#define ERR_FORCEPLAYERRESPAWN		8
-#define ERR_RESPAWNINVULNERABILITY	9
-#define ERR_DOWARMUP				10
-#define	ERR_NOJOINTIMEOUT			11
-#define	ERR_CLASSCHANGETIMEOUT		12
-
-void UI_BuildGroupTable(void);
-void SetPlayerMod(void);
+	ID_PMOD_ASSIMILIATION,
+	ID_PMOD_DISINTEGRATION,
+	ID_PMOD_ACTIONHERO,
+	ID_PMOD_SPECIALTIES,
+	ID_PMOD_ELIMINATION,
+};
 
 extern int s_OffOnNone_Names[];
-
-static const char  *s_skinsForRace[MAX_SKINS_FOR_RACE];
-
-static char skinsForRace[MAX_SKINS_FOR_RACE][128];
-
-typedef struct
-{
-	menuframework_s	menu;
-	menubitmap_s	mainmenu;
-	menubitmap_s	back;
-
-	menulist_s		autojoin;
-	menulist_s		autobalance;
-	menulist_s		friendlyfire;
-	menulist_s		fallingdamage;
-
-	menufield_s		repawntime;
-	menufield_s		maxclients;
-	menufield_s		runspeed;
-	menufield_s		gravity;
-	menufield_s		knockback;
-	menufield_s		dmgmult;
-	menufield_s		bot_minplayers;
-	menufield_s		nojointimeout;
-	menufield_s		classchangetimeout;
-
-	// Second column
-	menulist_s		adaptitemrespawn;
-	menulist_s		holodeckintro;
-	menufield_s		forceplayerrespawn;
-	menufield_s		respawninvulnerability;
-	menufield_s		dowarmup;
-
-	menulist_s		blueteam;
-	menulist_s		redteam;
-
-
-	menulist_s		assimilation;
-	menulist_s		specialties;
-	menulist_s		disintegration;
-
-	menulist_s		actionhero;
-	menulist_s		elimination;
-
-	menutext_s		errorText;
-
-	int				errorFlag;
-
-} advancedserver_t;
-
-static advancedserver_t s_advancedserver;
 
 typedef struct
 {
@@ -143,6 +50,9 @@ typedef struct
 
 	menubitmap_s	mainmenu;
 	menulist_s		gametype;
+	menutext_s		pageNumbers;
+	menufield_s		filterField;
+	menulist_s		filterMode;
 	menubitmap_s	mappics[MAX_MAPSPERPAGE];
 	menubitmap_s	mapbuttons[MAX_MAPSPERPAGE];
 	menubitmap_s	arrows;
@@ -154,7 +64,6 @@ typedef struct
 	menulist_s		assimilation;
 	menulist_s		specialties;
 	menulist_s		disintegration;
-
 	menulist_s		actionhero;
 	menulist_s		elimination;
 
@@ -165,14 +74,15 @@ typedef struct
 	qhandle_t		corner_lr;
 
 	qboolean		multiplayer;
+
 	int				currentmap;
-	int				nummaps;
 	int				page;
-	int				maxpages;
-	char			maplist[MAX_SERVERMAPS][MAX_NAMELENGTH];
-	int				mapGamebits[MAX_SERVERMAPS];
-	char			maplongname[MAX_SERVERMAPS][MAX_NAMELENGTH];
-	int				maprecommended[MAX_SERVERMAPS];
+	mapSearchResult_t msr;
+	int				msrNums[MAX_MAPSPERPAGE];
+
+	char			filterTextCurrent[MAX_EDIT_LINE];
+	char			pageNumbersBuffer[32];
+	char			mapnameBuffer[MAX_NAMELENGTH];
 } startserver_t;
 
 static startserver_t s_startserver;
@@ -190,306 +100,173 @@ static int gametype_items[] =
 static int gametype_remap[] = {GT_FFA, GT_TEAM, GT_CTF, GT_TOURNAMENT};
 static int gametype_remap2[] = {0, 3, 0, 1, 2};
 
-
+static int filtermode_items[] =
+{
+	MNT_STARTSERVER_FILTER_CONTAINS,
+	MNT_STARTSERVER_FILTER_STARTSWITH,
+	0
+};
 
 static void UI_ServerOptionsMenu( qboolean multiplayer );
-static int UI_SearchGroupTable(char *current_race);
-static void UI_BlankGroupTable(void);
-
-void StartServerSetModButtons(void);
-
-
 
 
 /*
 =================
-GametypeBits
+StartServer_UpdateMapButtons
+
+Called when page is loaded or map is selected.
 =================
 */
-static int GametypeBits( char *string ) {
-	int		bits;
-	char	*p;
-	char	*token;
+static void StartServer_UpdateMapButtons( void ) {
+	int i;
 
-	bits = 0;
-	p = string;
-	while( 1 ) {
-		token = COM_ParseExt( &p, qfalse );
-		if( token[0] == 0 ) {
-			break;
+	for ( i = 0; i < MAX_MAPSPERPAGE; i++ ) {
+		if ( i < s_startserver.msr.count ) {
+			// visible map
+			s_startserver.mapbuttons[i].generic.flags &= ~QMF_INACTIVE;
+			if ( s_startserver.msrNums[i] == s_startserver.currentmap ) {
+				// currently selected map
+				s_startserver.mappics[i].generic.flags |= QMF_HIGHLIGHT;
+				s_startserver.mapbuttons[i].generic.flags &= ~QMF_PULSEIFFOCUS;
+			} else {
+				s_startserver.mappics[i].generic.flags &= ~QMF_HIGHLIGHT;
+				s_startserver.mapbuttons[i].generic.flags |= QMF_PULSEIFFOCUS;
+			}
+		} else {
+			// empty slot
+			s_startserver.mappics[i].generic.flags &= ~QMF_HIGHLIGHT;
+			s_startserver.mapbuttons[i].generic.flags &= ~QMF_PULSEIFFOCUS;
+			s_startserver.mapbuttons[i].generic.flags |= QMF_INACTIVE;
 		}
+	}
+}
 
-		if( Q_stricmp( token, "ffa" ) == 0 ) {
-			bits |= 1 << GT_FFA;
-			// TS 10.12.2001
-			bits |= 1 << GT_TOURNAMENT;
-			continue;
-		}
+/*
+=================
+StartServer_SetSelectedMap
 
-		// TS 10.12.2001
-		if( Q_stricmp( token, "tourney" ) == 0 ) {
-			bits |= 1 << GT_TOURNAMENT;
-			continue;
-		}
+Called when a map is selected.
+=================
+*/
+extern vmCvar_t	ui_language;
+static void StartServer_SetSelectedMap( int mapNum ) {
+	char info[MAX_INFO_STRING];
 
-		if( Q_stricmp( token, "single" ) == 0 ) {
-			bits |= 1 << GT_SINGLE_PLAYER;
-			continue;
-		}
+	// store the selection
+	s_startserver.currentmap = mapNum;
 
-		if( Q_stricmp( token, "team" ) == 0 ) {
-			bits |= 1 << GT_TEAM;
-			continue;
-		}
+	// update the description text field
+	*s_startserver.mapnameBuffer = '\0';
+	UI_GetArenaInfo( mapNum, info, sizeof( info ) );
 
-		if( Q_stricmp( token, "ctf" ) == 0 ) {
-			bits |= 1 << GT_CTF;
-			continue;
+	if ( ui_language.string[0] == 0 || Q_stricmp( "ENGLISH", ui_language.string ) == 0 ) {
+		Q_strncpyz( s_startserver.mapnameBuffer, Info_ValueForKey( info, "longname" ),
+				sizeof( s_startserver.mapnameBuffer ) );
+	} else {
+		Q_strncpyz( s_startserver.mapnameBuffer,
+				Info_ValueForKey( info, va( "longname_%s", ui_language.string ) ),
+				sizeof( s_startserver.mapnameBuffer ) );
+		if ( !s_startserver.mapnameBuffer[0] ) {
+			Q_strncpyz( s_startserver.mapnameBuffer, Info_ValueForKey( info, "longname" ),
+					sizeof( s_startserver.mapnameBuffer ) );
 		}
 	}
 
-	return bits;
-}
+	if ( !s_startserver.mapnameBuffer[0] ) {
+		Q_strncpyz( s_startserver.mapnameBuffer, UI_GetMapName( mapNum ), sizeof( s_startserver.mapnameBuffer ) );
+	}
 
+	Q_strupr( s_startserver.mapnameBuffer );
+
+	// highlight the correct slot
+	StartServer_UpdateMapButtons();
+}
 
 /*
 =================
-StartServer_Update
+StartServer_LoadPage
+
+Called when moving to previous or next page, or initializing first page.
 =================
 */
-static void StartServer_Update( void ) {
-	int				i;
-	int				top;
+static void StartServer_LoadPage( void ) {
+	int i;
 	static	char	picname[MAX_MAPSPERPAGE][64];
 
-	top = s_startserver.page*MAX_MAPSPERPAGE;
+	// update map search
+	s_startserver.msr = UI_GetMapPage( s_startserver.filterField.field.buffer,
+			filtermode_items[s_startserver.filterMode.curvalue] == MNT_STARTSERVER_FILTER_CONTAINS ?
+			MST_CONTAINS : MST_STARTS_WITH,
+			gametype_remap[s_startserver.gametype.curvalue] == GT_CTF ? qtrue : qfalse,
+			s_startserver.page * MAX_MAPSPERPAGE, s_startserver.msrNums, MAX_MAPSPERPAGE );
 
-	for (i=0; i<MAX_MAPSPERPAGE; i++)
-	{
-		if (top+i >= s_startserver.nummaps)
-			break;
-
-		Com_sprintf( picname[i], sizeof(picname[i]), "levelshots/%s", s_startserver.maplist[top+i] );
-
-		s_startserver.mappics[i].generic.flags &= ~QMF_HIGHLIGHT;
-		s_startserver.mappics[i].generic.name   = picname[i];
-		s_startserver.mappics[i].shader         = 0;
-
-		// reset
-		s_startserver.mapbuttons[i].generic.flags |= QMF_PULSEIFFOCUS;
-		s_startserver.mapbuttons[i].generic.flags &= ~QMF_INACTIVE;
-	}
-
-	for (; i<MAX_MAPSPERPAGE; i++)
-	{
-		s_startserver.mappics[i].generic.flags &= ~QMF_HIGHLIGHT;
-		s_startserver.mappics[i].generic.name   = NULL;
-		s_startserver.mappics[i].shader         = 0;
-
-		// disable
-		s_startserver.mapbuttons[i].generic.flags &= ~QMF_PULSEIFFOCUS;
-		s_startserver.mapbuttons[i].generic.flags |= QMF_INACTIVE;
-	}
-
-	// no servers to start
-	if( !s_startserver.nummaps ) {
-		s_startserver.next.generic.flags |= QMF_INACTIVE;
-
-		// set the map name
-		strcpy( s_startserver.mapname.string, menu_normal_text[MNT_NOMAPSFOUND] );
-	}
-	else {
-		// set the highlight
-		s_startserver.next.generic.flags &= ~QMF_INACTIVE;
-		i = s_startserver.currentmap - top;
-		if ( i >=0 && i < MAX_MAPSPERPAGE )
-		{
-			s_startserver.mappics[i].generic.flags    |= QMF_HIGHLIGHT;
-			s_startserver.mapbuttons[i].generic.flags &= ~QMF_PULSEIFFOCUS;
+	// update thumbnails
+	for ( i = 0; i < MAX_MAPSPERPAGE; i++ ) {
+		s_startserver.mappics[i].shader = 0;
+		s_startserver.mappics[i].generic.name = NULL;
+		if ( i < s_startserver.msr.count ) {
+			Com_sprintf( picname[i], sizeof( picname[i] ), "levelshots/%s",
+					UI_GetMapName( s_startserver.msrNums[i] ) );
+			s_startserver.mappics[i].generic.name = picname[i];
 		}
-
-		// set the map name
-		strcpy( s_startserver.mapname.string, s_startserver.maplist[s_startserver.currentmap] );
 	}
 
-	Q_strupr( s_startserver.mapname.string );
+	// update page numbers
+	if ( s_startserver.msr.totalMaps > 0 ) {
+		Com_sprintf( s_startserver.pageNumbersBuffer, sizeof( s_startserver.pageNumbersBuffer ),
+				"%i-%i %s %i%s", s_startserver.page * MAX_MAPSPERPAGE + 1,
+				s_startserver.page * MAX_MAPSPERPAGE + s_startserver.msr.count,
+				menu_normal_text[MNT_OF], s_startserver.msr.totalMaps,
+				s_startserver.msr.totalMapsEstimated ? "*" : "" );
+	} else {
+		Com_sprintf( s_startserver.pageNumbersBuffer, sizeof( s_startserver.pageNumbersBuffer ),
+				"0 %s 0", menu_normal_text[MNT_OF] );
+	}
+
+	// configure thumbnails
+	StartServer_UpdateMapButtons();
 }
 
+/*
+=================
+StartServer_ResetPage
+
+Reset page selection to first page, and map selection to first map. Called when first
+entering menu, and on gametype or search filter changes.
+=================
+*/
+static void StartServer_ResetPage( void ) {
+	// load first page
+	s_startserver.page = 0;
+	s_startserver.currentmap = 0;
+	StartServer_LoadPage();
+
+	if ( s_startserver.msr.count > 0 ) {
+		// have maps, place selection on first one
+		StartServer_SetSelectedMap( s_startserver.msrNums[0] );
+		s_startserver.next.generic.flags &= ~QMF_INACTIVE;
+	} else {
+		// no maps
+		EF_WARN_ASSERT( s_startserver.msr.totalMaps == 0 );
+		s_startserver.next.generic.flags |= QMF_INACTIVE;
+
+		Q_strncpyz( s_startserver.mapnameBuffer, menu_normal_text[MNT_NOMAPSFOUND], sizeof( s_startserver.mapnameBuffer ) );
+		Q_strupr( s_startserver.mapnameBuffer );
+	}
+}
 
 /*
 =================
 StartServer_MapEvent
 =================
 */
-static void StartServer_MapEvent( void* ptr, int event ) {
-	if( event != QM_ACTIVATED) {
-		return;
-	}
-
-	s_startserver.currentmap = (s_startserver.page*MAX_MAPSPERPAGE) + (((menucommon_s*)ptr)->id - ID_PICTURES);
-	StartServer_Update();
-}
-
-static void StartServer_Settings(void)
-{
-	s_startserver.actionhero.curvalue= 0;
-	s_startserver.assimilation.curvalue= 0;
-	s_startserver.disintegration.curvalue= 0;
-	s_startserver.elimination.curvalue= 0;
-	s_startserver.specialties.curvalue= 0;
-
-	s_startserver.actionhero.generic.flags &= ~QMF_GRAYED;
-	s_startserver.assimilation.generic.flags &= ~QMF_GRAYED;
-	s_startserver.disintegration.generic.flags &= ~QMF_GRAYED;
-	s_startserver.elimination.generic.flags &= ~QMF_GRAYED;
-	s_startserver.specialties.generic.flags &= ~QMF_GRAYED;
-
-	// Set assimilation button
-	if  (gametype_remap[s_startserver.gametype.curvalue]== GT_TEAM )
-	{
-		s_startserver.assimilation.generic.flags &= ~QMF_HIDDEN;
-	}
-	else
-	{
-		s_startserver.assimilation.generic.flags |= QMF_HIDDEN;
-	}
-
-
-	// Set specialties button
-//	if  (gametype_remap[s_startserver.gametype.curvalue]>= GT_TEAM )
-//	{
-//		s_startserver.specialties.generic.flags &= ~QMF_HIDDEN;
-//	}
-//	else
-//	{
-//		s_startserver.specialties.generic.flags |= QMF_HIDDEN;
-//	}
-
-	// Set assimilation button
-	s_startserver.disintegration.generic.flags &= ~QMF_HIDDEN;
-
-	// Set elimination button
-	if  (gametype_remap[s_startserver.gametype.curvalue]< GT_CTF )
-	{
-		s_startserver.elimination.generic.flags &= ~QMF_HIDDEN;
-	}
-	else
-	{
-		s_startserver.elimination.generic.flags |= QMF_HIDDEN;
-	}
-
-	// Set action hero button
-	if  (gametype_remap[s_startserver.gametype.curvalue]< GT_TEAM )
-	{
-		s_startserver.actionhero.generic.flags &= ~QMF_HIDDEN;
-	}
-	else
-	{
-		s_startserver.actionhero.generic.flags |= QMF_HIDDEN;
-	}
-
-}
-
-/*
-=================
-StartServer_GametypeEvent
-=================
-*/
-extern vmCvar_t	ui_language;
-static void StartServer_GametypeEvent( void* ptr, int event ) {
-	int			i;
-	int			count;
-	int			gamebits;
-	int			matchbits;
-	const char	*info;
-
-	if( event != QM_ACTIVATED) {
-		return;
-	}
-
-
-	count = UI_GetNumArenas();
-	s_startserver.nummaps = 0;
-	matchbits = 1 << gametype_remap[s_startserver.gametype.curvalue];
-
-	if( gametype_remap[s_startserver.gametype.curvalue] == GT_FFA ) {
-		matchbits |= ( 1 << GT_SINGLE_PLAYER );
-	}
-
-	// TS 10.12.2001
-  else if( gametype_remap[s_startserver.gametype.curvalue] == GT_TOURNAMENT ) {
-		matchbits |= ( 1 << GT_SINGLE_PLAYER );
-	}
-
-	for( i = 0; i < count; i++ ) {
-		info = UI_GetArenaInfoByNumber( i );
-
-		gamebits = GametypeBits( Info_ValueForKey( info, "type") );
-		if( !( gamebits & matchbits ) ) {
-			continue;
+static void StartServer_MapEvent( void *ptr, int event ) {
+	if ( event == QM_ACTIVATED ) {
+		int index = ( (menucommon_s *)ptr )->id - ID_PICTURES;
+		if ( EF_WARN_ASSERT( index >= 0 && index < s_startserver.msr.count ) ) {
+			StartServer_SetSelectedMap( s_startserver.msrNums[index] );
 		}
-
-		Q_strncpyz( s_startserver.maplist[s_startserver.nummaps], Info_ValueForKey( info, "map"), MAX_NAMELENGTH );
-		Q_strupr( s_startserver.maplist[s_startserver.nummaps] );
-
-		if (ui_language.string[0] == 0 || Q_stricmp ("ENGLISH",ui_language.string)==0 )
-		{
-			Q_strncpyz( s_startserver.maplongname[s_startserver.nummaps], Info_ValueForKey( info, "longname"), MAX_NAMELENGTH );
-		}
-		else
-		{
-			Q_strncpyz( s_startserver.maplongname[s_startserver.nummaps], Info_ValueForKey( info, va("longname_%s",ui_language.string) ), MAX_NAMELENGTH );
-			if (!s_startserver.maplongname[s_startserver.nummaps][0])
-			{
-				Q_strncpyz( s_startserver.maplongname[s_startserver.nummaps], Info_ValueForKey( info, "longname"), MAX_NAMELENGTH );
-			}
-		}
-		Q_strupr( s_startserver.maplongname[s_startserver.nummaps] );
-
-		s_startserver.maprecommended[s_startserver.nummaps] = atoi(Info_ValueForKey( info, "recommended"));
-
-		s_startserver.mapGamebits[s_startserver.nummaps] = gamebits;
-		s_startserver.nummaps++;
 	}
-	s_startserver.maxpages = (s_startserver.nummaps + MAX_MAPSPERPAGE-1)/MAX_MAPSPERPAGE;
-	s_startserver.page = 0;
-	s_startserver.currentmap = 0;
-
-	StartServer_Settings();
-
-	StartServer_Update();
-
-	// Zero these bad boys out.
-	trap_Cvar_SetValue( "g_pModAssimilation", 0);
-	trap_Cvar_SetValue( "g_pModActionHero", 0);
-	trap_Cvar_SetValue( "g_pModDisintegration", 0);
-	trap_Cvar_SetValue( "g_pModElimination", 0);
-	trap_Cvar_SetValue( "g_pModSpecialties", 0);
-
-	StartServerSetModButtons();
-}
-
-
-/*
-=================
-GetStartServerMods
-=================
-*/
-void GetStartServerMods(void)
-{
-
-	s_startserver.assimilation.curvalue = Com_Clamp( 0, 1, trap_Cvar_VariableValue( "g_pModAssimilation"));
-
-	s_startserver.disintegration.curvalue = Com_Clamp( 0, 1, trap_Cvar_VariableValue( "g_pModDisintegration"));
-
-	s_startserver.actionhero.curvalue = Com_Clamp( 0, 1, trap_Cvar_VariableValue( "g_pModActionHero"));
-
-	s_startserver.specialties.curvalue = Com_Clamp( 0, 1, trap_Cvar_VariableValue( "g_pModSpecialties"));
-
-	s_startserver.elimination.curvalue = Com_Clamp( 0, 1, trap_Cvar_VariableValue( "g_pModElimination"));
-
-	s_startserver.assimilation.curvalue = Com_Clamp( 0, 1, trap_Cvar_VariableValue( "g_pModAssimilation"));
-
 }
 
 
@@ -498,174 +275,68 @@ void GetStartServerMods(void)
 SetServerButtons - where buttons are turned on/off or activated/grayed
 =================
 */
-void SetServerButtons(int gameType,menulist_s *assimilation,menulist_s *specialties,menulist_s *disintegration,menulist_s *elimination,menulist_s *actionhero)
-{
-
-	//Lots of checks because NULL  could be sent for one of the buttons
-
-	if  (gameType == GT_TEAM )
-	{
-		if (assimilation)
-		{
-			assimilation->generic.flags &= ~QMF_HIDDEN;
-		}
-	}
-	else
-	{
-		if (assimilation)
-		{
-			assimilation->generic.flags |= QMF_HIDDEN;
-		}
+void SetServerButtons( int gameType, menulist_s *assimilation, menulist_s *specialties,
+		menulist_s *disintegration, menulist_s *elimination, menulist_s *actionhero ) {
+	// Set assimilation button
+	if ( gameType == GT_TEAM ) {
+		assimilation->generic.flags &= ~QMF_HIDDEN;
+	} else {
+		assimilation->generic.flags |= QMF_HIDDEN;
 	}
 
 	// Set elimination button
-	if  (gameType < GT_CTF )
-	{
-		if (elimination)
-		{
-			elimination->generic.flags &= ~QMF_HIDDEN;
-		}
-	}
-	else
-	{
-		if (elimination)
-		{
-			elimination->generic.flags |= QMF_HIDDEN;
-		}
+	if ( gameType < GT_CTF ) {
+		elimination->generic.flags &= ~QMF_HIDDEN;
+	} else {
+		elimination->generic.flags |= QMF_HIDDEN;
 	}
 
 	// Set action hero button
-	if  (gameType < GT_TEAM )
-	{
-		if (actionhero)
-		{
-			actionhero->generic.flags &= ~QMF_HIDDEN;
-		}
-	}
-	else
-	{
-		if (actionhero)
-		{
-			actionhero->generic.flags |= QMF_HIDDEN;
-		}
+	if ( gameType < GT_TEAM ) {
+		actionhero->generic.flags &= ~QMF_HIDDEN;
+	} else {
+		actionhero->generic.flags |= QMF_HIDDEN;
 	}
 
 	// Ungray everything
-	if (actionhero)
-	{
-		actionhero->generic.flags &= ~QMF_GRAYED;
-	}
-	if (assimilation)
-	{
-		assimilation->generic.flags &= ~QMF_GRAYED;
-	}
-	if (disintegration)
-	{
-		disintegration->generic.flags &= ~QMF_GRAYED;
-	}
-	if (elimination)
-	{
-		elimination->generic.flags &= ~QMF_GRAYED;
-	}
-	if (specialties)
-	{
-		specialties->generic.flags &= ~QMF_GRAYED;
-	}
+	actionhero->generic.flags &= ~QMF_GRAYED;
+	assimilation->generic.flags &= ~QMF_GRAYED;
+	disintegration->generic.flags &= ~QMF_GRAYED;
+	elimination->generic.flags &= ~QMF_GRAYED;
+	specialties->generic.flags &= ~QMF_GRAYED;
 
 	// If action hero is ON
-	if (actionhero)
-	{
-		if (actionhero->curvalue==1)
-		{	// Gray these out
-			if (assimilation)
-			{
-				assimilation->generic.flags |= QMF_GRAYED;
-			}
-			if (disintegration)
-			{
-				disintegration->generic.flags |= QMF_GRAYED;
-			}
-			if (elimination)
-			{
-				elimination->generic.flags |= QMF_GRAYED;
-			}
-			if (specialties)
-			{
-				specialties->generic.flags |= QMF_GRAYED;
-			}
-		}
+	if ( actionhero->curvalue == 1 ) {
+		assimilation->generic.flags |= QMF_GRAYED;
+		disintegration->generic.flags |= QMF_GRAYED;
+		elimination->generic.flags |= QMF_GRAYED;
+		specialties->generic.flags |= QMF_GRAYED;
 	}
 
 	// If assimilation is ON
-	if (assimilation)
-	{
-		if (assimilation->curvalue==1)
-		{
-			if (actionhero)
-			{
-				actionhero->generic.flags |= QMF_GRAYED;
-			}
-			if (disintegration)
-			{
-				disintegration->generic.flags |= QMF_GRAYED;
-			}
-			if (elimination)
-			{
-				elimination->generic.flags |= QMF_GRAYED;
-			}
-		}
+	if ( assimilation->curvalue == 1 ) {
+		actionhero->generic.flags |= QMF_GRAYED;
+		disintegration->generic.flags |= QMF_GRAYED;
+		elimination->generic.flags |= QMF_GRAYED;
 	}
 
 	// If disintegration is ON
-	if (disintegration)
-	{
-		if (disintegration->curvalue==1)
-		{
-			if (actionhero)
-			{
-				actionhero->generic.flags |= QMF_GRAYED;
-			}
-			if (assimilation)
-			{
-				assimilation->generic.flags |= QMF_GRAYED;
-			}
-			if (specialties)
-			{
-				specialties->generic.flags |= QMF_GRAYED;
-			}
-		}
+	if ( disintegration->curvalue == 1 ) {
+		actionhero->generic.flags |= QMF_GRAYED;
+		assimilation->generic.flags |= QMF_GRAYED;
+		specialties->generic.flags |= QMF_GRAYED;
 	}
 
 	// If elimination is ON
-	if (elimination)
-	{
-		if (elimination->curvalue==1)
-		{
-			if (actionhero)
-			{
-				actionhero->generic.flags |= QMF_GRAYED;
-			}
-			if (assimilation)
-			{
-				assimilation->generic.flags |= QMF_GRAYED;
-			}
-		}
+	if ( elimination->curvalue == 1 ) {
+		actionhero->generic.flags |= QMF_GRAYED;
+		assimilation->generic.flags |= QMF_GRAYED;
 	}
 
 	// If specialties is ON
-	if (specialties)
-	{
-		if (specialties->curvalue==1)
-		{
-			if (actionhero)
-			{
-				actionhero->generic.flags |= QMF_GRAYED;
-			}
-			if (disintegration)
-			{
-				disintegration->generic.flags |= QMF_GRAYED;
-			}
-		}
+	if ( specialties->curvalue == 1 ) {
+		actionhero->generic.flags |= QMF_GRAYED;
+		disintegration->generic.flags |= QMF_GRAYED;
 	}
 }
 
@@ -777,6 +448,41 @@ void StartServerSetModButtons(void)
 			&s_startserver.actionhero);
 }
 
+/*
+=================
+StartServer_GametypeEvent
+=================
+*/
+static void StartServer_GametypeEvent( void* ptr, int event ) {
+	if( event != QM_ACTIVATED) {
+		return;
+	}
+
+	StartServer_ResetPage();
+
+	// Zero these bad boys out.
+	trap_Cvar_SetValue( "g_pModAssimilation", 0);
+	trap_Cvar_SetValue( "g_pModActionHero", 0);
+	trap_Cvar_SetValue( "g_pModDisintegration", 0);
+	trap_Cvar_SetValue( "g_pModElimination", 0);
+	trap_Cvar_SetValue( "g_pModSpecialties", 0);
+
+	StartServerSetModButtons();
+}
+
+/*
+=================
+SetPlayerMod
+=================
+*/
+void SetPlayerMod(void)
+{
+	trap_Cvar_SetValue( "g_pModAssimilation", s_startserver.assimilation.curvalue);
+	trap_Cvar_SetValue( "g_pModDisintegration", s_startserver.disintegration.curvalue);
+	trap_Cvar_SetValue( "g_pModActionHero", s_startserver.actionhero.curvalue);
+	trap_Cvar_SetValue( "g_pModSpecialties", s_startserver.specialties.curvalue);
+	trap_Cvar_SetValue( "g_pModElimination", s_startserver.elimination.curvalue);
+}
 
 /*
 =================
@@ -823,15 +529,19 @@ static void StartServer_MenuEvent( void* ptr, int event ) {
 	case ID_PREVPAGE:
 		if( s_startserver.page > 0 ) {
 			s_startserver.page--;
-			StartServer_Update();
+			StartServer_LoadPage();
 		}
 		break;
 
 	case ID_NEXTPAGE:
-		if( s_startserver.page < s_startserver.maxpages - 1 ) {
+		if( ( s_startserver.page + 1 ) * MAX_MAPSPERPAGE < s_startserver.msr.totalMaps ) {
 			s_startserver.page++;
-			StartServer_Update();
+			StartServer_LoadPage();
 		}
+		break;
+
+	case ID_FILTER_MODE:
+		StartServer_ResetPage();
 		break;
 
 	case ID_STARTSERVERNEXT:
@@ -861,7 +571,7 @@ static void StartServer_LevelshotDraw( void *self ) {
 	menubitmap_s	*b;
 	int				x;
 	int				y;
-	int				n;
+	int				index;
 	int				color = CT_DKGOLD1;
 
 	b = (menubitmap_s *)self;
@@ -887,21 +597,38 @@ static void StartServer_LevelshotDraw( void *self ) {
 		UI_DrawHandlePic( x, y, b->width, b->height, b->shader );
 	}
 
-	n = (s_startserver.page * MAX_MAPSPERPAGE) + (b->generic.id - ID_PICTURES);
-	if (n == s_startserver.currentmap)
+	index = b->generic.id - ID_PICTURES;
+	if ( !EF_WARN_ASSERT( index >= 0 && index < s_startserver.msr.count ) ) {
+		return;
+	}
+
+	if (s_startserver.msrNums[index] == s_startserver.currentmap)
 	{
 		color = CT_LTGOLD1;
 	}
 
-	UI_DrawProportionalString( x + 2, y +2, va("%s:%d",menu_normal_text[MNT_RECOMMENDEDPLAYERS],s_startserver.maprecommended[n]), UI_TINYFONT, colorTable[CT_LTGOLD1] );
+	{
+		// draw recommended players
+		int recommended = UI_GetMapRecommendedPlayers( s_startserver.msrNums[index] );
+		if ( recommended > 0 ) {
+			UI_DrawProportionalString( x + 2, y +2, va("%s:%d",menu_normal_text[MNT_RECOMMENDEDPLAYERS],recommended),
+					UI_TINYFONT, colorTable[CT_LTGOLD1] );
+		}
+	}
 
 	y += b->height;
 //	UI_FillRect( x, y, b->width, 28, colorBlack );	//blank the text box
 
 	x += b->width / 2;
 	y += 4;
-
-	UI_DrawProportionalString( x, y, s_startserver.maplist[n], UI_CENTER|UI_SMALLFONT, colorTable[color] );
+	
+	{
+		// draw map name
+		char buffer[MAX_NAMELENGTH];
+		Q_strncpyz( buffer, UI_GetMapName( s_startserver.msrNums[index] ), sizeof( buffer ) );
+		Q_strupr( buffer );
+		UI_DrawProportionalString( x, y, buffer, UI_CENTER|UI_SMALLFONT, colorTable[color] );
+	}
 
 	x = b->generic.x;
 	y = b->generic.y;
@@ -971,18 +698,8 @@ void StartServer_Graphics (void)
 
 static void MapName_Draw( void *self )
 {
-	if (!Q_stricmp(s_startserver.mapname.string,menu_normal_text[MNT_NOMAPSFOUND]))
-	{
-		UI_DrawProportionalString(  s_startserver.mapname.generic.x,  s_startserver.mapname.generic.y,
-			s_startserver.mapname.string,s_startserver.mapname.style, s_startserver.mapname.color);
-	}
-	else
-	{
-		UI_DrawProportionalString(  s_startserver.mapname.generic.x,  s_startserver.mapname.generic.y,
-			s_startserver.maplongname[s_startserver.currentmap],s_startserver.mapname.style, s_startserver.mapname.color);
-	}
-
-
+	UI_DrawProportionalString( s_startserver.mapname.generic.x,  s_startserver.mapname.generic.y,
+			s_startserver.mapname.string,s_startserver.mapname.style, s_startserver.mapname.color );
 }
 
 /*
@@ -992,6 +709,14 @@ StartServer_MenuDraw
 */
 static void StartServer_MenuDraw( void )
 {
+	// check filter field changes
+	if ( Q_stricmp( s_startserver.filterField.field.buffer, s_startserver.filterTextCurrent ) ) {
+		Q_strupr( s_startserver.filterField.field.buffer );
+		Q_strncpyz( s_startserver.filterTextCurrent, s_startserver.filterField.field.buffer,
+				sizeof( s_startserver.filterTextCurrent ) );
+		StartServer_ResetPage();
+	}
+
 	StartServer_Graphics();
 
 	Menu_Draw( &s_startserver.menu );
@@ -1006,7 +731,6 @@ static void StartServer_MenuInit(int multiplayer) {
 	int	i;
 	int	x;
 	int	y,pad;
-	static char mapnamebuffer[64];
 	int	picWidth,picHeight;
 
 	// zero set all our globals
@@ -1083,6 +807,43 @@ static void StartServer_MenuInit(int multiplayer) {
 	s_startserver.gametype.textX					= 5;
 	s_startserver.gametype.textY					= 2;
 	s_startserver.gametype.listnames				= gametype_items;
+
+	s_startserver.filterField.generic.type					= MTYPE_FIELD;
+	s_startserver.filterField.generic.flags					= QMF_SMALLFONT;
+	s_startserver.filterField.generic.x						= 305;
+	s_startserver.filterField.generic.y						= 394;
+	s_startserver.filterField.field.widthInChars			= 15;
+	s_startserver.filterField.field.maxchars				= 14;
+	s_startserver.filterField.field.style					= UI_SMALLFONT;
+	s_startserver.filterField.field.titleEnum				= MBT_STARTSERVER_FILTER_FIELD;
+	s_startserver.filterField.field.titlecolor				= CT_LTGOLD1;
+	s_startserver.filterField.field.textcolor				= CT_DKGOLD1;
+	s_startserver.filterField.field.textcolor2				= CT_LTGOLD1;
+	s_startserver.filterField.field.alwaysShowBackground	= qtrue;
+
+	s_startserver.filterMode.generic.type			= MTYPE_SPINCONTROL;
+	s_startserver.filterMode.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
+	s_startserver.filterMode.generic.callback		= StartServer_MenuEvent;
+	s_startserver.filterMode.generic.id				= ID_FILTER_MODE;
+	s_startserver.filterMode.generic.x				= 255;
+	s_startserver.filterMode.generic.y				= 415;
+	s_startserver.filterMode.textEnum				= MBT_STARTSERVER_FILTER_METHOD;
+	s_startserver.filterMode.textcolor				= CT_BLACK;
+	s_startserver.filterMode.textcolor2				= CT_WHITE;
+	s_startserver.filterMode.color					= CT_DKPURPLE1;
+	s_startserver.filterMode.color2					= CT_LTPURPLE1;
+	s_startserver.filterMode.width					= 55;
+	s_startserver.filterMode.textX					= 5;
+	s_startserver.filterMode.textY					= 2;
+	s_startserver.filterMode.listnames				= filtermode_items;
+
+	s_startserver.pageNumbers.generic.type		= MTYPE_PTEXT;
+	s_startserver.pageNumbers.generic.flags		= QMF_INACTIVE;
+	s_startserver.pageNumbers.generic.x			= 170;
+	s_startserver.pageNumbers.generic.y			= 353;
+	s_startserver.pageNumbers.string			= s_startserver.pageNumbersBuffer;
+	s_startserver.pageNumbers.style				= UI_SMALLFONT | UI_CENTER;
+	s_startserver.pageNumbers.color				= colorTable[CT_WHITE];
 
 	x = 475;
 	y = 90;
@@ -1256,7 +1017,7 @@ static void StartServer_MenuInit(int multiplayer) {
 	s_startserver.mapname.generic.flags = QMF_INACTIVE;
 	s_startserver.mapname.generic.x	    = START_X_POS + 153;
 	s_startserver.mapname.generic.y	    = 325;
-	s_startserver.mapname.string        = mapnamebuffer;
+	s_startserver.mapname.string        = s_startserver.mapnameBuffer;
 	s_startserver.mapname.style         = UI_SMALLFONT;
 	s_startserver.mapname.color         = colorTable[CT_WHITE];
 	s_startserver.mapname.generic.ownerdraw	= MapName_Draw;
@@ -1289,6 +1050,9 @@ static void StartServer_MenuInit(int multiplayer) {
 	Menu_AddItem( &s_startserver.menu, &s_startserver.mainmenu );
 	Menu_AddItem( &s_startserver.menu, &s_startserver.back );
 	Menu_AddItem( &s_startserver.menu, &s_startserver.gametype );
+	Menu_AddItem( &s_startserver.menu, &s_startserver.pageNumbers );
+	Menu_AddItem( &s_startserver.menu, &s_startserver.filterField );
+	Menu_AddItem( &s_startserver.menu, &s_startserver.filterMode );
 	for (i=0; i<MAX_MAPSPERPAGE; i++)
 	{
 		Menu_AddItem( &s_startserver.menu, &s_startserver.mappics[i] );
@@ -1310,10 +1074,6 @@ static void StartServer_MenuInit(int multiplayer) {
 	Menu_AddItem( &s_startserver.menu, &s_startserver.mapname );
 	Menu_AddItem( &s_startserver.menu, &s_startserver.item_null );
 
-	GetStartServerMods();
-
-	StartServer_Settings();
-
 	StartServer_GametypeEvent( NULL, QM_ACTIVATED );
 }
 
@@ -1325,11 +1085,6 @@ StartServer_Cache
 */
 void StartServer_Cache( void )
 {
-	int				i;
-	const char		*info;
-	qboolean		precache;
-	char			picname[64];
-
 	trap_R_RegisterShaderNoMip( GAMESERVER_SELECT );
 	trap_R_RegisterShaderNoMip( GAMESERVER_SELECTED );
 	trap_R_RegisterShaderNoMip( GAMESERVER_UNKNOWNMAP );
@@ -1337,36 +1092,15 @@ void StartServer_Cache( void )
 	s_startserver.corner_ll = trap_R_RegisterShaderNoMip("menu/common/corner_ll_18_18.tga");
 	s_startserver.corner_lr = trap_R_RegisterShaderNoMip("menu/common/corner_lr_18_18.tga");
 
-	precache = trap_Cvar_VariableValue("com_buildscript");
-
-	s_startserver.nummaps = UI_GetNumArenas();
-
-	for( i = 0; i < s_startserver.nummaps; i++ ) {
-		info = UI_GetArenaInfoByNumber( i );
-
-		Q_strncpyz( s_startserver.maplist[i], Info_ValueForKey( info, "map"), MAX_NAMELENGTH );
-		Q_strupr( s_startserver.maplist[i] );
-
-		s_startserver.mapGamebits[i] = GametypeBits( Info_ValueForKey( info, "type") );
-
-		if (ui_language.string[0] == 0 || Q_stricmp ("ENGLISH",ui_language.string)==0 ) {
-			Q_strncpyz( s_startserver.maplongname[i], Info_ValueForKey( info, "longname"), MAX_NAMELENGTH );
-		} else {
-			Q_strncpyz( s_startserver.maplongname[i], Info_ValueForKey( info, va("longname_%s",ui_language.string) ), MAX_NAMELENGTH );
-			if (!s_startserver.maplongname[i][0]) {
-				Q_strncpyz( s_startserver.maplongname[i], Info_ValueForKey( info, "longname"), MAX_NAMELENGTH );
-			}
-		}
-		Q_strupr( s_startserver.maplongname[i] );
-
-		s_startserver.maprecommended[i] = atoi(Info_ValueForKey( info, "recommended"));
-		if( precache ) {
-			Com_sprintf( picname, sizeof(picname), "levelshots/%s", s_startserver.maplist[i] );
-			trap_R_RegisterShaderNoMip(picname);
+	if ( trap_Cvar_VariableValue( "com_buildscript" ) ) {
+		int i;
+		char picname[64];
+		int numMaps = UI_GetNumMaps();
+		for ( i = 0; i < numMaps; ++i ) {
+			Com_sprintf( picname, sizeof( picname ), "levelshots/%s", UI_GetMapName( i ) );
+			trap_R_RegisterShaderNoMip( picname );
 		}
 	}
-
-	s_startserver.maxpages = (s_startserver.nummaps + MAX_MAPSPERPAGE-1)/MAX_MAPSPERPAGE;
 }
 
 
@@ -1392,8 +1126,18 @@ SERVER OPTIONS MENU *****
 =============================================================================
 */
 
-
 #define PLAYER_SLOTS			12
+
+enum {
+	ID_PLAYER_TYPE = 200,
+	ID_MAXCLIENTS,
+	ID_DEDICATED,
+	ID_GO,
+	ID_BACK,
+	ID_PLAYER_TEAM,
+	ID_ADVANCED,
+	ID_PLAYER_CLASS,
+};
 
 typedef enum
 {
@@ -1453,7 +1197,6 @@ typedef struct {
 	qboolean			multiplayer;
 	int					gametype;
 	qboolean			specialties;
-	char				mapnamebuffer[32];
 	char				playerNameBuffers[PLAYER_SLOTS][16];
 	qboolean			updatedPlayer;
 	int					newUpdatedPlayer;
@@ -1652,7 +1395,7 @@ static void ServerOptions_Start( void ) {
 	trap_Cvar_Set("sv_hostname", s_serveroptions.hostname.field.buffer );
 
 	// the wait commands will allow the dedicated to take effect
-	trap_Cmd_ExecuteText( EXEC_APPEND, va( "wait ; wait ; map %s\n", s_startserver.maplist[s_startserver.currentmap] ) );
+	trap_Cmd_ExecuteText( EXEC_APPEND, va( "wait ; wait ; map %s\n", UI_GetMapName( s_startserver.currentmap ) ) );
 
 	// add bots
 	trap_Cmd_ExecuteText( EXEC_APPEND, "wait 3\n" );
@@ -1933,8 +1676,7 @@ static void ServerOptions_LevelshotDraw( void *self ) {
 	x += b->width / 2;
 	y += 4;
 
-	UI_DrawProportionalString( x, y, s_startserver.maplongname[s_startserver.currentmap],
-		UI_CENTER|UI_SMALLFONT, colorTable[CT_LTGOLD1] );
+	UI_DrawProportionalString( x, y, s_startserver.mapname.string, UI_CENTER|UI_SMALLFONT, colorTable[CT_LTGOLD1] );
 
 	y += SMALLCHAR_HEIGHT;
 	UI_DrawProportionalString( x, y, menu_normal_text[gametype_items[gametype_remap2[s_serveroptions.gametype]]], UI_CENTER|UI_SMALLFONT, colorTable[CT_LTGOLD1] );
@@ -1944,7 +1686,6 @@ static void ServerOptions_LevelshotDraw( void *self ) {
 
 static void ServerOptions_InitBotNames( void ) {
 	int			count;
-	const char	*arenaInfo;
 	const char	*botInfo;
 	char		*p;
 	char		*bot;
@@ -1966,10 +1707,11 @@ static void ServerOptions_InitBotNames( void ) {
 	}
 
 	else {
+		char arenaInfo[MAX_INFO_STRING];
 		count = 1;	// skip the first slot, reserved for a human
 
 		// get info for this map
-		arenaInfo = UI_GetArenaInfoByMap( s_serveroptions.mapnamebuffer );
+		UI_GetArenaInfo( s_startserver.currentmap, arenaInfo, sizeof( arenaInfo ) );
 
 		// get the bot info - we'll seed with them if any are listed
 		Q_strncpyz( bots, Info_ValueForKey( arenaInfo, "bots" ), sizeof(bots) );
@@ -2060,12 +1802,8 @@ static void ServerOptions_SetMenuItems( void ) {
 	Q_strncpyz( s_serveroptions.motd.field.buffer, UI_Cvar_VariableString( "g_motd" ), sizeof( s_serveroptions.motd.field.buffer ) );
 
 	// set the map pic
-	Com_sprintf( picname, 64, "levelshots/%s", s_startserver.maplist[s_startserver.currentmap] );
+	Com_sprintf( picname, 64, "levelshots/%s", UI_GetMapName( s_startserver.currentmap ) );
 	s_serveroptions.mappic.generic.name = picname;
-
-	// set the map name
-	strcpy( s_serveroptions.mapnamebuffer, s_startserver.mapname.string );
-	Q_strupr( s_serveroptions.mapnamebuffer );
 
 	// get the player selections initialized
 	ServerOptions_InitPlayerItems();
@@ -3321,18 +3059,102 @@ void UI_BotSelectMenu( char *bot )
 
 
 /*
-=================
-SetPlayerMod
-=================
+=============================================================================
+
+ADVANCED SERVER MENU *****
+
+=============================================================================
 */
-void SetPlayerMod(void)
+
+enum {
+	ID_AUTOJOIN = 300,
+	ID_AUTOBALANCE,
+	ID_FRIENDLYFIRE,
+	ID_FALLINGDAMAGE,
+	ID_RESPAWNTIME,
+	ID_ADVMAXCLIENTS,
+	ID_RUNSPEED,
+	ID_GRAVITY,
+	ID_KNOCKBACK,
+	ID_DMGMULT,
+	ID_BOT_MINPLAYERS,
+	ID_ADAPTITEMRESPAWN,
+	ID_HOLODECKINTRO,
+	ID_FORCEPLAYERRESPAWN,
+	ID_RESPAWNINVULNERABILITY,
+	ID_DOWARMUP,
+	ID_BLUETEAM,
+	ID_REDTEAM,
+	ID_NOJOINTIMEOUT,
+	ID_CLASSCHANGETIMEOUT,
+
+	ERR_RESPAWNTIME,
+	ERR_MAXCLIENTS,
+	ERR_RUNSPEED,
+	ERR_GRAVITY,
+	ERR_KNOCKBACK,
+	ERR_DMGMULT,
+	ERR_BOT_MINPLAYERS,
+	ERR_FORCEPLAYERRESPAWN,
+	ERR_RESPAWNINVULNERABILITY,
+	ERR_DOWARMUP,
+	ERR_NOJOINTIMEOUT,
+	ERR_CLASSCHANGETIMEOUT,
+};
+
+typedef struct
 {
-	trap_Cvar_SetValue( "g_pModAssimilation", s_startserver.assimilation.curvalue);
-	trap_Cvar_SetValue( "g_pModDisintegration", s_startserver.disintegration.curvalue);
-	trap_Cvar_SetValue( "g_pModActionHero", s_startserver.actionhero.curvalue);
-	trap_Cvar_SetValue( "g_pModSpecialties", s_startserver.specialties.curvalue);
-	trap_Cvar_SetValue( "g_pModElimination", s_startserver.elimination.curvalue);
-}
+	menuframework_s	menu;
+	menubitmap_s	mainmenu;
+	menubitmap_s	back;
+
+	menulist_s		autojoin;
+	menulist_s		autobalance;
+	menulist_s		friendlyfire;
+	menulist_s		fallingdamage;
+
+	menufield_s		repawntime;
+	menufield_s		maxclients;
+	menufield_s		runspeed;
+	menufield_s		gravity;
+	menufield_s		knockback;
+	menufield_s		dmgmult;
+	menufield_s		bot_minplayers;
+	menufield_s		nojointimeout;
+	menufield_s		classchangetimeout;
+
+	// Second column
+	menulist_s		adaptitemrespawn;
+	menulist_s		holodeckintro;
+	menufield_s		forceplayerrespawn;
+	menufield_s		respawninvulnerability;
+	menufield_s		dowarmup;
+
+	menulist_s		blueteam;
+	menulist_s		redteam;
+
+
+	menulist_s		assimilation;
+	menulist_s		specialties;
+	menulist_s		disintegration;
+
+	menulist_s		actionhero;
+	menulist_s		elimination;
+
+	menutext_s		errorText;
+
+	int				errorFlag;
+
+} advancedserver_t;
+
+static advancedserver_t s_advancedserver;
+
+static const char  *s_skinsForRace[MAX_SKINS_FOR_RACE];
+static char skinsForRace[MAX_SKINS_FOR_RACE][128];
+
+static void UI_BuildGroupTable(void);
+static int UI_SearchGroupTable(char *current_race);
+static void UI_BlankGroupTable(void);
 
 /*
 =================
@@ -4456,7 +4278,7 @@ void UI_ServerAdvancedOptions(int fromMenu)
 
 
 // Giving credit where credit is due - I stole most of this from Jake's code.
-void UI_BuildGroupTable(void)
+static void UI_BuildGroupTable(void)
 {
 	int		howManySkins = 0;
 	char	filename[128];

@@ -409,6 +409,11 @@ void MenuField_Draw( menufield_s *f )
 			menu = f->generic.parent;
 			UI_DrawProportionalString( menu->descX, menu->descY, menu_button_text[f->field.titleEnum][1], UI_LEFT|UI_TINYFONT, colorTable[CT_BLACK]);
 		}
+	} else if ( f->field.alwaysShowBackground ) {
+		// draw a rectangle a bit darker than the regular listbar_color
+		static const vec4_t color = { 0.60, 0.30, 0.00, 0.30 };
+		UI_FillRect( f->generic.left, f->generic.top, f->generic.right-f->generic.left+1,
+			f->generic.bottom-f->generic.top+1, color );
 	}
 
 	if ( f->field.titleEnum )

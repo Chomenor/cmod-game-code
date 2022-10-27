@@ -30,36 +30,28 @@ static spchoose_t s_spchoose;
 #define ART_MAP_COMPLETE4			"menu/art/level_complete4"
 #define ART_MAP_COMPLETE5			"menu/art/level_complete5"
 
-#define ID_LEFTARROW		10
-#define ID_PICTURE0			11
-#define ID_PICTURE1			12
-#define ID_PICTURE2			13
-#define ID_PICTURE3			14
-#define ID_RIGHTARROW		15
-#define ID_PLAYERPIC		16
-#define ID_AWARD1			17
-#define ID_AWARD2			18
-#define ID_AWARD3			19
-#define ID_AWARD4			20
-#define ID_AWARD5			21
-#define ID_AWARD6			22
-#define ID_AWARD7			23
-#define ID_AWARD8			24
-#define ID_AWARD9			25
-#define ID_RESET			26
-#define ID_CUSTOM			27
-#define ID_NEXT				28
-#define ID_MAINMENU			100
-#define ID_PLAYERINFO		112
-#define ID_NO				120
-#define ID_YES				121
-#define ID_PRESET			122
-#define ID_BACK				123
-#define ID_ADVANCED			124
+enum {
+	ID_LEFTARROW = 100,
+	ID_PICTURE0,
+	ID_PICTURE1,
+	ID_PICTURE2,
+	ID_PICTURE3,
+	ID_RIGHTARROW,
+	ID_PLAYERPIC,
+	ID_RESET,
+	ID_CUSTOM,
+	ID_NEXT,
+	ID_MAINMENU,
+	ID_PLAYERINFO,
+	ID_NO,
+	ID_YES,
+	ID_PRESET,
+	ID_BACK,
+	ID_ADVANCED,
+};
 
-#define AWARDS_Y			(315)
-
-#define MAX_ITEM_MAPS 4
+#define ARENAS_PER_TIER		4
+#define MAX_ITEM_MAPS		4
 
 #define MAX_LONGNAME		24
 
@@ -75,7 +67,6 @@ typedef struct
 	menubitmap_s	item_maps[MAX_ITEM_MAPS];
 	menubitmap_s	item_rightarrow;
 	menubitmap_s	item_player;
-	menubitmap_s	item_awards[6];
 	menubitmap_s	item_null;
 	menubitmap_s	item_reset;
 	menubitmap_s	playerinfo;
@@ -83,7 +74,7 @@ typedef struct
 
 	qboolean		reinit;
 
-	const char *	selectedArenaInfo;
+	char			selectedArenaInfo[MAX_INFO_STRING];
 	int				numMaps;
 	char			levelPicNames[4][MAX_QPATH];
 	char			levelNames[4][16];
@@ -101,8 +92,6 @@ typedef struct
 
 	char			playerModel[MAX_QPATH];
 	char			playerPicName[MAX_QPATH];
-	int				awardLevels[6];
-	sfxHandle_t		awardSounds[6];
 
 	int				numBots;
 	qhandle_t		botPics[7];
@@ -135,10 +124,6 @@ void UI_ResetGameMenu( void );
 
 static int	selectedArenaSet;
 static int	selectedArena;
-static int	currentSet;
-static int	currentGame;
-static int	trainingTier;
-static int	finalTier;
 static int	minTier;
 static int	maxTier;
 
@@ -291,104 +276,44 @@ UI_SPLevelMenu_SetMenuItems
 */
 static void UI_SPLevelMenu_SetMenuItems( void )
 {
-	int			n,i;
+	int			n;
 	int			level;
-	const char	*arenaInfo;
-	char		*type;
+	char		arenaInfo[MAX_INFO_STRING];
 
 	if ( selectedArena == -1 )
 	{
 		selectedArena = 0;
 	}
 
-//	if( selectedArenaSet == trainingTier || selectedArenaSet == finalTier )
-//	{
-//		selectedArena = 0;
-//	}
+	trap_Cvar_SetValue( "ui_spSelection", selectedArenaSet * ARENAS_PER_TIER + selectedArena );
 
-	if( selectedArena != -1 )
+	Bitmap_Init( &levelMenuInfo.item_maps[0] );
+	levelMenuInfo.item_maps[0].generic.bottom += 18;
+
+	memset( levelMenuInfo.levelNames,0, sizeof(levelMenuInfo.levelNames));
+
+	// Zero out info
+	for ( n = 0; n < MAX_ITEM_MAPS; n++ )
 	{
-		trap_Cvar_SetValue( "ui_spSelection", selectedArenaSet * ARENAS_PER_TIER + selectedArena );
+		levelMenuInfo.item_maps[n].generic.flags |= QMF_HIDDEN | QMF_INACTIVE;
+		levelMenuInfo.levelScores[n] = 0;
 	}
 
-	if( selectedArenaSet == trainingTier )
+	levelMenuInfo.numMaps = 0;
+	for ( n = 0; n < MAX_ITEM_MAPS; n++ )
 	{
-		arenaInfo = UI_GetSpecialArenaInfo( "training" );
-		level = atoi( Info_ValueForKey( arenaInfo, "num" ) );
-		UI_SPLevelMenu_SetMenuArena( 0, level, arenaInfo );
-		levelMenuInfo.selectedArenaInfo = arenaInfo;
-
-//		levelMenuInfo.item_maps[0].generic.x = 256;
-		Bitmap_Init( &levelMenuInfo.item_maps[0] );
-		levelMenuInfo.item_maps[0].generic.bottom += 32;
-		levelMenuInfo.numMaps = 1;
-
-		levelMenuInfo.item_maps[1].generic.flags |= QMF_INACTIVE;
-		levelMenuInfo.item_maps[2].generic.flags |= QMF_INACTIVE;
-		levelMenuInfo.item_maps[3].generic.flags |= QMF_INACTIVE;
-		levelMenuInfo.levelPicNames[1][0] = 0;
-		levelMenuInfo.levelPicNames[2][0] = 0;
-		levelMenuInfo.levelPicNames[3][0] = 0;
-		levelMenuInfo.item_maps[1].shader = 0;
-		levelMenuInfo.item_maps[2].shader = 0;
-		levelMenuInfo.item_maps[3].shader = 0;
-	}
-	else if( selectedArenaSet == finalTier )
-	{
-		arenaInfo = UI_GetSpecialArenaInfo( "final" );
-		level = atoi( Info_ValueForKey( arenaInfo, "num" ) );
-		UI_SPLevelMenu_SetMenuArena( 0, level, arenaInfo );
-		levelMenuInfo.selectedArenaInfo = arenaInfo;
-
-//		levelMenuInfo.item_maps[0].generic.x = 256;
-		Bitmap_Init( &levelMenuInfo.item_maps[0] );
-		levelMenuInfo.item_maps[0].generic.bottom += 32;
-		levelMenuInfo.numMaps = 1;
-
-		levelMenuInfo.item_maps[1].generic.flags |= QMF_INACTIVE;
-		levelMenuInfo.item_maps[2].generic.flags |= QMF_INACTIVE;
-		levelMenuInfo.item_maps[3].generic.flags |= QMF_INACTIVE;
-		levelMenuInfo.levelPicNames[1][0] = 0;
-		levelMenuInfo.levelPicNames[2][0] = 0;
-		levelMenuInfo.levelPicNames[3][0] = 0;
-		levelMenuInfo.item_maps[1].shader = 0;
-		levelMenuInfo.item_maps[2].shader = 0;
-		levelMenuInfo.item_maps[3].shader = 0;
-	}
-	else
-	{
-		Bitmap_Init( &levelMenuInfo.item_maps[0] );
-		levelMenuInfo.item_maps[0].generic.bottom += 18;
-
-		memset( levelMenuInfo.levelNames,0, sizeof(levelMenuInfo.levelNames));
-
-		// Zero out info
-		for ( n = 0; n < MAX_ITEM_MAPS; n++ )
+		level = selectedArenaSet * ARENAS_PER_TIER + n;
+		UI_GetSPArenaInfo( level, arenaInfo, sizeof( arenaInfo ) );
+		if( strstr( Info_ValueForKey( arenaInfo, "type" ), "single" ) )
 		{
-			levelMenuInfo.item_maps[n].generic.flags |= QMF_HIDDEN | QMF_INACTIVE;
-			levelMenuInfo.levelScores[n] = 0;
-		}
-
-		i = 0;
-		for ( n = 0; n < MAX_ITEM_MAPS; n++ )
-		{
-			level = selectedArenaSet * ARENAS_PER_TIER + n;
-			arenaInfo = UI_GetArenaInfoByNumber( level );
-			type = Info_ValueForKey( arenaInfo, "type" );
-			if( strstr( type, "single" ) )
-			{
-				UI_SPLevelMenu_SetMenuArena( n, level, arenaInfo );
-				i++;
-			}
-		}
-
-		levelMenuInfo.numMaps = i;
-
-		if( selectedArena != -1 )
-		{
-			levelMenuInfo.selectedArenaInfo = UI_GetArenaInfoByNumber( selectedArenaSet * ARENAS_PER_TIER + selectedArena );
+			UI_SPLevelMenu_SetMenuArena( n, level, arenaInfo );
+			levelMenuInfo.numMaps++;
 		}
 	}
+
+	UI_GetSPArenaInfo( selectedArenaSet * ARENAS_PER_TIER + selectedArena, levelMenuInfo.selectedArenaInfo,
+			sizeof ( levelMenuInfo.selectedArenaInfo ) );
+	EF_WARN_ASSERT( *levelMenuInfo.selectedArenaInfo );
 
 	// enable/disable arrows when they are valid/invalid
 	if ( selectedArenaSet == minTier )
@@ -465,7 +390,11 @@ static void UI_SPLevelMenu_LevelEvent( void* ptr, int notification )
 	}
 
 	selectedArena = ((menucommon_s*)ptr)->id - ID_PICTURE0;
-	levelMenuInfo.selectedArenaInfo = UI_GetArenaInfoByNumber( selectedArenaSet * ARENAS_PER_TIER + selectedArena );
+
+	UI_GetSPArenaInfo( selectedArenaSet * ARENAS_PER_TIER + selectedArena, levelMenuInfo.selectedArenaInfo,
+			sizeof ( levelMenuInfo.selectedArenaInfo ) );
+	EF_WARN_ASSERT( *levelMenuInfo.selectedArenaInfo );
+
 	UI_SPLevelMenu_SetBots();
 
 	trap_Cvar_SetValue( "ui_spSelection", selectedArenaSet * ARENAS_PER_TIER + selectedArena );
@@ -566,25 +495,6 @@ static void UI_SPLevelMenu_AdvancedEvent( void* ptr, int notification )
 			UI_ServerAdvancedOptions(1);
 			break;
 	}
-}
-
-
-/*
-=================
-UI_SPLevelMenu_AwardEvent
-=================
-*/
-static void UI_SPLevelMenu_AwardEvent( void* ptr, int notification )
-{
-	int		n;
-
-	if (notification != QM_ACTIVATED)
-	{
-		return;
-	}
-
-	n = ((menucommon_s*)ptr)->id - ID_AWARD1;
-	trap_S_StartLocalSound( levelMenuInfo.awardSounds[n], CHAN_ANNOUNCER );
 }
 
 
@@ -728,38 +638,6 @@ static void UI_SPLevelMenu_MenuDraw( void )
 	// standard menu drawing
 	Menu_Draw( &levelMenuInfo.menu );
 
-	// draw player award levels
-/*	y = AWARDS_Y;
-	i = 0;
-	for( n = 0; n < AWARD_MAX; n++ )
-	{
-		level = levelMenuInfo.awardLevels[n];
-		if( level > 0 )
-		{
-			x = 385 + (i * 38);
-			i++;
-
-			if( level == 1 )
-			{
-				continue;
-			}
-
-			if( level >= 1000000 )
-			{
-				Com_sprintf( string, sizeof(string), "%im", level / 1000000 );
-			}
-			else if( level >= 1000 ) {
-				Com_sprintf( string, sizeof(string), "%ik", level / 1000 );
-			}
-			else
-			{
-				Com_sprintf( string, sizeof(string), "%i", level );
-			}
-
-			UI_DrawString( x + 19, y + 38, string, UI_CENTER, colorTable[CT_LTGOLD1] );
-		}
-	}
-*/
 	// Print black rectangle below map picture
 	for ( n = 0; n < levelMenuInfo.numMaps; n++ )
 	{
@@ -878,15 +756,7 @@ UI_SPLevelMenu_Cache
 */
 void UI_SPLevelMenu_Cache( void )
 {
-	int				n;
-
 	trap_R_RegisterShaderNoMip( ART_MAP_UNKNOWN );
-
-	for( n = 0; n < AWARD_MAX; n++ )
-	{
-		trap_R_RegisterShaderNoMip( ui_medalPicNames[n] );
-		levelMenuInfo.awardSounds[n] = trap_S_RegisterSound( ui_medalSounds[n] );
-	}
 
 	levelMenuInfo.corner_ul_18_12 = trap_R_RegisterShaderNoMip("menu/common/corner_ul_18_12");
 	levelMenuInfo.corner_ur_18_12 = trap_R_RegisterShaderNoMip("menu/common/corner_ur_18_12");
@@ -914,7 +784,6 @@ static void UI_SPLevelMenu_Init( void )
 	int		skill;
 	int		n;
 	int		x, y;
-	int		count;
 	char	buf[MAX_QPATH];
 	int mapHeight,mapWidth;
 
@@ -1104,34 +973,6 @@ static void UI_SPLevelMenu_Init( void )
 	levelMenuInfo.playerinfo.textcolor				= CT_BLACK;
 	levelMenuInfo.playerinfo.textcolor2				= CT_WHITE;
 
-
-	for( n = 0; n < AWARD_MAX; n++ )
-	{
-		levelMenuInfo.awardLevels[n] = UI_GetAwardLevel( n );
-	}
-//	levelMenuInfo.awardLevels[AWARD_FRAGS] = 100 * (levelMenuInfo.awardLevels[AWARD_FRAGS] / 100);
-
-	y = AWARDS_Y;
-	count = 0;
-	for( n = 0; n < AWARD_MAX; n++ )
-	{
-		if( levelMenuInfo.awardLevels[n] )
-		{
-			x = 385 + (count * 38);
-
-			levelMenuInfo.item_awards[count].generic.type		= MTYPE_BITMAP;
-			levelMenuInfo.item_awards[count].generic.name		= ui_medalPicNames[n];
-			levelMenuInfo.item_awards[count].generic.flags		= QMF_LEFT_JUSTIFY|QMF_SILENT|QMF_MOUSEONLY;
-			levelMenuInfo.item_awards[count].generic.x			= x;
-			levelMenuInfo.item_awards[count].generic.y			= y;
-			levelMenuInfo.item_awards[count].generic.id			= ID_AWARD1 + n;
-			levelMenuInfo.item_awards[count].generic.callback	= UI_SPLevelMenu_AwardEvent;
-			levelMenuInfo.item_awards[count].width				= 34;
-			levelMenuInfo.item_awards[count].height				= 34;
-			count++;
-		}
-	}
-
 	levelMenuInfo.create.generic.type			= MTYPE_BITMAP;
 	levelMenuInfo.create.generic.flags		= QMF_HIGHLIGHT_IF_FOCUS;
 	levelMenuInfo.create.generic.x			= 293;
@@ -1206,11 +1047,6 @@ static void UI_SPLevelMenu_Init( void )
 
 	Menu_AddItem( &levelMenuInfo.menu, &levelMenuInfo.item_player );
 
-//	for( n = 0; n < count; n++ )
-//	{
-//		Menu_AddItem( &levelMenuInfo.menu, &levelMenuInfo.item_awards[n] );
-//	}
-
 	Menu_AddItem( &levelMenuInfo.menu, &levelMenuInfo.item_reset );
 	Menu_AddItem( &levelMenuInfo.menu, &levelMenuInfo.playerinfo );
 	Menu_AddItem( &levelMenuInfo.menu, &levelMenuInfo.create );
@@ -1222,18 +1058,29 @@ static void UI_SPLevelMenu_Init( void )
 	if( *buf )
 	{
 		n = atoi( buf );
-		selectedArenaSet = n / ARENAS_PER_TIER;
-		selectedArena = n % ARENAS_PER_TIER;
 	}
 	else
 	{
-		selectedArenaSet = currentSet;
-		selectedArena = currentGame;
+		n = UI_GetInitialLevel();
 	}
+	selectedArenaSet = n / ARENAS_PER_TIER;
+	selectedArena = n % ARENAS_PER_TIER;
 
 	UI_SPLevelMenu_SetMenuItems();
 }
 
+/*
+===============
+UI_GetNumSPTiers
+
+Returns number of screens of maps to display in solo match menu.
+===============
+*/
+static int UI_GetNumSPTiers( void ) {
+	int arenas = UI_GetNumSPArenas();
+	int remainder = arenas % ARENAS_PER_TIER ? 1 : 0;
+	return ( ( arenas / ARENAS_PER_TIER ) + remainder );
+}
 
 /*
 =================
@@ -1242,61 +1089,16 @@ UI_SPLevelMenu
 */
 void UI_SPLevelMenu( void )
 {
-	int			level;
-	int			trainingLevel;
-	const char	*arenaInfo;
-
-	trainingTier = -1;
-	arenaInfo = UI_GetSpecialArenaInfo( "training" );
-	if( arenaInfo )
+	minTier = 0;
+	maxTier = UI_GetNumSPTiers() - 1;
+	if( maxTier < minTier )
 	{
-		minTier = trainingTier;
-		trainingLevel = atoi( Info_ValueForKey( arenaInfo, "num" ) );
-	}
-	else
-	{
-		minTier = 0;
-		trainingLevel = -2;
-	}
-
-	finalTier = UI_GetNumSPTiers();
-	arenaInfo = UI_GetSpecialArenaInfo( "final" );
-	if( arenaInfo ) {
-		maxTier = finalTier;
-	}
-	else
-	{
-		maxTier = finalTier - 1;
-		if( maxTier < minTier )
-		{
-			maxTier = minTier;
-		}
-	}
-
-	level = UI_GetCurrentGame(-1);
-
-	if ( level == -1 ) {
-		level = UI_GetNumSPArenas() - 1;
-		if( maxTier == finalTier )
-		{
-			level++;
-		}
-	}
-
-	if( level == trainingLevel )
-	{
-		currentSet = -1;
-		currentGame = 0;
-	}
-	else {
-		currentSet = level / ARENAS_PER_TIER;
-		currentGame = level % ARENAS_PER_TIER;
+		maxTier = minTier;
 	}
 
 	UI_SPLevelMenu_Init();
 	UI_PushMenu( &levelMenuInfo.menu );
 	Menu_SetCursorToItem( &levelMenuInfo.menu, &levelMenuInfo.fight );
-
 }
 
 

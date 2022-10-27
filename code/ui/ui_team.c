@@ -226,8 +226,6 @@ ignorekey:
 	return Menu_DefaultKey( &s_teammain.menu, key );
 }
 
-void SetServerButtons(int gameType,menulist_s *assimilation,menulist_s *specialties,menulist_s *disintegration,menulist_s *elimination,menulist_s *actionhero);
-
 /*
 ===============
 TeamMain_MenuInit

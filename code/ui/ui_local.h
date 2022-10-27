@@ -588,6 +588,8 @@ typedef enum
 	MNT_ALTSWAP_SWAPPED,
 	MNT_ALTSWAP_AUTO,
 	MNT_ALTSWAP_CUSTOM,
+	MNT_STARTSERVER_FILTER_CONTAINS,
+	MNT_STARTSERVER_FILTER_STARTSWITH,
 
 	MNT_MAX
 } menuNormalTextType_t;
@@ -985,6 +987,8 @@ typedef enum
 	MBT_ALTSWAP_WEAPON9,
 	MBT_ALTSWAP_WEAPON10,
 	MBT_ALTSWAP_WEAPON11,
+	MBT_STARTSERVER_FILTER_FIELD,
+	MBT_STARTSERVER_FILTER_METHOD,
 
 	MBT_MAX
 } menuButtonTextType_t;
@@ -1035,8 +1039,6 @@ extern vmCvar_t	ui_spScores2;
 extern vmCvar_t	ui_spScores3;
 extern vmCvar_t	ui_spScores4;
 extern vmCvar_t	ui_spScores5;
-extern vmCvar_t	ui_spAwards;
-extern vmCvar_t	ui_spVideos;
 extern vmCvar_t	ui_spSkill;
 
 extern vmCvar_t	ui_weaponrespawn;
@@ -1198,6 +1200,7 @@ typedef struct {
 	int		titlecolor;		// Normal color
 	int		textcolor;		// Normal color
 	int		textcolor2;		// Highlight color
+	qboolean alwaysShowBackground;	// Show rectangle even when not in focus
 } mfield_t;
 
 typedef struct
@@ -1413,10 +1416,6 @@ extern vec4_t		text_color_disabled;
 extern vec4_t		text_color_normal;
 extern vec4_t		text_color_highlight;
 
-extern char	*ui_medalNames[];
-extern char	*ui_medalPicNames[];
-extern char	*ui_medalSounds[];
-
 //
 // ui_main.c
 //
@@ -1573,6 +1572,7 @@ extern void StartServer_Cache( void );
 extern void ServerOptions_Cache( void );
 extern void UI_BotSelectMenu( char *bot );
 extern void UI_BotSelectMenu_Cache( void );
+extern void UI_ServerAdvancedOptions( int fromMenu );
 
 //
 // ui_serverinfo.c
@@ -1752,6 +1752,8 @@ extern void			UI_KeyEvent( int key );
 extern void			UI_PrecacheMenuGraphics(menugraphics_s *menuGraphics,int maxI);
 extern void			UI_MenuFrame(menuframework_s *menu);
 extern void			UI_MenuFrame2(menuframework_s *menu);
+extern void			UI_MenuBottomLineEnd_Graphics (const char *string,int color);
+extern void			UI_PrintMenuGraphics(menugraphics_s *menuGraphics,int maxI);
 
 extern qboolean		m_entersound;
 extern uiStatic_t	uis;
@@ -1898,14 +1900,29 @@ void UI_NetworkOptionsMenu( void );
 //
 // ui_gameinfo.c
 //
-const char *UI_GetArenaInfoByNumber( int num );
-const char *UI_GetArenaInfoByMap( const char *map );
-const char *UI_GetSpecialArenaInfo( const char *tag );
-int UI_GetNumArenas( void );
-int UI_GetNumSPArenas( void );
-int UI_GetNumSPTiers( void );
+typedef enum {
+	MST_UNFILTERED,
+	MST_STARTS_WITH,
+	MST_CONTAINS,
+} mapSearchType_t;
 
-void UI_ServerAdvancedOptions(int fromMenu);
+typedef struct {
+	int count;
+	int totalMaps;
+	qboolean totalMapsEstimated;
+} mapSearchResult_t;
+
+int UI_GetNumMaps( void );
+const char *UI_GetMapName( int num );
+int UI_GetMapRecommendedPlayers( int num );
+void UI_GetArenaInfo( int num, char *buffer, unsigned int bufSize );
+mapSearchResult_t UI_GetMapPage( const char *filter, mapSearchType_t type, qboolean ctf,
+		int startIndex, int *mapsOut, int maxCount );
+
+int UI_GetNumSPArenas( void );
+int UI_GetSPArenaNumByMap( const char *mapName );
+void UI_GetSPArenaInfo( int spNum, char *buffer, unsigned int bufSize );
+int UI_GetInitialLevel( void );
 
 char *UI_GetBotInfoByNumber( int num );
 char *UI_GetBotInfoByName( const char *name );
@@ -1913,19 +1930,9 @@ int UI_GetNumBots( void );
 
 void UI_GetBestScore( int level, int *score, int *skill );
 void UI_SetBestScore( int level, int score );
-int UI_TierCompleted( int levelWon );
-qboolean UI_ShowTierVideo( int tier );
-qboolean UI_CanShowTierVideo( int tier );
-int  UI_GetCurrentGame( int curLevel );
 void UI_NewGame( void );
-void UI_LogAwardData( int award, int data );
-int UI_GetAwardLevel( int award );
 
 void UI_InitGameinfo( void );
-
-
-void UI_MenuBottomLineEnd_Graphics (const char *string,int color);
-void UI_PrintMenuGraphics(menugraphics_s *menuGraphics,int maxI);
 
 //
 // ui_cvars.c

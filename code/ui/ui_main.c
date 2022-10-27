@@ -105,8 +105,6 @@ vmCvar_t	ui_spScores2;
 vmCvar_t	ui_spScores3;
 vmCvar_t	ui_spScores4;
 vmCvar_t	ui_spScores5;
-vmCvar_t	ui_spAwards;
-vmCvar_t	ui_spVideos;
 vmCvar_t	ui_spSkill;
 
 vmCvar_t	ui_weaponrespawn;
@@ -192,8 +190,6 @@ cvarTable_t		cvarTable[] = {
 	{ &ui_spScores3, "g_spScores3", "", CVAR_ARCHIVE | CVAR_ROM },
 	{ &ui_spScores4, "g_spScores4", "", CVAR_ARCHIVE | CVAR_ROM },
 	{ &ui_spScores5, "g_spScores5", "", CVAR_ARCHIVE | CVAR_ROM },
-	{ &ui_spAwards, "g_spAwards", "", CVAR_ARCHIVE | CVAR_ROM },
-	{ &ui_spVideos, "g_spVideos", "", CVAR_ARCHIVE | CVAR_ROM },
 	{ &ui_spSkill, "g_spSkill", "2", CVAR_ARCHIVE | CVAR_LATCH },
 
 	{ &ui_weaponrespawn, "g_weaponrespawn", "5", CVAR_ARCHIVE},

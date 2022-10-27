@@ -2092,6 +2092,8 @@ void UI_LoadMenuText()
 	menu_normal_text[MNT_ALTSWAP_SWAPPED] = "SWAPPED";
 	menu_normal_text[MNT_ALTSWAP_AUTO] = "AUTO";
 	menu_normal_text[MNT_ALTSWAP_CUSTOM] = "CUSTOM";
+	menu_normal_text[MNT_STARTSERVER_FILTER_CONTAINS] = "CONTAINS TEXT";
+	menu_normal_text[MNT_STARTSERVER_FILTER_STARTSWITH] = "STARTS WITH";
 
 	if ( !Q_stricmp( language, "deutsch" ) ) {
 		menu_normal_text[MNT_ORDER_TOEVERYONE] = "An alle";
@@ -2118,6 +2120,8 @@ void UI_LoadMenuText()
 		menu_normal_text[MNT_ALTSWAP_SWAPPED] = "INVERTIERT";
 		menu_normal_text[MNT_ALTSWAP_AUTO] = "AUTOMATISCH";
 		menu_normal_text[MNT_ALTSWAP_CUSTOM] = "BENUTZER";
+		menu_normal_text[MNT_STARTSERVER_FILTER_CONTAINS] = "ENTHÄLT TEXT";
+		menu_normal_text[MNT_STARTSERVER_FILTER_STARTSWITH] = "BEGINNT MIT";
 
 	} else if ( !Q_stricmp( language, "francais" ) ) {
 		menu_normal_text[MNT_PC_NOCLASS] = "SansClasse";
@@ -2161,6 +2165,8 @@ void UI_LoadMenuText()
 		menu_normal_text[MNT_ALTSWAP_SWAPPED] = "INVERSÉ";
 		menu_normal_text[MNT_ALTSWAP_AUTO] = "AUTO";
 		menu_normal_text[MNT_ALTSWAP_CUSTOM] = "SUR MESURE";
+		menu_normal_text[MNT_STARTSERVER_FILTER_CONTAINS] = "CONTIENT TEXTE";
+		menu_normal_text[MNT_STARTSERVER_FILTER_STARTSWITH] = "COMMENCE AVEC";
 	}
 }
 
@@ -2363,6 +2369,10 @@ void UI_LoadButtonText()
 	for ( i = 0; i < 11; ++i ) {
 		menu_button_text[MBT_ALTSWAP_WEAPON1 + i][1] = "SELECT ALT FIRE BUTTON SWAPPING MODE";
 	}
+	menu_button_text[MBT_STARTSERVER_FILTER_FIELD][0] = "FILTER";
+	menu_button_text[MBT_STARTSERVER_FILTER_FIELD][1] = "ENTER MAP SEARCH TEXT";
+	menu_button_text[MBT_STARTSERVER_FILTER_METHOD][0] = "METHOD";
+	menu_button_text[MBT_STARTSERVER_FILTER_METHOD][1] = "SELECT MAP SEARCH TYPE";
 
 	if ( !Q_stricmp( language, "deutsch" ) ) {
 		menu_button_text[MBT_INGAMESERVERDATA][1] = "SERVER-INFORMATION ANZEIGEN";
@@ -2450,6 +2460,10 @@ void UI_LoadButtonText()
 		for ( i = 0; i < 11; ++i ) {
 			menu_button_text[MBT_ALTSWAP_WEAPON1 + i][1] = "MODUS FÜR DAS ALTERNATIVE FEUER AUSWÄHLEN";
 		}
+		//menu_button_text[MBT_STARTSERVER_FILTER_FIELD][0] = "FILTER";
+		menu_button_text[MBT_STARTSERVER_FILTER_FIELD][1] = "SUCHTEXT EINGEBEN";
+		menu_button_text[MBT_STARTSERVER_FILTER_METHOD][0] = "METHODE";
+		menu_button_text[MBT_STARTSERVER_FILTER_METHOD][1] = "SUCHTYP AUSWÄHLEN";
 
 	} else if ( !Q_stricmp( language, "francais" ) ) {
 		menu_button_text[MBT_INGAMESERVERDATA][1] = "AFFICHER INFORMATIONS SERVEUR";
@@ -2549,6 +2563,10 @@ void UI_LoadButtonText()
 		for ( i = 0; i < 11; ++i ) {
 			menu_button_text[MBT_ALTSWAP_WEAPON1 + i][1] = "SÉLECTIONNER LE MODE D'ÉCHANGE DU BOUTON ALT FIRE";
 		}
+		menu_button_text[MBT_STARTSERVER_FILTER_FIELD][0] = "FILTRE";
+		menu_button_text[MBT_STARTSERVER_FILTER_FIELD][1] = "ENTRER LE TEXTE DE RECHERCHE";
+		menu_button_text[MBT_STARTSERVER_FILTER_METHOD][0] = "MÉTHODE";
+		menu_button_text[MBT_STARTSERVER_FILTER_METHOD][1] = "SÉLECTIONNER LE TYPE DE RECHERCHE";
 	}
 }
 

@@ -47,7 +47,6 @@ typedef struct
 
 	const char		*arenaInfo;
 	qhandle_t		skillpics[5];
-	sfxHandle_t		nightmareSound;	//	Do we need this for Voyager??? RWL
 	sfxHandle_t		silenceSound;
 } skillMenuInfo_t;
 
@@ -119,14 +118,7 @@ static void UI_SPSkillMenu_SkillEvent( void *ptr, int notification )
 
 	skillMenuInfo.art_skillPic.shader = skillMenuInfo.skillpics[skill - 1];
 
-//	if( id == ID_NIGHTMARE )
-//	{
-//		trap_S_StartLocalSound( skillMenuInfo.nightmareSound, CHAN_ANNOUNCER );
-//	}
-//	else
-//	{
-		trap_S_StartLocalSound( skillMenuInfo.silenceSound, CHAN_ANNOUNCER );
-//	}
+	trap_S_StartLocalSound( skillMenuInfo.silenceSound, CHAN_ANNOUNCER );
 }
 
 
@@ -267,7 +259,6 @@ void UI_SPSkillMenu_Cache( void )
 
 	skillMenuInfo.corner_18_50 = trap_R_RegisterShaderNoMip("menu/common/corner_ul_18_50" );
 
-//	skillMenuInfo.nightmareSound = trap_S_RegisterSound( "sound/misc/nightmare.wav" );
 	skillMenuInfo.silenceSound = trap_S_RegisterSound( "sound/silence.wav" );
 }
 

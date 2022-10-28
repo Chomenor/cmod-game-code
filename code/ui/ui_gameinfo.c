@@ -1111,15 +1111,17 @@ Returns single player index of the first level the player has not won.
 ===============
 */
 int UI_GetInitialLevel( void ) {
-	int count = UI_GetNumSPArenas();
-	int level;
-	int rank;
-	int skill;
+	int i;
+	int spCount = 0;
 
-	for ( level = 0; level < count; level++ ) {
-		UI_GetBestScore( level, &rank, &skill );
-		if ( !rank || rank > 1 ) {
-			return level;
+	UI_IndexMapsIfNeeded();
+
+	for ( i = 0; i < ui_maps.mapCount; ++i ) {
+		if ( ui_maps.mapList[i].flags & MAPFLAG_SINGLE_PLAYER_SUPPORT ) {
+			if ( UI_ReadMapCompletionSkill( ui_maps.mapList[i].name ) <= 0 ) {
+				return spCount;
+			}
+			++spCount;
 		}
 	}
 
@@ -1300,106 +1302,100 @@ int UI_GetNumBots( void ) {
 
 SINGLE PLAYER GAME INFO
 
+This section handles logging map completion progress, which is used to
+display an icon on maps completed at 1st place in the solo match menu.
+
 =======================================================================
 */
 
+#define SCORE_FILENAME "spscores.dat"
+
+static qboolean ui_mapCompletionLoaded = qfalse;
+static char ui_mapCompletion[BIG_INFO_STRING];
+
 /*
 ===============
-UI_GetBestScore
+UI_ReadMapCompletionIfNeeded
 
-Returns the player's best finish on a given level, 0 if the have not played the level
+Reads completed map record from file.
 ===============
 */
-void UI_GetBestScore( int level, int *score, int *skill ) {
-	int		n;
-	int		skillScore;
-	int		bestScore;
-	int		bestScoreSkill;
-	char	arenaKey[16];
-	char	scores[MAX_INFO_VALUE];
-
-	if( !score || !skill ) {
-		return;
+static void UI_ReadMapCompletionIfNeeded( void ) {
+	if ( !ui_mapCompletionLoaded ) {
+		UI_ReadInfoFile( SCORE_FILENAME, ui_mapCompletion, sizeof( ui_mapCompletion ) );
+		ui_mapCompletionLoaded = qtrue;
 	}
-
-	bestScore = 0;
-	bestScoreSkill = 0;
-
-	for( n = 1; n <= 5; n++ ) {
-		trap_Cvar_VariableStringBuffer( va( "g_spScores%i", n ), scores, MAX_INFO_VALUE );
-
-		Com_sprintf( arenaKey, sizeof( arenaKey ), "l%i", level );
-		skillScore = atoi( Info_ValueForKey( scores, arenaKey ) );
-
-		if( skillScore < 1 || skillScore > 8 ) {
-			continue;
-		}
-
-		if( !bestScore || skillScore <= bestScore ) {
-			bestScore = skillScore;
-			bestScoreSkill = n;
-		}
-	}
-
-	*score = bestScore;
-	*skill = bestScoreSkill;
 }
 
-
 /*
 ===============
-UI_SetBestScore
+UI_WriteMapCompletion
 
-Set the player's best finish for a level
+Writes completed map record to file.
 ===============
 */
-void UI_SetBestScore( int level, int score ) {
-	int		skill;
-	int		oldScore;
-	char	arenaKey[16];
-	char	scores[MAX_INFO_VALUE];
-
-	// validate score
-	if( score < 1 || score > 8 ) {
-		return;
+static void UI_WriteMapCompletion( void ) {
+	fileHandle_t f = 0;
+	trap_FS_FOpenFile( SCORE_FILENAME, &f, FS_WRITE );
+	if ( f ) {
+		trap_FS_Write( ui_mapCompletion, strlen( ui_mapCompletion ), f );
+		trap_FS_FCloseFile( f );
 	}
-
-	// validate skill
-	skill = (int)trap_Cvar_VariableValue( "g_spSkill" );
-	if( skill < 1 || skill > 5 ) {
-		return;
-	}
-
-	// get scores
-	trap_Cvar_VariableStringBuffer( va( "g_spScores%i", skill ), scores, MAX_INFO_VALUE );
-
-	// see if this is better
-	Com_sprintf( arenaKey, sizeof( arenaKey ), "l%i", level );
-	oldScore = atoi( Info_ValueForKey( scores, arenaKey ) );
-	if( oldScore && oldScore <= score ) {
-		return;
-	}
-
-	// update scores
-	Info_SetValueForKey( scores, arenaKey, va( "%i", score ) );
-	trap_Cvar_Set( va( "g_spScores%i", skill ), scores );
 }
 
+/*
+===============
+UI_ReadMapCompletionSkill
 
+Returns the highest difficulty beaten on a level, from 1 to 5, or 0 if the level
+hasn't been completed.
+===============
+*/
+int UI_ReadMapCompletionSkill( const char *mapName ) {
+	int result;
+	UI_ReadMapCompletionIfNeeded();
+	result = atoi( Info_ValueForKey( ui_mapCompletion, mapName ) );
+	if ( result < 0 ) {
+		return 0;
+	}
+	if ( result > 5 ) { 
+		return 5;
+	}
+	return result;
+}
 
 /*
 ===============
-UI_NewGame
+UI_WriteMapCompletionSkill
 
-Clears the scores
+Logs the difficulty level when a map has been completed at 1st place.
 ===============
 */
-void UI_NewGame( void ) {
-	trap_Cvar_Set( "g_spScores1", "" );
-	trap_Cvar_Set( "g_spScores2", "" );
-	trap_Cvar_Set( "g_spScores3", "" );
-	trap_Cvar_Set( "g_spScores4", "" );
-	trap_Cvar_Set( "g_spScores5", "" );
+void UI_WriteMapCompletionSkill( const char *mapName, int skill ) {
+	if ( skill < 1 ) {
+		skill = 1;
+	}
+	if ( skill > 5 ) {
+		skill = 5;
+	}
+	UI_ReadMapCompletionIfNeeded();
+	if ( skill > UI_ReadMapCompletionSkill( mapName ) ) {
+		Info_SetValueForKey_Big( ui_mapCompletion, mapName, va( "%i", skill ) );
+		UI_WriteMapCompletion();
+	}
+}
+
+/*
+===============
+UI_ResetMapCompletion
+
+Clears map completion record.
+===============
+*/
+void UI_ResetMapCompletion( void ) {
+	ui_mapCompletion[0] = '\0';
+	ui_mapCompletionLoaded = qtrue;
+	UI_WriteMapCompletion();
 }
 
 

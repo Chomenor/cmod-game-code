@@ -100,11 +100,6 @@ vmCvar_t	ui_ctf_friendly;
 vmCvar_t	ui_arenasFile;
 vmCvar_t	ui_botsFile;
 vmCvar_t	ui_botminplayers;
-vmCvar_t	ui_spScores1;
-vmCvar_t	ui_spScores2;
-vmCvar_t	ui_spScores3;
-vmCvar_t	ui_spScores4;
-vmCvar_t	ui_spScores5;
 vmCvar_t	ui_spSkill;
 
 vmCvar_t	ui_weaponrespawn;
@@ -185,11 +180,6 @@ cvarTable_t		cvarTable[] = {
 	{ &ui_arenasFile, "g_arenasFile", "", CVAR_INIT|CVAR_ROM },
 	{ &ui_botsFile, "g_botsFile", "", CVAR_INIT|CVAR_ROM },				// Used to have CVAR_ARCHIVE.
 	{ &ui_botminplayers, "bot_minplayers","0", CVAR_SERVERINFO },
-	{ &ui_spScores1, "g_spScores1", "", CVAR_ARCHIVE | CVAR_ROM },
-	{ &ui_spScores2, "g_spScores2", "", CVAR_ARCHIVE | CVAR_ROM },
-	{ &ui_spScores3, "g_spScores3", "", CVAR_ARCHIVE | CVAR_ROM },
-	{ &ui_spScores4, "g_spScores4", "", CVAR_ARCHIVE | CVAR_ROM },
-	{ &ui_spScores5, "g_spScores5", "", CVAR_ARCHIVE | CVAR_ROM },
 	{ &ui_spSkill, "g_spSkill", "2", CVAR_ARCHIVE | CVAR_LATCH },
 
 	{ &ui_weaponrespawn, "g_weaponrespawn", "5", CVAR_ARCHIVE},

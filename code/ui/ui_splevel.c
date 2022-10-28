@@ -79,8 +79,7 @@ typedef struct
 	char			levelPicNames[4][MAX_QPATH];
 	char			levelNames[4][16];
 	char			levelLongNames[4][MAX_LONGNAME];
-	int				levelScores[MAX_ITEM_MAPS];
-	int				levelScoresSkill[4];
+	int				levelCompletion[MAX_ITEM_MAPS];
 	qhandle_t		levelSelectedPic;
 	qhandle_t		levelFocusPic;
 	qhandle_t		levelCompletePic[5];
@@ -251,12 +250,7 @@ static void UI_SPLevelMenu_SetMenuArena( int n, int level, const char *arenaInfo
 	Q_strncpyz( levelMenuInfo.levelLongNames[n], string, sizeof(levelMenuInfo.levelLongNames[n]) );
 	Q_strupr( levelMenuInfo.levelLongNames[n] );
 
-
-	UI_GetBestScore( level, &levelMenuInfo.levelScores[n], &levelMenuInfo.levelScoresSkill[n] );
-	if( levelMenuInfo.levelScores[n] > 8 )
-	{
-		levelMenuInfo.levelScores[n] = 8;
-	}
+	levelMenuInfo.levelCompletion[n] = UI_ReadMapCompletionSkill( map );
 
 	strcpy( levelMenuInfo.levelPicNames[n], va( "levelshots/%s.tga", map ) );
 	if( !trap_R_RegisterShaderNoMip( levelMenuInfo.levelPicNames[n] ) )
@@ -296,7 +290,7 @@ static void UI_SPLevelMenu_SetMenuItems( void )
 	for ( n = 0; n < MAX_ITEM_MAPS; n++ )
 	{
 		levelMenuInfo.item_maps[n].generic.flags |= QMF_HIDDEN | QMF_INACTIVE;
-		levelMenuInfo.levelScores[n] = 0;
+		levelMenuInfo.levelCompletion[n] = 0;
 	}
 
 	levelMenuInfo.numMaps = 0;
@@ -352,7 +346,7 @@ static void UI_SPLevelMenu_ResetAction( qboolean result )
 	}
 
 	// clear game variables
-	UI_NewGame();
+	UI_ResetMapCompletion();
 	trap_Cvar_SetValue( "ui_spSelection", 0 );
 
 	// make the level select menu re-initialize
@@ -658,10 +652,9 @@ static void UI_SPLevelMenu_MenuDraw( void )
 //		UI_DrawString( x + 64, y + 87, levelMenuInfo.levelLongNames[n], UI_CENTER|UI_SMALLFONT, colorTable[CT_LTGOLD1] );
 		UI_DrawProportionalString( x + (MAP_WIDTH/2), y + 87, levelMenuInfo.levelLongNames[n], UI_CENTER|UI_SMALLFONT, colorTable[CT_LTGOLD1] );
 
-		if( levelMenuInfo.levelScores[n] == 1 )
+		if (levelMenuInfo.levelCompletion[n] > 0 && EF_WARN_ASSERT( levelMenuInfo.levelCompletion[n] <= 5 ) )
 		{
-//	UI_DrawHandlePic( x, y, 128, 96, levelMenuInfo.levelCompletePic[levelMenuInfo.levelScoresSkill[n] - 1] );
-			UI_DrawHandlePic( x, y, 48, 48, levelMenuInfo.levelCompletePic[levelMenuInfo.levelScoresSkill[n] - 1] );
+			UI_DrawHandlePic( x, y, 48, 48, levelMenuInfo.levelCompletePic[levelMenuInfo.levelCompletion[n] - 1] );
 		}
 
 		if ( n == selectedArena )

@@ -1034,11 +1034,6 @@ extern vmCvar_t	ui_ctf_friendly;
 extern vmCvar_t	ui_arenasFile;
 extern vmCvar_t	ui_botsFile;
 extern vmCvar_t	ui_botminplayers;
-extern vmCvar_t	ui_spScores1;
-extern vmCvar_t	ui_spScores2;
-extern vmCvar_t	ui_spScores3;
-extern vmCvar_t	ui_spScores4;
-extern vmCvar_t	ui_spScores5;
 extern vmCvar_t	ui_spSkill;
 
 extern vmCvar_t	ui_weaponrespawn;
@@ -1928,9 +1923,9 @@ char *UI_GetBotInfoByNumber( int num );
 char *UI_GetBotInfoByName( const char *name );
 int UI_GetNumBots( void );
 
-void UI_GetBestScore( int level, int *score, int *skill );
-void UI_SetBestScore( int level, int score );
-void UI_NewGame( void );
+int UI_ReadMapCompletionSkill( const char *mapName );
+void UI_WriteMapCompletionSkill( const char *mapName, int skill );
+void UI_ResetMapCompletion( void );
 
 void UI_InitGameinfo( void );
 

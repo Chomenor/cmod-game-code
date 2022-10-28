@@ -219,10 +219,6 @@ void UI_SPPostgameMenu_f( void ) {
 
 	playerGameRank = atoi( UI_Argv(1));
 
-	if ( postgameMenuInfo.level >= 0 ) {
-		UI_SetBestScore( postgameMenuInfo.level, playerGameRank+1 );
-	}
-
 	trap_Key_SetCatcher( KEYCATCH_UI );
 	uis.menusp = 0;
 
@@ -232,6 +228,7 @@ void UI_SPPostgameMenu_f( void ) {
 	if (playerGameRank == 0)
 	{
 		postgameMenuInfo.won = 1;
+		UI_WriteMapCompletionSkill( map, trap_Cvar_VariableValue( "g_spSkill" ) );
 		Menu_SetCursorToItem( &postgameMenuInfo.menu, &postgameMenuInfo.item_next );
 	}
 	else {

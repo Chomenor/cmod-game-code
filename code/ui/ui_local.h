@@ -1622,8 +1622,6 @@ typedef struct {
 	qhandle_t		headModel;
 	qhandle_t		headSkin;
 
-	char			race[256];
-
 	animation_t		animations[MAX_ANIMATIONS];
 
 	qhandle_t		weaponModel;

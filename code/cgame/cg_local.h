@@ -438,8 +438,6 @@ typedef struct {
 	qhandle_t		headModel;
 	qhandle_t		headSkin;
 
-	char			race[256];
-
 	qhandle_t		modelIcon;
 
 	animation_t		animations[MAX_ANIMATIONS];

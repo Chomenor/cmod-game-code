@@ -13,7 +13,6 @@
 #define MAX_GROUP_MEMBERS	1024
 
 #define MAX_GROUP_FILE_SIZE	5000
-extern char	races[256];	//this is evil!
 
 typedef struct {
 	char *name;
@@ -23,6 +22,7 @@ typedef struct {
 static struct {
 	group_list_t group_list[MAX_GROUP_MEMBERS];
 	int group_count;
+	char races[256];
 } *MOD_STATE;
 
 /*
@@ -89,7 +89,7 @@ char *ModModelGroups_Shared_SearchGroupList(const char *name)
 
 	EF_ERR_ASSERT( MOD_STATE );
 
-	memset (races, 0, sizeof(races));
+	memset (MOD_STATE->races, 0, sizeof(MOD_STATE->races));
 	memset (text, 0, sizeof(text));
 
 	// check to see if there is a '/' in the name
@@ -113,13 +113,13 @@ char *ModModelGroups_Shared_SearchGroupList(const char *name)
 	// did we find this group in the list?
 	if (i == MOD_STATE->group_count)
 	{
-		Com_sprintf(races, sizeof(races), "unknown");
+		Com_sprintf(MOD_STATE->races, sizeof(MOD_STATE->races), "unknown");
 	}
 	else
 	{
-		Com_sprintf(races, sizeof(races), text_p);
+		Com_sprintf(MOD_STATE->races, sizeof(MOD_STATE->races), text_p);
 	}
-	return races;
+	return MOD_STATE->races;
 
 }
 

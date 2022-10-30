@@ -252,9 +252,6 @@ static qboolean	CG_RegisterClientSkin( clientInfo_t *ci, const char *modelName, 
 	Com_sprintf( filename, sizeof( filename ), "models/players2/%s/head_%s.skin", modelName, skinName );
 	ci->headSkin = trap_R_RegisterSkin( filename );
 
-	Com_sprintf( filename, sizeof( filename ), "models/players2/%s/groups.cfg", modelName);
-	strcpy(ci->race, BG_RegisterRace( filename ));
-
 	if ( !ci->legsSkin || !ci->torsoSkin || !ci->headSkin ) {
 		return qfalse;
 	}

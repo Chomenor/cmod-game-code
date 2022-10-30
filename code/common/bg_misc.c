@@ -21,8 +21,6 @@ void	trap_FS_Read( void *buffer, int len, fileHandle_t f );
 #define AMMO_QUANTUM_CLIP		6
 #define AMMO_DREADNOUGHT_CLIP	40
 
-char	races[256];
-
 int Max_Ammo[WP_NUM_WEAPONS] =
 {
 	0,						// WP_NONE,
@@ -1433,15 +1431,16 @@ void BG_LoadItemNames(void)
 
 }
 
+#if defined( MODULE_GAME ) || defined ( MODULE_UI )
 /*
 ======================
-G_ParseAnimationFileSex
+BG_ParseAnimationFileSex
 
 Read a configuration file to get the sex
 models/players2/munro/animation.cfg
 ======================
 */
-static gender_t	G_ParseAnimationFileSex( const char *filename) {
+static gender_t	BG_ParseAnimationFileSex( const char *filename) {
 	char		*text_p;
 	int			len;
 	char		*token;
@@ -1495,8 +1494,7 @@ static gender_t	G_ParseAnimationFileSex( const char *filename) {
 
 /*
 ===============
-RE_RegisterSkin
-
+BG_RegisterRace
 ===============
 */
 #define MAX_GROUP_FILE_SIZE	5000
@@ -1507,6 +1505,7 @@ char* BG_RegisterRace( const char *name ) {
 	fileHandle_t	f;
 	char	text[MAX_GROUP_FILE_SIZE];
 	gender_t theSex;
+	static char races[256];
 
 	memset (races, 0, sizeof(races));
 	memset (text, 0, sizeof(text));
@@ -1528,7 +1527,7 @@ char* BG_RegisterRace( const char *name ) {
 	trap_FS_Read( text, len, f );
 	trap_FS_FCloseFile( f );
 
-	theSex = G_ParseAnimationFileSex(name);
+	theSex = BG_ParseAnimationFileSex(name);
 	if (theSex == GENDER_MALE) {
 		strcat(races, "Male,");
 	} else if (theSex == GENDER_FEMALE) {
@@ -1583,7 +1582,6 @@ char* BG_RegisterRace( const char *name ) {
 	return races;
 }
 
-#if defined( MODULE_GAME ) || defined( MODULE_UI )
 /*
 ===============
 BG_ParseInfo

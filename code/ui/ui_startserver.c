@@ -3057,6 +3057,113 @@ void UI_BotSelectMenu( char *bot )
 	UI_PushMenu( &botSelectInfo.menu );
 }
 
+/*
+=============================================================================
+
+TEAM GROUPS *****
+
+=============================================================================
+*/
+
+static const char  *s_skinsForRace[MAX_SKINS_FOR_RACE];
+static char skinsForRace[MAX_SKINS_FOR_RACE][128];
+
+static int UI_SearchGroupTable(char *current_race)
+{
+	int i;
+
+	i=0;
+	while (skinsForRace[i][0])
+	{
+		if (!strcmp(current_race,skinsForRace[i]))
+		{
+			return i;
+		}
+		i++;
+	}
+
+	Q_strncpyz(skinsForRace[i],current_race,strlen(current_race)+1);
+	s_skinsForRace[i] = skinsForRace[i];
+
+	return i;
+}
+
+static void UI_BlankGroupTable(void)
+{
+	skinsForRace[0][0] = '\0';
+	s_skinsForRace[0] = skinsForRace[0];
+}
+
+// Giving credit where credit is due - I stole most of this from Jake's code.
+static void UI_BuildGroupTable(void)
+{
+	int		howManySkins = 0;
+	char	filename[128];
+	char	dirlist[2048];
+	int		i;
+	char*	dirptr;
+	char*	race_list;
+	int		numdirs;
+	int		dirlen;
+	char current_race_name[125];
+	char *max_place;
+	char *s;
+	char *marker;
+
+	memset(skinsForRace,0,sizeof(skinsForRace));
+
+	Q_strncpyz(skinsForRace[0],"",sizeof(skinsForRace[0]));
+	s_skinsForRace[0] = skinsForRace[0];
+
+	// search through each and every skin we can find
+	numdirs = trap_FS_GetFileList("models/players2", "/", dirlist, 2048 );
+	dirptr  = dirlist;
+	for (i=0; i<numdirs && howManySkins < MAX_SKINS_FOR_RACE; i++,dirptr+=dirlen+1)
+	{
+		dirlen = strlen(dirptr);
+
+		if (!dirlen) {
+			continue;
+		}
+
+		if (dirptr[dirlen-1]=='/') {
+			dirptr[dirlen-1]='\0';
+		}
+
+		if (!strcmp(dirptr,".") || !strcmp(dirptr,"..")) {
+			continue;
+		}
+
+		// Get group names for this model
+		Com_sprintf(filename, sizeof(filename), "models/players2/%s/groups.cfg", dirptr);
+		race_list = BG_RegisterRace(filename);
+		max_place = race_list + strlen(race_list);
+		s = race_list;
+
+		// look through the list till it's empty
+		while (s < max_place)
+		{
+			marker = s;
+			// figure out from where we are where the next ',' or 0 is
+			while (*s != ',' && *s != 0)
+			{
+				s++;
+			}
+
+			// copy just that name
+			Q_strncpyz(current_race_name, marker, (s-marker)+1);
+
+			//Search table for a matching entry
+			UI_SearchGroupTable(current_race_name);
+
+			// avoid the comma or increment us past the end of the string so we fail the main while loop
+			s++;
+		}
+	}
+
+	UI_SearchGroupTable("NONE");	// Add this
+
+}
 
 /*
 =============================================================================
@@ -3148,13 +3255,6 @@ typedef struct
 } advancedserver_t;
 
 static advancedserver_t s_advancedserver;
-
-static const char  *s_skinsForRace[MAX_SKINS_FOR_RACE];
-static char skinsForRace[MAX_SKINS_FOR_RACE][128];
-
-static void UI_BuildGroupTable(void);
-static int UI_SearchGroupTable(char *current_race);
-static void UI_BlankGroupTable(void);
 
 /*
 =================
@@ -4274,102 +4374,4 @@ void UI_ServerAdvancedOptions(int fromMenu)
 {
 	UI_AdvancedServerMenu_Init(fromMenu);
 	UI_PushMenu( &s_advancedserver.menu );
-}
-
-
-// Giving credit where credit is due - I stole most of this from Jake's code.
-static void UI_BuildGroupTable(void)
-{
-	int		howManySkins = 0;
-	char	filename[128];
-	char	dirlist[2048];
-	int		i;
-	char*	dirptr;
-	char*	race_list;
-	int		numdirs;
-	int		dirlen;
-	char current_race_name[125];
-	char *max_place;
-	char *s;
-	char *marker;
-
-	memset(skinsForRace,0,sizeof(skinsForRace));
-
-	Q_strncpyz(skinsForRace[0],"",sizeof(skinsForRace[0]));
-	s_skinsForRace[0] = skinsForRace[0];
-
-	// search through each and every skin we can find
-	numdirs = trap_FS_GetFileList("models/players2", "/", dirlist, 2048 );
-	dirptr  = dirlist;
-	for (i=0; i<numdirs && howManySkins < MAX_SKINS_FOR_RACE; i++,dirptr+=dirlen+1)
-	{
-		dirlen = strlen(dirptr);
-
-		if (!dirlen) {
-			continue;
-		}
-
-		if (dirptr[dirlen-1]=='/') {
-			dirptr[dirlen-1]='\0';
-		}
-
-		if (!strcmp(dirptr,".") || !strcmp(dirptr,"..")) {
-			continue;
-		}
-
-		// Get group names for this model
-		Com_sprintf(filename, sizeof(filename), "models/players2/%s/groups.cfg", dirptr);
-		race_list = BG_RegisterRace(filename);
-		max_place = race_list + strlen(race_list);
-		s = race_list;
-
-		// look through the list till it's empty
-		while (s < max_place)
-		{
-			marker = s;
-			// figure out from where we are where the next ',' or 0 is
-			while (*s != ',' && *s != 0)
-			{
-				s++;
-			}
-
-			// copy just that name
-			Q_strncpyz(current_race_name, marker, (s-marker)+1);
-
-			//Search table for a matching entry
-			UI_SearchGroupTable(current_race_name);
-
-			// avoid the comma or increment us past the end of the string so we fail the main while loop
-			s++;
-		}
-	}
-
-	UI_SearchGroupTable("NONE");	// Add this
-
-}
-
-static int UI_SearchGroupTable(char *current_race)
-{
-	int i;
-
-	i=0;
-	while (skinsForRace[i][0])
-	{
-		if (!strcmp(current_race,skinsForRace[i]))
-		{
-			return i;
-		}
-		i++;
-	}
-
-	Q_strncpyz(skinsForRace[i],current_race,strlen(current_race)+1);
-	s_skinsForRace[i] = skinsForRace[i];
-
-	return i;
-}
-
-static void UI_BlankGroupTable(void)
-{
-	skinsForRace[0][0] = '\0';
-	s_skinsForRace[0] = skinsForRace[0];
 }

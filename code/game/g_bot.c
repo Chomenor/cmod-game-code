@@ -4,14 +4,10 @@
 
 #include "g_local.h"
 
+#define ARENA_LIST_BUFFER ( 128 * 1024 )
 
 static int		g_numBots;
 static char		*g_botInfos[MAX_BOTS];
-
-
-static int		g_numArenas;
-static char		*g_arenaInfos[MAX_ARENAS];
-
 
 // Enables announcing each bot one by one in single player.
 // Normally disabled in EF 1.20.
@@ -89,21 +85,26 @@ int G_ParseInfos( char *buf, int max, char *infos[] ) {
 
 /*
 ===============
-G_LoadArenasFromFile
+G_GetArenaInfoByMapFromFile
+
+Returns empty string if map not found in file.
 ===============
 */
-static void G_LoadArenasFromFile( char *filename ) {
-	int				len;
-	fileHandle_t	f;
-	char			buf[MAX_ARENAS_TEXT];
+static void G_GetArenaInfoByMapFromFile( const char *path, const char *map, char *buffer, unsigned int bufSize ) {
+	int len;
+	fileHandle_t f;
+	char buf[MAX_ARENAS_TEXT];
+	infoParseResult_t ipr;
 
-	len = trap_FS_FOpenFile( filename, &f, FS_READ );
+	*buffer = '\0';
+
+	len = trap_FS_FOpenFile( path, &f, FS_READ );
 	if ( !f ) {
-		trap_Printf( va( S_COLOR_RED "file not found: %s\n", filename ) );
+		trap_Printf( va( S_COLOR_RED "file not found: %s\n", path ) );
 		return;
 	}
 	if ( len >= MAX_ARENAS_TEXT ) {
-		trap_Printf( va( S_COLOR_RED "file too large: %s is %i, max allowed is %i", filename, len, MAX_ARENAS_TEXT ) );
+		trap_Printf( va( S_COLOR_RED "file too large: %s is %i, max allowed is %i", path, len, MAX_ARENAS_TEXT ) );
 		trap_FS_FCloseFile( f );
 		return;
 	}
@@ -112,65 +113,55 @@ static void G_LoadArenasFromFile( char *filename ) {
 	buf[len] = 0;
 	trap_FS_FCloseFile( f );
 
-	g_numArenas += G_ParseInfos( buf, MAX_ARENAS - g_numArenas, &g_arenaInfos[g_numArenas] );
+	if ( BG_ParseInfoForMap( buf, map, &ipr ) ) {
+		Q_strncpyz( buffer, ipr.info, bufSize );
+	}
 }
 
 /*
 ===============
-G_LoadArenas
+G_GetArenaInfoByMap
+
+Returns empty string if map not found.
 ===============
 */
-static void G_LoadArenas( void ) {
-	int			numdirs;
-	vmCvar_t	arenasFile;
-	char		filename[128];
-	char		dirlist[1024];
-	char*		dirptr;
-	int			i, n;
-	int			dirlen;
+static void G_GetArenaInfoByMap( const char *map, char *buffer, unsigned int bufSize ) {
+	static char *dirlist = NULL;
+	int numdirs;
+	vmCvar_t arenasFile;
+	char *dirptr;
+	int i;
+	int dirlen;
 
-	g_numArenas = 0;
+	*buffer = '\0';
 
-	trap_Cvar_Register( &arenasFile, "g_arenasFile", "", CVAR_INIT|CVAR_ROM );
-	if( *arenasFile.string ) {
-		G_LoadArenasFromFile(arenasFile.string);
+	if ( !dirlist ) {
+		// not very efficient, but should be adequate for solo match mode
+		dirlist = G_Alloc( ARENA_LIST_BUFFER );
 	}
-	else {
-		G_LoadArenasFromFile("scripts/arenas.txt");
+
+	trap_Cvar_Register( &arenasFile, "g_arenasFile", "", CVAR_INIT | CVAR_ROM );
+	if ( *arenasFile.string ) {
+		G_GetArenaInfoByMapFromFile( arenasFile.string, map, buffer, bufSize );
+	} else {
+		G_GetArenaInfoByMapFromFile( "scripts/arenas.txt", map, buffer, bufSize );
+	}
+	if ( *buffer ) {
+		return;
 	}
 
 	// get all arenas from .arena files
-	numdirs = trap_FS_GetFileList("scripts", ".arena", dirlist, 1024 );
-	dirptr  = dirlist;
-	for (i = 0; i < numdirs; i++, dirptr += dirlen+1) {
-		dirlen = strlen(dirptr);
-		strcpy(filename, "scripts/");
-		strcat(filename, dirptr);
-		G_LoadArenasFromFile(filename);
-	}
-	trap_Printf( va( "%i arenas parsed\n", g_numArenas ) );
-
-	for( n = 0; n < g_numArenas; n++ ) {
-		Info_SetValueForKey( g_arenaInfos[n], "num", va( "%i", n ) );
-	}
-}
-
-
-/*
-===============
-G_GetArenaInfoByNumber
-===============
-*/
-const char *G_GetArenaInfoByMap( const char *map ) {
-	int			n;
-
-	for( n = 0; n < g_numArenas; n++ ) {
-		if( Q_stricmp( Info_ValueForKey( g_arenaInfos[n], "map" ), map ) == 0 ) {
-			return g_arenaInfos[n];
+	numdirs = trap_FS_GetFileList( "scripts", ".arena", dirlist, ARENA_LIST_BUFFER );
+	dirptr = dirlist;
+	for ( i = 0; i < numdirs; i++, dirptr += dirlen + 1 ) {
+		char fullPath[256];
+		dirlen = strlen( dirptr );
+		Com_sprintf( fullPath, sizeof( fullPath ), "scripts/%s", dirptr );
+		G_GetArenaInfoByMapFromFile( fullPath, map, buffer, bufSize );
+		if ( *buffer ) {
+			return;
 		}
 	}
-
-	return NULL;
 }
 
 
@@ -924,7 +915,7 @@ G_InitBots
 void G_InitBots( qboolean restart ) {
 	int			fragLimit;
 	int			timeLimit;
-	const char	*arenainfo;
+	char		arenainfo[MAX_INFO_STRING];
 	char		*strValue;
 	int			basedelay;
 	char		map[MAX_QPATH];
@@ -933,12 +924,10 @@ void G_InitBots( qboolean restart ) {
 	G_LoadBots();
 
 	if( g_gametype.integer == GT_SINGLE_PLAYER ) {
-		G_LoadArenas();
-
 		trap_GetServerinfo( serverinfo, sizeof(serverinfo) );
 		Q_strncpyz( map, Info_ValueForKey( serverinfo, "mapname" ), sizeof(map) );
-		arenainfo = G_GetArenaInfoByMap( map );
-		if ( !arenainfo ) {
+		G_GetArenaInfoByMap( map, arenainfo, sizeof( arenainfo ) );
+		if ( !*arenainfo ) {
 			return;
 		}
 

@@ -694,6 +694,7 @@ typedef struct gitem_s {
 // included in both the game dll and the client
 extern	gitem_t	bg_itemlist[];
 extern	int		bg_numItems;
+#define	ITEM_INDEX(x) ((x)-bg_itemlist)
 
 gitem_t *BG_FindItemWithClassname(const char *name);
 char *BG_FindClassnameForHoldable(holdable_t pw);
@@ -703,12 +704,17 @@ gitem_t	*BG_FindItemForAmmo( weapon_t weapon );
 gitem_t	*BG_FindItemForPowerup( powerup_t pw );
 gitem_t	*BG_FindItemForHoldable( holdable_t pw );
 void BG_LoadItemNames( void );
-char *BG_RegisterRace( const char *name );
-#define	ITEM_INDEX(x) ((x)-bg_itemlist)
-
 qboolean BG_CanItemBeGrabbed( const entityState_t *ent, const playerState_t *ps );
 qboolean BG_BorgTransporting( playerState_t *ps );
+char *BG_RegisterRace( const char *name );
 
+typedef struct {
+	char info[MAX_INFO_STRING];
+	char error[128];
+} infoParseResult_t;
+
+qboolean BG_ParseInfo( char **ptr, infoParseResult_t *out );
+qboolean BG_ParseInfoForMap( const char *arenaData, const char *mapName, infoParseResult_t *out );
 
 // g_dmflags->integer flags
 #define	DF_NO_FALLING			8

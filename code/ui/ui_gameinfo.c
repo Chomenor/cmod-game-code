@@ -23,14 +23,6 @@ static qboolean UI_GameInfoDebug( void ) {
 }
 
 /*
-=======================================================================
-
-INFO PARSING
-
-=======================================================================
-*/
-
-/*
 ===============
 UI_ReadInfoFile
 
@@ -57,93 +49,6 @@ static void UI_ReadInfoFile( const char *path, char *buffer, unsigned int bufSiz
 	trap_FS_Read( buffer, len, f );
 	buffer[len] = '\0';
 	trap_FS_FCloseFile( f );
-}
-
-typedef struct {
-	char info[MAX_INFO_STRING];
-	char error[128];
-} infoParseResult_t;
-
-/*
-===============
-UI_ParseInfo
-
-Parse a single entry out of an arena or bot file.
-
-Returns qtrue on success. In this case, function can be called again to attempt parsing
-another entry. If error string output is non-empty, it represents a warning message.
-
-Returns qfalse on error or end of file. Error string output will be empty on normal
-end of file, or non-empty if there is a specific error message.
-===============
-*/
-qboolean UI_ParseInfo( char **ptr, infoParseResult_t *out ) {
-	int		i;
-	char	*token;
-	char	key[MAX_TOKEN_CHARS];
-	static const char badChars[] = { '"', '\\', ';' };
-
-	out->info[0] = '\0';
-	out->error[0] = '\0';
-
-	token = COM_Parse( ptr );
-	if ( !token[0] ) {
-		return qfalse;
-	}
-	if ( strcmp( token, "{" ) ) {
-		Q_strncpyz( out->error, "Missing { in info file", sizeof( out->error ) );
-		return qfalse;
-	}
-
-	while ( 1 ) {
-		token = COM_ParseExt( ptr, qtrue );
-		if ( !token[0] ) {
-			Q_strncpyz( out->error, "Unexpected end of info file", sizeof( out->error ) );
-			return qfalse;
-		}
-		if ( !strcmp( token, "}" ) ) {
-			break;
-		}
-		Q_strncpyz( key, token, sizeof( key ) );
-
-		token = COM_ParseExt( ptr, qfalse );
-		if ( !token[0] ) {
-			strcpy( token, "<NULL>" );
-		}
-
-		// check for bad characters here to avoid console spam from Info_SetValueForKey
-		for ( i = 0; i < sizeof( badChars ); ++i ) {
-			if ( strchr( key, badChars[i] ) || strchr( token, badChars[i] ) ) {
-				Com_sprintf( out->error, sizeof( out->error ), "Bad character '%c' in info file key/value", badChars[i] );
-				break;
-			}
-		}
-		if ( i != sizeof( badChars ) ) {
-			continue;
-		}
-
-		Info_SetValueForKey( out->info, key, token );
-	}
-
-	return qtrue;
-}
-
-/*
-===============
-UI_ParseInfoForMap
-
-Attempts to retrieve arena info for a specific map from arena file.
-Returns qtrue on success, qfalse on error or map not found.
-===============
-*/
-qboolean UI_ParseInfoForMap( const char *arenaData, const char *mapName, infoParseResult_t *out ) {
-	while ( UI_ParseInfo( (char **)&arenaData, out ) ) {
-		if ( !Q_stricmp( Info_ValueForKey( out->info, "map" ), mapName ) ) {
-			return qtrue;
-		}
-	}
-	
-	return qfalse;
 }
 
 /*
@@ -717,7 +622,7 @@ static void UI_IndexArenasFromFile( const char *path, qboolean rawPath, sortedMa
 		return;
 	}
 
-	while ( UI_ParseInfo( &parsePtr, &info ) ) {
+	while ( BG_ParseInfo( &parsePtr, &info ) ) {
 		const char *mapName = Info_ValueForKey( info.info, "map" );
 		mapEntry_t *mapEntry = UI_FindMapByName( sml, mapName );
 		if ( mapEntry ) {
@@ -916,7 +821,7 @@ void UI_GetArenaInfo( int num, char *buffer, unsigned int bufSize ) {
 				UI_ReadInfoFile( fullPath, arenaFile, MAX_ARENAS_TEXT );
 			}
 
-			if ( *arenaFile && UI_ParseInfoForMap( arenaFile, mapEntry->name, &info ) ) {
+			if ( *arenaFile && BG_ParseInfoForMap( arenaFile, mapEntry->name, &info ) ) {
 				Q_strncpyz( buffer, info.info, bufSize );
 			}
 		}
@@ -1181,7 +1086,7 @@ static void UI_LoadBotsFromFile( char *filename ) {
 		return;
 	}
 
-	while ( UI_ParseInfo( &parsePtr, &info ) ) {
+	while ( BG_ParseInfo( &parsePtr, &info ) ) {
 		if ( *info.error ) {
 			GAMEINFO_DEBUG_PRINT( ( "parse warning in bot file '%s': %s\n", filename, info.error ) );
 		}

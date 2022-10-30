@@ -1074,16 +1074,18 @@ void *UI_Alloc( int size ) {
 /*
 ===============
 UI_LoadBotsFromFile
+
+Returns qfalse if MAX_BOTS hit, qtrue otherwise.
 ===============
 */
-static void UI_LoadBotsFromFile( char *filename ) {
+static qboolean UI_LoadBotsFromFile( char *filename ) {
 	char buf[MAX_BOTS_TEXT];
 	char *parsePtr = buf;
 	infoParseResult_t info;
 
 	UI_ReadInfoFile( filename, buf, sizeof( buf ) );
 	if ( !*buf ) {
-		return;
+		return qtrue;
 	}
 
 	while ( BG_ParseInfo( &parsePtr, &info ) ) {
@@ -1091,8 +1093,7 @@ static void UI_LoadBotsFromFile( char *filename ) {
 			GAMEINFO_DEBUG_PRINT( ( "parse warning in bot file '%s': %s\n", filename, info.error ) );
 		}
 		if ( ui_numBots >= MAX_BOTS ) {
-			GAMEINFO_DEBUG_PRINT( ( "MAX_BOTS exceeded\n" ) );
-			return;
+			return qfalse;
 		}
 		ui_botInfos[ui_numBots] = UI_Alloc( strlen( info.info ) + 1 );
 		if ( ui_botInfos[ui_numBots] ) {
@@ -1104,6 +1105,7 @@ static void UI_LoadBotsFromFile( char *filename ) {
 	if ( *info.error ) {
 		GAMEINFO_DEBUG_PRINT( ( "parse error in bot file '%s': %s\n", filename, info.error ) );
 	}
+	return qtrue;
 }
 
 /*
@@ -1115,7 +1117,7 @@ static void UI_LoadBots( void ) {
 	vmCvar_t	botsFile;
 	int			numdirs;
 	char		filename[128];
-	char		dirlist[1024];
+	char		dirlist[16384];
 	char*		dirptr;
 	int			i;
 	int			dirlen;
@@ -1135,9 +1137,11 @@ static void UI_LoadBots( void ) {
 	dirptr  = dirlist;
 	for (i = 0; i < numdirs; i++, dirptr += dirlen+1) {
 		dirlen = strlen(dirptr);
-		strcpy(filename, "scripts/");
-		strcat(filename, dirptr);
-		UI_LoadBotsFromFile(filename);
+		Com_sprintf( filename, sizeof( filename ), "scripts/%s", dirptr );
+		if ( !UI_LoadBotsFromFile(filename) ) {
+			GAMEINFO_DEBUG_PRINT( ( "MAX_BOTS exceeded\n" ) );
+			break;
+		}
 	}
 
 	if (outOfMemory) trap_Print(S_COLOR_YELLOW"WARNING: not enough memory in pool to load all bots\n");

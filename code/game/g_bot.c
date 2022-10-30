@@ -29,62 +29,6 @@ static botSpawnQueue_t	botSpawnQueue[BOT_SPAWN_QUEUE_DEPTH];
 
 /*
 ===============
-G_ParseInfos
-===============
-*/
-int G_ParseInfos( char *buf, int max, char *infos[] ) {
-	char	*token;
-	int		count;
-	char	key[MAX_TOKEN_CHARS];
-	char	info[MAX_INFO_STRING];
-
-	count = 0;
-
-	while ( 1 ) {
-		token = COM_Parse( &buf );
-		if ( !token[0] ) {
-			break;
-		}
-		if ( strcmp( token, "{" ) ) {
-			Com_Printf( "Missing { in info file\n" );
-			break;
-		}
-
-		if ( count == max ) {
-			Com_Printf( "Max infos exceeded\n" );
-			break;
-		}
-
-		info[0] = '\0';
-		while ( 1 ) {
-			token = COM_ParseExt( &buf, qtrue );
-			if ( !token[0] ) {
-				Com_Printf( "Unexpected end of info file\n" );
-				break;
-			}
-			if ( !strcmp( token, "}" ) ) {
-				break;
-			}
-			Q_strncpyz( key, token, sizeof( key ) );
-
-			token = COM_ParseExt( &buf, qfalse );
-			if ( !token[0] ) {
-				strcpy( token, "<NULL>" );
-			}
-			Info_SetValueForKey( info, key, token );
-		}
-		//NOTE: extra space for arena number
-		infos[count] = G_Alloc(strlen(info) + strlen("\\num\\") + strlen(va("%d", MAX_ARENAS)) + 1);
-		if (infos[count]) {
-			strcpy(infos[count], info);
-			count++;
-		}
-	}
-	return count;
-}
-
-/*
-===============
 G_GetArenaInfoByMapFromFile
 
 Returns empty string if map not found in file.
@@ -821,9 +765,11 @@ G_LoadBotsFromFile
 ===============
 */
 static void G_LoadBotsFromFile( char *filename ) {
-	int				len;
-	fileHandle_t	f;
-	char			buf[MAX_BOTS_TEXT];
+	int len;
+	fileHandle_t f;
+	char buf[MAX_BOTS_TEXT];
+	char *parsePtr = buf;
+	infoParseResult_t info;
 
 	len = trap_FS_FOpenFile( filename, &f, FS_READ );
 	if ( !f ) {
@@ -840,7 +786,16 @@ static void G_LoadBotsFromFile( char *filename ) {
 	buf[len] = 0;
 	trap_FS_FCloseFile( f );
 
-	g_numBots += G_ParseInfos( buf, MAX_BOTS - g_numBots, &g_botInfos[g_numBots] );
+	while ( BG_ParseInfo( &parsePtr, &info ) ) {
+		if ( g_numBots >= MAX_BOTS ) {
+			return;
+		}
+		g_botInfos[g_numBots] = G_Alloc( strlen( info.info ) + 1 );
+		if ( g_botInfos[g_numBots] ) {
+			strcpy( g_botInfos[g_numBots], info.info );
+			g_numBots++;
+		}
+	}
 }
 
 /*
@@ -852,7 +807,7 @@ static void G_LoadBots( void ) {
 	vmCvar_t	botsFile;
 	int			numdirs;
 	char		filename[128];
-	char		dirlist[1024];
+	char		dirlist[16384];
 	char*		dirptr;
 	int			i;
 	int			dirlen;
@@ -873,13 +828,15 @@ static void G_LoadBots( void ) {
 		G_LoadBotsFromFile("scripts/bots.txt");
 
 		// get all bots from .bot files
-		numdirs = trap_FS_GetFileList("scripts", ".bot", dirlist, 1024 );
+		numdirs = trap_FS_GetFileList("scripts", ".bot", dirlist, sizeof( dirlist ) );
 		dirptr  = dirlist;
 		for (i = 0; i < numdirs; i++, dirptr += dirlen+1) {
 			dirlen = strlen(dirptr);
-			strcpy(filename, "scripts/");
-			strcat(filename, dirptr);
+			Com_sprintf( filename, sizeof( filename ), "scripts/%s", dirptr );
 			G_LoadBotsFromFile(filename);
+			if ( g_numBots >= MAX_BOTS ) {
+				break;
+			}
 		}
 	}
 

@@ -681,8 +681,9 @@ void BrowserServerInfo_RenderMapPic( void ) {
 
 		if ( s_browserserverinfo.mapPicShader ) {
 			UI_DrawHandlePic( 90, 75, 128, 96, s_browserserverinfo.mapPicShader );
-			UI_DrawProportionalString( 90 + ( 128 / 2 ), 75 + 96 + 4, mapName, UI_CENTER | UI_SMALLFONT, colorTable[CT_LTGOLD1] );
 		}
+
+		UI_DrawAutoProportionalString( 90 + ( 128 / 2 ), 75 + 96 + 4, mapName, UI_CENTER, colorTable[CT_LTGOLD1], 140, 2 );
 	}
 }
 

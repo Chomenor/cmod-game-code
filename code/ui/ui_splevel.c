@@ -649,8 +649,8 @@ static void UI_SPLevelMenu_MenuDraw( void )
 		y = levelMenuInfo.item_maps[n].generic.y;
 
 		// Map name below picture
-//		UI_DrawString( x + 64, y + 87, levelMenuInfo.levelLongNames[n], UI_CENTER|UI_SMALLFONT, colorTable[CT_LTGOLD1] );
-		UI_DrawProportionalString( x + (MAP_WIDTH/2), y + 87, levelMenuInfo.levelLongNames[n], UI_CENTER|UI_SMALLFONT, colorTable[CT_LTGOLD1] );
+		UI_DrawAutoProportionalString( x + (MAP_WIDTH/2), y + 87, levelMenuInfo.levelLongNames[n],
+				UI_CENTER, colorTable[CT_LTGOLD1], MAP_WIDTH - 1, 2 );
 
 		if (levelMenuInfo.levelCompletion[n] > 0 && EF_WARN_ASSERT( levelMenuInfo.levelCompletion[n] <= 5 ) )
 		{

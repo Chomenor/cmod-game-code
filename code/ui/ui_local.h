@@ -1725,6 +1725,8 @@ extern void			UI_DrawRect( float x, float y, float width, float height, const fl
 extern void			UI_DrawBannerString( int x, int y, const char* str, int style, vec4_t color );
 extern float		UI_ProportionalSizeScale( int style );
 extern void			UI_DrawProportionalString( int x, int y, const char* str, int style, vec4_t color );
+extern void			UI_DrawAutoProportionalString( int x, int y, const char *str, int style, vec4_t color,
+							int maxWidth, int tinyYShift );
 void				UI_TruncateStringWidth( char *source, int width );
 extern int			UI_ProportionalStringWidth( const char* str,int style );
 extern void			UI_DrawString( int x, int y, const char* str, int style, vec4_t color );

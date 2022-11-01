@@ -801,6 +801,25 @@ void UI_DrawProportionalString( int x, int y, const char* str, int style, vec4_t
 	}
 }
 
+/*
+=================
+UI_DrawAutoProportionalString
+
+Draw a proportional string with UI_SMALLFONT, but automatically change to
+UI_TINYFONT if width is greater than maxWidth.
+=================
+*/
+void UI_DrawAutoProportionalString( int x, int y, const char *str, int style, vec4_t color,
+		int maxWidth, int tinyYShift ) {
+	if ( UI_ProportionalStringWidth( str, UI_SMALLFONT ) > maxWidth ) {
+		style |= UI_TINYFONT;
+		y += tinyYShift;
+	} else {
+		style |= UI_SMALLFONT;
+	}
+	UI_DrawProportionalString( x, y, str, style, color );
+}
+
 static int showColorChars;
 
 /*

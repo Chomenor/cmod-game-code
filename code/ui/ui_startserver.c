@@ -19,7 +19,8 @@ START SERVER MENU *****
 
 #define MAX_MAPSPERPAGE	4
 
-#define MAX_NAMELENGTH	24
+#define MAX_NAMELENGTH 24
+#define MAX_DESCRIPTIONLENGTH 48
 
 enum {
 	ID_GAMETYPE = 100,
@@ -82,7 +83,7 @@ typedef struct
 
 	char			filterTextCurrent[MAX_EDIT_LINE];
 	char			pageNumbersBuffer[32];
-	char			mapnameBuffer[MAX_NAMELENGTH];
+	char			mapnameBuffer[MAX_DESCRIPTIONLENGTH];
 } startserver_t;
 
 static startserver_t s_startserver;
@@ -627,7 +628,7 @@ static void StartServer_LevelshotDraw( void *self ) {
 		char buffer[MAX_NAMELENGTH];
 		Q_strncpyz( buffer, UI_GetMapName( s_startserver.msrNums[index] ), sizeof( buffer ) );
 		Q_strupr( buffer );
-		UI_DrawProportionalString( x, y, buffer, UI_CENTER|UI_SMALLFONT, colorTable[color] );
+		UI_DrawAutoProportionalString( x, y, buffer, UI_CENTER, colorTable[color], 128, 2 );
 	}
 
 	x = b->generic.x;
@@ -698,8 +699,8 @@ void StartServer_Graphics (void)
 
 static void MapName_Draw( void *self )
 {
-	UI_DrawProportionalString( s_startserver.mapname.generic.x,  s_startserver.mapname.generic.y,
-			s_startserver.mapname.string,s_startserver.mapname.style, s_startserver.mapname.color );
+	UI_DrawAutoProportionalString( s_startserver.mapname.generic.x, s_startserver.mapname.generic.y,
+			s_startserver.mapname.string, 0, s_startserver.mapname.color, 175, 3 );
 }
 
 /*
@@ -1676,7 +1677,7 @@ static void ServerOptions_LevelshotDraw( void *self ) {
 	x += b->width / 2;
 	y += 4;
 
-	UI_DrawProportionalString( x, y, s_startserver.mapname.string, UI_CENTER|UI_SMALLFONT, colorTable[CT_LTGOLD1] );
+	UI_DrawAutoProportionalString( x, y, s_startserver.mapname.string, UI_CENTER, colorTable[CT_LTGOLD1], 160, 1 );
 
 	y += SMALLCHAR_HEIGHT;
 	UI_DrawProportionalString( x, y, menu_normal_text[gametype_items[gametype_remap2[s_serveroptions.gametype]]], UI_CENTER|UI_SMALLFONT, colorTable[CT_LTGOLD1] );

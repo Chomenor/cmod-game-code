@@ -370,11 +370,14 @@ int UI_ProportionalStringWidth( const char* str,int style ) {
 	int				ch;
 	int				charWidth;
 	int				width;
+	char			stripped[1024];
 
+	Q_strncpyz( stripped, str, sizeof( stripped ) );
+	Q_StripColor( stripped );
 
 	if (style == UI_TINYFONT)
 	{
-		s = str;
+		s = stripped;
 		width = 0;
 		while ( *s ) {
 			ch = *s & 255;
@@ -390,7 +393,7 @@ int UI_ProportionalStringWidth( const char* str,int style ) {
 	}
 	else if (style == UI_BIGFONT)
 	{
-		s = str;
+		s = stripped;
 		width = 0;
 		while ( *s ) {
 			ch = *s & 255;
@@ -406,7 +409,7 @@ int UI_ProportionalStringWidth( const char* str,int style ) {
 	}
 	else
 	{
-		s = str;
+		s = stripped;
 		width = 0;
 		while ( *s ) {
 			ch = *s & 255;

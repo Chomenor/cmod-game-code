@@ -22,11 +22,23 @@ typedef struct {
 
 	int				ignoreKeysTime;
 
-	int				level;
 	int				won;
 } postgameMenuInfo_t;
 
 static postgameMenuInfo_t	postgameMenuInfo;
+
+
+/*
+=================
+UI_SPPostgameMenu_GetCurrentMap
+=================
+*/
+static void UI_SPPostgameMenu_GetCurrentMap( char *buffer, int bufSize )
+{
+	char info[MAX_INFO_STRING];
+	trap_GetConfigString( CS_SERVERINFO, info, sizeof( info ) );
+	Q_strncpyz( buffer, Info_ValueForKey( info, "mapname" ), bufSize );
+}
 
 
 /*
@@ -52,14 +64,16 @@ UI_SPPostgameMenu_NextEvent
 static void UI_SPPostgameMenu_NextEvent( void* ptr, int event ) {
 	int			level;
 	char		arenaInfo[MAX_INFO_STRING];
+	char		map[MAX_QPATH];
 
 	if (event != QM_ACTIVATED) {
 		return;
 	}
 	UI_PopMenu();
 
-	level = postgameMenuInfo.level + 1;
-	if ( level >= UI_GetNumSPArenas() ) {
+	UI_SPPostgameMenu_GetCurrentMap( map, sizeof( map ) );
+	level = UI_GetSPArenaNumByMap( map ) + 1;
+	if ( level < 0 || level >= UI_GetNumSPArenas() ) {
 		level = 0;
 	}
 
@@ -202,20 +216,12 @@ UI_SPPostgameMenu_f
 */
 void UI_SPPostgameMenu_f( void ) {
 	int			playerGameRank;
-	char		map[MAX_QPATH];
-	char		info[MAX_INFO_STRING];
 
 	Mouse_Show();
 
 	memset( &postgameMenuInfo, 0, sizeof(postgameMenuInfo) );
 
 	postgameMenuInfo.menu.nobackground = qtrue;
-
-	trap_GetConfigString( CS_SERVERINFO, info, sizeof(info) );
-	Q_strncpyz( map, Info_ValueForKey( info, "mapname" ), sizeof(map) );
-
-	// This might be -1, but that is fine since it will increment to 0 in UI_SPPostgameMenu_NextEvent
-	postgameMenuInfo.level = UI_GetSPArenaNumByMap( map );
 
 	playerGameRank = atoi( UI_Argv(1));
 
@@ -227,9 +233,13 @@ void UI_SPPostgameMenu_f( void ) {
 
 	if (playerGameRank == 0)
 	{
+		char map[MAX_QPATH];
 		postgameMenuInfo.won = 1;
-		UI_WriteMapCompletionSkill( map, trap_Cvar_VariableValue( "g_spSkill" ) );
 		Menu_SetCursorToItem( &postgameMenuInfo.menu, &postgameMenuInfo.item_next );
+
+		// update completion record
+		UI_SPPostgameMenu_GetCurrentMap( map, sizeof( map ) );
+		UI_WriteMapCompletionSkill( map, trap_Cvar_VariableValue( "g_spSkill" ) );
 	}
 	else {
 		Menu_SetCursorToItem( &postgameMenuInfo.menu, &postgameMenuInfo.item_menu );

@@ -3262,6 +3262,7 @@ static void VideoData2_MenuInit( void )
 	int inc = 22;
 	qboolean suppressViewSize = VMExt_GVCommandInt( "ui_suppress_cg_viewsize", 0 )
 			&& trap_Cvar_VariableValue( "cg_viewsize" ) >= 100.0f ? qtrue : qfalse;
+	qboolean suppressRenderFinish = VMExt_GVCommandInt( "ui_skip_r_finish", 0 ) ? qtrue : qfalse;
 
 	UI_InitVideoEngineConfig();
 
@@ -3290,7 +3291,7 @@ static void VideoData2_MenuInit( void )
 	x = 175;
 	y = 183;
 
-	if ( !suppressViewSize && !videoEngineConfig.anisotropicFilteringVideoMenu ) {
+	if ( !suppressViewSize && !suppressRenderFinish && !videoEngineConfig.anisotropicFilteringVideoMenu ) {
 		// need some extra space
 		y = 176;
 	}
@@ -3488,21 +3489,23 @@ static void VideoData2_MenuInit( void )
 	s_videodata2.simpleitems.textcolor2				= CT_WHITE;
 	s_videodata2.simpleitems.listnames				= s_OffOnNone_Names;
 
-	y += inc;
-	s_videodata2.synceveryframe.generic.type		= MTYPE_SPINCONTROL;
-	s_videodata2.synceveryframe.generic.flags		= QMF_HIGHLIGHT_IF_FOCUS;
-	s_videodata2.synceveryframe.generic.x			= x;
-	s_videodata2.synceveryframe.generic.y			= y;
-	s_videodata2.synceveryframe.generic.name		= GRAPHIC_BUTTONRIGHT;
-	s_videodata2.synceveryframe.generic.callback	= VideoData2_Event;
-	s_videodata2.synceveryframe.color				= CT_DKPURPLE1;
-	s_videodata2.synceveryframe.color2				= CT_LTPURPLE1;
-	s_videodata2.synceveryframe.textX				= MENU_BUTTON_TEXT_X;
-	s_videodata2.synceveryframe.textY				= MENU_BUTTON_TEXT_Y;
-	s_videodata2.synceveryframe.textEnum			= MBT_SYNCEVERYFRAME1;
-	s_videodata2.synceveryframe.textcolor			= CT_BLACK;
-	s_videodata2.synceveryframe.textcolor2			= CT_WHITE;
-	s_videodata2.synceveryframe.listnames			= s_OffOnNone_Names;
+	if ( !suppressRenderFinish ) {
+		y += inc;
+		s_videodata2.synceveryframe.generic.type		= MTYPE_SPINCONTROL;
+		s_videodata2.synceveryframe.generic.flags		= QMF_HIGHLIGHT_IF_FOCUS;
+		s_videodata2.synceveryframe.generic.x			= x;
+		s_videodata2.synceveryframe.generic.y			= y;
+		s_videodata2.synceveryframe.generic.name		= GRAPHIC_BUTTONRIGHT;
+		s_videodata2.synceveryframe.generic.callback	= VideoData2_Event;
+		s_videodata2.synceveryframe.color				= CT_DKPURPLE1;
+		s_videodata2.synceveryframe.color2				= CT_LTPURPLE1;
+		s_videodata2.synceveryframe.textX				= MENU_BUTTON_TEXT_X;
+		s_videodata2.synceveryframe.textY				= MENU_BUTTON_TEXT_Y;
+		s_videodata2.synceveryframe.textEnum			= MBT_SYNCEVERYFRAME1;
+		s_videodata2.synceveryframe.textcolor			= CT_BLACK;
+		s_videodata2.synceveryframe.textcolor2			= CT_WHITE;
+		s_videodata2.synceveryframe.listnames			= s_OffOnNone_Names;
+	}
 
 	if ( !videoEngineConfig.anisotropicFilteringVideoMenu ) {
 		y += inc;
@@ -3534,7 +3537,9 @@ static void VideoData2_MenuInit( void )
 	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.dynamiclights);
 	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.simplesky);
 	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.simpleitems);
-	Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.synceveryframe);
+	if ( !suppressRenderFinish ) {
+		Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.synceveryframe);
+	}
 	if ( !videoEngineConfig.anisotropicFilteringVideoMenu ) {
 		Menu_AddItem( &s_videodata2.menu, ( void * )&s_videodata2.anisotropic);
 	}

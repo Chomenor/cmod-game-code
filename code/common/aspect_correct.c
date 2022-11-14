@@ -232,6 +232,23 @@ qboolean AspectCorrect_UseCorrectedGunPosition( void ) {
 }
 #endif
 
+#ifdef MODULE_UI
+/*
+================
+AspectCorrect_WidthScale
+
+Returns the ratio of stretched graphics width to centered width.
+================
+*/
+float AspectCorrect_WidthScale( void ) {
+	if ( ASPECT_CORRECT_ENABLED ) {
+		return uix.XStretchFactor / uix.XScaledFactor;
+	} else {
+		return 1.0f;
+	}
+}
+#endif
+
 /*
 ================
 AspectCorrect_RunFrame

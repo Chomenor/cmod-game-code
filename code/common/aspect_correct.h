@@ -18,6 +18,7 @@ void AspectCorrect_ResetMode( void );
 void AspectCorrect_AdjustFrom640( float *x, float *y, float *w, float *h );
 void AspectCorrect_DrawAdjustedStretchPic( float x, float y, float w, float h, float s1, float t1, float s2, float t2, qhandle_t hShader );
 qboolean AspectCorrect_UseCorrectedGunPosition( void );
+float AspectCorrect_WidthScale( void );
 void AspectCorrect_RunFrame( void );
 void AspectCorrect_Shutdown( void );
 void AspectCorrect_Init( int width, int height );

@@ -300,7 +300,9 @@ void BrowserServerInfo_RenderInfoField( int *currentLine, const char *key, const
 		char buffer[128];
 		Com_sprintf( buffer, sizeof( buffer ), "%s:", key );
 		UI_DrawProportionalString( 375 - 8, yPos, buffer, UI_RIGHT | UI_SMALLFONT | UI_NO_BLACK, colorTable[CT_LTBLUE2] );
-		UI_DrawProportionalString( 375 + 8, yPos, value, UI_LEFT | UI_SMALLFONT | UI_NO_BLACK, colorTable[CT_LTGOLD1] );
+		// let string use the entire right side of the screen before shrinking
+		UI_DrawAutoProportionalString( 375 + 8, yPos, value, UI_LEFT | UI_NO_BLACK, colorTable[CT_LTGOLD1],
+				320 * AspectCorrect_WidthScale() - ( 375 + 8 - 320 ), 4 );
 	}
 }
 

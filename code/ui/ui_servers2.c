@@ -623,6 +623,7 @@ SERVER BROWSER
 
 enum {
 	ID_MASTER = 200,
+	ID_IPPROTOCOL,
 	ID_GAMETYPE,
 	ID_SORTKEY,
 	ID_SHOW_EMPTY,
@@ -647,6 +648,10 @@ typedef struct {
 	int		start;
 } pinglist_t;
 
+#define SERVERFLAG_IPV6 1			// entry has an ipv6 address
+#define SERVERFLAG_IP_PAIRED 2		// has an ipv4/ipv6 counterpart with same hostname
+#define SERVERFLAG_FORCE_LIST 4		// always show regardless of ipv4/ipv6 counterpart
+
 typedef struct servernode_s {
 	char	adrstr[MAX_ADDRESSLENGTH];
 	char	hostname[MAX_HOSTNAMELENGTH];
@@ -659,6 +664,7 @@ typedef struct servernode_s {
 	char	modname[12];
 	int		minPing;
 	int		maxPing;
+	int		flags;
 } servernode_t;
 
 typedef struct {
@@ -672,6 +678,7 @@ typedef struct {
 	menubitmap_s		mainmenu;
 	menubitmap_s		back;
 	menulist_s			master;
+	menulist_s			ipprotocol;
 	menulist_s			gametype;
 	menulist_s			sortkey;
 	menulist_s			showempty;
@@ -710,6 +717,7 @@ static arenaservers_t	g_arenaservers;
 static servernode_t		g_serverlist[MAX_SERVERS];
 static int				g_numservers;
 static int				g_servertype;
+static int				g_ipprotocol;
 static int				g_gametype;
 static int				g_sortkey;
 static int				g_emptyservers;
@@ -761,6 +769,19 @@ enum {
 	AS_GLOBAL5,
 	AS_FAVORITES,
 	NUM_MASTER_ITEMS
+};
+
+static int ipprotocol_items[] =
+{
+	MNT_BROWSER_PREFER_IPV4,
+	MNT_BROWSER_PREFER_IPV6,
+	0
+};
+
+enum {
+	// Must correspond to ipprotocol_items
+	PROTOCOL_IPV4,
+	PROTOCOL_IPV6,
 };
 
 static int servertype_items[] =
@@ -838,6 +859,50 @@ static void ArenaServers_StopRefresh( void );
 
 /*
 =================
+ArenaServers_IsIpv6Address
+=================
+*/
+static qboolean ArenaServers_IsIpv6Address( char *adrstr ) {
+	const char *p = strchr( adrstr, ':' );
+	if ( p && strchr( &p[1], ':' ) ) {
+		return qtrue;
+	}
+	return qfalse;
+}
+
+/*
+=================
+ArenaServers_UpdateIpv6Flags
+
+Should be called after each new server added to g_serverlist.
+=================
+*/
+static void ArenaServers_UpdateIpv6Flags( void ) {
+	if ( EF_WARN_ASSERT( g_numservers > 0 ) ) {
+		int i;
+		int existingCount = g_numservers - 1;
+		servernode_t *latest = &g_serverlist[g_numservers - 1];
+
+		// update ip protocol of the server that was just added
+		if ( ArenaServers_IsIpv6Address( latest->adrstr ) ) {
+			latest->flags |= SERVERFLAG_IPV6;
+		}
+
+		// look for pairings
+		for ( i = 0; i < existingCount; ++i ) {
+			if ( ( g_serverlist[i].flags & SERVERFLAG_IPV6 ) != ( latest->flags & SERVERFLAG_IPV6 ) &&
+					!strcmp( g_serverlist[i].hostname, latest->hostname ) ) {
+				// found server with same hostname but different ip protocol than the new one
+				// set paired flag on both servers; ArenaServers_UpdateMenu will sort out which one(s) to display
+				g_serverlist[i].flags |= SERVERFLAG_IP_PAIRED;
+				latest->flags |= SERVERFLAG_IP_PAIRED;
+			}
+		}
+	}
+}
+
+/*
+=================
 ArenaServers_InsertUnresponsive
 
 Insert an unresponsive server into list. Only used for favorites category.
@@ -860,6 +925,8 @@ static void ArenaServers_InsertUnresponsive( char *adrstr ) {
 
 	servernodeptr->pingtime = ArenaServers_MaxPing();
 	servernodeptr->gametype = 5;
+
+	ArenaServers_UpdateIpv6Flags();
 }
 
 /*
@@ -937,6 +1004,18 @@ static void StatusQuery_Insert( char* adrstr, char* info, int pingtime )
 			if ( atoi( player.ping ) ) {
 				++servernodeptr->numhumanclients;
 			}
+		}
+	}
+
+	// update ip type flags
+	ArenaServers_UpdateIpv6Flags();
+	if ( servernodeptr->flags & SERVERFLAG_IPV6 ) {
+		if ( atoi( StatusParse_ValueForKey( info, "sv_forceListIpv6" ) ) ) {
+			servernodeptr->flags |= SERVERFLAG_FORCE_LIST;
+		}
+	} else {
+		if ( atoi( StatusParse_ValueForKey( info, "sv_forceListIpv4" ) ) ) {
+			servernodeptr->flags |= SERVERFLAG_FORCE_LIST;
 		}
 	}
 }
@@ -1192,6 +1271,7 @@ static void ArenaServers_UpdateMenu( void ) {
 	servernode_t*	servernodeptr;
 	table_t*		tableptr;
 	char			*pingColor;
+	int				protocolMatches = 0;
 
 	// make sure list is sorted
 	qsort( g_serverlist, g_numservers, sizeof( servernode_t ), ArenaServers_Compare );
@@ -1206,6 +1286,15 @@ static void ArenaServers_UpdateMenu( void ) {
 		tableptr = &g_arenaservers.table[g_arenaservers.list.numitems];
 		tableptr->servernode = servernodeptr;
 		buff = tableptr->buff;
+
+		// check for skipping paired ip, so dual ipv4/ipv6 servers are only displayed once
+		if ( ( servernodeptr->flags & SERVERFLAG_IP_PAIRED ) && !( servernodeptr->flags & SERVERFLAG_FORCE_LIST ) ) {
+			if ( ( g_arenaservers.ipprotocol.curvalue == PROTOCOL_IPV4 && ( servernodeptr->flags & SERVERFLAG_IPV6 ) ) ||
+					( g_arenaservers.ipprotocol.curvalue == PROTOCOL_IPV6 && !( servernodeptr->flags & SERVERFLAG_IPV6 ) ) ) {
+				continue;
+			}
+		}
+		++protocolMatches;
 
 		if ( g_arenaservers.statusQueryEnabled ) {
 			if ( ( g_emptyservers == PLAYERTYPE_HUMANS_ONLY && !servernodeptr->numhumanclients ) ||
@@ -1264,16 +1353,17 @@ static void ArenaServers_UpdateMenu( void ) {
 		}
 
 		if ( g_arenaservers.statusQueryEnabled ) {
-			Com_sprintf( buff, MAX_LISTBOXBUFFER, "%s%-22.22s %-11.11s %2d/%3d %3s %-9.9s %2d %s%3d",
+			Com_sprintf( buff, MAX_LISTBOXBUFFER, "%s%-22.22s %-11.11s %2d/%3d %3s %-9.9s %2d %s%3d %s",
 				servernodeptr->numhumanclients ? "^5" : "",		// color servers with players blue
 				servernodeptr->hostname, servernodeptr->mapname, servernodeptr->numhumanclients,
 				servernodeptr->maxclients, gamenames[servernodeptr->gametype], servernodeptr->modname,
-				servernodeptr->numclients - servernodeptr->numhumanclients, pingColor, servernodeptr->pingtime);
+				servernodeptr->numclients - servernodeptr->numhumanclients, pingColor, servernodeptr->pingtime,
+				servernodeptr->flags & SERVERFLAG_IPV6 ? "*" : "" );
 		} else {
-			Com_sprintf( buff, MAX_LISTBOXBUFFER, "%-23.23s %-11.11s %3d/%3d %3s %-9.9s  %s%3d",
+			Com_sprintf( buff, MAX_LISTBOXBUFFER, "%-23.23s %-11.11s %3d/%3d %3s %-9.9s  %s%3d %s",
 				servernodeptr->hostname, servernodeptr->mapname, servernodeptr->numclients,
 				servernodeptr->maxclients, gamenames[servernodeptr->gametype], servernodeptr->modname,
-				pingColor, servernodeptr->pingtime);
+				pingColor, servernodeptr->pingtime, servernodeptr->flags & SERVERFLAG_IPV6 ? "*" : "" );
 		}
 		g_arenaservers.list.numitems++;
 	}
@@ -1291,6 +1381,7 @@ static void ArenaServers_UpdateMenu( void ) {
 
 		// disable controls during refresh
 		g_arenaservers.master.generic.flags		|= QMF_GRAYED;
+		g_arenaservers.ipprotocol.generic.flags	|= QMF_GRAYED;
 		g_arenaservers.gametype.generic.flags	|= QMF_GRAYED;
 		g_arenaservers.sortkey.generic.flags	|= QMF_GRAYED;
 		g_arenaservers.showempty.generic.flags	|= QMF_GRAYED;
@@ -1302,6 +1393,7 @@ static void ArenaServers_UpdateMenu( void ) {
 	else {
 		// no refresh in progress
 		g_arenaservers.master.generic.flags		&= ~QMF_GRAYED;
+		g_arenaservers.ipprotocol.generic.flags	&= ~QMF_GRAYED;
 		g_arenaservers.gametype.generic.flags	&= ~QMF_GRAYED;
 		g_arenaservers.sortkey.generic.flags	&= ~QMF_GRAYED;
 		g_arenaservers.showempty.generic.flags	&= ~QMF_GRAYED;
@@ -1322,7 +1414,7 @@ static void ArenaServers_UpdateMenu( void ) {
 					sizeof( g_arenaservers.statusBuffer ) );
 		} else {
 			Com_sprintf( g_arenaservers.statusBuffer, sizeof( g_arenaservers.statusBuffer ),
-					menu_normal_text[MNT_CNT_SERVERS], g_arenaservers.list.numitems, g_numservers );
+					menu_normal_text[MNT_CNT_SERVERS], g_arenaservers.list.numitems, protocolMatches );
 		}
 	}
 
@@ -1458,6 +1550,18 @@ static void ArenaServers_Insert( char* adrstr, char* info, int pingtime )
 	else {
 		*servernodeptr->modname = '\0';
 	}
+
+	// update ip type flags
+	ArenaServers_UpdateIpv6Flags();
+	if ( servernodeptr->flags & SERVERFLAG_IPV6 ) {
+		if ( atoi( Info_ValueForKey( info, "forceListIpv6" ) ) ) {
+			servernodeptr->flags |= SERVERFLAG_FORCE_LIST;
+		}
+	} else {
+		if ( atoi( Info_ValueForKey( info, "forceListIpv4" ) ) ) {
+			servernodeptr->flags |= SERVERFLAG_FORCE_LIST;
+		}
+	}
 }
 
 
@@ -1483,7 +1587,7 @@ void ArenaServers_LoadFavorites( void )
 
 		// quick sanity check to avoid slow domain name resolving
 		// first character must be numeric
-		if (adrstr[0] < '0' || adrstr[0] > '9')
+		if (adrstr[0] != '[' && (adrstr[0] < '0' || adrstr[0] > '9'))
 			continue;
 
 		// favorite server addresses must be maintained outside refresh list
@@ -1890,6 +1994,12 @@ static void ArenaServers_Event( void* ptr, int event ) {
 		ArenaServers_SetType( g_arenaservers.master.curvalue );
 		break;
 
+	case ID_IPPROTOCOL:
+		trap_Cvar_SetValue( "ui_browserIpProtocol", g_arenaservers.ipprotocol.curvalue );
+		g_ipprotocol = g_arenaservers.ipprotocol.curvalue;
+		ArenaServers_UpdateMenu();
+		break;
+
 	case ID_GAMETYPE:
 		trap_Cvar_SetValue( "ui_browserGameType", g_arenaservers.gametype.curvalue );
 		g_gametype = g_arenaservers.gametype.curvalue;
@@ -1998,7 +2108,7 @@ void ArenaServers_Graphics (void)
 
 	// Frame servers
 	trap_R_SetColor( colorTable[CT_DKORANGE]);
-	UI_DrawHandlePic(  87, 175, 523,  13, uis.whiteShader);	// Top line
+	UI_DrawHandlePic(  87, 175, 536,  13, uis.whiteShader);	// Top line
 	UI_DrawHandlePic(  87, 188,  16,  11, uis.whiteShader);	// Side line
 	UI_DrawHandlePic(  87, 202,  16,  17, uis.whiteShader);	// Side line
 	UI_DrawHandlePic(  87, 222,  16, 110, uis.whiteShader);	// Side line
@@ -2021,6 +2131,7 @@ void ArenaServers_Graphics (void)
 		UI_DrawProportionalString(  488, 177, menu_normal_text[MNT_BROWSER_MOD],UI_TINYFONT, colorTable[CT_BLACK]);
 		UI_DrawProportionalString(  582, 177, menu_normal_text[MNT_PING],UI_TINYFONT, colorTable[CT_BLACK]);
 	}
+	UI_DrawProportionalString( 606, 177, "IPV6", UI_TINYFONT, colorTable[CT_BLACK] );
 
 	UI_DrawProportionalString(  74,  27, "819",UI_RIGHT|UI_TINYFONT, colorTable[CT_BLACK]);
 	UI_DrawProportionalString(  74, 149, "42",UI_RIGHT|UI_TINYFONT, colorTable[CT_BLACK]);
@@ -2163,6 +2274,23 @@ static void ArenaServers_MenuInit( void )
 	g_arenaservers.master.textX						= 5;
 	g_arenaservers.master.textY						= 2;
 	g_arenaservers.master.listnames					= MASTER_MULTI_FETCH_ACTIVE ? master_items_multi_fetch : master_items;
+
+	y += 20;
+	g_arenaservers.ipprotocol.generic.type			= MTYPE_SPINCONTROL;
+	g_arenaservers.ipprotocol.generic.flags			= QMF_HIGHLIGHT_IF_FOCUS;
+	g_arenaservers.ipprotocol.generic.callback		= ArenaServers_Event;
+	g_arenaservers.ipprotocol.generic.id			= ID_IPPROTOCOL;
+	g_arenaservers.ipprotocol.generic.x				= 274;
+	g_arenaservers.ipprotocol.generic.y				= y;
+	g_arenaservers.ipprotocol.textEnum				= MBT_BROWSER_IPPROTOCOL;
+	g_arenaservers.ipprotocol.textcolor				= CT_BLACK;
+	g_arenaservers.ipprotocol.textcolor2			= CT_WHITE;
+	g_arenaservers.ipprotocol.color					= CT_DKPURPLE1;
+	g_arenaservers.ipprotocol.color2				= CT_LTPURPLE1;
+	g_arenaservers.ipprotocol.width					= 80;
+	g_arenaservers.ipprotocol.textX					= 5;
+	g_arenaservers.ipprotocol.textY					= 2;
+	g_arenaservers.ipprotocol.listnames				= ipprotocol_items;
 
 	y += 20;
 	g_arenaservers.gametype.generic.type			= MTYPE_SPINCONTROL;
@@ -2378,6 +2506,7 @@ static void ArenaServers_MenuInit( void )
 	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.mainmenu );
 	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.back );
 	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.master );
+	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.ipprotocol );
 	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.gametype );
 	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.sortkey );
 	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.showempty );
@@ -2399,6 +2528,9 @@ static void ArenaServers_MenuInit( void )
 	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.go );
 
 	ArenaServers_LoadFavorites();
+
+	g_ipprotocol = Com_Clamp( 0, 1, ui_browserIpProtocol.integer );
+	g_arenaservers.ipprotocol.curvalue = g_ipprotocol;
 
 	g_servertype = Com_Clamp( 0, NUM_MASTER_ITEMS - 1, ui_browserMaster.integer );
 	g_arenaservers.master.curvalue = g_servertype;

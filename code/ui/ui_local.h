@@ -567,6 +567,8 @@ typedef enum
 	MNT_SHORTCUT_VOTE_NO,
 	MNT_SHORTCUT_MINIMIZE,
 	MNT_SHORTCUT_QUIT,
+	MNT_BROWSER_PREFER_IPV4,
+	MNT_BROWSER_PREFER_IPV6,
 	MNT_BROWSER_PLAYER_COUNT,
 	MNT_BROWSER_HUMANS_ONLY,
 	MNT_BROWSER_BOTS_AND_HUMANS,
@@ -954,6 +956,7 @@ typedef enum
 	MBT_ASPECTCORRECTION,
 	MBT_CENTERHUD,
 	MBT_BROWSER_PLAYERTYPE,
+	MBT_BROWSER_IPPROTOCOL,
 	MBT_SOUND_OPENAL,
 	MBT_SOUND_GENERAL_VOLUME,
 	MBT_CONTROLS_OTHER_KEYS,
@@ -1053,6 +1056,7 @@ extern vmCvar_t	ui_team_race_red;
 extern vmCvar_t	ui_spSelection;
 
 extern vmCvar_t	ui_browserMaster;
+extern vmCvar_t	ui_browserIpProtocol;
 extern vmCvar_t	ui_browserGameType;
 extern vmCvar_t	ui_browserSortKey;
 extern vmCvar_t	ui_browserSortKey2;

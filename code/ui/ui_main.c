@@ -125,6 +125,7 @@ vmCvar_t	ui_pModElimination;
 vmCvar_t	ui_spSelection;
 
 vmCvar_t	ui_browserMaster;
+vmCvar_t	ui_browserIpProtocol;
 vmCvar_t	ui_browserGameType;
 vmCvar_t	ui_browserSortKey;
 vmCvar_t	ui_browserSortKey2;
@@ -205,6 +206,7 @@ cvarTable_t		cvarTable[] = {
 	{ &ui_spSelection, "ui_spSelection", "", CVAR_ROM },
 
 	{ &ui_browserMaster, "ui_browserMaster", "0", CVAR_ARCHIVE },
+	{ &ui_browserIpProtocol, "ui_browserIpProtocol", "0", CVAR_ARCHIVE },
 	{ &ui_browserGameType, "ui_browserGameType", "0", CVAR_ARCHIVE },
 	{ &ui_browserSortKey, "ui_browserSortKey", "4", CVAR_ARCHIVE },
 	{ &ui_browserSortKey2, "ui_browserSortKey2", "2", CVAR_ARCHIVE },

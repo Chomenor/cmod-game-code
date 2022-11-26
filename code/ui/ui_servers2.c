@@ -853,10 +853,6 @@ static char* gamenames[] = {
 	"???",	// unknown
 };
 
-static int ArenaServers_MaxPing( void );
-static void ArenaServers_UpdateMenu( void );
-static void ArenaServers_StopRefresh( void );
-
 /*
 =================
 ArenaServers_IsIpv6Address
@@ -868,280 +864,6 @@ static qboolean ArenaServers_IsIpv6Address( char *adrstr ) {
 		return qtrue;
 	}
 	return qfalse;
-}
-
-/*
-=================
-ArenaServers_UpdateIpv6Flags
-
-Should be called after each new server added to g_serverlist.
-=================
-*/
-static void ArenaServers_UpdateIpv6Flags( void ) {
-	if ( EF_WARN_ASSERT( g_numservers > 0 ) ) {
-		int i;
-		int existingCount = g_numservers - 1;
-		servernode_t *latest = &g_serverlist[g_numservers - 1];
-
-		// update ip protocol of the server that was just added
-		if ( ArenaServers_IsIpv6Address( latest->adrstr ) ) {
-			latest->flags |= SERVERFLAG_IPV6;
-		}
-
-		// look for pairings
-		for ( i = 0; i < existingCount; ++i ) {
-			if ( ( g_serverlist[i].flags & SERVERFLAG_IPV6 ) != ( latest->flags & SERVERFLAG_IPV6 ) &&
-					!strcmp( g_serverlist[i].hostname, latest->hostname ) ) {
-				// found server with same hostname but different ip protocol than the new one
-				// set paired flag on both servers; ArenaServers_UpdateMenu will sort out which one(s) to display
-				g_serverlist[i].flags |= SERVERFLAG_IP_PAIRED;
-				latest->flags |= SERVERFLAG_IP_PAIRED;
-			}
-		}
-	}
-}
-
-/*
-=================
-ArenaServers_InsertUnresponsive
-
-Insert an unresponsive server into list. Only used for favorites category.
-=================
-*/
-static void ArenaServers_InsertUnresponsive( char *adrstr ) {
-	servernode_t *servernodeptr;
-
-	if ( g_numservers >= MAX_SERVERS ) {
-		// list full
-		return;
-	}
-
-	// next slot
-	servernodeptr = &g_serverlist[g_numservers++];
-	memset( servernodeptr, 0, sizeof( *servernodeptr ) );
-
-	Q_strncpyz( servernodeptr->adrstr, adrstr, MAX_ADDRESSLENGTH );
-	Q_strncpyz( servernodeptr->hostname, adrstr, MAX_HOSTNAMELENGTH );
-
-	servernodeptr->pingtime = ArenaServers_MaxPing();
-	servernodeptr->gametype = 5;
-
-	ArenaServers_UpdateIpv6Flags();
-}
-
-/*
-=================
-StatusQuery_Insert
-=================
-*/
-static void StatusQuery_Insert( char* adrstr, char* info, int pingtime )
-{
-	servernode_t*	servernodeptr;
-	char*			s;
-
-	if ( g_numservers >= MAX_SERVERS ) {
-		// list full
-		return;
-	}
-
-	// next slot
-	servernodeptr = &g_serverlist[g_numservers++];
-	memset( servernodeptr, 0, sizeof( *servernodeptr ) );
-
-	Q_strncpyz( servernodeptr->adrstr, adrstr, MAX_ADDRESSLENGTH );
-
-	s = StatusParse_ValueForKey( info, "sv_hostname" );
-	Q_StripColor( s );
-	Q_strncpyz( servernodeptr->hostname, s, MAX_HOSTNAMELENGTH );
-	Q_strupr( servernodeptr->hostname );
-
-	s = StatusParse_ValueForKey( info, "mapname" );
-	Q_StripColor( s );
-	Q_strncpyz( servernodeptr->mapname, s, MAX_MAPNAMELENGTH );
-	Q_strupr( servernodeptr->mapname );
-
-	servernodeptr->maxclients = atoi( StatusParse_ValueForKey( info, "sv_maxclients" ) );
-	servernodeptr->pingtime   = pingtime;
-	servernodeptr->minPing    = atoi( StatusParse_ValueForKey( info, "sv_minPing" ) );
-	servernodeptr->maxPing    = atoi( StatusParse_ValueForKey( info, "sv_maxPing" ) );
-
-	servernodeptr->gametype = atoi( StatusParse_ValueForKey( info, "g_gametype" ) );
-	if( servernodeptr->gametype < 0 ) {
-		servernodeptr->gametype = 0;
-	}
-	else if( servernodeptr->gametype > 5 ) {
-		servernodeptr->gametype = 5;
-	}
-
-	s = StatusParse_ValueForKey( info, "gamename");
-	if( *s && Q_stricmp( s, "baseEF" ) ) {
-		Q_StripColor( s );
-		Q_strncpyz( servernodeptr->modname, s, sizeof(servernodeptr->modname) );
-	} else if ( atoi ( StatusParse_ValueForKey( info, "g_pModAssimilation" ) ) ) {
-		Q_strncpyz( servernodeptr->modname, "Assimilation", sizeof(servernodeptr->modname) );
-	} else if ( atoi ( StatusParse_ValueForKey( info, "g_pModElimination" ) ) ) {
-		Q_strncpyz( servernodeptr->modname, "Elimination", sizeof(servernodeptr->modname) );
-	} else if ( atoi ( StatusParse_ValueForKey( info, "g_pModSpecialties" ) ) ) {
-		Q_strncpyz( servernodeptr->modname, "Specialties", sizeof(servernodeptr->modname) );
-	} else if ( atoi ( StatusParse_ValueForKey( info, "g_pModDisintegration" ) ) ) {
-		Q_strncpyz( servernodeptr->modname, "Disintegration", sizeof(servernodeptr->modname) );
-	} else if ( atoi ( StatusParse_ValueForKey( info, "g_pModActionHero" ) ) ) {
-		Q_strncpyz( servernodeptr->modname, "ActionHero", sizeof(servernodeptr->modname) );
-	} else {
-		*servernodeptr->modname = '\0';
-	}
-
-	// count the number of players
-	servernodeptr->numclients = 0;
-	servernodeptr->numhumanclients = 0;
-	{
-		statusPlayer_t player;
-		s = info;
-		while ( StatusParse_ParseField( &s, NULL ) ) {
-		}
-		while ( StatusParse_ParsePlayer( &s, &player ) ) {
-			++servernodeptr->numclients;
-			if ( atoi( player.ping ) ) {
-				++servernodeptr->numhumanclients;
-			}
-		}
-	}
-
-	// update ip type flags
-	ArenaServers_UpdateIpv6Flags();
-	if ( servernodeptr->flags & SERVERFLAG_IPV6 ) {
-		if ( atoi( StatusParse_ValueForKey( info, "sv_forceListIpv6" ) ) ) {
-			servernodeptr->flags |= SERVERFLAG_FORCE_LIST;
-		}
-	} else {
-		if ( atoi( StatusParse_ValueForKey( info, "sv_forceListIpv4" ) ) ) {
-			servernodeptr->flags |= SERVERFLAG_FORCE_LIST;
-		}
-	}
-}
-
-/*
-=================
-StatusQuery_Refresh
-=================
-*/
-static void StatusQuery_Refresh( void )
-{
-	int		i;
-	int		time;
-	int		maxPing;
-	char	adrstr[MAX_ADDRESSLENGTH];
-	char	info[2048];
-
-	// process ping results
-	maxPing = ArenaServers_MaxPing();
-
-	for ( i = 0; i < MAX_PINGREQUESTS; i++ ) {
-		pinglist_t *listEntry = &g_arenaservers.pinglist[i];
-		char extInfo[1024];
-
-		if ( !listEntry->adrstr[0] ) {
-			// nothing in progress
-			continue;
-		}
-
-		time = uis.realtime - listEntry->start;
-		if (time > maxPing)
-		{
-			// timed out
-			if ( g_servertype == AS_FAVORITES ) {
-				ArenaServers_InsertUnresponsive( listEntry->adrstr );
-			}
-
-			VMExt_FN_LAN_ServerStatus_Ext( listEntry->adrstr, NULL, 0, NULL, 0 );
-		}
-
-		else {
-			if ( !VMExt_FN_LAN_ServerStatus_Ext( listEntry->adrstr, info, sizeof( info ), extInfo, sizeof( extInfo ) ) ) {
-				// still waiting
-				continue;
-			}
-
-			// insert ping results
-			time = atoi( Info_ValueForKey( extInfo, "ping" ) );
-			StatusQuery_Insert( listEntry->adrstr, info, time );
-		}
-
-		// clear this query from internal list
-		listEntry->adrstr[0] = '\0';
-	}
-
-	// get results of servers query
-	// counts can increase as servers respond
-	switch (g_servertype)
-	{
-		case AS_LOCAL:
-			g_arenaservers.numqueriedservers = trap_LAN_GetLocalServerCount();
-			break;
-
-		case AS_GLOBAL1:
-		case AS_GLOBAL2:
-		case AS_GLOBAL3:
-		case AS_GLOBAL4:
-		case AS_GLOBAL5:
-			g_arenaservers.numqueriedservers = trap_LAN_GetGlobalServerCount();
-			break;
-
-		case AS_FAVORITES:
-			g_arenaservers.numqueriedservers = g_arenaservers.numfavoriteaddresses;
-			break;
-	}
-
-//	if (g_arenaservers.numqueriedservers > g_arenaservers.maxservers)
-//		g_arenaservers.numqueriedservers = g_arenaservers.maxservers;
-
-	// send ping requests in reasonable bursts
-	// iterate ping through all found servers
-	for (i=0; i<MAX_PINGREQUESTS && g_arenaservers.currentping < g_arenaservers.numqueriedservers; i++)
-	{
-		if ( g_arenaservers.pinglist[i].adrstr[0] ) {
-			// already querying in this slot
-			continue;
-		}
-
-		// get an address to ping
-		switch (g_servertype)
-		{
-			case AS_LOCAL:
-				trap_LAN_GetLocalServerAddressString( g_arenaservers.currentping, adrstr, MAX_ADDRESSLENGTH );
-				break;
-
-			case AS_GLOBAL1:
-			case AS_GLOBAL2:
-			case AS_GLOBAL3:
-			case AS_GLOBAL4:
-			case AS_GLOBAL5:
-				trap_LAN_GetGlobalServerAddressString( g_arenaservers.currentping, adrstr, MAX_ADDRESSLENGTH );
-				break;
-
-			case AS_FAVORITES:
-				Q_strncpyz( adrstr, g_arenaservers.favoriteaddresses[g_arenaservers.currentping], sizeof( adrstr ) );
-				break;
-
-		}
-
-		Q_strncpyz( g_arenaservers.pinglist[i].adrstr, adrstr, sizeof( g_arenaservers.pinglist[i].adrstr ) );
-		g_arenaservers.pinglist[i].start = uis.realtime;
-
-		// advance to next server
-		g_arenaservers.currentping++;
-	}
-
-	for ( i = 0; i < MAX_PINGREQUESTS && !g_arenaservers.pinglist[i].adrstr[0]; i++ ) {
-	}
-	if ( !INTERNET_REFRESH_HOLD && i == MAX_PINGREQUESTS ) {
-		// all pings completed
-		ArenaServers_StopRefresh();
-		return;
-	}
-
-	// update the user interface with ping status
-	ArenaServers_UpdateMenu();
 }
 
 /*
@@ -1158,7 +880,6 @@ static int ArenaServers_MaxPing( void ) {
 	}
 	return maxPing;
 }
-
 
 /*
 =================
@@ -1221,7 +942,6 @@ static int QDECL ArenaServers_Compare( const void *arg1, const void *arg2 ) {
 	return Q_stricmp( t1->hostname, t2->hostname );
 }
 
-
 /*
 =================
 ArenaServers_Go
@@ -1235,7 +955,6 @@ static void ArenaServers_Go( void ) {
 		trap_Cmd_ExecuteText( EXEC_APPEND, va( "connect %s\n", servernode->adrstr ) );
 	}
 }
-
 
 /*
 =================
@@ -1258,7 +977,6 @@ static void ArenaServers_UpdatePicture( void ) {
 	// force shader update during draw
 	g_arenaservers.mappic.shader = 0;
 }
-
 
 /*
 =================
@@ -1422,6 +1140,39 @@ static void ArenaServers_UpdateMenu( void ) {
 	ArenaServers_UpdatePicture();
 }
 
+/*
+=================
+ArenaServers_LoadFavorites
+
+Load cvar address book entries into local list.
+=================
+*/
+void ArenaServers_LoadFavorites( void )
+{
+	int				i;
+	char			adrstr[MAX_ADDRESSLENGTH];
+
+	g_arenaservers.numfavoriteaddresses = 0;
+
+	for (i=0; i<MAX_FAVORITESERVERS; i++)
+	{
+		trap_Cvar_VariableStringBuffer( va("server%d",i+1), adrstr, MAX_ADDRESSLENGTH );
+		if (!adrstr[0])
+			continue;
+
+		// quick sanity check to avoid slow domain name resolving
+		// first character must be numeric
+		if (adrstr[0] != '[' && (adrstr[0] < '0' || adrstr[0] > '9'))
+			continue;
+
+		// favorite server addresses must be maintained outside refresh list
+		// this mimics local and global netadr's stored in client
+		// these can be fetched to fill ping list
+		Q_strncpyz( g_arenaservers.favoriteaddresses[g_arenaservers.numfavoriteaddresses], adrstr,
+				sizeof( g_arenaservers.favoriteaddresses[g_arenaservers.numfavoriteaddresses] ) );
+		g_arenaservers.numfavoriteaddresses++;
+	}
+}
 
 /*
 =================
@@ -1499,6 +1250,206 @@ static void ArenaServers_Remove( void )
 	ArenaServers_SaveChanges();
 }
 
+/*
+=================
+ArenaServers_Favorites_Add
+
+Add current server to favorites
+=================
+*/
+void ArenaServers_Favorites_Add( void )
+{
+	if ( g_arenaservers.list.curvalue < g_arenaservers.list.numitems &&
+			g_arenaservers.numfavoriteaddresses < MAX_FAVORITESERVERS ) {
+		const char *adr = g_arenaservers.table[g_arenaservers.list.curvalue].servernode->adrstr;
+		int i;
+
+		for ( i = 0; i < g_arenaservers.numfavoriteaddresses; i++ ) {
+			if ( !Q_stricmp( adr, g_arenaservers.favoriteaddresses[i] ) ) {
+				// already in list
+				return;
+			}
+		}
+
+		Q_strncpyz( g_arenaservers.favoriteaddresses[g_arenaservers.numfavoriteaddresses], adr,
+				sizeof( g_arenaservers.favoriteaddresses[g_arenaservers.numfavoriteaddresses] ) );
+		g_arenaservers.numfavoriteaddresses++;
+		ArenaServers_SaveChanges();
+	}
+}
+
+/*
+=================
+ArenaServers_StopRefresh
+=================
+*/
+static void ArenaServers_StopRefresh( void )
+{
+	if (!g_arenaservers.refreshservers)
+		// not currently refreshing
+		return;
+
+	g_arenaservers.refreshservers = qfalse;
+
+	// final tally
+	if (g_arenaservers.numqueriedservers >= 0)
+	{
+		g_arenaservers.currentping       = g_numservers;
+		g_arenaservers.numqueriedservers = g_numservers;
+	}
+
+	ArenaServers_UpdateMenu();
+}
+
+/*
+=================
+ArenaServers_UpdateIpv6Flags
+
+Should be called after each new server added to g_serverlist.
+=================
+*/
+static void ArenaServers_UpdateIpv6Flags( void ) {
+	if ( EF_WARN_ASSERT( g_numservers > 0 ) ) {
+		int i;
+		int existingCount = g_numservers - 1;
+		servernode_t *latest = &g_serverlist[g_numservers - 1];
+
+		// update ip protocol of the server that was just added
+		if ( ArenaServers_IsIpv6Address( latest->adrstr ) ) {
+			latest->flags |= SERVERFLAG_IPV6;
+		}
+
+		// look for pairings
+		for ( i = 0; i < existingCount; ++i ) {
+			if ( ( g_serverlist[i].flags & SERVERFLAG_IPV6 ) != ( latest->flags & SERVERFLAG_IPV6 ) &&
+					!strcmp( g_serverlist[i].hostname, latest->hostname ) ) {
+				// found server with same hostname but different ip protocol than the new one
+				// set paired flag on both servers; ArenaServers_UpdateMenu will sort out which one(s) to display
+				g_serverlist[i].flags |= SERVERFLAG_IP_PAIRED;
+				latest->flags |= SERVERFLAG_IP_PAIRED;
+			}
+		}
+	}
+}
+
+/*
+=================
+ArenaServers_InsertUnresponsive
+
+Insert an unresponsive server into list. Only used for favorites category.
+=================
+*/
+static void ArenaServers_InsertUnresponsive( char *adrstr ) {
+	servernode_t *servernodeptr;
+
+	if ( g_numservers >= MAX_SERVERS ) {
+		// list full
+		return;
+	}
+
+	// next slot
+	servernodeptr = &g_serverlist[g_numservers++];
+	memset( servernodeptr, 0, sizeof( *servernodeptr ) );
+
+	Q_strncpyz( servernodeptr->adrstr, adrstr, MAX_ADDRESSLENGTH );
+	Q_strncpyz( servernodeptr->hostname, adrstr, MAX_HOSTNAMELENGTH );
+
+	servernodeptr->pingtime = ArenaServers_MaxPing();
+	servernodeptr->gametype = 5;
+
+	ArenaServers_UpdateIpv6Flags();
+}
+
+/*
+=================
+StatusQuery_Insert
+=================
+*/
+static void StatusQuery_Insert( char* adrstr, char* info, int pingtime )
+{
+	servernode_t*	servernodeptr;
+	char*			s;
+
+	if ( g_numservers >= MAX_SERVERS ) {
+		// list full
+		return;
+	}
+
+	// next slot
+	servernodeptr = &g_serverlist[g_numservers++];
+	memset( servernodeptr, 0, sizeof( *servernodeptr ) );
+
+	Q_strncpyz( servernodeptr->adrstr, adrstr, MAX_ADDRESSLENGTH );
+
+	s = StatusParse_ValueForKey( info, "sv_hostname" );
+	Q_StripColor( s );
+	Q_strncpyz( servernodeptr->hostname, s, MAX_HOSTNAMELENGTH );
+	Q_strupr( servernodeptr->hostname );
+
+	s = StatusParse_ValueForKey( info, "mapname" );
+	Q_StripColor( s );
+	Q_strncpyz( servernodeptr->mapname, s, MAX_MAPNAMELENGTH );
+	Q_strupr( servernodeptr->mapname );
+
+	servernodeptr->maxclients = atoi( StatusParse_ValueForKey( info, "sv_maxclients" ) );
+	servernodeptr->pingtime   = pingtime;
+	servernodeptr->minPing    = atoi( StatusParse_ValueForKey( info, "sv_minPing" ) );
+	servernodeptr->maxPing    = atoi( StatusParse_ValueForKey( info, "sv_maxPing" ) );
+
+	servernodeptr->gametype = atoi( StatusParse_ValueForKey( info, "g_gametype" ) );
+	if( servernodeptr->gametype < 0 ) {
+		servernodeptr->gametype = 0;
+	}
+	else if( servernodeptr->gametype > 5 ) {
+		servernodeptr->gametype = 5;
+	}
+
+	s = StatusParse_ValueForKey( info, "gamename");
+	if( *s && Q_stricmp( s, "baseEF" ) ) {
+		Q_StripColor( s );
+		Q_strncpyz( servernodeptr->modname, s, sizeof(servernodeptr->modname) );
+	} else if ( atoi ( StatusParse_ValueForKey( info, "g_pModAssimilation" ) ) ) {
+		Q_strncpyz( servernodeptr->modname, "Assimilation", sizeof(servernodeptr->modname) );
+	} else if ( atoi ( StatusParse_ValueForKey( info, "g_pModElimination" ) ) ) {
+		Q_strncpyz( servernodeptr->modname, "Elimination", sizeof(servernodeptr->modname) );
+	} else if ( atoi ( StatusParse_ValueForKey( info, "g_pModSpecialties" ) ) ) {
+		Q_strncpyz( servernodeptr->modname, "Specialties", sizeof(servernodeptr->modname) );
+	} else if ( atoi ( StatusParse_ValueForKey( info, "g_pModDisintegration" ) ) ) {
+		Q_strncpyz( servernodeptr->modname, "Disintegration", sizeof(servernodeptr->modname) );
+	} else if ( atoi ( StatusParse_ValueForKey( info, "g_pModActionHero" ) ) ) {
+		Q_strncpyz( servernodeptr->modname, "ActionHero", sizeof(servernodeptr->modname) );
+	} else {
+		*servernodeptr->modname = '\0';
+	}
+
+	// count the number of players
+	servernodeptr->numclients = 0;
+	servernodeptr->numhumanclients = 0;
+	{
+		statusPlayer_t player;
+		s = info;
+		while ( StatusParse_ParseField( &s, NULL ) ) {
+		}
+		while ( StatusParse_ParsePlayer( &s, &player ) ) {
+			++servernodeptr->numclients;
+			if ( atoi( player.ping ) ) {
+				++servernodeptr->numhumanclients;
+			}
+		}
+	}
+
+	// update ip type flags
+	ArenaServers_UpdateIpv6Flags();
+	if ( servernodeptr->flags & SERVERFLAG_IPV6 ) {
+		if ( atoi( StatusParse_ValueForKey( info, "sv_forceListIpv6" ) ) ) {
+			servernodeptr->flags |= SERVERFLAG_FORCE_LIST;
+		}
+	} else {
+		if ( atoi( StatusParse_ValueForKey( info, "sv_forceListIpv4" ) ) ) {
+			servernodeptr->flags |= SERVERFLAG_FORCE_LIST;
+		}
+	}
+}
 
 /*
 =================
@@ -1564,65 +1515,129 @@ static void ArenaServers_Insert( char* adrstr, char* info, int pingtime )
 	}
 }
 
-
 /*
 =================
-ArenaServers_LoadFavorites
-
-Load cvar address book entries into local list.
+StatusQuery_Refresh
 =================
 */
-void ArenaServers_LoadFavorites( void )
+static void StatusQuery_Refresh( void )
 {
-	int				i;
-	char			adrstr[MAX_ADDRESSLENGTH];
+	int		i;
+	int		time;
+	int		maxPing;
+	char	adrstr[MAX_ADDRESSLENGTH];
+	char	info[2048];
 
-	g_arenaservers.numfavoriteaddresses = 0;
+	// process ping results
+	maxPing = ArenaServers_MaxPing();
 
-	for (i=0; i<MAX_FAVORITESERVERS; i++)
-	{
-		trap_Cvar_VariableStringBuffer( va("server%d",i+1), adrstr, MAX_ADDRESSLENGTH );
-		if (!adrstr[0])
+	for ( i = 0; i < MAX_PINGREQUESTS; i++ ) {
+		pinglist_t *listEntry = &g_arenaservers.pinglist[i];
+		char extInfo[1024];
+
+		if ( !listEntry->adrstr[0] ) {
+			// nothing in progress
 			continue;
+		}
 
-		// quick sanity check to avoid slow domain name resolving
-		// first character must be numeric
-		if (adrstr[0] != '[' && (adrstr[0] < '0' || adrstr[0] > '9'))
-			continue;
+		time = uis.realtime - listEntry->start;
+		if (time > maxPing)
+		{
+			// timed out
+			if ( g_servertype == AS_FAVORITES ) {
+				ArenaServers_InsertUnresponsive( listEntry->adrstr );
+			}
 
-		// favorite server addresses must be maintained outside refresh list
-		// this mimics local and global netadr's stored in client
-		// these can be fetched to fill ping list
-		Q_strncpyz( g_arenaservers.favoriteaddresses[g_arenaservers.numfavoriteaddresses], adrstr,
-				sizeof( g_arenaservers.favoriteaddresses[g_arenaservers.numfavoriteaddresses] ) );
-		g_arenaservers.numfavoriteaddresses++;
+			VMExt_FN_LAN_ServerStatus_Ext( listEntry->adrstr, NULL, 0, NULL, 0 );
+		}
+
+		else {
+			if ( !VMExt_FN_LAN_ServerStatus_Ext( listEntry->adrstr, info, sizeof( info ), extInfo, sizeof( extInfo ) ) ) {
+				// still waiting
+				continue;
+			}
+
+			// insert ping results
+			time = atoi( Info_ValueForKey( extInfo, "ping" ) );
+			StatusQuery_Insert( listEntry->adrstr, info, time );
+		}
+
+		// clear this query from internal list
+		listEntry->adrstr[0] = '\0';
 	}
-}
 
+	// get results of servers query
+	// counts can increase as servers respond
+	switch (g_servertype)
+	{
+		case AS_LOCAL:
+			g_arenaservers.numqueriedservers = trap_LAN_GetLocalServerCount();
+			break;
 
-/*
-=================
-ArenaServers_StopRefresh
-=================
-*/
-static void ArenaServers_StopRefresh( void )
-{
-	if (!g_arenaservers.refreshservers)
-		// not currently refreshing
+		case AS_GLOBAL1:
+		case AS_GLOBAL2:
+		case AS_GLOBAL3:
+		case AS_GLOBAL4:
+		case AS_GLOBAL5:
+			g_arenaservers.numqueriedservers = trap_LAN_GetGlobalServerCount();
+			break;
+
+		case AS_FAVORITES:
+			g_arenaservers.numqueriedservers = g_arenaservers.numfavoriteaddresses;
+			break;
+	}
+
+//	if (g_arenaservers.numqueriedservers > g_arenaservers.maxservers)
+//		g_arenaservers.numqueriedservers = g_arenaservers.maxservers;
+
+	// send ping requests in reasonable bursts
+	// iterate ping through all found servers
+	for (i=0; i<MAX_PINGREQUESTS && g_arenaservers.currentping < g_arenaservers.numqueriedservers; i++)
+	{
+		if ( g_arenaservers.pinglist[i].adrstr[0] ) {
+			// already querying in this slot
+			continue;
+		}
+
+		// get an address to ping
+		switch (g_servertype)
+		{
+			case AS_LOCAL:
+				trap_LAN_GetLocalServerAddressString( g_arenaservers.currentping, adrstr, MAX_ADDRESSLENGTH );
+				break;
+
+			case AS_GLOBAL1:
+			case AS_GLOBAL2:
+			case AS_GLOBAL3:
+			case AS_GLOBAL4:
+			case AS_GLOBAL5:
+				trap_LAN_GetGlobalServerAddressString( g_arenaservers.currentping, adrstr, MAX_ADDRESSLENGTH );
+				break;
+
+			case AS_FAVORITES:
+				Q_strncpyz( adrstr, g_arenaservers.favoriteaddresses[g_arenaservers.currentping], sizeof( adrstr ) );
+				break;
+
+		}
+
+		Q_strncpyz( g_arenaservers.pinglist[i].adrstr, adrstr, sizeof( g_arenaservers.pinglist[i].adrstr ) );
+		g_arenaservers.pinglist[i].start = uis.realtime;
+
+		// advance to next server
+		g_arenaservers.currentping++;
+	}
+
+	for ( i = 0; i < MAX_PINGREQUESTS && !g_arenaservers.pinglist[i].adrstr[0]; i++ ) {
+	}
+	if ( !INTERNET_REFRESH_HOLD && i == MAX_PINGREQUESTS ) {
+		// all pings completed
+		ArenaServers_StopRefresh();
 		return;
-
-	g_arenaservers.refreshservers = qfalse;
-
-	// final tally
-	if (g_arenaservers.numqueriedservers >= 0)
-	{
-		g_arenaservers.currentping       = g_numservers;
-		g_arenaservers.numqueriedservers = g_numservers;
 	}
 
+	// update the user interface with ping status
 	ArenaServers_UpdateMenu();
 }
-
 
 /*
 =================
@@ -1809,7 +1824,6 @@ static void ArenaServers_DoRefresh( void )
 	ArenaServers_UpdateMenu();
 }
 
-
 /*
 =================
 ArenaServers_StartRefresh
@@ -1848,7 +1862,6 @@ static void ArenaServers_StartRefresh( void )
 				(int)trap_Cvar_VariableValue( "protocol" ) ) );
 	}
 }
-
 
 /*
 =================
@@ -1932,36 +1945,6 @@ void ArenaServers_SetType( int type )
 				sizeof( g_arenaservers.statusBuffer ) );
 	}
 }
-
-
-/*
-=================
-ArenaServers_Favorites_Add
-
-Add current server to favorites
-=================
-*/
-void ArenaServers_Favorites_Add( void )
-{
-	if ( g_arenaservers.list.curvalue < g_arenaservers.list.numitems &&
-			g_arenaservers.numfavoriteaddresses < MAX_FAVORITESERVERS ) {
-		const char *adr = g_arenaservers.table[g_arenaservers.list.curvalue].servernode->adrstr;
-		int i;
-
-		for ( i = 0; i < g_arenaservers.numfavoriteaddresses; i++ ) {
-			if ( !Q_stricmp( adr, g_arenaservers.favoriteaddresses[i] ) ) {
-				// already in list
-				return;
-			}
-		}
-
-		Q_strncpyz( g_arenaservers.favoriteaddresses[g_arenaservers.numfavoriteaddresses], adr,
-				sizeof( g_arenaservers.favoriteaddresses[g_arenaservers.numfavoriteaddresses] ) );
-		g_arenaservers.numfavoriteaddresses++;
-		ArenaServers_SaveChanges();
-	}
-}
-
 
 /*
 =================
@@ -2081,8 +2064,6 @@ static void ArenaServers_Event( void* ptr, int event ) {
 	}
 }
 
-
-
 /*
 =================
 ArenaServers_Graphics
@@ -2167,7 +2148,6 @@ static void ArenaServers_MenuDraw( void )
 	Menu_Draw( &g_arenaservers.menu );
 }
 
-
 /*
 =================
 ArenaServers_MenuKey
@@ -2193,7 +2173,6 @@ static sfxHandle_t ArenaServers_MenuKey( int key ) {
 
 	return Menu_DefaultKey( &g_arenaservers.menu, key );
 }
-
 
 /*
 =================
@@ -2552,7 +2531,6 @@ static void ArenaServers_MenuInit( void )
 	ArenaServers_SetType( g_servertype );
 }
 
-
 /*
 =================
 ArenaServers_Cache
@@ -2562,7 +2540,6 @@ void ArenaServers_Cache( void )
 {
 	trap_R_RegisterShaderNoMip( ART_UNKNOWNMAP );
 }
-
 
 /*
 =================
@@ -2658,6 +2635,7 @@ UI_ChooseServerTypeMenu_Cache
 void UI_ChooseServerTypeMenu_Cache( void )
 {
 }
+
 /*
 =================
 ChooseServerType_MenuInit

@@ -1142,12 +1142,12 @@ static void ArenaServers_UpdateMenu( void ) {
 
 /*
 =================
-ArenaServers_LoadFavorites
+ArenaServers_Favorites_Import
 
-Load cvar address book entries into local list.
+Load favorite servers list from cvars.
 =================
 */
-void ArenaServers_LoadFavorites( void )
+void ArenaServers_Favorites_Import( void )
 {
 	int				i;
 	char			adrstr[MAX_ADDRESSLENGTH];
@@ -1176,10 +1176,12 @@ void ArenaServers_LoadFavorites( void )
 
 /*
 =================
-ArenaServers_SaveChanges
+ArenaServers_Favorites_Export
+
+Write favorite server list to cvars.
 =================
 */
-static void ArenaServers_SaveChanges( void )
+static void ArenaServers_Favorites_Export( void )
 {
 	int	i;
 
@@ -1192,10 +1194,10 @@ static void ArenaServers_SaveChanges( void )
 
 /*
 =================
-ArenaServers_Remove
+ArenaServers_Favorites_Remove
 =================
 */
-static void ArenaServers_Remove( void )
+static void ArenaServers_Favorites_Remove( void )
 {
 	int				i;
 	servernode_t*	servernodeptr;
@@ -1247,7 +1249,7 @@ static void ArenaServers_Remove( void )
 	g_arenaservers.numqueriedservers = g_arenaservers.numfavoriteaddresses;
 	g_arenaservers.currentping       = g_arenaservers.numfavoriteaddresses;
 	ArenaServers_UpdateMenu();
-	ArenaServers_SaveChanges();
+	ArenaServers_Favorites_Export();
 }
 
 /*
@@ -1274,7 +1276,7 @@ void ArenaServers_Favorites_Add( void )
 		Q_strncpyz( g_arenaservers.favoriteaddresses[g_arenaservers.numfavoriteaddresses], adr,
 				sizeof( g_arenaservers.favoriteaddresses[g_arenaservers.numfavoriteaddresses] ) );
 		g_arenaservers.numfavoriteaddresses++;
-		ArenaServers_SaveChanges();
+		ArenaServers_Favorites_Export();
 	}
 }
 
@@ -1362,10 +1364,12 @@ static void ArenaServers_InsertUnresponsive( char *adrstr ) {
 
 /*
 =================
-StatusQuery_Insert
+ArenaServers_InsertFromStatus
+
+Add a server using data from getstatus-based query.
 =================
 */
-static void StatusQuery_Insert( char* adrstr, char* info, int pingtime )
+static void ArenaServers_InsertFromStatus( char* adrstr, char* info, int pingtime )
 {
 	servernode_t*	servernodeptr;
 	char*			s;
@@ -1453,10 +1457,12 @@ static void StatusQuery_Insert( char* adrstr, char* info, int pingtime )
 
 /*
 =================
-ArenaServers_Insert
+ArenaServers_InsertFromInfo
+
+Add a server using data from getinfo-based query.
 =================
 */
-static void ArenaServers_Insert( char* adrstr, char* info, int pingtime )
+static void ArenaServers_InsertFromInfo( char* adrstr, char* info, int pingtime )
 {
 	servernode_t*	servernodeptr;
 	char*			s;
@@ -1517,10 +1523,13 @@ static void ArenaServers_Insert( char* adrstr, char* info, int pingtime )
 
 /*
 =================
-StatusQuery_Refresh
+ArenaServers_StatusRefresh
+
+Search for servers using getstatus query instead of original getinfo method, if engine
+support is available.
 =================
 */
-static void StatusQuery_Refresh( void )
+static void ArenaServers_StatusRefresh( void )
 {
 	int		i;
 	int		time;
@@ -1559,7 +1568,7 @@ static void StatusQuery_Refresh( void )
 
 			// insert ping results
 			time = atoi( Info_ValueForKey( extInfo, "ping" ) );
-			StatusQuery_Insert( listEntry->adrstr, info, time );
+			ArenaServers_InsertFromStatus( listEntry->adrstr, info, time );
 		}
 
 		// clear this query from internal list
@@ -1685,7 +1694,7 @@ static void ArenaServers_DoRefresh( void )
 	g_arenaservers.nextpingtime = uis.realtime + 50;
 
 	if ( g_arenaservers.statusQueryEnabled ) {
-		StatusQuery_Refresh();
+		ArenaServers_StatusRefresh();
 		return;
 	}
 
@@ -1729,7 +1738,7 @@ static void ArenaServers_DoRefresh( void )
 			{
 				// insert ping results
 				trap_LAN_GetPingInfo( i, info, MAX_INFO_STRING );
-				ArenaServers_Insert( adrstr, info, time );
+				ArenaServers_InsertFromInfo( adrstr, info, time );
 			}
 
 			// clear this query from internal list
@@ -2059,7 +2068,7 @@ static void ArenaServers_Event( void* ptr, int event ) {
 		break;
 
 	case ID_REMOVE:
-		ArenaServers_Remove();
+		ArenaServers_Favorites_Remove();
 		break;
 	}
 }
@@ -2161,7 +2170,7 @@ static sfxHandle_t ArenaServers_MenuKey( int key ) {
 
 	if( ( key == K_DEL || key == K_KP_DEL ) && ( g_servertype == AS_FAVORITES ) &&
 		( Menu_ItemAtCursor( &g_arenaservers.menu) == &g_arenaservers.list ) ) {
-		ArenaServers_Remove();
+		ArenaServers_Favorites_Remove();
 		ArenaServers_UpdateMenu();
 		return menu_move_sound;
 	}
@@ -2506,7 +2515,7 @@ static void ArenaServers_MenuInit( void )
 	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.favorite );
 	Menu_AddItem( &g_arenaservers.menu, (void*) &g_arenaservers.go );
 
-	ArenaServers_LoadFavorites();
+	ArenaServers_Favorites_Import();
 
 	g_ipprotocol = Com_Clamp( 0, 1, ui_browserIpProtocol.integer );
 	g_arenaservers.ipprotocol.curvalue = g_ipprotocol;

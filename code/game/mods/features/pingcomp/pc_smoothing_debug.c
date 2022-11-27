@@ -7,10 +7,9 @@
 * TODO: Add statistics tracking features.
 */
 
-#include "mods/features/pingcomp/pc_local.h"
+#define MOD_PREFIX( x ) ModPCSmoothingDebug_##x
 
-#define PREFIX( x ) ModPCSmoothingDebug_##x
-#define MOD_STATE PREFIX( state )
+#include "mods/features/pingcomp/pc_local.h"
 
 #define WORKING_CLIENT_COUNT ( level.maxclients < MAX_SMOOTHING_CLIENTS ? level.maxclients : MAX_SMOOTHING_CLIENTS )
 #define CLIENT_IN_RANGE( clientNum ) ( clientNum >= 0 && clientNum < WORKING_CLIENT_COUNT )
@@ -101,7 +100,7 @@ void ModPCSmoothingDebug_Static_LogFrame( int clientNum, int smoothedCommandTime
 Handle smoothing_debug_frames command.
 ===================
 */
-LOGFUNCTION_SRET( qboolean, PREFIX(ModConsoleCommand), ( const char *cmd ), ( cmd ), "G_MODFN_MODCONSOLECOMMAND" ) {
+LOGFUNCTION_SRET( qboolean, MOD_PREFIX(ModConsoleCommand), ( const char *cmd ), ( cmd ), "G_MODFN_MODCONSOLECOMMAND" ) {
 	if (Q_stricmp (cmd, "smoothing_debug_frames") == 0) {
 		ModPCSmoothingDebug_PrintFrames();
 		return qtrue;
@@ -115,14 +114,6 @@ LOGFUNCTION_SRET( qboolean, PREFIX(ModConsoleCommand), ( const char *cmd ), ( cm
 ModPCSmoothingDebug_Init
 ================
 */
-
-#define INIT_FN_STACKABLE( name ) \
-	MOD_STATE->Prev_##name = modfn.name; \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_OVERRIDE( name ) \
-	modfn.name = PREFIX(name);
-
 LOGFUNCTION_VOID( ModPCSmoothingDebug_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );

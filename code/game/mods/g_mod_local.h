@@ -118,3 +118,22 @@ extern ModModelSelection_shared_t *ModModelSelection_shared;
 //
 
 void ModPendingItem_Shared_SchedulePendingItem( int clientNum, holdable_t item, int delay );
+
+/* ************************************************************************* */
+// Helper Macros
+/* ************************************************************************* */
+
+#ifdef MOD_PREFIX
+#define MOD_STATE MOD_PREFIX( state )
+
+#define INIT_FN_STACKABLE( name ) \
+	MOD_STATE->Prev_##name = modfn.name; \
+	modfn.name = MOD_PREFIX(name);
+
+#define INIT_FN_OVERRIDE( name ) \
+	modfn.name = MOD_PREFIX(name);
+
+#define INIT_FN_BASE( name ) \
+	EF_WARN_ASSERT( modfn.name == ModFNDefault_##name ); \
+	modfn.name = MOD_PREFIX(name);
+#endif

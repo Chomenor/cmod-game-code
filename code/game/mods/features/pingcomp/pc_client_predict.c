@@ -4,10 +4,9 @@
 * This module provides server-side support for weapon fire prediction features on the client.
 */
 
-#include "mods/features/pingcomp/pc_local.h"
+#define MOD_PREFIX( x ) ModPCClientPredict_##x
 
-#define PREFIX( x ) ModPCClientPredict_##x
-#define MOD_STATE PREFIX( state )
+#include "mods/features/pingcomp/pc_local.h"
 
 #define PREDICTION_ENABLED ( ModPingcomp_Static_PingCompensationEnabled() && MOD_STATE->g_unlaggedPredict.integer )
 
@@ -34,7 +33,7 @@ Only use the predictable functions if prediction is actually enabled (it could h
 cheating security implications).
 ======================
 */
-LOGFUNCTION_SRET( unsigned int, PREFIX(WeaponPredictableRNG), ( int clientNum ), ( clientNum ), "G_MODFN_WEAPONPREDICTABLERNG" ) {
+LOGFUNCTION_SRET( unsigned int, MOD_PREFIX(WeaponPredictableRNG), ( int clientNum ), ( clientNum ), "G_MODFN_WEAPONPREDICTABLERNG" ) {
 	if ( PREDICTION_ENABLED && G_AssertConnectedClient( clientNum ) ) {
 		return BG_PredictableRNG_Rand( &MOD_STATE->clients[clientNum].rng, level.clients[clientNum].ps.commandTime );
 	}
@@ -109,7 +108,7 @@ static void ModPCClientPredict_CvarCallback( trackedCvar_t *cvar ) {
 (ModFN) AddModConfigInfo
 ==============
 */
-LOGFUNCTION_SVOID( PREFIX(AddModConfigInfo), ( char *info ), ( info ), "G_MODFN_ADDMODCONFIGINFO" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(AddModConfigInfo), ( char *info ), ( info ), "G_MODFN_ADDMODCONFIGINFO" ) {
 	MOD_STATE->Prev_AddModConfigInfo( info );
 
 	if ( PREDICTION_ENABLED ) {
@@ -122,7 +121,7 @@ LOGFUNCTION_SVOID( PREFIX(AddModConfigInfo), ( char *info ), ( info ), "G_MODFN_
 (ModFN) PostRunFrame
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) {
 	MOD_STATE->Prev_PostRunFrame();
 
 	if ( PREDICTION_ENABLED ) {
@@ -135,14 +134,6 @@ LOGFUNCTION_SVOID( PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) 
 ModPCClientPredict_Init
 ================
 */
-
-#define INIT_FN_STACKABLE( name ) \
-	MOD_STATE->Prev_##name = modfn.name; \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_OVERRIDE( name ) \
-	modfn.name = PREFIX(name);
-
 LOGFUNCTION_VOID( ModPCClientPredict_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );

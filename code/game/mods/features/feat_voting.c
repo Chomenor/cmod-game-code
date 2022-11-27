@@ -9,10 +9,9 @@
 * system in the future, so adding features or vote options here is not considered a priority.
 */
 
-#include "mods/g_mod_local.h"
+#define MOD_PREFIX( x ) ModVoting_##x
 
-#define PREFIX( x ) ModVoting_##x
-#define MOD_STATE PREFIX( state )
+#include "mods/g_mod_local.h"
 
 #define	MAX_VOTE_COUNT 3
 
@@ -260,7 +259,7 @@ static void ModVoting_CheckVote( void ) {
 (ModFN) ModClientCommand
 ================
 */
-LOGFUNCTION_SRET( qboolean, PREFIX(ModClientCommand), ( int clientNum, const char *cmd ),
+LOGFUNCTION_SRET( qboolean, MOD_PREFIX(ModClientCommand), ( int clientNum, const char *cmd ),
 		( clientNum, cmd ), "G_MODFN_MODCLIENTCOMMAND" ) {
 	if ( level.clients[clientNum].pers.connected == CON_CONNECTED && level.matchState < MS_INTERMISSION_QUEUED ) {
 		if ( !Q_stricmp( cmd, "callvote" ) ) {
@@ -283,7 +282,7 @@ LOGFUNCTION_SRET( qboolean, PREFIX(ModClientCommand), ( int clientNum, const cha
 Run pending nextmap if it was voted.
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(ExitLevel), ( void ), (), "G_MODFN_EXITLEVEL" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(ExitLevel), ( void ), (), "G_MODFN_EXITLEVEL" ) {
 	if ( *MOD_STATE->nextmapPending ) {
 		ModVoting_LaunchMap( MOD_STATE->nextmapPending );
 	} else {
@@ -296,7 +295,7 @@ LOGFUNCTION_SVOID( PREFIX(ExitLevel), ( void ), (), "G_MODFN_EXITLEVEL" ) {
 (ModFN) InitClientSession
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(InitClientSession), ( int clientNum, qboolean initialConnect, const info_string_t *info ),
+LOGFUNCTION_SVOID( MOD_PREFIX(InitClientSession), ( int clientNum, qboolean initialConnect, const info_string_t *info ),
 		( clientNum, initialConnect, info ), "G_MODFN_INITCLIENTSESSION" ) {
 	ModVotingClient_t *modclient = &MOD_STATE->clients[clientNum];
 	memset( modclient, 0, sizeof( *modclient ) );
@@ -308,7 +307,7 @@ LOGFUNCTION_SVOID( PREFIX(InitClientSession), ( int clientNum, qboolean initialC
 (ModFN) PostRunFrame
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(PostRunFrame), (void), (), "G_MODFN_POSTRUNFRAME" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), (void), (), "G_MODFN_POSTRUNFRAME" ) {
 	MOD_STATE->Prev_PostRunFrame();
 	ModVoting_CheckVote();
 }
@@ -318,14 +317,6 @@ LOGFUNCTION_SVOID( PREFIX(PostRunFrame), (void), (), "G_MODFN_POSTRUNFRAME" ) {
 ModVoting_Init
 ================
 */
-
-#define INIT_FN_STACKABLE( name ) \
-	MOD_STATE->Prev_##name = modfn.name; \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_OVERRIDE( name ) \
-	modfn.name = PREFIX(name);
-
 LOGFUNCTION_VOID( ModVoting_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );

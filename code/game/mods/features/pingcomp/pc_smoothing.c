@@ -10,10 +10,9 @@
 * resulting in the appeareance of smooth movement.
 */
 
-#include "mods/features/pingcomp/pc_local.h"
+#define MOD_PREFIX( x ) ModPCSmoothing_##x
 
-#define PREFIX( x ) ModPCSmoothing_##x
-#define MOD_STATE PREFIX( state )
+#include "mods/features/pingcomp/pc_local.h"
 
 #define WORKING_CLIENT_COUNT ( level.maxclients < MAX_SMOOTHING_CLIENTS ? level.maxclients : MAX_SMOOTHING_CLIENTS )
 #define CLIENT_IN_RANGE( clientNum ) ( clientNum >= 0 && clientNum < WORKING_CLIENT_COUNT )
@@ -274,7 +273,7 @@ qboolean ModPCSmoothing_Static_ShiftClient( int clientNum, Smoothing_ShiftInfo_t
 Record client positions after each move fragment.
 ==============
 */
-LOGFUNCTION_SVOID( PREFIX(PostPmoveActions), ( pmove_t *pmove, int clientNum, int oldEventSequence ),
+LOGFUNCTION_SVOID( MOD_PREFIX(PostPmoveActions), ( pmove_t *pmove, int clientNum, int oldEventSequence ),
 		( pmove, clientNum, oldEventSequence ), "G_MODFN_POSTPMOVEACTIONS" ) {
 	MOD_STATE->Prev_PostPmoveActions( pmove, clientNum, oldEventSequence );
 
@@ -291,7 +290,7 @@ Use smoothed position when creating body entity so it stays in the same visible 
 as the player entity body.
 =============
 */
-LOGFUNCTION_SRET( gentity_t *, PREFIX(CopyToBodyQue), ( int clientNum ), ( clientNum ), "G_MODFN_COPYTOBODYQUE" ) {
+LOGFUNCTION_SRET( gentity_t *, MOD_PREFIX(CopyToBodyQue), ( int clientNum ), ( clientNum ), "G_MODFN_COPYTOBODYQUE" ) {
 	ModPCSmoothing_Static_ShiftClient( clientNum, NULL );
 	return MOD_STATE->Prev_CopyToBodyQue( clientNum );
 }
@@ -301,7 +300,7 @@ LOGFUNCTION_SRET( gentity_t *, PREFIX(CopyToBodyQue), ( int clientNum ), ( clien
 (ModFN) PostRunFrame
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) {
 	if ( ModPingcomp_Static_SmoothingEnabled() ) {
 		ModPCSmoothing_CheckLiftMoves();
 	}
@@ -314,14 +313,6 @@ LOGFUNCTION_SVOID( PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) 
 ModPCSmoothing_Init
 ================
 */
-
-#define INIT_FN_STACKABLE( name ) \
-	MOD_STATE->Prev_##name = modfn.name; \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_OVERRIDE( name ) \
-	modfn.name = PREFIX(name);
-
 LOGFUNCTION_VOID( ModPCSmoothing_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );

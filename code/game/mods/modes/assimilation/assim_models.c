@@ -6,10 +6,9 @@
 * queen has a specific unique model.
 */
 
-#include "mods/modes/assimilation/assim_local.h"
+#define MOD_PREFIX( x ) ModAssimModels_##x
 
-#define PREFIX( x ) ModAssimModels_##x
-#define MOD_STATE PREFIX( state )
+#include "mods/modes/assimilation/assim_local.h"
 
 static struct {
 	PlayerModels_ConvertPlayerModel_t Prev_ConvertPlayerModel;
@@ -151,18 +150,6 @@ LOGFUNCTION_SVOID( ModAssimModels_RandomPlayerModel, ( int clientNum, const char
 ModAssimModels_Init
 ================
 */
-
-#define INIT_FN_STACKABLE( name ) \
-	MOD_STATE->Prev_##name = modfn.name; \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_OVERRIDE( name ) \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_BASE( name ) \
-	EF_WARN_ASSERT( modfn.name == ModFNDefault_##name ); \
-	modfn.name = PREFIX(name);
-
 LOGFUNCTION_VOID( ModAssimModels_Init, ( void ), (), "G_MOD_INIT G_ASSIMILATION" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );

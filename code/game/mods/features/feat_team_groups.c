@@ -6,10 +6,9 @@
 * team must belong to that race, or a random one will be selected instead.
 */
 
-#include "mods/g_mod_local.h"
+#define MOD_PREFIX( x ) ModTeamGroups_##x
 
-#define PREFIX( x ) ModTeamGroups_##x
-#define MOD_STATE PREFIX( state )
+#include "mods/g_mod_local.h"
 
 #define GROUP_NAME_LENGTH 256
 
@@ -122,7 +121,7 @@ LOGFUNCTION_SVOID( ModTeamGroups_RandomPlayerModel, ( int clientNum, const char 
 Delay full initialization until g_gametype is determined, because other mods might have modified it.
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(PostModInit), ( void ), (), "G_MODFN_POSTMODINIT" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(PostModInit), ( void ), (), "G_MODFN_POSTMODINIT" ) {
 	MOD_STATE->Prev_PostModInit();
 
 	if ( G_ModUtils_GetLatchedValue( "g_gametype", "0", 0 ) >= GT_TEAM ) {
@@ -150,14 +149,6 @@ LOGFUNCTION_SVOID( PREFIX(PostModInit), ( void ), (), "G_MODFN_POSTMODINIT" ) {
 ModTeamGroups_Init
 ================
 */
-
-#define INIT_FN_STACKABLE( name ) \
-	MOD_STATE->Prev_##name = modfn.name; \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_OVERRIDE( name ) \
-	modfn.name = PREFIX(name);
-
 LOGFUNCTION_VOID( ModTeamGroups_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );

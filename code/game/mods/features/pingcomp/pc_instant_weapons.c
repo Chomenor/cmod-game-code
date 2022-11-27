@@ -6,10 +6,9 @@
 * the player firing the weapon.
 */
 
-#include "mods/features/pingcomp/pc_local.h"
+#define MOD_PREFIX( x ) ModPCInstantWeapons_##x
 
-#define PREFIX( x ) ModPCInstantWeapons_##x
-#define MOD_STATE PREFIX( state )
+#include "mods/features/pingcomp/pc_local.h"
 
 // Maximum ping allowed for full compensation (for instant hit weapons)
 #define MAX_SHIFT_TIME 300
@@ -46,7 +45,7 @@ static void ModPCInstantWeapons_ShiftedTrace( trace_t *results, const vec3_t sta
 Store the currently active client while move is in progress.
 ==============
 */
-LOGFUNCTION_SVOID( PREFIX(PostPmoveActions), ( pmove_t *pmove, int clientNum, int oldEventSequence ),
+LOGFUNCTION_SVOID( MOD_PREFIX(PostPmoveActions), ( pmove_t *pmove, int clientNum, int oldEventSequence ),
 		( pmove, clientNum, oldEventSequence ), "G_MODFN_POSTPMOVEACTIONS" ) {
 	MOD_STATE->postPmoveActive = qtrue;
 	MOD_STATE->postPmoveClient = clientNum;
@@ -61,7 +60,7 @@ LOGFUNCTION_SVOID( PREFIX(PostPmoveActions), ( pmove_t *pmove, int clientNum, in
 (ModFN) TrapTrace
 ==============
 */
-LOGFUNCTION_SVOID( PREFIX(TrapTrace), ( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs,
+LOGFUNCTION_SVOID( MOD_PREFIX(TrapTrace), ( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs,
 		const vec3_t end, int passEntityNum, int contentmask, int modFlags ),
 		( results, start, mins, maxs, end, passEntityNum, contentmask, modFlags ), "G_MODFN_TRAPTRACE" ) {
 	int shiftTime = 0;
@@ -94,14 +93,6 @@ LOGFUNCTION_SVOID( PREFIX(TrapTrace), ( trace_t *results, const vec3_t start, co
 ModPCInstantWeapons_Init
 ================
 */
-
-#define INIT_FN_STACKABLE( name ) \
-	MOD_STATE->Prev_##name = modfn.name; \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_OVERRIDE( name ) \
-	modfn.name = PREFIX(name);
-
 LOGFUNCTION_VOID( ModPCInstantWeapons_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );

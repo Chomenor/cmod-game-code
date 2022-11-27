@@ -14,10 +14,9 @@
 * than more trivial implementations.
 */
 
-#include "mods/features/pingcomp/pc_local.h"
+#define MOD_PREFIX( x ) ModPCSmoothingOffset_##x
 
-#define PREFIX( x ) ModPCSmoothingOffset_##x
-#define MOD_STATE PREFIX( state )
+#include "mods/features/pingcomp/pc_local.h"
 
 #define WORKING_CLIENT_COUNT ( level.maxclients < MAX_SMOOTHING_CLIENTS ? level.maxclients : MAX_SMOOTHING_CLIENTS )
 #define CLIENT_IN_RANGE( clientNum ) ( clientNum >= 0 && clientNum < WORKING_CLIENT_COUNT )
@@ -356,7 +355,7 @@ static void ModPCSmoothingOffset_OffsetDebug( int clientNum ) {
 (ModFN) ModConsoleCommand
 ===================
 */
-LOGFUNCTION_SRET( qboolean, PREFIX(ModConsoleCommand), ( const char *cmd ), ( cmd ), "G_MODFN_MODCONSOLECOMMAND" ) {
+LOGFUNCTION_SRET( qboolean, MOD_PREFIX(ModConsoleCommand), ( const char *cmd ), ( cmd ), "G_MODFN_MODCONSOLECOMMAND" ) {
 	if (Q_stricmp (cmd, "smoothing_debug_offset") == 0) {
 		ModPCSmoothingOffset_OffsetDebug( 0 );
 		return qtrue;
@@ -370,7 +369,7 @@ LOGFUNCTION_SRET( qboolean, PREFIX(ModConsoleCommand), ( const char *cmd ), ( cm
 (ModFN) RunPlayerMove
 ==============
 */
-LOGFUNCTION_SVOID( PREFIX(RunPlayerMove), ( int clientNum ), ( clientNum ), "G_MODFN_RUNPLAYERMOVE" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(RunPlayerMove), ( int clientNum ), ( clientNum ), "G_MODFN_RUNPLAYERMOVE" ) {
 	int oldTime = level.clients[clientNum].ps.commandTime;
 	MOD_STATE->Prev_RunPlayerMove( clientNum );
 
@@ -384,7 +383,7 @@ LOGFUNCTION_SVOID( PREFIX(RunPlayerMove), ( int clientNum ), ( clientNum ), "G_M
 (ModFN) InitClientSession
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(InitClientSession), ( int clientNum, qboolean initialConnect, const info_string_t *info ),
+LOGFUNCTION_SVOID( MOD_PREFIX(InitClientSession), ( int clientNum, qboolean initialConnect, const info_string_t *info ),
 		( clientNum, initialConnect, info ), "G_MODFN_INITCLIENTSESSION" ) {
 	MOD_STATE->Prev_InitClientSession( clientNum, initialConnect, info );
 
@@ -401,7 +400,7 @@ LOGFUNCTION_SVOID( PREFIX(InitClientSession), ( int clientNum, qboolean initialC
 (ModFN) PostRunFrame
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) {
 	MOD_STATE->Prev_PostRunFrame();
 
 	if ( ModPingcomp_Static_SmoothingEnabled() ) {
@@ -415,14 +414,6 @@ LOGFUNCTION_SVOID( PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) 
 ModPCSmoothingOffset_Init
 ================
 */
-
-#define INIT_FN_STACKABLE( name ) \
-	MOD_STATE->Prev_##name = modfn.name; \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_OVERRIDE( name ) \
-	modfn.name = PREFIX(name);
-
 LOGFUNCTION_VOID( ModPCSmoothingOffset_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );

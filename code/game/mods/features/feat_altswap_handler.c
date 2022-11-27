@@ -10,10 +10,9 @@
 * could cause the command to be dropped leading to an inconsistent state.
 */
 
-#include "mods/g_mod_local.h"
+#define MOD_PREFIX( x ) ModAltSwapHandler_##x
 
-#define PREFIX( x ) ModAltSwapHandler_##x
-#define MOD_STATE PREFIX( state )
+#include "mods/g_mod_local.h"
 
 typedef struct {
 	int swapFlags;
@@ -61,7 +60,7 @@ static void ModAltSwapHandler_CheckEnabled( void ) {
 (ModFN) InitClientSession
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(InitClientSession), ( int clientNum, qboolean initialConnect, const info_string_t *info ),
+LOGFUNCTION_SVOID( MOD_PREFIX(InitClientSession), ( int clientNum, qboolean initialConnect, const info_string_t *info ),
 		( clientNum, initialConnect, info ), "G_MODFN_INITCLIENTSESSION" ) {
 	AltFireSwap_client_t *modclient = &MOD_STATE->clients[clientNum];
 
@@ -79,7 +78,7 @@ LOGFUNCTION_SVOID( PREFIX(InitClientSession), ( int clientNum, qboolean initialC
 (ModFN) GenerateClientSessionInfo
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(GenerateClientSessionInfo), ( int clientNum, info_string_t *info ),
+LOGFUNCTION_SVOID( MOD_PREFIX(GenerateClientSessionInfo), ( int clientNum, info_string_t *info ),
 		( clientNum, info ), "G_MODFN_GENERATECLIENTSESSIONINFO" ) {
 	AltFireSwap_client_t *modclient = &MOD_STATE->clients[clientNum];
 
@@ -97,7 +96,7 @@ LOGFUNCTION_SVOID( PREFIX(GenerateClientSessionInfo), ( int clientNum, info_stri
 Handle setAltSwap command.
 ================
 */
-LOGFUNCTION_SRET( qboolean, PREFIX(ModClientCommand), ( int clientNum, const char *cmd ),
+LOGFUNCTION_SRET( qboolean, MOD_PREFIX(ModClientCommand), ( int clientNum, const char *cmd ),
 		( clientNum, cmd ), "G_MODFN_MODCLIENTCOMMAND" ) {
 	if ( MOD_STATE->enabled && !Q_stricmp( cmd, "setAltSwap" ) ) {
 		AltFireSwap_client_t *modclient = &MOD_STATE->clients[clientNum];
@@ -115,7 +114,7 @@ LOGFUNCTION_SRET( qboolean, PREFIX(ModClientCommand), ( int clientNum, const cha
 (ModFN) PmoveInit
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(PmoveInit), ( int clientNum, pmove_t *pmove ),
+LOGFUNCTION_SVOID( MOD_PREFIX(PmoveInit), ( int clientNum, pmove_t *pmove ),
 		( clientNum, pmove ), "G_MODFN_PMOVEINIT" ) {
 	playerState_t *ps = &level.clients[clientNum].ps;
 
@@ -134,7 +133,7 @@ LOGFUNCTION_SVOID( PREFIX(PmoveInit), ( int clientNum, pmove_t *pmove ),
 (ModFN) AddModConfigInfo
 ==============
 */
-LOGFUNCTION_SVOID( PREFIX(AddModConfigInfo), ( char *info ), ( info ), "G_MODFN_ADDMODCONFIGINFO" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(AddModConfigInfo), ( char *info ), ( info ), "G_MODFN_ADDMODCONFIGINFO" ) {
 	if ( MOD_STATE->enabled ) {
 		Info_SetValueForKey( info, "altSwapSupport", "1" );
 	}
@@ -147,7 +146,7 @@ LOGFUNCTION_SVOID( PREFIX(AddModConfigInfo), ( char *info ), ( info ), "G_MODFN_
 (ModFN) PostRunFrame
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) {
 	MOD_STATE->Prev_PostRunFrame();
 	ModAltSwapHandler_CheckEnabled();
 }
@@ -157,14 +156,6 @@ LOGFUNCTION_SVOID( PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) 
 ModAltSwapHandler_Init
 ================
 */
-
-#define INIT_FN_STACKABLE( name ) \
-	MOD_STATE->Prev_##name = modfn.name; \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_OVERRIDE( name ) \
-	modfn.name = PREFIX(name);
-
 LOGFUNCTION_VOID( ModAltSwapHandler_Init, ( void ), (), "G_MOD_INIT" ) {
 	// Don't enable if server engine has its own alt swap handler
 	if ( VMExt_GVCommandInt( "sv_support_setAltSwap", 0 ) ) {

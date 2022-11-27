@@ -13,10 +13,9 @@
 *    acceleration regardless of how long the jump key is held.
 */
 
-#include "mods/g_mod_local.h"
+#define MOD_PREFIX( x ) ModPlayerMove_##x
 
-#define PREFIX( x ) ModPlayerMove_##x
-#define MOD_STATE PREFIX( state )
+#include "mods/g_mod_local.h"
 
 #define SNAPVECTOR_GRAV_LIMIT 100
 #define SNAPVECTOR_GRAV_LIMIT_STR "100"
@@ -38,7 +37,7 @@ static struct {
 (ModFN) AdjustPmoveConstant
 ==================
 */
-LOGFUNCTION_SRET( int, PREFIX(AdjustPmoveConstant), ( pmoveConstant_t pmcType, int defaultValue ),
+LOGFUNCTION_SRET( int, MOD_PREFIX(AdjustPmoveConstant), ( pmoveConstant_t pmcType, int defaultValue ),
 		( pmcType, defaultValue ), "G_MODFN_ADJUSTPMOVECONSTANT" ) {
 	if ( pmcType == PMC_FIXED_LENGTH && MOD_STATE->g_pMoveFixed.integer &&
 			MOD_STATE->g_pMoveMsec.integer > 0 && MOD_STATE->g_pMoveMsec.integer < 35 ) {
@@ -56,7 +55,7 @@ LOGFUNCTION_SRET( int, PREFIX(AdjustPmoveConstant), ( pmoveConstant_t pmcType, i
 (ModFN) PmoveInit
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(PmoveInit), ( int clientNum, pmove_t *pmove ),
+LOGFUNCTION_SVOID( MOD_PREFIX(PmoveInit), ( int clientNum, pmove_t *pmove ),
 		( clientNum, pmove ), "G_MODFN_PMOVEINIT" ) {
 	MOD_STATE->Prev_PmoveInit( clientNum, pmove );
 
@@ -76,7 +75,7 @@ LOGFUNCTION_SVOID( PREFIX(PmoveInit), ( int clientNum, pmove_t *pmove ),
 (ModFN) AddModConfigInfo
 ==============
 */
-LOGFUNCTION_SVOID( PREFIX(AddModConfigInfo), ( char *info ), ( info ), "G_MODFN_ADDMODCONFIGINFO" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(AddModConfigInfo), ( char *info ), ( info ), "G_MODFN_ADDMODCONFIGINFO" ) {
 	int pMoveFixed = modfn.AdjustPmoveConstant( PMC_FIXED_LENGTH, 0 );
 
 	if ( pMoveFixed ) {
@@ -115,14 +114,6 @@ static void ModPlayerMove_ModcfgCvarChanged( trackedCvar_t *cvar ) {
 ModPlayerMove_Init
 ================
 */
-
-#define INIT_FN_STACKABLE( name ) \
-	MOD_STATE->Prev_##name = modfn.name; \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_OVERRIDE( name ) \
-	modfn.name = PREFIX(name);
-
 LOGFUNCTION_VOID( ModPlayerMove_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );

@@ -13,10 +13,9 @@
 * useful for handling nested cases such as projectile movement and explosions.
 */
 
-#include "mods/features/pingcomp/pc_local.h"
+#define MOD_PREFIX( x ) ModPCPositionShift_##x
 
-#define PREFIX( x ) ModPCPositionShift_##x
-#define MOD_STATE PREFIX( state )
+#include "mods/features/pingcomp/pc_local.h"
 
 #define WORKING_CLIENT_COUNT ( level.maxclients < POSITION_SHIFT_MAX_CLIENTS ? level.maxclients : POSITION_SHIFT_MAX_CLIENTS )
 #define CLIENT_IN_RANGE( clientNum ) ( clientNum >= 0 && clientNum < WORKING_CLIENT_COUNT )
@@ -234,7 +233,7 @@ void ModPCPositionShift_Shared_SetShiftState( positionShiftState_t *shiftState )
 (ModFN) PostRunFrame
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) {
 	MOD_STATE->Prev_PostRunFrame();
 
 	if ( ModPingcomp_Static_PositionShiftEnabled() ) {
@@ -247,14 +246,6 @@ LOGFUNCTION_SVOID( PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) 
 ModPCPositionShift_Init
 ================
 */
-
-#define INIT_FN_STACKABLE( name ) \
-	MOD_STATE->Prev_##name = modfn.name; \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_OVERRIDE( name ) \
-	modfn.name = PREFIX(name);
-
 LOGFUNCTION_VOID( ModPCPositionShift_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );

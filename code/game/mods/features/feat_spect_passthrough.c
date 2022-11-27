@@ -6,10 +6,9 @@
 * unreliable and prone to getting stuck.
 */
 
-#include "mods/g_mod_local.h"
+#define MOD_PREFIX( x ) ModSpectPassThrough_##x
 
-#define PREFIX( x ) ModSpectPassThrough_##x
-#define MOD_STATE PREFIX( state )
+#include "mods/g_mod_local.h"
 
 static struct {
 	void ( *Prev_Trace )( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs,
@@ -49,7 +48,7 @@ static void ModSpectPassThrough_Trace( trace_t *results, const vec3_t start, con
 Override trace function for spectators.
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(PmoveInit), ( int clientNum, pmove_t *pmove ),
+LOGFUNCTION_SVOID( MOD_PREFIX(PmoveInit), ( int clientNum, pmove_t *pmove ),
 		( clientNum, pmove ), "G_MODFN_PMOVEINIT" ) {
 	MOD_STATE->Prev_PmoveInit( clientNum, pmove );
 
@@ -64,7 +63,7 @@ LOGFUNCTION_SVOID( PREFIX(PmoveInit), ( int clientNum, pmove_t *pmove ),
 (ModFN) AdjustGeneralConstant
 ================
 */
-int PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defaultValue ) {
+int MOD_PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defaultValue ) {
 	if ( gcType == GC_SKIP_SPECTATOR_DOOR_TELEPORT ) {
 		return 1;
 	}
@@ -77,14 +76,6 @@ int PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defaultValue ) 
 ModSpectPassThrough_Init
 ================
 */
-
-#define INIT_FN_STACKABLE( name ) \
-	MOD_STATE->Prev_##name = modfn.name; \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_OVERRIDE( name ) \
-	modfn.name = PREFIX(name);
-
 LOGFUNCTION_VOID( ModSpectPassThrough_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );

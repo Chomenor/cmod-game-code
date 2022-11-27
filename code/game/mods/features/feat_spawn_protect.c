@@ -6,10 +6,9 @@
 * changed to a different one or shifted to the side to ensure there is space for the player.
 */
 
-#include "mods/g_mod_local.h"
+#define MOD_PREFIX( x ) ModSpawnProtect_##x
 
-#define PREFIX( x ) ModSpawnProtect_##x
-#define MOD_STATE PREFIX( state )
+#include "mods/g_mod_local.h"
 
 #define MAX_SPAWN_POINTS 128
 
@@ -222,7 +221,7 @@ Checks if player spawn selected by the normal process would cause a telefrag, an
 replace it with a different or shifted spawn point.
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(PatchClientSpawn), ( int clientNum, gentity_t **spawn, vec3_t origin, vec3_t angles ),
+LOGFUNCTION_SVOID( MOD_PREFIX(PatchClientSpawn), ( int clientNum, gentity_t **spawn, vec3_t origin, vec3_t angles ),
 		( clientNum, spawn, origin, angles ), "G_MODFN_PATCHCLIENTSPAWN" ) {
 	if ( !*spawn || SpotWouldTelefrag( origin ) ) {
 		if ( SP_DEBUG ) {
@@ -265,18 +264,6 @@ LOGFUNCTION_SVOID( PREFIX(PatchClientSpawn), ( int clientNum, gentity_t **spawn,
 ModSpawnProtect_Init
 ================
 */
-
-#define INIT_FN_STACKABLE( name ) \
-	MOD_STATE->Prev_##name = modfn.name; \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_OVERRIDE( name ) \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_BASE( name ) \
-	EF_WARN_ASSERT( modfn.name == ModFNDefault_##name ); \
-	modfn.name = PREFIX(name);
-
 LOGFUNCTION_VOID( ModSpawnProtect_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );

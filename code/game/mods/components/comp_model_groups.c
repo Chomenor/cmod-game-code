@@ -4,10 +4,9 @@
 * This module provides functions for determining the race of player models.
 */
 
-#include "mods/g_mod_local.h"
+#define MOD_PREFIX( x ) ModModelGroups_##x
 
-#define PREFIX( x ) ModModelGroups_##x
-#define MOD_STATE PREFIX( state )
+#include "mods/g_mod_local.h"
 
 #define MAX_SKINS_FOR_RACE	128
 #define MAX_GROUP_MEMBERS	1024
@@ -209,14 +208,6 @@ void ModModelGroups_Shared_RandomModelForRace( const char *race, char *model, un
 ModModelGroups_Init
 ================
 */
-
-#define INIT_FN_STACKABLE( name ) \
-	MOD_STATE->Prev_##name = modfn.name; \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_OVERRIDE( name ) \
-	modfn.name = PREFIX(name);
-
 LOGFUNCTION_VOID( ModModelGroups_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );

@@ -5,10 +5,9 @@
 * weapon and develop shielding to it.
 */
 
-#include "mods/modes/assimilation/assim_local.h"
+#define MOD_PREFIX( x ) ModAssimBorgAdapt_##x
 
-#define PREFIX( x ) ModAssimBorgAdapt_##x
-#define MOD_STATE PREFIX( state )
+#include "mods/modes/assimilation/assim_local.h"
 
 #define BORG_ADAPT_NUM_HITS 10
 
@@ -108,7 +107,7 @@ static qboolean ModAssimBorgAdapt_CheckAdapted( int clientNum, int mod, int dama
 Check for borg shield adaptation.
 ================
 */
-LOGFUNCTION_SRET( qboolean, PREFIX(CheckBorgAdapt), ( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckBorgAdapt), ( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		vec3_t dir, vec3_t point, int damage, int dflags, int mod ),
 		( targ, inflictor, attacker, dir, point, damage, dflags, mod ), "G_MODFN_CHECKBORGADAPT" ) {
 	if( targ->client && targ->client->sess.sessionClass == PC_BORG ) {
@@ -124,18 +123,6 @@ LOGFUNCTION_SRET( qboolean, PREFIX(CheckBorgAdapt), ( gentity_t *targ, gentity_t
 ModAssimBorgAdapt_Init
 ================
 */
-
-#define INIT_FN_STACKABLE( name ) \
-	MOD_STATE->Prev_##name = modfn.name; \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_OVERRIDE( name ) \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_BASE( name ) \
-	EF_WARN_ASSERT( modfn.name == ModFNDefault_##name ); \
-	modfn.name = PREFIX(name);
-
 LOGFUNCTION_VOID( ModAssimBorgAdapt_Init, ( void ), (), "G_MOD_INIT G_ASSIMILATION" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );

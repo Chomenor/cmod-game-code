@@ -7,10 +7,9 @@
 * of each feaure is handled through submodules.
 */
 
-#include "mods/features/pingcomp/pc_local.h"
+#define MOD_PREFIX( x ) ModPingcomp_##x
 
-#define PREFIX( x ) ModPingcomp_##x
-#define MOD_STATE PREFIX( state )
+#include "mods/features/pingcomp/pc_local.h"
 
 static struct {
 	trackedCvar_t g_unlagged;
@@ -89,14 +88,6 @@ static void ModPingcomp_CvarCallback( trackedCvar_t *cvar ) {
 ModPingcomp_Init
 ================
 */
-
-#define INIT_FN_STACKABLE( name ) \
-	MOD_STATE->Prev_##name = modfn.name; \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_OVERRIDE( name ) \
-	modfn.name = PREFIX(name);
-
 LOGFUNCTION_VOID( ModPingcomp_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );

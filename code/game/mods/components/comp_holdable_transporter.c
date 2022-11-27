@@ -5,10 +5,9 @@
 * point to point transport with a temporary flight mode.
 */
 
-#include "mods/g_mod_local.h"
+#define MOD_PREFIX( x ) ModHoldableTransporter_##x
 
-#define PREFIX( x ) ModHoldableTransporter_##x
-#define MOD_STATE PREFIX( state )
+#include "mods/g_mod_local.h"
 
 typedef struct {
 	int endTeleportTime;
@@ -59,7 +58,7 @@ LOGFUNCTION_SVOID( ModHoldableTransporter_Rematerialize, ( int clientNum ), ( cl
 Called when player triggers the holdable transporter powerup.
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(PortableTransporterActivate), ( int clientNum ),
+LOGFUNCTION_SVOID( MOD_PREFIX(PortableTransporterActivate), ( int clientNum ),
 		( clientNum ), "G_MODFN_PORTABLETRANSPORTERACTIVATE" ) {
 	holdableTransporter_client_t *modclient = &MOD_STATE->clients[clientNum];
 	gclient_t *client = &level.clients[clientNum];
@@ -98,7 +97,7 @@ LOGFUNCTION_SVOID( PREFIX(PortableTransporterActivate), ( int clientNum ),
 Check for expiring borg teleports.
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(PreRunFrame), ( void ), (), "G_MODFN_PRERUNFRAME" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(PreRunFrame), ( void ), (), "G_MODFN_PRERUNFRAME" ) {
 	MOD_STATE->Prev_PreRunFrame();
 
 	if ( MOD_STATE->borgTeleportActive ) {
@@ -128,14 +127,6 @@ LOGFUNCTION_SVOID( PREFIX(PreRunFrame), ( void ), (), "G_MODFN_PRERUNFRAME" ) {
 ModHoldableTransporter_Init
 ================
 */
-
-#define INIT_FN_STACKABLE( name ) \
-	MOD_STATE->Prev_##name = modfn.name; \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_OVERRIDE( name ) \
-	modfn.name = PREFIX(name);
-
 LOGFUNCTION_VOID( ModHoldableTransporter_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );

@@ -8,10 +8,9 @@
 * and Pending Item module is used to handle the countdown.
 */
 
-#include "mods/modes/assimilation/assim_local.h"
+#define MOD_PREFIX( x ) ModAssimBorgTeleport_##x
 
-#define PREFIX( x ) ModAssimBorgTeleport_##x
-#define MOD_STATE PREFIX( state )
+#include "mods/modes/assimilation/assim_local.h"
 
 static struct {
 	// For mod function stacking
@@ -23,7 +22,7 @@ static struct {
 (ModFN) SpawnConfigureClient
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(SpawnConfigureClient), ( int clientNum ), ( clientNum ), "G_MODFN_SPAWNCONFIGURECLIENT" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(SpawnConfigureClient), ( int clientNum ), ( clientNum ), "G_MODFN_SPAWNCONFIGURECLIENT" ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	MOD_STATE->Prev_SpawnConfigureClient( clientNum );
@@ -66,18 +65,6 @@ LOGFUNCTION_SVOID( ModAssimBorgTeleport_PostBorgTeleport, ( int clientNum ), ( c
 ModAssimBorgTeleport_Init
 ================
 */
-
-#define INIT_FN_STACKABLE( name ) \
-	MOD_STATE->Prev_##name = modfn.name; \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_OVERRIDE( name ) \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_BASE( name ) \
-	EF_WARN_ASSERT( modfn.name == ModFNDefault_##name ); \
-	modfn.name = PREFIX(name);
-
 LOGFUNCTION_VOID( ModAssimBorgTeleport_Init, ( void ), (), "G_MOD_INIT G_ASSIMILATION" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );

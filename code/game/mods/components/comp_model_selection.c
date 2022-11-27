@@ -15,10 +15,9 @@
 * the same as long as it is needed.
 */
 
-#include "mods/g_mod_local.h"
+#define MOD_PREFIX( x ) ModModelSelection_##x
 
-#define PREFIX( x ) ModModelSelection_##x
-#define MOD_STATE PREFIX( state )
+#include "mods/g_mod_local.h"
 
 typedef struct {
 	char validModel[64];	// last valid player model in <model>/<skin> format
@@ -62,7 +61,7 @@ LOGFUNCTION_SVOID( ModModelSelection_DefaultRandomPlayerModel,
 Retrieves player model string for client, performing any mod conversions as needed.
 ============
 */
-LOGFUNCTION_SVOID( PREFIX(GetPlayerModel),
+LOGFUNCTION_SVOID( MOD_PREFIX(GetPlayerModel),
 		( int clientNum, const char *userinfo, char *output, unsigned int outputSize ),
 		( clientNum, userinfo, output, outputSize ), "G_MODFN_GETPLAYERMODEL G_PLAYERMODELS" ) {
 	gclient_t *client = &level.clients[clientNum];
@@ -115,7 +114,7 @@ LOGFUNCTION_SVOID( PREFIX(GetPlayerModel),
 (ModFN) InitClientSession
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(InitClientSession), ( int clientNum, qboolean initialConnect, const info_string_t *info ),
+LOGFUNCTION_SVOID( MOD_PREFIX(InitClientSession), ( int clientNum, qboolean initialConnect, const info_string_t *info ),
 		( clientNum, initialConnect, info ), "G_MODFN_INITCLIENTSESSION" ) {
 	modClient_t *modClient = &MOD_STATE->clients[clientNum];
 
@@ -129,7 +128,7 @@ LOGFUNCTION_SVOID( PREFIX(InitClientSession), ( int clientNum, qboolean initialC
 (ModFN) GenerateClientSessionInfo
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(GenerateClientSessionInfo), ( int clientNum, info_string_t *info ),
+LOGFUNCTION_SVOID( MOD_PREFIX(GenerateClientSessionInfo), ( int clientNum, info_string_t *info ),
 		( clientNum, info ), "G_MODFN_GENERATECLIENTSESSIONINFO" ) {
 	modClient_t *modClient = &MOD_STATE->clients[clientNum];
 
@@ -145,18 +144,6 @@ LOGFUNCTION_SVOID( PREFIX(GenerateClientSessionInfo), ( int clientNum, info_stri
 ModModelSelection_Init
 ================
 */
-
-#define INIT_FN_STACKABLE( name ) \
-	MOD_STATE->Prev_##name = modfn.name; \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_OVERRIDE( name ) \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_BASE( name ) \
-	EF_WARN_ASSERT( modfn.name == ModFNDefault_##name ); \
-	modfn.name = PREFIX(name);
-
 LOGFUNCTION_VOID( ModModelSelection_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );

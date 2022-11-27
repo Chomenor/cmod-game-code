@@ -13,10 +13,9 @@
 * would be advanced by 100ms as soon as it is fired, in 25ms increments.
 */
 
-#include "mods/features/pingcomp/pc_local.h"
+#define MOD_PREFIX( x ) ModPCProjectileLaunch_##x
 
-#define PREFIX( x ) ModPCProjectileLaunch_##x
-#define MOD_STATE PREFIX( state )
+#include "mods/features/pingcomp/pc_local.h"
 
 // Maximum ping allowed for full compensation (for projectile weapons)
 #define MAX_SHIFT_TIME 300
@@ -116,7 +115,7 @@ static void ModPCProjectileLaunch_AdvanceProjectile( gentity_t *projectile ) {
 (ModFN) AdjustWeaponConstant
 ======================
 */
-static int PREFIX(AdjustWeaponConstant)( weaponConstant_t wcType, int defaultValue ) {
+static int MOD_PREFIX(AdjustWeaponConstant)( weaponConstant_t wcType, int defaultValue ) {
 	// Disable initial welder projectile think, so it can be handled here with appropriate shifting
 	if ( wcType == WC_WELDER_SKIP_INITIAL_THINK && ModPingcomp_Static_ProjectileCompensationEnabled() ) {
 		return 1;
@@ -130,7 +129,7 @@ static int PREFIX(AdjustWeaponConstant)( weaponConstant_t wcType, int defaultVal
 (ModFN) AdjustGeneralConstant
 ==================
 */
-int PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defaultValue ) {
+int MOD_PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defaultValue ) {
 	if ( gcType == GC_EVENT_TIME_OFFSET ) {
 		return MOD_STATE->eventTimeOffset;
 	}
@@ -143,7 +142,7 @@ int PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defaultValue ) 
 (ModFN) PostFireProjectile
 ======================
 */
-LOGFUNCTION_SVOID( PREFIX(PostFireProjectile), ( gentity_t *projectile ), ( projectile ), "G_MODFN_POSTFIREPROJECTILE" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(PostFireProjectile), ( gentity_t *projectile ), ( projectile ), "G_MODFN_POSTFIREPROJECTILE" ) {
 	if ( projectile->inuse && ModPingcomp_Static_ProjectileCompensationEnabled() ) {
 		ModPCProjectileLaunch_AdvanceProjectile( projectile );
 	}
@@ -160,7 +159,7 @@ LOGFUNCTION_SVOID( PREFIX(PostFireProjectile), ( gentity_t *projectile ), ( proj
 Log the frame time in order to replay frames accurately.
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(PostRunFrame), (void), (), "G_MODFN_POSTRUNFRAME" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), (void), (), "G_MODFN_POSTRUNFRAME" ) {
 	MOD_STATE->frameRecord[( MOD_STATE->frameCounter++ ) % MAX_FRAME_RECORD] = level.time;
 	MOD_STATE->Prev_PostRunFrame();
 }
@@ -170,14 +169,6 @@ LOGFUNCTION_SVOID( PREFIX(PostRunFrame), (void), (), "G_MODFN_POSTRUNFRAME" ) {
 ModPCProjectileLaunch_Init
 ================
 */
-
-#define INIT_FN_STACKABLE( name ) \
-	MOD_STATE->Prev_##name = modfn.name; \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_OVERRIDE( name ) \
-	modfn.name = PREFIX(name);
-
 LOGFUNCTION_VOID( ModPCProjectileLaunch_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );

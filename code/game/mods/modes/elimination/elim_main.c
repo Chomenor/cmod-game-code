@@ -6,10 +6,9 @@
 * teams mode the goal is to eliminate everybody on the other team.
 */
 
-#include "mods/modes/elimination/elim_local.h"
+#define MOD_PREFIX( x ) ModElimination_##x
 
-#define PREFIX( x ) ModElimination_##x
-#define MOD_STATE PREFIX( state )
+#include "mods/modes/elimination/elim_local.h"
 
 typedef struct {
 	qboolean eliminated;
@@ -106,7 +105,7 @@ qboolean ModElimination_Shared_MatchLocked( void ) {
 Treat eliminated players as spectators.
 ================
 */
-static qboolean PREFIX(SpectatorClient)( int clientNum ) {
+static qboolean MOD_PREFIX(SpectatorClient)( int clientNum ) {
 	if( G_AssertConnectedClient( clientNum ) && MOD_STATE->clients[clientNum].eliminatedSpect ) {
 		return qtrue;
 	}
@@ -121,7 +120,7 @@ static qboolean PREFIX(SpectatorClient)( int clientNum ) {
 Display red 'X' next to eliminated players name.
 ================
 */
-int PREFIX(AdjustScoreboardAttributes)( int clientNum, scoreboardAttribute_t saType, int defaultValue ) {
+int MOD_PREFIX(AdjustScoreboardAttributes)( int clientNum, scoreboardAttribute_t saType, int defaultValue ) {
 	if ( saType == SA_ELIMINATED ) {
 		elimination_client_t *modclient = &MOD_STATE->clients[clientNum];
 		return modclient->eliminated ? 1 : 0;
@@ -137,7 +136,7 @@ int PREFIX(AdjustScoreboardAttributes)( int clientNum, scoreboardAttribute_t saT
 Use elimination score instead of PERS_SCORE to avoid issues with follow spectators.
 ================
 */
-static int PREFIX(EffectiveScore)( int clientNum, effectiveScoreType_t type ) {
+static int MOD_PREFIX(EffectiveScore)( int clientNum, effectiveScoreType_t type ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	if ( client->sess.sessionTeam != TEAM_SPECTATOR ) {
@@ -154,7 +153,7 @@ static int PREFIX(EffectiveScore)( int clientNum, effectiveScoreType_t type ) {
 Transition recently eliminated players into spectator mode.
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(PreClientSpawn), ( int clientNum, clientSpawnType_t spawnType ),
+LOGFUNCTION_SVOID( MOD_PREFIX(PreClientSpawn), ( int clientNum, clientSpawnType_t spawnType ),
 		( clientNum, spawnType ), "G_MODFN_PRECLIENTSPAWN" ) {
 	gclient_t *client = &level.clients[clientNum];
 	elimination_client_t *modclient = &MOD_STATE->clients[clientNum];
@@ -170,7 +169,7 @@ LOGFUNCTION_SVOID( PREFIX(PreClientSpawn), ( int clientNum, clientSpawnType_t sp
 Print info messages to clients during ClientSpawn.
 ============
 */
-LOGFUNCTION_SVOID( PREFIX(SpawnCenterPrintMessage), ( int clientNum, clientSpawnType_t spawnType ),
+LOGFUNCTION_SVOID( MOD_PREFIX(SpawnCenterPrintMessage), ( int clientNum, clientSpawnType_t spawnType ),
 		( clientNum, spawnType ), "G_MODFN_SPAWNCENTERPRINTMESSAGE" ) {
 	gclient_t *client = &level.clients[clientNum];
 
@@ -186,7 +185,7 @@ LOGFUNCTION_SVOID( PREFIX(SpawnCenterPrintMessage), ( int clientNum, clientSpawn
 Force respawn after 3 seconds.
 ==============
 */
-LOGFUNCTION_SRET( qboolean, PREFIX(CheckRespawnTime), ( int clientNum, qboolean voluntary ),
+LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckRespawnTime), ( int clientNum, qboolean voluntary ),
 		( clientNum, voluntary ), "G_MODFN_CHECKRESPAWNTIME" ) {
 	gclient_t *client = &level.clients[clientNum];
 
@@ -202,7 +201,7 @@ LOGFUNCTION_SRET( qboolean, PREFIX(CheckRespawnTime), ( int clientNum, qboolean 
 (ModFN) AdjustGeneralConstant
 ==================
 */
-static int PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defaultValue ) {
+static int MOD_PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defaultValue ) {
 	// In original implementation, intermission countdown starts when last player "respawns" to spectator.
 	// Total time from final death to intermission ranges from ~3700 to ~5000 ms depending on whether
 	// they press the respawn button.
@@ -240,7 +239,7 @@ LOGFUNCTION_SVOID( ModElimination_ExitRound, ( team_t winningTeam ), ( winningTe
 (ModFN) CheckExitRules
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(CheckExitRules), ( void ), (), "G_MODFN_CHECKEXITRULES" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(CheckExitRules), ( void ), (), "G_MODFN_CHECKEXITRULES" ) {
 	// Don't go to intermission if nobody was eliminated.
 	if ( MOD_STATE->numEliminated ) {
 		if ( g_gametype.integer >= GT_TEAM ) {
@@ -266,7 +265,7 @@ LOGFUNCTION_SVOID( PREFIX(CheckExitRules), ( void ), (), "G_MODFN_CHECKEXITRULES
 Check if joining or changing team/class is disabled due to match in progress.
 ================
 */
-LOGFUNCTION_SRET( qboolean, PREFIX(CheckJoinAllowed), ( int clientNum, join_allowed_type_t type, team_t targetTeam ),
+LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckJoinAllowed), ( int clientNum, join_allowed_type_t type, team_t targetTeam ),
 		( clientNum, type, targetTeam ), "G_MODFN_CHECKJOINLOCKED" ) {
 	gclient_t *client = &level.clients[clientNum];
 	elimination_client_t *modclient = &MOD_STATE->clients[clientNum];
@@ -303,7 +302,7 @@ LOGFUNCTION_SRET( qboolean, PREFIX(CheckJoinAllowed), ( int clientNum, join_allo
 (ModFN) PostPlayerDie
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(PostPlayerDie), ( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int meansOfDeath, int *awardPoints ),
+LOGFUNCTION_SVOID( MOD_PREFIX(PostPlayerDie), ( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int meansOfDeath, int *awardPoints ),
 		( self, inflictor, attacker, meansOfDeath, awardPoints ), "G_MODFN_POSTPLAYERDIE" ) {
 	int clientNum = self - g_entities;
 	gclient_t *client = &level.clients[clientNum];
@@ -360,7 +359,7 @@ LOGFUNCTION_SVOID( PREFIX(PostPlayerDie), ( gentity_t *self, gentity_t *inflicto
 Reset stats and eliminated state when player switches teams or becomes spectator.
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(PrePlayerLeaveTeam), ( int clientNum, team_t oldTeam ),
+LOGFUNCTION_SVOID( MOD_PREFIX(PrePlayerLeaveTeam), ( int clientNum, team_t oldTeam ),
 		( clientNum, oldTeam ), "G_MODFN_PREPLAYERLEAVETEAM" ) {
 	elimination_client_t *modclient = &MOD_STATE->clients[clientNum];
 
@@ -377,7 +376,7 @@ LOGFUNCTION_SVOID( PREFIX(PrePlayerLeaveTeam), ( int clientNum, team_t oldTeam )
 (ModFN) InitClientSession
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(InitClientSession), ( int clientNum, qboolean initialConnect, const info_string_t *info ),
+LOGFUNCTION_SVOID( MOD_PREFIX(InitClientSession), ( int clientNum, qboolean initialConnect, const info_string_t *info ),
 		( clientNum, initialConnect, info ), "G_MODFN_INITCLIENTSESSION" ) {
 	elimination_client_t *modclient = &MOD_STATE->clients[clientNum];
 
@@ -390,7 +389,7 @@ LOGFUNCTION_SVOID( PREFIX(InitClientSession), ( int clientNum, qboolean initialC
 (ModFN) PostRunFrame
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(PostRunFrame), (void), (), "G_MODFN_POSTRUNFRAME" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), (void), (), "G_MODFN_POSTRUNFRAME" ) {
 	int i;
 	MOD_STATE->Prev_PostRunFrame();
 
@@ -433,7 +432,7 @@ LOGFUNCTION_SVOID( PREFIX(PostRunFrame), (void), (), "G_MODFN_POSTRUNFRAME" ) {
 (ModFN) MatchStateTransition
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(MatchStateTransition), ( matchState_t oldState, matchState_t newState ),
+LOGFUNCTION_SVOID( MOD_PREFIX(MatchStateTransition), ( matchState_t oldState, matchState_t newState ),
 		( oldState, newState ), "G_MODFN_MATCHSTATETRANSITION" ) {
 	MOD_STATE->Prev_MatchStateTransition( oldState, newState );
 
@@ -459,18 +458,6 @@ LOGFUNCTION_SVOID( PREFIX(MatchStateTransition), ( matchState_t oldState, matchS
 ModElimination_Init
 ================
 */
-
-#define INIT_FN_STACKABLE( name ) \
-	MOD_STATE->Prev_##name = modfn.name; \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_OVERRIDE( name ) \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_BASE( name ) \
-	EF_WARN_ASSERT( modfn.name == ModFNDefault_##name ); \
-	modfn.name = PREFIX(name);
-
 LOGFUNCTION_VOID( ModElimination_Init, ( void ), (), "G_MOD_INIT G_ELIMINATION" ) {
 	if ( EF_WARN_ASSERT( !MOD_STATE ) ) {
 		modcfg.mods_enabled.elimination = qtrue;

@@ -10,10 +10,9 @@
 * human team wins if they kill the borg queen.
 */
 
-#include "mods/modes/assimilation/assim_local.h"
+#define MOD_PREFIX( x ) ModAssimilation_##x
 
-#define PREFIX( x ) ModAssimilation_##x
-#define MOD_STATE PREFIX( state )
+#include "mods/modes/assimilation/assim_local.h"
 
 typedef struct {
 	// Differentiates assimilated player versus chosen borg team
@@ -68,7 +67,7 @@ static struct {
 (ModFN) IsBorgQueen
 ================
 */
-LOGFUNCTION_SRET( qboolean, PREFIX(IsBorgQueen), ( int clientNum ),
+LOGFUNCTION_SRET( qboolean, MOD_PREFIX(IsBorgQueen), ( int clientNum ),
 		( clientNum ), "G_MODFN_ISBORGQUEEN" ) {
 	return clientNum >= 0 && clientNum == MOD_STATE->borgQueenClientNum;
 }
@@ -81,7 +80,7 @@ When level is exiting, save whether the borg team was red or blue, so we can try
 to keep the same configuration when the map changes or restarts.
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(GenerateGlobalSessionInfo), ( info_string_t *info ), ( info ), "G_MODFN_GENERATEGLOBALSESSIONINFO" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(GenerateGlobalSessionInfo), ( info_string_t *info ), ( info ), "G_MODFN_GENERATEGLOBALSESSIONINFO" ) {
 	MOD_STATE->Prev_GenerateGlobalSessionInfo( info );
 
 	if ( !MOD_STATE->staleBorgTeam ) {
@@ -202,7 +201,7 @@ static qboolean ModAssimilation_MatchLocked( void ) {
 Check if joining or changing team/class is disabled due to match in progress.
 ================
 */
-LOGFUNCTION_SRET( qboolean, PREFIX(CheckJoinAllowed), ( int clientNum, join_allowed_type_t type, team_t targetTeam ),
+LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckJoinAllowed), ( int clientNum, join_allowed_type_t type, team_t targetTeam ),
 		( clientNum, type, targetTeam ), "G_MODFN_CHECKJOINALLOWED" ) {
 	gclient_t *client = &level.clients[clientNum];
 	assimilation_client_t *modclient = &MOD_STATE->clients[clientNum];
@@ -330,7 +329,7 @@ If non-borg are killed by assimilator weapon, set them to assimilated. Actual tr
 will wait until respawn.
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(PostPlayerDie), ( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int meansOfDeath, int *awardPoints ),
+LOGFUNCTION_SVOID( MOD_PREFIX(PostPlayerDie), ( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int meansOfDeath, int *awardPoints ),
 		( self, inflictor, attacker, meansOfDeath, awardPoints ), "G_MODFN_POSTPLAYERDIE" ) {
 	int clientNum = self - g_entities;
 	gclient_t *client = &level.clients[clientNum];
@@ -384,7 +383,7 @@ LOGFUNCTION_SVOID( PREFIX(PostPlayerDie), ( gentity_t *self, gentity_t *inflicto
 Check for borg queen disconnecting or leaving the borg team.
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(PrePlayerLeaveTeam), ( int clientNum, team_t oldTeam ),
+LOGFUNCTION_SVOID( MOD_PREFIX(PrePlayerLeaveTeam), ( int clientNum, team_t oldTeam ),
 		( clientNum, oldTeam ), "G_MODFN_PREPLAYERLEAVETEAM" ) {
 	MOD_STATE->Prev_PrePlayerLeaveTeam( clientNum, oldTeam );
 
@@ -407,7 +406,7 @@ LOGFUNCTION_SVOID( PREFIX(PrePlayerLeaveTeam), ( int clientNum, team_t oldTeam )
 (ModFN) PreClientConnect
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(PreClientConnect), ( int clientNum, qboolean firstTime, qboolean isBot ),
+LOGFUNCTION_SVOID( MOD_PREFIX(PreClientConnect), ( int clientNum, qboolean firstTime, qboolean isBot ),
 		( clientNum, firstTime, isBot ), "G_MODFN_PRECLIENTCONNECT" ) {
 	if ( !MOD_STATE->borgTeam ) {
 		// Determine borg team color.
@@ -420,7 +419,7 @@ LOGFUNCTION_SVOID( PREFIX(PreClientConnect), ( int clientNum, qboolean firstTime
 (ModFN) InitClientSession
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(InitClientSession), ( int clientNum, qboolean initialConnect, const info_string_t *info ),
+LOGFUNCTION_SVOID( MOD_PREFIX(InitClientSession), ( int clientNum, qboolean initialConnect, const info_string_t *info ),
 		( clientNum, initialConnect, info ), "G_MODFN_INITCLIENTSESSION" ) {
 	assimilation_client_t *modclient = &MOD_STATE->clients[clientNum];
 
@@ -435,7 +434,7 @@ LOGFUNCTION_SVOID( PREFIX(InitClientSession), ( int clientNum, qboolean initialC
 Set borg team members to borg class and vice versa.
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(UpdateSessionClass), ( int clientNum ),
+LOGFUNCTION_SVOID( MOD_PREFIX(UpdateSessionClass), ( int clientNum ),
 		( clientNum ), "G_MODFN_UPDATESESSIONCLASS" ) {
 	gclient_t *client = &level.clients[clientNum];
 	assimilation_client_t *modclient = &MOD_STATE->clients[clientNum];
@@ -470,7 +469,7 @@ LOGFUNCTION_SVOID( PREFIX(UpdateSessionClass), ( int clientNum ),
 (ModFN) SpawnConfigureClient
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(SpawnConfigureClient), ( int clientNum ), ( clientNum ), "G_MODFN_SPAWNCONFIGURECLIENT" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(SpawnConfigureClient), ( int clientNum ), ( clientNum ), "G_MODFN_SPAWNCONFIGURECLIENT" ) {
 	gentity_t *ent = &g_entities[clientNum];
 	gclient_t *client = &level.clients[clientNum];
 	assimilation_client_t *modclient = &MOD_STATE->clients[clientNum];
@@ -516,7 +515,7 @@ LOGFUNCTION_SVOID( PREFIX(SpawnConfigureClient), ( int clientNum ), ( clientNum 
 Prints info messages to client during ClientSpawn.
 ============
 */
-LOGFUNCTION_SVOID( PREFIX(SpawnCenterPrintMessage), ( int clientNum, clientSpawnType_t spawnType ),
+LOGFUNCTION_SVOID( MOD_PREFIX(SpawnCenterPrintMessage), ( int clientNum, clientSpawnType_t spawnType ),
 		( clientNum, spawnType ), "G_MODFN_SPAWNCENTERPRINTMESSAGE" ) {
 	gclient_t *client = &level.clients[clientNum];
 	assimilation_client_t *modclient = &MOD_STATE->clients[clientNum];
@@ -547,7 +546,7 @@ LOGFUNCTION_SVOID( PREFIX(SpawnCenterPrintMessage), ( int clientNum, clientSpawn
 Play special transporter effects for borg.
 ============
 */
-LOGFUNCTION_SVOID( PREFIX(SpawnTransporterEffect), ( int clientNum, clientSpawnType_t spawnType ),
+LOGFUNCTION_SVOID( MOD_PREFIX(SpawnTransporterEffect), ( int clientNum, clientSpawnType_t spawnType ),
 		( clientNum, spawnType ), "G_MODFN_SPAWNTRANSPORTEREFFECT" ) {
 	gclient_t *client = &level.clients[clientNum];
 
@@ -574,7 +573,7 @@ LOGFUNCTION_SVOID( PREFIX(SpawnTransporterEffect), ( int clientNum, clientSpawnT
 Returns player-selected team, even if active team is overriden by borg assimilation.
 ================
 */
-static team_t PREFIX(RealSessionTeam)( int clientNum ) {
+static team_t MOD_PREFIX(RealSessionTeam)( int clientNum ) {
 	gclient_t *client = &level.clients[clientNum];
 	assimilation_client_t *modclient = &MOD_STATE->clients[clientNum];
 
@@ -598,7 +597,7 @@ static team_t PREFIX(RealSessionTeam)( int clientNum ) {
 Returns player-selected class, even if active class is overridden by borg team/assimilation.
 ================
 */
-static pclass_t PREFIX(RealSessionClass)( int clientNum ) {
+static pclass_t MOD_PREFIX(RealSessionClass)( int clientNum ) {
 	assimilation_client_t *modclient = &MOD_STATE->clients[clientNum];
 	if ( modclient->oldClass != PC_NOCLASS ) {
 		return modclient->oldClass;
@@ -614,7 +613,7 @@ static pclass_t PREFIX(RealSessionClass)( int clientNum ) {
 Check for borg team win due to all players on other team being assimilated.
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(CheckExitRules), ( void ), (), "G_MODFN_CHECKEXITRULES" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(CheckExitRules), ( void ), (), "G_MODFN_CHECKEXITRULES" ) {
 	if ( MOD_STATE->numAssimilated > 0 ) {
 		int i;
 		gclient_t *survivor = NULL;
@@ -642,7 +641,7 @@ LOGFUNCTION_SVOID( PREFIX(CheckExitRules), ( void ), (), "G_MODFN_CHECKEXITRULES
 Move players to borg team if they were assimilated.
 ================
 */
-LOGFUNCTION_SEVOID( PREFIX(ClientRespawn), ( int clientNum ), ( clientNum ), clientNum, "G_MODFN_CLIENTRESPAWN" ) {
+LOGFUNCTION_SEVOID( MOD_PREFIX(ClientRespawn), ( int clientNum ), ( clientNum ), clientNum, "G_MODFN_CLIENTRESPAWN" ) {
 	gentity_t *ent = &g_entities[clientNum];
 	gclient_t *client = &level.clients[clientNum];
 	assimilation_client_t *modclient = &MOD_STATE->clients[clientNum];
@@ -673,7 +672,7 @@ LOGFUNCTION_SEVOID( PREFIX(ClientRespawn), ( int clientNum ), ( clientNum ), cli
 Force respawn after 3 seconds.
 ==============
 */
-LOGFUNCTION_SRET( qboolean, PREFIX(CheckRespawnTime), ( int clientNum, qboolean voluntary ),
+LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckRespawnTime), ( int clientNum, qboolean voluntary ),
 		( clientNum, voluntary ), "G_MODFN_CHECKRESPAWNTIME" ) {
 	gclient_t *client = &level.clients[clientNum];
 
@@ -691,7 +690,7 @@ LOGFUNCTION_SRET( qboolean, PREFIX(CheckRespawnTime), ( int clientNum, qboolean 
 Replace tetrion weapon with imod.
 ================
 */
-LOGFUNCTION_SRET( gitem_t *, PREFIX(CheckReplaceItem), ( gitem_t *item ), ( item ), "G_MODFN_CHECKREPLACEITEM" ) {
+LOGFUNCTION_SRET( gitem_t *, MOD_PREFIX(CheckReplaceItem), ( gitem_t *item ), ( item ), "G_MODFN_CHECKREPLACEITEM" ) {
 	item = MOD_STATE->Prev_CheckReplaceItem( item );
 
 	switch ( item->giTag ) {
@@ -715,7 +714,7 @@ LOGFUNCTION_SRET( gitem_t *, PREFIX(CheckReplaceItem), ( gitem_t *item ), ( item
 Borg don't drop items.
 ============
 */
-LOGFUNCTION_SRET( qboolean, PREFIX(CanItemBeDropped), ( gitem_t *item, int clientNum ),
+LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CanItemBeDropped), ( gitem_t *item, int clientNum ),
 		( item, clientNum ), "G_MODFN_CANITEMBEDROPPED" ) {
 	gclient_t *client = &level.clients[clientNum];
 
@@ -733,7 +732,7 @@ LOGFUNCTION_SRET( qboolean, PREFIX(CanItemBeDropped), ( gitem_t *item, int clien
 (ModFN) AddRegisteredItems
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(AddRegisteredItems), ( void ), (), "G_MODFN_ADDREGISTEREDITEMS" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(AddRegisteredItems), ( void ), (), "G_MODFN_ADDREGISTEREDITEMS" ) {
 	MOD_STATE->Prev_AddRegisteredItems();
 
 	RegisterItem( BG_FindItemForWeapon( WP_BORG_ASSIMILATOR ) );
@@ -746,7 +745,7 @@ LOGFUNCTION_SVOID( PREFIX(AddRegisteredItems), ( void ), (), "G_MODFN_ADDREGISTE
 (ModFN) CheckSuicideAllowed
 =================
 */
-LOGFUNCTION_SRET( qboolean, PREFIX(CheckSuicideAllowed), ( int clientNum ),
+LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckSuicideAllowed), ( int clientNum ),
 		( clientNum ), "G_MODFN_CHECKSUICIDEALLOWED" ) {
 	gclient_t *client = &level.clients[clientNum];
 
@@ -766,7 +765,7 @@ LOGFUNCTION_SRET( qboolean, PREFIX(CheckSuicideAllowed), ( int clientNum ),
 Handle class command for borg (which can't change class directly).
 ================
 */
-LOGFUNCTION_SRET( qboolean, PREFIX(ModClientCommand), ( int clientNum, const char *cmd ),
+LOGFUNCTION_SRET( qboolean, MOD_PREFIX(ModClientCommand), ( int clientNum, const char *cmd ),
 		( clientNum, cmd ), "G_MODFN_MODCLIENTCOMMAND" ) {
 	gclient_t *client = &level.clients[clientNum];
 
@@ -788,7 +787,7 @@ LOGFUNCTION_SRET( qboolean, PREFIX(ModClientCommand), ( int clientNum, const cha
 (ModFN) AdjustGeneralConstant
 ==================
 */
-static int PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defaultValue ) {
+static int MOD_PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defaultValue ) {
 	if ( gcType == GC_DISABLE_TEAM_FORCE_BALANCE )
 		return 1;
 
@@ -800,7 +799,7 @@ static int PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defaultV
 (ModFN) PostRunFrame
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) {
 	MOD_STATE->Prev_PostRunFrame();
 
 	ModAssimilation_CheckReplaceQueen();
@@ -825,7 +824,7 @@ LOGFUNCTION_SVOID( PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) 
 (ModFN) MatchStateTransition
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(MatchStateTransition), ( matchState_t oldState, matchState_t newState ),
+LOGFUNCTION_SVOID( MOD_PREFIX(MatchStateTransition), ( matchState_t oldState, matchState_t newState ),
 		( oldState, newState ), "G_MODFN_MATCHSTATETRANSITION" ) {
 	MOD_STATE->Prev_MatchStateTransition( oldState, newState );
 
@@ -851,18 +850,6 @@ LOGFUNCTION_SVOID( PREFIX(MatchStateTransition), ( matchState_t oldState, matchS
 ModAssimilation_Init
 ================
 */
-
-#define INIT_FN_STACKABLE( name ) \
-	MOD_STATE->Prev_##name = modfn.name; \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_OVERRIDE( name ) \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_BASE( name ) \
-	EF_WARN_ASSERT( modfn.name == ModFNDefault_##name ); \
-	modfn.name = PREFIX(name);
-
 LOGFUNCTION_VOID( ModAssimilation_Init, ( void ), (), "G_MOD_INIT G_ASSIMILATION" ) {
 	if ( EF_WARN_ASSERT( !MOD_STATE ) ) {
 		modcfg.mods_enabled.assimilation = qtrue;

@@ -5,10 +5,9 @@
 * teleporter in Assimilation and the demolitionist detpack in Specialties.
 */
 
-#include "mods/g_mod_local.h"
+#define MOD_PREFIX( x ) ModPendingItem_##x
 
-#define PREFIX( x ) ModPendingItem_##x
-#define MOD_STATE PREFIX( state )
+#include "mods/g_mod_local.h"
 
 typedef struct {
 	int pendingItemTime;
@@ -30,7 +29,7 @@ static struct {
 Reset pending item when client spawns.
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(PreClientSpawn), ( int clientNum, clientSpawnType_t spawnType ),
+LOGFUNCTION_SVOID( MOD_PREFIX(PreClientSpawn), ( int clientNum, clientSpawnType_t spawnType ),
 		( clientNum, spawnType ), "G_MODFN_PRECLIENTSPAWN" ) {
 	modClient_t *modclient = &MOD_STATE->clients[clientNum];
 	modclient->pendingItem = HI_NONE;
@@ -43,7 +42,7 @@ LOGFUNCTION_SVOID( PREFIX(PreClientSpawn), ( int clientNum, clientSpawnType_t sp
 (ModFN) PostRunFrame
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) {
 	int i;
 	MOD_STATE->Prev_PostRunFrame();
 
@@ -89,14 +88,6 @@ void ModPendingItem_Shared_SchedulePendingItem( int clientNum, holdable_t item, 
 ModPendingItem_Init
 ================
 */
-
-#define INIT_FN_STACKABLE( name ) \
-	MOD_STATE->Prev_##name = modfn.name; \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_OVERRIDE( name ) \
-	modfn.name = PREFIX(name);
-
 LOGFUNCTION_VOID( ModPendingItem_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );

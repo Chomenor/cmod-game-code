@@ -4,10 +4,9 @@
 * All players spawn with a rifle which has unlimited ammo and kills with one hit.
 */
 
-#include "mods/g_mod_local.h"
+#define MOD_PREFIX( x ) ModDisintegration_##x
 
-#define PREFIX( x ) ModDisintegration_##x
-#define MOD_STATE PREFIX( state )
+#include "mods/g_mod_local.h"
 
 static struct {
 	// For mod function stacking
@@ -27,7 +26,7 @@ static struct {
 Player starts with just a rifle.
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(SpawnConfigureClient), ( int clientNum ), ( clientNum ), "G_MODFN_SPAWNCONFIGURECLIENT" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(SpawnConfigureClient), ( int clientNum ), ( clientNum ), "G_MODFN_SPAWNCONFIGURECLIENT" ) {
 	gentity_t *ent = &g_entities[clientNum];
 	gclient_t *client = &level.clients[clientNum];
 
@@ -44,7 +43,7 @@ LOGFUNCTION_SVOID( PREFIX(SpawnConfigureClient), ( int clientNum ), ( clientNum 
 Rifle does enough damage to 1-hit, but no splash damage.
 ======================
 */
-static int PREFIX(AdjustWeaponConstant)( weaponConstant_t wcType, int defaultValue ) {
+static int MOD_PREFIX(AdjustWeaponConstant)( weaponConstant_t wcType, int defaultValue ) {
 	if ( wcType == WC_USE_RANDOM_DAMAGE )
 		return 0;
 	if ( wcType == WC_CRIFLE_ALTDAMAGE )
@@ -62,7 +61,7 @@ static int PREFIX(AdjustWeaponConstant)( weaponConstant_t wcType, int defaultVal
 (ModFN) AdjustGeneralConstant
 ==================
 */
-static int PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defaultValue ) {
+static int MOD_PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defaultValue ) {
 	if ( gcType == GC_FORCE_BOTROAMSONLY )
 		return 1;
 	if ( gcType == GC_DISABLE_TACTICIAN )
@@ -78,7 +77,7 @@ static int PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defaultV
 Don't use up any ammo when firing.
 ==============
 */
-LOGFUNCTION_SRET( int, PREFIX(ModifyAmmoUsage), ( int defaultValue, int weapon, qboolean alt ),
+LOGFUNCTION_SRET( int, MOD_PREFIX(ModifyAmmoUsage), ( int defaultValue, int weapon, qboolean alt ),
 		( defaultValue, weapon, alt ), "G_MODFN_MODIFYAMMOUSAGE" ) {
 	return 0;
 }
@@ -90,7 +89,7 @@ LOGFUNCTION_SRET( int, PREFIX(ModifyAmmoUsage), ( int defaultValue, int weapon, 
 Enable alt attack mode.
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(PmoveInit), ( int clientNum, pmove_t *pmove ),
+LOGFUNCTION_SVOID( MOD_PREFIX(PmoveInit), ( int clientNum, pmove_t *pmove ),
 		( clientNum, pmove ), "G_MODFN_PMOVEINIT" ) {
 	MOD_STATE->Prev_PmoveInit( clientNum, pmove );
 
@@ -104,7 +103,7 @@ LOGFUNCTION_SVOID( PREFIX(PmoveInit), ( int clientNum, pmove_t *pmove ),
 Don't drop rifles on death.
 ============
 */
-LOGFUNCTION_SRET( qboolean, PREFIX(CanItemBeDropped), ( gitem_t *item, int clientNum ),
+LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CanItemBeDropped), ( gitem_t *item, int clientNum ),
 		( item, clientNum ), "G_MODFN_CANITEMBEDROPPED" ) {
 	if ( item->giType == IT_WEAPON ) {
 		return qfalse;
@@ -120,7 +119,7 @@ LOGFUNCTION_SRET( qboolean, PREFIX(CanItemBeDropped), ( gitem_t *item, int clien
 Adjust some damage flags for consistency with original implementation. Probably doesn't make much difference typically.
 ============
 */
-LOGFUNCTION_SRET( int, PREFIX(ModifyDamageFlags), ( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+LOGFUNCTION_SRET( int, MOD_PREFIX(ModifyDamageFlags), ( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		vec3_t dir, vec3_t point, int damage, int dflags, int mod ),
 		( targ, inflictor, attacker, dir, point, damage, dflags, mod ), "G_MODFN_MODIFYDAMAGEFLAGS" ) {
 	if ( mod == MOD_CRIFLE_ALT || mod == MOD_CRIFLE_ALT_SPLASH ) {
@@ -137,7 +136,7 @@ LOGFUNCTION_SRET( int, PREFIX(ModifyDamageFlags), ( gentity_t *targ, gentity_t *
 Disable most item pickups.
 ================
 */
-LOGFUNCTION_SRET( qboolean, PREFIX(CheckItemSpawnDisabled), ( gitem_t *item ), ( item ), "G_MODFN_CHECKITEMSPAWNDISABLED" ) {
+LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckItemSpawnDisabled), ( gitem_t *item ), ( item ), "G_MODFN_CHECKITEMSPAWNDISABLED" ) {
 	switch ( item->giType ) {
 		case IT_ARMOR: //useless
 		case IT_WEAPON: //only compression rifle
@@ -169,18 +168,6 @@ LOGFUNCTION_SRET( qboolean, PREFIX(CheckItemSpawnDisabled), ( gitem_t *item ), (
 ModDisintegration_Init
 ================
 */
-
-#define INIT_FN_STACKABLE( name ) \
-	MOD_STATE->Prev_##name = modfn.name; \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_OVERRIDE( name ) \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_BASE( name ) \
-	EF_WARN_ASSERT( modfn.name == ModFNDefault_##name ); \
-	modfn.name = PREFIX(name);
-
 LOGFUNCTION_VOID( ModDisintegration_Init, ( void ), (), "G_MOD_INIT G_DISINTEGRATION" ) {
 	if ( EF_WARN_ASSERT( !MOD_STATE ) ) {
 		modcfg.mods_enabled.disintegration = qtrue;

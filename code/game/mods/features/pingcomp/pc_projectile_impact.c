@@ -9,10 +9,9 @@
 * the most recent frame (level.time) during projectile movement.
 */
 
-#include "mods/features/pingcomp/pc_local.h"
+#define MOD_PREFIX( x ) ModPCProjectileImpact_##x
 
-#define PREFIX( x ) ModPCProjectileImpact_##x
-#define MOD_STATE PREFIX( state )
+#include "mods/features/pingcomp/pc_local.h"
 
 #define STUCK_MISSILE( ent ) ( (ent)->s.pos.trType == TR_STATIONARY && ((ent)->s.eFlags&EF_MISSILE_STICK) )
 
@@ -70,7 +69,7 @@ static void ModPCProjectileImpact_RunMissiles( void ) {
 Shift clients during explosions for accurate radius damage.
 ============
 */
-LOGFUNCTION_SRET( qboolean, PREFIX(RadiusDamage),
+LOGFUNCTION_SRET( qboolean, MOD_PREFIX(RadiusDamage),
 		( vec3_t origin, gentity_t *attacker, float damage, float radius, gentity_t *ignore, int dflags, int mod ),
 		( origin, attacker, damage, radius, ignore, dflags, mod ), "G_MODFN_RADIUSDAMAGE" ) {
 	if ( ModPingcomp_Static_SmoothingEnabled() ) {
@@ -104,7 +103,7 @@ LOGFUNCTION_SRET( qboolean, PREFIX(RadiusDamage),
 Disable the normal run missile routine.
 ==================
 */
-int PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defaultValue ) {
+int MOD_PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defaultValue ) {
 	if ( gcType == GC_SKIP_RUN_MISSILE && ModPingcomp_Static_SmoothingEnabled() ) {
 		return 1;
 	}
@@ -119,7 +118,7 @@ int PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defaultValue ) 
 Perform custom run missile routine.
 ================
 */
-LOGFUNCTION_SVOID( PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) {
 	MOD_STATE->Prev_PostRunFrame();
 
 	// At this point, PostRunFrame should have been called in the ModPCPositionShift module, so
@@ -135,14 +134,6 @@ LOGFUNCTION_SVOID( PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) 
 ModPCProjectileImpact_Init
 ================
 */
-
-#define INIT_FN_STACKABLE( name ) \
-	MOD_STATE->Prev_##name = modfn.name; \
-	modfn.name = PREFIX(name);
-
-#define INIT_FN_OVERRIDE( name ) \
-	modfn.name = PREFIX(name);
-
 LOGFUNCTION_VOID( ModPCProjectileImpact_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );

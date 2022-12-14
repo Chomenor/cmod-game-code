@@ -1588,9 +1588,16 @@ qboolean CalculateSection31Award(gentity_t *ent)
 	return qfalse;
 }
 
-void CalculateAwards(gentity_t *ent, char *msg)
-{
+/*
+================
+(ModFN) CalculateAwards
+
+Generates awards message string for specified client.
+================
+*/
+LOGFUNCTION_VOID( ModFNDefault_CalculateAwards, ( int clientNum, char *msg ), ( clientNum, msg ), "G_MODFN_CALCULATEAWARDS" ) {
 #ifdef LOGGING_WEAPONS
+	gentity_t	*ent = &g_entities[clientNum];
 	char		buf1[AWARDS_MSG_LENGTH], buf2[AWARDS_MSG_LENGTH];
 	int			awardFlags = 0, efficiency = 0, stuffUsed = 0, kills = 0, streak = 0, teamAwards = 0;
 	int			awardCount = 0;		// maximum of 4 awards, to avoid issues with buggy cgame AW_SPPostgameMenu_f

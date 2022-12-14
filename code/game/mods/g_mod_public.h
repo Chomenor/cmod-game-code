@@ -13,6 +13,8 @@ typedef enum {
 } join_allowed_type_t;
 
 typedef enum {
+	SA_PLAYERTIME,
+	SA_NUM_DEATHS,
 	SA_ELIMINATED,
 } scoreboardAttribute_t;
 
@@ -40,6 +42,7 @@ typedef enum {
 	GC_DISABLE_TACTICIAN,
 	GC_SKIP_ENTER_GAME_PRINT,
 	GC_DISABLE_BOT_ADDING,			// Skip normal bot_minplayers handling
+	GC_JOIN_MESSAGE_CONSOLE_PRINT,	// Use console print for team join messages instead of center print
 } generalConstant_t;
 
 typedef enum {

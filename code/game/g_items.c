@@ -29,27 +29,40 @@
 Bots in MP will go to these spots when there's nothing else to get- helps them patrol.
 */
 
+/*
+================
+(ModFN) AdaptRespawnNumPlayers
+
+Returns the effective number of players to use for g_adaptRespawn calculation.
+================
+*/
+LOGFUNCTION_RET( int, ModFNDefault_AdaptRespawnNumPlayers, ( void ), (), "G_MODFN_ADAPTRESPAWNNUMPLAYERS" ) {
+	return level.numPlayingClients;
+}
+
 // For more than four players, adjust the respawn times, up to 1/4.
 int adjustRespawnTime(float respawnTime)
 {
+	int numPlayers;
 	if (!g_adaptRespawn.integer)
 	{
 		return((int)respawnTime);
 	}
 
-	if (level.numPlayingClients > 4)
+	numPlayers = modfn.AdaptRespawnNumPlayers();
+	if (numPlayers > 4)
 	{	// Start scaling the respawn times.
-		if (level.numPlayingClients > 32)
+		if (numPlayers > 32)
 		{	// 1/4 time minimum.
 			respawnTime *= 0.25;
 		}
-		else if (level.numPlayingClients > 12)
+		else if (numPlayers > 12)
 		{	// From 12-32, scale from 0.5 to 0.25;
-			respawnTime *= 20.0 / (float)(level.numPlayingClients + 8);
+			respawnTime *= 20.0 / (float)(numPlayers + 8);
 		}
 		else
 		{	// From 4-12, scale from 1.0 to 0.5;
-			respawnTime *= 8.0 / (float)(level.numPlayingClients + 4);
+			respawnTime *= 8.0 / (float)(numPlayers + 4);
 		}
 	}
 

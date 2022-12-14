@@ -127,7 +127,7 @@ void UpdateTournamentInfo( void ) {
 		}
 		else
 		{
-			CalculateAwards(player, msg);
+			modfn.CalculateAwards(playerClientNum, msg);
 
 			// get the best rank this player's score matches
 			// 0=first place, 1=second place, ...
@@ -344,7 +344,19 @@ SpawnModelsOnVictoryPads
 ==================
 */
 void SpawnModelsOnVictoryPads( void ) {
-	gentity_t *podium = SpawnPodium();
+	int i;
+	static gentity_t *podium = NULL;
+
+	for ( i = 0; i < 3; ++i ) {
+		if ( podiumModels[i] ) {
+			G_FreeEntity( podiumModels[i] );
+			podiumModels[i] = NULL;
+		}
+	}
+
+	if ( !podium ) {
+		podium = SpawnPodium();
+	}
 
 	// SPAWN PLAYER ON TOP MOST PODIUM
 	if (g_gametype.integer >= GT_TEAM)

@@ -23,7 +23,6 @@ void G_InitGame( int levelTime, int randomSeed, int restart );
 void G_RunFrame( int levelTime );
 void G_ShutdownGame( int restart );
 static void G_CheckExitRules( void );
-static int G_WarmupLength( void );
 
 //=============================
 //** begin code
@@ -450,7 +449,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	}
 
 	// initialize warmup
-	if ( G_WarmupLength() && !level.warmupRestarting ) {
+	if ( modfn.WarmupLength() > 0 && !level.warmupRestarting ) {
 		// no sound effect until countdown starts
 		level.warmupTime = -1;
 		trap_SetConfigstring( CS_WARMUP, "-1" );
@@ -496,6 +495,8 @@ void G_ShutdownGame( int restart ) {
 	if ( trap_Cvar_VariableIntegerValue( "bot_enable" ) ) {
 		BotAIShutdown( restart );
 	}
+
+	modfn.PostGameShutdown( restart );
 }
 
 
@@ -596,6 +597,31 @@ int QDECL SortRanks( const void *a, const void *b ) {
 
 /*
 ============
+(ModFN) SetScoresConfigStrings
+
+Set CS_SCORES* configstrings during CalculateRanks.
+============
+*/
+LOGFUNCTION_VOID( ModFNDefault_SetScoresConfigStrings, ( void ), (), "G_MODFN_SETSCORESCONFIGSTRINGS" ) {
+	if ( g_gametype.integer >= GT_TEAM ) {
+		trap_SetConfigstring( CS_SCORES1, va("%i", level.teamScores[TEAM_RED] ) );
+		trap_SetConfigstring( CS_SCORES2, va("%i", level.teamScores[TEAM_BLUE] ) );
+	} else {
+		if ( level.numConnectedClients == 0 ) {
+			trap_SetConfigstring( CS_SCORES1, va("%i", SCORE_NOT_PRESENT) );
+			trap_SetConfigstring( CS_SCORES2, va("%i", SCORE_NOT_PRESENT) );
+		} else if ( level.numConnectedClients == 1 ) {
+			trap_SetConfigstring( CS_SCORES1, va("%i", modfn.EffectiveScore( level.sortedClients[0], EST_REALSCORE ) ) );
+			trap_SetConfigstring( CS_SCORES2, va("%i", SCORE_NOT_PRESENT) );
+		} else {
+			trap_SetConfigstring( CS_SCORES1, va("%i", modfn.EffectiveScore( level.sortedClients[0], EST_REALSCORE ) ) );
+			trap_SetConfigstring( CS_SCORES2, va("%i", modfn.EffectiveScore( level.sortedClients[1], EST_REALSCORE ) ) );
+		}
+	}
+}
+
+/*
+============
 CalculateRanks
 
 Recalculates the score ranks of all players
@@ -679,21 +705,7 @@ void CalculateRanks( void ) {
 	}
 
 	// set the CS_SCORES1/2 configstrings, which will be visible to everyone
-	if ( g_gametype.integer >= GT_TEAM ) {
-		trap_SetConfigstring( CS_SCORES1, va("%i", level.teamScores[TEAM_RED] ) );
-		trap_SetConfigstring( CS_SCORES2, va("%i", level.teamScores[TEAM_BLUE] ) );
-	} else {
-		if ( level.numConnectedClients == 0 ) {
-			trap_SetConfigstring( CS_SCORES1, va("%i", SCORE_NOT_PRESENT) );
-			trap_SetConfigstring( CS_SCORES2, va("%i", SCORE_NOT_PRESENT) );
-		} else if ( level.numConnectedClients == 1 ) {
-			trap_SetConfigstring( CS_SCORES1, va("%i", modfn.EffectiveScore( level.sortedClients[0], EST_REALSCORE ) ) );
-			trap_SetConfigstring( CS_SCORES2, va("%i", SCORE_NOT_PRESENT) );
-		} else {
-			trap_SetConfigstring( CS_SCORES1, va("%i", modfn.EffectiveScore( level.sortedClients[0], EST_REALSCORE ) ) );
-			trap_SetConfigstring( CS_SCORES2, va("%i", modfn.EffectiveScore( level.sortedClients[1], EST_REALSCORE ) ) );
-		}
-	}
+	modfn.SetScoresConfigStrings();
 
 	// run exit check here to ensure exit is processed at the first qualified time
 	// if we waited until next frame, simultaneous events like multiple players being hit by explosion
@@ -870,6 +882,100 @@ LOGFUNCTION_VOID( G_ExitLevel, ( void ), (), "G_MATCHSTATE" ) {
 }
 
 /*
+========================================================================
+
+FUNCTIONS CALLED EVERY FRAME
+
+========================================================================
+*/
+
+/*
+=================
+(ModFN) IntermissionReadyIndicator
+
+Determines whether to display green 'ready' indicator next to player's name during intermission.
+=================
+*/
+qboolean ModFNDefault_IntermissionReadyIndicator( int clientNum ) {
+	gentity_t *ent = &g_entities[clientNum];
+	gclient_t *client = &level.clients[clientNum];
+
+	// Don't update during first five seconds
+	if ( level.time < level.intermissiontime + 5000 ) {
+		return qfalse;
+	}
+
+	// Always show bots as ready. It is already forced in cgame, but doesn't work for
+	// bots at skill 0, so this makes it consistent for all bots.
+	if ( ent->r.svFlags & SVF_BOT ) {
+		return qtrue;
+	}
+
+	return client->readyToExit;
+}
+
+/*
+=================
+(ModFN) IntermissionReadyToExit
+
+Determine whether it is time to exit intermission.
+=================
+*/
+qboolean ModFNDefault_IntermissionReadyToExit( void ) {
+	int i;
+	int ready = 0;
+	int notReady = 0;
+
+	// never exit in less than five seconds
+	if ( level.time < level.intermissiontime + 5000 ) {
+		return qfalse;
+	}
+
+	for ( i = 0; i < level.maxclients; ++i ) {
+		gclient_t *client = &level.clients[i];
+		gentity_t *ent = &g_entities[i];
+
+		if ( client->pers.connected != CON_CONNECTED ) {
+			continue;
+		}
+
+		if ( ent->r.svFlags & SVF_BOT ) {
+			continue;
+		}
+
+		if ( client->readyToExit ) {
+			ready++;
+		} else {
+			notReady++;
+		}
+	}
+
+	// if nobody wants to go, clear timer
+	if ( !ready ) {
+		level.readyToExitTime = 0;
+		return qfalse;
+	}
+
+	// if everyone wants to go, go now
+	if ( !notReady ) {
+		return qtrue;
+	}
+
+	// the first person ready starts timer
+	if ( !level.readyToExitTime ) {
+		level.readyToExitTime = level.time;
+	}
+
+	// if we have waited g_intermissionTime seconds since at least one player
+	// wanted to exit, go ahead
+	if ( level.time >= level.readyToExitTime + (1000 * g_intermissionTime.integer) ) {
+		return qtrue;
+	}
+
+	return qfalse;
+}
+
+/*
 =================
 CheckIntermissionExit
 
@@ -880,91 +986,41 @@ wait 20 seconds before going on.
 =================
 */
 void CheckIntermissionExit( void ) {
-	int			ready, notReady;
-	int			i;
-	gclient_t	*cl;
-	int			readyMask;
+	int i;
+	int readyMask = 0;
 
-
-	if ( level.exiting )
-	{//already on our way out, skip the check
+	if ( level.exiting ) {
 		return;
 	}
 
-	if ( level.time < level.intermissiontime + 5000 )
-	{
-			// bring up the scoreboard after 5 seconds
-	}
-
-
-	// Single player exit does not happen until menu event
+	// single player exit does not happen until menu event
 	if ( g_gametype.integer == GT_SINGLE_PLAYER ) {
 		return;
 	}
 
-	// see which players are ready
-	ready = 0;
-	notReady = 0;
-	readyMask = 0;
-	for (i=0 ; i< g_maxclients.integer ; i++) {
-		cl = level.clients + i;
-		if ( cl->pers.connected != CON_CONNECTED ) {
-			continue;
-		}
-		if ( g_entities[i].r.svFlags & SVF_BOT ) {
-			continue;
-		}
+	// calculate readyMask
+	for ( i = 0; i < level.maxclients && i < 16; i++ ) {
+		gclient_t *client = &level.clients[i];
 
-		if ( cl->readyToExit ) {
-			ready++;
-			if ( i < 16 ) {
-				readyMask |= 1 << i;
-			}
-		} else {
-			notReady++;
+		if ( client->pers.connected == CON_CONNECTED && modfn.IntermissionReadyIndicator( i ) ) {
+			readyMask |= 1 << i;
 		}
 	}
 
 	// copy the readyMask to each player's stats so
 	// it can be displayed on the scoreboard
-	for (i=0 ; i< g_maxclients.integer ; i++) {
-		cl = level.clients + i;
-		if ( cl->pers.connected != CON_CONNECTED ) {
-			continue;
+	for ( i = 0; i < level.maxclients; i++ ) {
+		gclient_t *client = &level.clients[i];
+
+		if ( client->pers.connected == CON_CONNECTED ) {
+			client->ps.stats[STAT_CLIENTS_READY] = readyMask;
 		}
-		cl->ps.stats[STAT_CLIENTS_READY] = readyMask;
 	}
 
-	// never exit in less than five seconds
-	if ( level.time < level.intermissiontime + 5000 ) {
-		return;
-	}
-
-	// if nobody wants to go, clear timer
-	if ( !ready ) {
-		level.readyToExit = qfalse;
-		return;
-	}
-
-	// if everyone wants to go, go now
-	if ( !notReady ) {
+	// check for exit
+	if ( modfn.IntermissionReadyToExit() ) {
 		G_ExitLevel();
-		return;
 	}
-
-	// the first person to ready starts the ten second timeout
-	if ( !level.readyToExit ) {
-		level.readyToExit = qtrue;
-		level.exitTime = level.time;
-	}
-
-	// if we have waited g_intermissionTime seconds since at least one player
-	// wanted to exit, go ahead
-	if ( level.time < level.exitTime + (1000 * g_intermissionTime.integer) ) {
-		return;
-	}
-
-	G_ExitLevel();
 }
 
 /*
@@ -1117,17 +1173,6 @@ static void G_CheckExitRules( void ) {
 	}
 }
 
-
-
-/*
-========================================================================
-
-FUNCTIONS CALLED EVERY FRAME
-
-========================================================================
-*/
-
-
 /*
 ==================
 G_CheckEnoughPlayers
@@ -1152,12 +1197,12 @@ static qboolean G_CheckEnoughPlayers( void ) {
 
 /*
 ==================
-G_WarmupLength
+(ModFN) WarmupLength
 
-Returns length in milliseconds to use for warmup if enabled, or 0 if warmup disabled.
+Returns length in milliseconds to use for warmup if enabled, or <= 0 if warmup disabled.
 ==================
 */
-static int G_WarmupLength( void ) {
+int ModFNDefault_WarmupLength( void ) {
 	if ( g_doWarmup.integer && g_gametype.integer != GT_SINGLE_PLAYER ) {
 		int length = ( g_warmup.integer - 1 ) * 1000;
 		if ( length < 1000 ) {
@@ -1246,7 +1291,7 @@ static void G_CheckMatchState( void ) {
 
 	} else if ( G_CheckEnoughPlayers() ) {
 		// enough players
-		int warmupLength = G_WarmupLength();
+		int warmupLength = modfn.WarmupLength();
 
 		if ( warmupLength > 0 && level.matchState == MS_WARMUP ) {
 			// warmup countdown in progress
@@ -1277,7 +1322,7 @@ static void G_CheckMatchState( void ) {
 
 	} else {
 		// not enough players
-		if ( G_WarmupLength() > 0 ) {
+		if ( modfn.WarmupLength() > 0 ) {
 			G_SetWarmupState( -1 );
 		} else {
 			G_SetWarmupState( 0 );

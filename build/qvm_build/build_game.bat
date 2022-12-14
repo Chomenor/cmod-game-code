@@ -63,10 +63,13 @@ set src=game\bots&set name=ai_team&call :compile
 set src=game\mods&set name=g_mod_main&call :compile
 set src=game\mods&set name=g_mod_stubs&call :compile
 set src=game\mods&set name=g_mod_utils&call :compile
+set src=game\mods\components&set name=comp_clicktojoin&call :compile
 set src=game\mods\components&set name=comp_holdable_transporter&call :compile
+set src=game\mods\components&set name=comp_intermission_ready&call :compile
 set src=game\mods\components&set name=comp_model_groups&call :compile
 set src=game\mods\components&set name=comp_model_selection&call :compile
 set src=game\mods\components&set name=comp_pending_item&call :compile
+set src=game\mods\components&set name=comp_warmup_sequence&call :compile
 set src=game\mods\features&set name=feat_altswap_handler&call :compile
 set src=game\mods\features&set name=feat_bot_adding&call :compile
 set src=game\mods\features&set name=feat_player_move&call :compile
@@ -92,6 +95,10 @@ set src=game\mods\modes\assimilation&set name=assim_borg_teleport&call :compile
 set src=game\mods\modes\assimilation&set name=assim_main&call :compile
 set src=game\mods\modes\assimilation&set name=assim_models&call :compile
 set src=game\mods\modes\elimination&set name=elim_main&call :compile
+set src=game\mods\modes\elimination&set name=elim_misc&call :compile
+set src=game\mods\modes\elimination&set name=elim_multiround&call :compile
+set src=game\mods\modes\elimination&set name=elim_timelimit&call :compile
+set src=game\mods\modes\elimination&set name=elim_tweaks&call :compile
 set src=game\mods\modes\specialties&set name=specs_main&call :compile
 set src=common&set name=logging&call :compile
 set src=common&set name=vm_extensions&call :compile

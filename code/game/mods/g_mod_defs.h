@@ -26,8 +26,14 @@ MOD_FUNCTION_DEF( PreRunFrame, void, ( void ) )
 // Called after G_RunFrame completes.
 MOD_FUNCTION_DEF( PostRunFrame, void, ( void ) )
 
+// Called after G_ShutdownGame completes.
+MOD_FUNCTION_DEF( PostGameShutdown, void, ( qboolean restart ) )
+
 // Called when level.matchState has been updated.
 MOD_FUNCTION_DEF( MatchStateTransition, void, ( matchState_t oldState, matchState_t newState ) )
+
+// Returns length in milliseconds to use for warmup if enabled, or <= 0 if warmup disabled.
+MOD_FUNCTION_DEF( WarmupLength, int, ( void ) )
 
 // Checks for initiating match exit to intermission.
 // Called every frame and after CalculateRanks, which is called on events like
@@ -36,6 +42,12 @@ MOD_FUNCTION_DEF( MatchStateTransition, void, ( matchState_t oldState, matchStat
 //   before check to enter warmup, so events like a player quitting or being assimilated
 //   can trigger intermission even if they make CheckEnoughPlayers false.
 MOD_FUNCTION_DEF( CheckExitRules, void, ( void ) )
+
+// Determines whether to display green 'ready' indicator next to player's name during intermission.
+MOD_FUNCTION_DEF( IntermissionReadyIndicator, qboolean, ( int clientNum ) )
+
+// Determine whether it is time to exit intermission.
+MOD_FUNCTION_DEF( IntermissionReadyToExit, qboolean, ( void ) )
 
 // Execute change to next round or map when intermission completes.
 MOD_FUNCTION_DEF( ExitLevel, void, ( void ) )
@@ -118,6 +130,9 @@ MOD_FUNCTION_DEF( SpawnTransporterEffect, void, ( int clientNum, clientSpawnType
 // Retrieves player model string for client, performing any mod conversions as needed.
 MOD_FUNCTION_DEF( GetPlayerModel, void, ( int clientNum, const char *userinfo, char *output, unsigned int outputSize ) )
 
+// Generates awards message string for specified client.
+MOD_FUNCTION_DEF( CalculateAwards, void, ( int clientNum, char *msg ) )
+
 //////////////////////////
 // weapon related
 //////////////////////////
@@ -161,6 +176,9 @@ MOD_FUNCTION_DEF( CheckReplaceItem, gitem_t *, ( gitem_t *item ) )
 // Allows permanently removing an item during initial spawn.
 // Returns qtrue to disable item, qfalse to spawn item normally.
 MOD_FUNCTION_DEF( CheckItemSpawnDisabled, qboolean, ( gitem_t *item ) )
+
+// Returns the effective number of players to use for g_adaptRespawn calculation.
+MOD_FUNCTION_DEF( AdaptRespawnNumPlayers, int, ( void ) )
 
 // Check if item can be tossed on death/disconnect.
 MOD_FUNCTION_DEF( CanItemBeDropped, qboolean, ( gitem_t *item, int clientNum ) )
@@ -237,6 +255,9 @@ MOD_FUNCTION_DEF( AdjustScoreboardAttributes, int, ( int clientNum, scoreboardAt
 
 // Check if suicide is allowed. If not, prints notification to client.
 MOD_FUNCTION_DEF( CheckSuicideAllowed, qboolean, ( int clientNum ) )
+
+// Set CS_SCORES* configstrings during CalculateRanks.
+MOD_FUNCTION_DEF( SetScoresConfigStrings, void, ( void ) )
 
 // Wrapper to trap_Trace function allowing mod overrides.
 MOD_FUNCTION_DEF( TrapTrace, void, ( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs,

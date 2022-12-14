@@ -380,8 +380,7 @@ typedef struct {
 										// frag can be watched.  Disable future
 										// kills during this delay
 	int			intermissiontime;		// time the intermission was started
-	qboolean	readyToExit;			// at least one client wants to exit
-	int			exitTime;
+	int			readyToExitTime;		// set when at least one client wants to exit
 	vec3_t		intermission_origin;	// also used for spectator spawns
 	vec3_t		intermission_angle;
 
@@ -452,6 +451,7 @@ void	G_InitGentity( gentity_t *e );
 gentity_t	*G_Spawn (void);
 gentity_t *G_TempEntity( vec3_t origin, int event );
 void	G_Sound( gentity_t *ent, int soundIndex );
+void	G_GlobalSound( int soundIndex );
 void	G_FreeEntity( gentity_t *e );
 
 void	G_TouchTriggers (gentity_t *ent);
@@ -592,7 +592,6 @@ void QDECL G_LogWeaponOutput(void);
 void QDECL G_LogExit( const char *string );
 void QDECL G_ClearClientLog(int client);
 
-void CalculateAwards(gentity_t *ent, char *msg);
 int GetWinningTeamMVP( void );
 qboolean CalculateTeamMVP(gentity_t *ent);
 int GetMaxDeathsForClient(int nClient);

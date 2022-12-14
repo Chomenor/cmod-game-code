@@ -68,10 +68,19 @@ void ModTeamGroups_Shared_ForceConfigStrings( const char *redGroup, const char *
 // Components - Modules generally only loaded by other modules
 /* ************************************************************************* */
 
+void ModClickToJoin_Init( void );
 void ModHoldableTransporter_Init( void );
+void ModIntermissionReady_Init( void );
 void ModModelGroups_Init( void );
 void ModModelSelection_Init( void );
 void ModPendingItem_Init( void );
+void ModWarmupSequence_Init();
+
+//
+// Click-to-Join support (comp_clicktojoin.c)
+//
+
+qboolean ModClickToJoin_Static_ActiveForClient( int clientNum );
 
 //
 // Portable transporter & borg teleport (comp_holdable_transporter.c)
@@ -86,6 +95,32 @@ typedef struct {
 } ModHoldableTransporter_config_t;
 
 extern ModHoldableTransporter_config_t *ModHoldableTransporter_config;
+
+//
+// Intermission ready handling (comp_intermissionready.c)
+//
+
+typedef struct {
+	qboolean readySound;		// play beep sound when players become ready
+	qboolean ignoreSpectators;	// treat spectators as non-players for ready calculations (similar to bots)
+	qboolean noPlayersExit;		// exit immediately (after minExitTime) if no valid players available to signal ready
+	int anyReadyTime;			// time to exit when at least one player is ready
+	int sustainedAnyReadyTime;	// time to exit after continuous period of at least one player being ready (resets if nobody is ready)
+	int minExitTime;			// don't exit before this time regardless of players ready
+	int maxExitTime;			// always exit at this time regardless of players ready
+} ModIntermissionReady_config_t;
+
+typedef void ( *IntermissionReady_ConfigFunction_t )( ModIntermissionReady_config_t *config );
+
+typedef struct {
+	IntermissionReady_ConfigFunction_t configFunction;
+} ModIntermissionReady_shared_t;
+
+extern ModIntermissionReady_shared_t *modIntermissionReady_shared;
+
+void ModIntermissionReady_Shared_UpdateConfig( void );
+void ModIntermissionReady_Shared_Suspend( void );
+void ModIntermissionReady_Shared_Resume( void );
 
 //
 // Player model groups (comp_model_groups.c)
@@ -118,6 +153,33 @@ extern ModModelSelection_shared_t *ModModelSelection_shared;
 //
 
 void ModPendingItem_Shared_SchedulePendingItem( int clientNum, holdable_t item, int delay );
+
+//
+// Warmup sequences (comp_warmupsequence.c)
+//
+
+#define MAX_INFO_SEQUENCE_EVENTS 20
+
+typedef struct {
+	int time;
+	void ( *operation )( const char *msg );
+	const char *msg;
+} warmupSequenceEvent_t;
+
+typedef struct {
+	int duration;
+	int eventCount;
+	warmupSequenceEvent_t events[MAX_INFO_SEQUENCE_EVENTS];
+} warmupSequence_t;
+
+typedef struct {
+	qboolean ( *getSequence )( warmupSequence_t *sequence );
+} ModWarmupSequence_shared_t;
+
+extern ModWarmupSequence_shared_t *modWarmupSequence_shared;
+void ModWarmupSequence_Static_AddEventToSequence( warmupSequence_t *sequence, int time,
+		void ( *operation )( const char *msg ), const char *msg );
+qboolean ModWarmupSequence_Static_SequenceInProgressOrPending( void );
 
 /* ************************************************************************* */
 // Helper Macros

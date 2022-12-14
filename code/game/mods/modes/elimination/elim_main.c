@@ -40,6 +40,35 @@ static struct {
 
 /*
 ================
+ModElimination_Static_CountPlayersAlive
+
+Returns total number of non-eliminated players in the game.
+Valid to call even if Elimination mod not loaded.
+================
+*/
+int ModElimination_Static_CountPlayersAlive( void ) {
+	if ( MOD_STATE ) {
+		int i;
+		int count = 0;
+
+		for ( i = 0; i < level.maxclients; ++i ) {
+			gclient_t *client = &level.clients[i];
+			elimination_client_t *modclient = &MOD_STATE->clients[i];
+
+			if ( client->pers.connected >= CON_CONNECTING && !modclient->eliminated && !modfn.SpectatorClient( i ) ) {
+				++count;
+			}
+		}
+
+		return count;
+
+	} else {
+		return level.numNonSpectatorClients;
+	}
+}
+
+/*
+================
 ModElimination_Shared_CountPlayersAliveTeam
 
 Returns number of non-eliminated players on the specified team.
@@ -120,7 +149,7 @@ static qboolean MOD_PREFIX(SpectatorClient)( int clientNum ) {
 Display red 'X' next to eliminated players name.
 ================
 */
-int MOD_PREFIX(AdjustScoreboardAttributes)( int clientNum, scoreboardAttribute_t saType, int defaultValue ) {
+static int MOD_PREFIX(AdjustScoreboardAttributes)( int clientNum, scoreboardAttribute_t saType, int defaultValue ) {
 	if ( saType == SA_ELIMINATED ) {
 		elimination_client_t *modclient = &MOD_STATE->clients[clientNum];
 		return modclient->eliminated ? 1 : 0;
@@ -133,7 +162,8 @@ int MOD_PREFIX(AdjustScoreboardAttributes)( int clientNum, scoreboardAttribute_t
 ================
 (ModFN) EffectiveScore
 
-Use elimination score instead of PERS_SCORE to avoid issues with follow spectators.
+Use elimination score instead of PERS_SCORE to avoid issues with follow spectators
+and for compatibility with round indicator features.
 ================
 */
 static int MOD_PREFIX(EffectiveScore)( int clientNum, effectiveScoreType_t type ) {
@@ -172,6 +202,11 @@ Print info messages to clients during ClientSpawn.
 LOGFUNCTION_SVOID( MOD_PREFIX(SpawnCenterPrintMessage), ( int clientNum, clientSpawnType_t spawnType ),
 		( clientNum, spawnType ), "G_MODFN_SPAWNCENTERPRINTMESSAGE" ) {
 	gclient_t *client = &level.clients[clientNum];
+
+	// Don't print this if warmup sequence is playing or going to be played
+	if ( ModWarmupSequence_Static_SequenceInProgressOrPending() ) {
+		return;
+	}
 
 	if ( client->sess.sessionTeam == TEAM_SPECTATOR || spawnType != CST_RESPAWN ) {
 		trap_SendServerCommand( clientNum, "cp \"Elimination\"" );
@@ -310,17 +345,17 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostPlayerDie), ( gentity_t *self, gentity_t *infl
 
 	MOD_STATE->Prev_PostPlayerDie( self, inflictor, attacker, meansOfDeath, awardPoints );
 
-	// in elimination, you get scored by when you died, but knockout just respawns you, not kill you
+	// In elimination, you get scored by when you died, but knockout just respawns you, not kill you.
 	if ( meansOfDeath != MOD_KNOCKOUT ) {
 		modclient->eliminated = qtrue;
 		MOD_STATE->numEliminated++;
 
-		// Normally unused, but set in case some server engine modification wants to access it
+		// Normally unused, but set in case some server engine modification wants to access it.
 		self->r.svFlags |= SVF_ELIMINATED;
 
 		if ( !level.warmupTime ) {
-			// If we were eliminated by a player not on the same team, increment their scores
-			// Note that the normal AddScore increment is disabled to avoid any non-elimination scoring effects
+			// If we were eliminated by a player not on the same team, increment their scores.
+			// Note that the normal AddScore increment is disabled to avoid any non-elimination scoring effects.
 			if ( attacker && attacker->client && attacker != self &&
 					( client->sess.sessionTeam == TEAM_FREE || attacker->client->sess.sessionTeam != client->sess.sessionTeam ) ) {
 				elimination_client_t *attacker_modclient = &MOD_STATE->clients[attacker - g_entities];
@@ -336,7 +371,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostPlayerDie), ( gentity_t *self, gentity_t *infl
 				}
 			}
 
-			// In FFA, increment score for all non-eliminated players
+			// In FFA, increment score for all non-eliminated players.
 			if ( g_gametype.integer < GT_TEAM ) {
 				int i;
 				for ( i = 0; i < level.maxclients; i++ ) {
@@ -408,7 +443,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), (void), (), "G_MODFN_POSTRUNFRAME" 
 
 			// Copy real score into PERS_SCORE except for follow spectators.
 			// It shouldn't affect much normally, but it does allow the original HUD behavior of
-			// displaying the order of elimination to work correctly.
+			// displaying the order of elimination to work correctly if round indicator is disabled.
 			if ( !( modclient->eliminatedSpect && client->sess.spectatorState == SPECTATOR_FOLLOW ) ) {
 				client->ps.persistant[PERS_SCORE] = modclient->score;
 			}
@@ -487,9 +522,7 @@ LOGFUNCTION_VOID( ModElimination_Init, ( void ), (), "G_MOD_INIT G_ELIMINATION" 
 		INIT_FN_STACKABLE( PostRunFrame );
 		INIT_FN_STACKABLE( MatchStateTransition );
 
-		if ( trap_Cvar_VariableIntegerValue( "fraglimit" ) != 0 && trap_Cvar_VariableIntegerValue( "dedicated" ) ) {
-			G_Printf( "WARNING: Recommend setting 'fraglimit' to 0 for Elimination mode "
-					"to remove unnecessary HUD indicator.\n" );
-		}
+		// Initialize additional features
+		ModElimMisc_Init();
 	}
 }

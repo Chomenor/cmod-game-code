@@ -19,6 +19,10 @@ LOGFUNCTION_VOID( ModFNDefault_PostRunFrame, ( void ),
 		(), "G_MODFN_POSTRUNFRAME" ) {
 }
 
+LOGFUNCTION_VOID( ModFNDefault_PostGameShutdown, ( qboolean restart ),
+		( restart ), "G_MODFN_POSTGAMESHUTDOWN" ) {
+}
+
 LOGFUNCTION_VOID( ModFNDefault_MatchStateTransition, ( matchState_t oldState, matchState_t newState ),
 		( oldState, newState ), "G_MODFN_MATCHSTATETRANSITION" ) {
 }

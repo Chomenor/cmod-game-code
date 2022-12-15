@@ -12,27 +12,17 @@
 
 #include "mods/modes/elimination/elim_local.h"
 
-// Restart game when timelimit expires.
-#define FEATURE_TIMELIMIT_RESTART
-
-// Modify timelimit when game gets down to final players / only bots.
-#define FEATURE_TIMELIMIT_ADJUST
-
 static struct {
-#ifdef FEATURE_TIMELIMIT_ADJUST
 	trackedCvar_t g_mod_finalistsTimelimit;
 	trackedCvar_t g_mod_onlyBotsTimelimit;
 	qboolean finalistTimelimitActive;
 	qboolean onlyBotsTimelimitActive;
 	int oldTimelimit;
-#endif
 
 	// For mod function stacking
 	ModFNType_PostGameShutdown Prev_PostGameShutdown;
 	ModFNType_PostRunFrame Prev_PostRunFrame;
 } *MOD_STATE;
-
-#ifdef FEATURE_TIMELIMIT_ADJUST
 
 // Once timelimit is adjusted, original timelimit cvar needs to be restored at end of round.
 #define ADJUSTED_TIMELIMIT_ACTIVE ( MOD_STATE->finalistTimelimitActive || MOD_STATE->onlyBotsTimelimitActive )
@@ -129,7 +119,6 @@ static void ModElimTimelimit_CheckAdjustTimelimit( void ) {
 		}
 	}
 }
-#endif
 
 /*
 ================
@@ -139,12 +128,10 @@ static void ModElimTimelimit_CheckAdjustTimelimit( void ) {
 LOGFUNCTION_SVOID( MOD_PREFIX(PostGameShutdown), ( qboolean restart ), ( restart ), "G_MODFN_POSTGAMESHUTDOWN" ) {
 	MOD_STATE->Prev_PostGameShutdown( restart );
 
-#ifdef FEATURE_TIMELIMIT_ADJUST
 	// Restore original timelimit value.
 	if ( ADJUSTED_TIMELIMIT_ACTIVE ) {
 		trap_Cvar_Set( "timelimit", va( "%i", MOD_STATE->oldTimelimit ) );
 	}
-#endif
 }
 
 /*
@@ -154,20 +141,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostGameShutdown), ( qboolean restart ), ( restart
 */
 LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), (void), (), "G_MODFN_POSTRUNFRAME" ) {
 	MOD_STATE->Prev_PostRunFrame();
-
-#ifdef FEATURE_TIMELIMIT_RESTART
-	// Check for restart.
-	if ( g_timelimit.integer && level.matchState == MS_ACTIVE && !level.exiting &&
-			level.time - level.startTime >= g_timelimit.integer * 60000 ) {
-		trap_SendServerCommand( -1, "print \"Timelimit hit, game restart...\n\"");
-		level.exiting = qtrue;
-		trap_SendConsoleCommand( EXEC_APPEND, "map_restart 0\n" );
-	}
-#endif
-
-#ifdef FEATURE_TIMELIMIT_ADJUST
 	ModElimTimelimit_CheckAdjustTimelimit();
-#endif
 }
 
 /*
@@ -182,13 +156,11 @@ LOGFUNCTION_VOID( ModElimTimelimit_Init, ( void ), (), "G_MOD_INIT G_ELIMINATION
 		INIT_FN_STACKABLE( PostGameShutdown );
 		INIT_FN_STACKABLE( PostRunFrame );
 
-#ifdef FEATURE_TIMELIMIT_ADJUST
 		G_RegisterTrackedCvar( &MOD_STATE->g_mod_finalistsTimelimit, "g_mod_finalistsTimelimit", "0", CVAR_ARCHIVE, qfalse );
 		G_RegisterTrackedCvar( &MOD_STATE->g_mod_onlyBotsTimelimit, "g_mod_onlyBotsTimelimit", "0", CVAR_ARCHIVE, qfalse );
 
 		if ( MOD_STATE->g_mod_finalistsTimelimit.integer <= 0 ) {
 			G_DedPrintf( "NOTE: Recommend setting 'g_mod_finalistsTimelimit' to 3 or 4 for Elimination mode.\n" );
 		}
-#endif
 	}
 }

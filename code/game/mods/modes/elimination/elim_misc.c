@@ -101,8 +101,6 @@ LOGFUNCTION_VOID( ModElimMisc_Init, ( void ), (), "G_MOD_INIT G_ELIMINATION" ) {
 		INIT_FN_STACKABLE( SetScoresConfigStrings );
 		INIT_FN_STACKABLE( PostRunFrame );
 
-		ModElimTimelimit_Init();
-
 		if ( G_ModUtils_GetLatchedValue( "g_mod_elimTweaks", "0", 0 ) ) {
 			ModElimTweaks_Init();
 		} else {

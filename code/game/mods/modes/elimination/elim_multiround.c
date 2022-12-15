@@ -85,6 +85,10 @@ static struct {
 #define TOTAL_ROUNDS ( MOD_STATE->g_mod_noOfGamesPerMatch.integer >= 1 ? MOD_STATE->g_mod_noOfGamesPerMatch.integer : 1 )
 #define MULTI_ROUND_ENABLED ( MOD_STATE->g_mod_noOfGamesPerMatch.integer > 1 )
 
+// Save match state on end of warmup, timelimit reset, and round transition.
+// Don't save state on admin map/restart command or end of match.
+#define WRITE_SESSION ( level.exiting && ( level.matchState < MS_INTERMISSION_ACTIVE || MOD_STATE->pendingRound ) )
+
 /*
 ================
 ModElimMultiRound_Static_GetTotalRounds
@@ -439,8 +443,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostPlayerDie), ( gentity_t *self, gentity_t *infl
 LOGFUNCTION_SVOID( MOD_PREFIX(GenerateGlobalSessionInfo), ( info_string_t *info ), ( info ), "G_MODFN_GENERATEGLOBALSESSIONINFO" ) {
 	MOD_STATE->Prev_GenerateGlobalSessionInfo( info );
 
-	// Save state on end of warmup or round transition, but not an admin map/restart command or end of match.
-	if ( level.exiting && ( level.warmupRestarting || MOD_STATE->pendingRound ) ) {
+	if ( WRITE_SESSION ) {
 		int pendingRound = MOD_STATE->pendingRound ? MOD_STATE->pendingRound : MOD_STATE->currentRound;
 		qboolean pendingTiebreaker = MOD_STATE->pendingRound ? MOD_STATE->pendingTiebreaker : MOD_STATE->tiebreaker;
 		Info_SetValueForKey_Big( info->s, "elim_session", "1" );
@@ -477,8 +480,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(GenerateClientSessionInfo), ( int clientNum, info_
 		( clientNum, info ), "G_MODFN_GENERATECLIENTSESSIONINFO" ) {
 	MOD_STATE->Prev_GenerateClientSessionInfo( clientNum, info );
 
-	// Save state on end of warmup or round transition, but not an admin map/restart command or end of match.
-	if ( level.exiting && ( level.warmupRestarting || MOD_STATE->pendingRound ) ) {
+	if ( WRITE_SESSION ) {
 		eliminationMR_client_t *modclient = &MOD_STATE->clients[clientNum];
 		Info_SetValueForKey_Big( info->s, "elim_matchKills", va( "%i", modclient->matchKills ) );
 		Info_SetValueForKey_Big( info->s, "elim_roundWins", va( "%i", modclient->roundWins ) );

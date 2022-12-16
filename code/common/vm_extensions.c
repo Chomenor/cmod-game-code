@@ -161,3 +161,37 @@ void VMExt_FN_AltSwap_SetState( qboolean swapState ) {
 		);
 	}
 }
+
+#ifdef MODULE_GAME
+static vmext_cached_value_t trap_status_scores_override_set_array;
+
+/*
+================
+VMExt_FNAvailable_StatusScoresOverride_SetArray
+
+Returns qtrue if function is available.
+================
+*/
+qboolean VMExt_FNAvailable_StatusScoresOverride_SetArray( void ) {
+	VMExt_UpdateCachedValue( "trap_status_scores_override_set_array", &trap_status_scores_override_set_array );
+	return trap_status_scores_override_set_array.value ? qtrue : qfalse;
+}
+
+/*
+================
+VMExt_FN_StatusScoresOverride_SetArray
+
+Sets buffer of score values for the engine to use for status queries instead of playerstate PERS_SCORE.
+================
+*/
+void VMExt_FN_StatusScoresOverride_SetArray( int *sharedArray, int clientCount ) {
+	VMExt_UpdateCachedValue( "trap_status_scores_override_set_array", &trap_status_scores_override_set_array );
+	if ( EF_WARN_ASSERT( trap_status_scores_override_set_array.value ) ) {
+		SYSCALL( trap_status_scores_override_set_array.value,
+			( int *sharedArray, int clientCount ),
+			( sharedArray, clientCount ),
+			( trap_status_scores_override_set_array.value, sharedArray, clientCount )
+		);
+	}
+}
+#endif

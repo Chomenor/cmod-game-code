@@ -296,6 +296,9 @@
     <ClCompile Include="..\..\code\game\mods\features\feat_spect_passthrough.c">
       <Filter>game\mods\features</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\features\feat_status_scores.c">
+      <Filter>game\mods\features</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\code\game\mods\features\feat_team_groups.c">
       <Filter>game\mods\features</Filter>
     </ClCompile>

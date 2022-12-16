@@ -21,6 +21,7 @@ typedef enum {
 typedef enum {
 	EST_REALSCORE,
 	EST_SCOREBOARD,
+	EST_STATUS_QUERY,
 } effectiveScoreType_t;
 
 typedef enum {

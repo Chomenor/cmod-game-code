@@ -266,6 +266,7 @@
     <ClCompile Include="..\..\code\game\mods\features\feat_player_move.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_spawn_protect.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_spect_passthrough.c" />
+    <ClCompile Include="..\..\code\game\mods\features\feat_status_scores.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_team_groups.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_voting.c" />
     <ClCompile Include="..\..\code\game\mods\features\pingcomp\pc_client_predict.c" />

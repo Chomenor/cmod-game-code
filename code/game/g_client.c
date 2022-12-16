@@ -480,12 +480,14 @@ Returns effective score values to use for client.
 int ModFNDefault_EffectiveScore( int clientNum, effectiveScoreType_t type ) {
 	if ( !G_AssertConnectedClient( clientNum ) ) {
 		return 0;
-	} else if ( type == EST_SCOREBOARD && modfn.SpectatorClient( clientNum ) &&
+	}
+	
+	if ( type != EST_SCOREBOARD && modfn.SpectatorClient( clientNum ) &&
 			level.clients[clientNum].sess.spectatorState == SPECTATOR_FOLLOW ) {
-		// If currently spectating and following somebody, allow showing the score of player
-		// being followed in scoreboard. This matches the original behavior and can be useful
-		// as a way to tell which player somebody is following.
-	} else if ( level.clients[clientNum].sess.sessionTeam == TEAM_SPECTATOR ) {
+		// If currently spectating and following somebody, PERS_SCORE will be copied from the
+		// followed player. Use the copied score for scoreboard, for consistency with original
+		// behavior, as it can be useful as a way to tell which player somebody is following.
+		// For other purposes (such as external status queries) treat the score as 0.
 		return 0;
 	}
 

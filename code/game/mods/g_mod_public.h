@@ -56,12 +56,6 @@ typedef enum {
 	WC_USE_TRIPMINES,
 } weaponConstant_t;
 
-typedef enum {
-	PMC_NONE,
-	PMC_FIXED_LENGTH,	// subdivide moves into this frame length (0 = disabled)
-	PMC_PARTIAL_MOVE_TRIGGERS,	// if 1, process triggers after each subdivided move fragment
-} pmoveConstant_t;
-
 // Mod trace flags
 #define MOD_TRACE_WEAPON 1
 

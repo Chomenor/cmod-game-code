@@ -216,8 +216,8 @@ MOD_FUNCTION_DEF( GenerateGlobalSessionInfo, void, ( info_string_t *info ) )
 // player movement
 //////////////////////////
 
-// Support modifying pmove-related integer constants.
-MOD_FUNCTION_DEF( AdjustPmoveConstant, int, ( pmoveConstant_t pmcType, int defaultValue ) )
+// Returns fixed frame length to use for player move, or 0 for no fixed length.
+MOD_FUNCTION_DEF( PmoveFixedLength, int, ( qboolean isBot ) )
 
 // Initialize pmove_t structure ahead of player move.
 MOD_FUNCTION_DEF( PmoveInit, void, ( int clientNum, pmove_t *pmove ) )

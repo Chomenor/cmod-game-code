@@ -1584,6 +1584,17 @@ LOGFUNCTION_RET( qboolean, ModFNDefault_CheckRespawnTime, ( int clientNum, qbool
 
 /*
 ==============
+(ModFN) PmoveFixedLength
+
+Returns fixed frame length to use for player move, or 0 for no fixed length.
+==============
+*/
+int ModFNDefault_PmoveFixedLength( qboolean isBot ) {
+	return 0;
+}
+
+/*
+==============
 (ModFN) PmoveInit
 ==============
 */
@@ -1664,25 +1675,6 @@ LOGFUNCTION_VOID( ModFNDefault_PostPmoveActions, ( pmove_t *pmove, int clientNum
 	ClientImpacts( ent, pmove );
 }
 
-typedef struct {
-	int clientNum;
-	int oldEventSequence;
-} postMoveContext_t;
-
-/*
-==============
-G_PostPmoveCallback
-==============
-*/
-LOGFUNCTION_SVOID( G_PostPmoveCallback, ( pmove_t *pmove, qboolean finalFragment, void *context ),
-		( pmove, finalFragment, context ), "" ) {
-	if ( finalFragment || modfn.AdjustPmoveConstant( PMC_PARTIAL_MOVE_TRIGGERS, 0 ) ) {
-		postMoveContext_t *pmc = (postMoveContext_t *)context;
-		modfn.PostPmoveActions( pmove, pmc->clientNum, pmc->oldEventSequence );
-		pmc->oldEventSequence = level.clients[pmc->clientNum].ps.eventSequence;
-	}
-}
-
 /*
 ==============
 (ModFN) RunPlayerMove
@@ -1694,13 +1686,11 @@ LOGFUNCTION_VOID( ModFNDefault_RunPlayerMove, ( int clientNum ), ( clientNum ), 
 	gclient_t *client = &level.clients[clientNum];
 	playerState_t *ps = &client->ps;
 	pmove_t pmove;
-	postMoveContext_t pmc = { 0 };
-
-	pmc.clientNum = clientNum;
-	pmc.oldEventSequence = ps->eventSequence;
+	int oldEventSequence = ps->eventSequence;
 
 	modfn.PmoveInit( clientNum, &pmove );
-	Pmove( &pmove, modfn.AdjustPmoveConstant( PMC_FIXED_LENGTH, 0 ), G_PostPmoveCallback, &pmc );
+	Pmove( &pmove, 0, NULL, NULL );
+	modfn.PostPmoveActions( &pmove, clientNum, oldEventSequence );
 }
 
 /*
@@ -1750,6 +1740,7 @@ void ClientThink_real( gentity_t *ent ) {
 	int			oldEventSequence;
 	int			msec;
 	usercmd_t	*ucmd;
+	#define FIXED_LENGTH modfn.PmoveFixedLength( ( ent->r.svFlags & SVF_BOT ) ? qtrue : qfalse )
 
 	// don't think if the client is not yet connected (and thus not yet spawned in)
 	if (client->pers.connected != CON_CONNECTED) {
@@ -1766,7 +1757,7 @@ void ClientThink_real( gentity_t *ent ) {
 		ucmd->serverTime = level.time - 1000;
 	}
 
-	if ( !PM_IsMoveNeeded( client->ps.commandTime, ucmd->serverTime, modfn.AdjustPmoveConstant( PMC_FIXED_LENGTH, 0 ) ) &&
+	if ( !PM_IsMoveNeeded( client->ps.commandTime, ucmd->serverTime, FIXED_LENGTH ) &&
 			// following others may result in bad times, but we still want
 			// to check for follow toggles
 			!( modfn.SpectatorClient( clientNum ) && client->sess.spectatorState == SPECTATOR_FOLLOW ) ) {

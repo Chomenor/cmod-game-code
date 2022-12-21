@@ -64,11 +64,6 @@ LOGFUNCTION_RET( int, ModFNDefault_ModifyDamageFlags, ( gentity_t *targ, gentity
 	return dflags;
 }
 
-LOGFUNCTION_RET( int, ModFNDefault_AdjustPmoveConstant, ( pmoveConstant_t pmcType, int defaultValue ),
-		( pmcType, defaultValue ), "G_MODFN_ADJUSTPMOVECONSTANT" ) {
-	return defaultValue;
-}
-
 LOGFUNCTION_RET( int, ModFNDefault_ModifyAmmoUsage, ( int defaultValue, int weapon, qboolean alt ),
 		( defaultValue, weapon, alt ), "G_MODFN_MODIFYAMMOUSAGE" ) {
 	return defaultValue;

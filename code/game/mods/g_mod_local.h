@@ -54,10 +54,11 @@ void ModSpectPassThrough_Init( void );
 void ModVoting_Init( void );
 
 //
-// Ping Compensation (pc_main.c)
+// Ping Compensation (pingcomp/*.c)
 //
 
 qboolean ModPingcomp_Static_PingCompensationEnabled( void );
+void ModPCSmoothing_Static_RecordClientMove( int clientNum );
 
 //
 // Team Groups (feat_team_groups.c)

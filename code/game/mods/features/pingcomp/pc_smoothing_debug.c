@@ -18,7 +18,8 @@
 
 typedef struct {
 	int levelTime;
-	short offset;
+	short offsetTarget;
+	short offsetResult;
 	short buffer;
 } SmoothingDebug_frame_t;
 
@@ -66,14 +67,14 @@ static void ModPCSmoothingDebug_PrintFrames( void ) {
 		SmoothingDebug_client_t *modclient = &MOD_STATE->clients[clientNum];
 		int i;
 
-		G_Printf( "format: levelTime / offset / buffer\n" );
+		G_Printf( "format: levelTime / offset(achieved) / buffer\n" );
 		G_Printf( "levelTime: The server time at which the snapshot was sent.\n" );
-		G_Printf( "offset: How far smoothed command time was behind levelTime.\n" );
-		G_Printf( "buffer: How far smoothed command time was behind actual command time.\n" );
+		G_Printf( "offset: How far target/achieved smoothed time was behind levelTime.\n" );
+		G_Printf( "buffer: How far target smoothed time was behind actual command time.\n" );
 
-		for ( i = 1; i <= MAX_DEBUG_FRAMES; ++i ) {
+		for ( i = 0; i < MAX_DEBUG_FRAMES; ++i ) {
 			const SmoothingDebug_frame_t *frame = &modclient->frames[( modclient->frameCounter + i ) % MAX_DEBUG_FRAMES];
-			G_Printf( "%i / %i / %i\n", frame->levelTime, frame->offset, frame->buffer );
+			G_Printf( "%i / %i(%i) / %i\n", frame->levelTime, frame->offsetTarget, frame->offsetResult, frame->buffer );
 		}
 	}
 }
@@ -83,13 +84,14 @@ static void ModPCSmoothingDebug_PrintFrames( void ) {
 ModPCSmoothingDebug_Static_LogFrame
 ===================
 */
-void ModPCSmoothingDebug_Static_LogFrame( int clientNum, int smoothedCommandTime ) {
+void ModPCSmoothingDebug_Static_LogFrame( int clientNum, int targetTime, int resultTime ) {
 	if ( MOD_STATE && CLIENT_IN_RANGE( clientNum ) ) {
 		SmoothingDebug_client_t *modclient = &MOD_STATE->clients[clientNum];
 		SmoothingDebug_frame_t *frame = &modclient->frames[( modclient->frameCounter++ ) % MAX_DEBUG_FRAMES];
 		frame->levelTime = level.time;
-		frame->offset = level.time - smoothedCommandTime;
-		frame->buffer = level.clients[clientNum].ps.commandTime - smoothedCommandTime;
+		frame->offsetTarget = level.time - targetTime;
+		frame->offsetResult = level.time - resultTime;
+		frame->buffer = level.clients[clientNum].ps.commandTime - targetTime;
 	}
 }
 

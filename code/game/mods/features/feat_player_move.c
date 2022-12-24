@@ -44,11 +44,15 @@ ModPlayerMove_PostPmoveCallback
 */
 LOGFUNCTION_SVOID( ModPlayerMove_PostPmoveCallback, ( pmove_t *pmove, qboolean finalFragment, void *context ),
 		( pmove, finalFragment, context ), "" ) {
+	postMoveContext_t *pmc = (postMoveContext_t *)context;
+
 	if ( finalFragment || MOD_STATE->g_pMoveTriggerMode.integer ) {
-		postMoveContext_t *pmc = (postMoveContext_t *)context;
 		modfn.PostPmoveActions( pmove, pmc->clientNum, pmc->oldEventSequence );
 		pmc->oldEventSequence = level.clients[pmc->clientNum].ps.eventSequence;
 	}
+
+	// Store smoothing position here regardless of trigger mode.
+	ModPCSmoothing_Static_RecordClientMove( pmc->clientNum );
 }
 
 /*

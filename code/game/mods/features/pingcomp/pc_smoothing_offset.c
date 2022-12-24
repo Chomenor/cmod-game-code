@@ -21,6 +21,9 @@
 #define WORKING_CLIENT_COUNT ( level.maxclients < MAX_SMOOTHING_CLIENTS ? level.maxclients : MAX_SMOOTHING_CLIENTS )
 #define CLIENT_IN_RANGE( clientNum ) ( clientNum >= 0 && clientNum < WORKING_CLIENT_COUNT )
 
+// Use special offset calculation for bots on dedicated servers
+#define SYNCHRONOUS_BOT( clientNum ) ( ( g_entities[clientNum].r.svFlags & SVF_BOT ) && MOD_STATE->dedicatedServer )
+
 // Maximum time to shift client back from their current commandTime
 #define MAX_TRUE_SHIFT 300
 
@@ -69,6 +72,7 @@ static struct {
 
 	SmoothingOffset_client_t clients[MAX_SMOOTHING_CLIENTS];
 	int lastFrameTime;
+	qboolean dedicatedServer;
 
 	// For mod function stacking
 	ModFNType_ModConsoleCommand Prev_ModConsoleCommand;
@@ -288,10 +292,24 @@ ModPCSmoothingOffset_Shared_GetOffset
 */
 int ModPCSmoothingOffset_Shared_GetOffset( int clientNum ) {
 	EF_ERR_ASSERT( MOD_STATE );
-	if ( ModPingcomp_Static_SmoothingEnabled() && CLIENT_IN_RANGE( clientNum ) && MOD_STATE->clients[clientNum].initialized ) {
-		SmoothingOffset_client_t *modclient = &MOD_STATE->clients[clientNum];
-		ModPCSmoothingOffset_UpdateStabilizedOffset( clientNum );
-		return tonextint( modclient->stabilizedOffset ) + BASE_OFFSET + MOD_STATE->g_smoothClientsOffset.integer;
+	if ( ModPingcomp_Static_SmoothingEnabled() && CLIENT_IN_RANGE( clientNum ) ) {
+		if ( SYNCHRONOUS_BOT( clientNum ) ) {
+			// On dedicated server, the engine generally calls bot moves in sync with server frames.
+			// If move partitioning is disabled, just set the offset to the offset of the latest move
+			// (effectively no smoothing effect). If move partitioning is enabled, the move time can
+			// lag the command time by up to ( fixedLength - 1 ) msec, so add this value to the offset.
+			int partitioningOffset = modfn.PmoveFixedLength( qtrue ) - 1;
+			if ( partitioningOffset < 0 ) {
+				partitioningOffset = 0;
+			}
+			return ( level.time - level.clients[clientNum].pers.cmd.serverTime ) + partitioningOffset +
+					MOD_STATE->g_smoothClientsOffset.integer;
+
+		} else if (MOD_STATE->clients[clientNum].initialized ) {
+			SmoothingOffset_client_t *modclient = &MOD_STATE->clients[clientNum];
+			ModPCSmoothingOffset_UpdateStabilizedOffset( clientNum );
+			return tonextint( modclient->stabilizedOffset ) + BASE_OFFSET + MOD_STATE->g_smoothClientsOffset.integer;
+		}
 	}
 	return 0;
 }
@@ -330,18 +348,23 @@ ModPCSmoothingOffset_OffsetDebug
 */
 static void ModPCSmoothingOffset_OffsetDebug( int clientNum ) {
 	SmoothingOffset_client_t *modclient = &MOD_STATE->clients[clientNum];
-	int optimal = ModPCSmoothingOffset_GetOptimalOffset( clientNum );
-	int i;
+	if ( modclient->initialized ) {
+		int optimal = ModPCSmoothingOffset_GetOptimalOffset( clientNum );
+		int i;
 
-	G_Printf( "\nminimum considered offset (should equal coverage 75): %i\n", INDEX_TO_OFFSET( modclient->minimumOffsetIndex ) );
-	G_Printf( "format: coverage / offset / score\n" );
-	for ( i = 75; i <= 100; ++i ) {
-		int offset = ModPCSmoothingOffset_GetOffsetAtCoverage( clientNum, 0.01f * i );
-		G_Printf( "%i / %i / %i\n", i, offset, (int)( tonextint( OFFSET_SCORE( offset, i * 0.01f ) ) ) );
+		G_Printf( "\nminimum considered offset (should equal coverage 75): %i\n",
+				INDEX_TO_OFFSET( modclient->minimumOffsetIndex ) );
+		G_Printf( "format: coverage / offset / score\n" );
+		for ( i = 75; i <= 100; ++i ) {
+			int offset = ModPCSmoothingOffset_GetOffsetAtCoverage( clientNum, 0.01f * i );
+			G_Printf( "%i / %i / %i\n", i, offset, (int)( tonextint( OFFSET_SCORE( offset, i * 0.01f ) ) ) );
+		}
+
+		G_Printf( "calculated optimal offset: %i\n", optimal );
+		G_Printf( "current stabilized offset: %i\n", (int)( tonextint( modclient->stabilizedOffset ) ) );
+	} else {
+		G_Printf( "offset calculation not initialized for client %i.\n", clientNum );
 	}
-
-	G_Printf( "calculated optimal offset: %i\n", optimal );
-	G_Printf( "current stabilized offset: %i\n", (int)( tonextint( modclient->stabilizedOffset ) ) );
 }
 
 /* ----------------------------------------------------------------------- */
@@ -373,7 +396,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(RunPlayerMove), ( int clientNum ), ( clientNum ), 
 	int oldTime = level.clients[clientNum].ps.commandTime;
 	MOD_STATE->Prev_RunPlayerMove( clientNum );
 
-	if ( ModPingcomp_Static_SmoothingEnabledForClient( clientNum ) ) {
+	if ( !SYNCHRONOUS_BOT( clientNum ) && ModPingcomp_Static_SmoothingEnabledForClient( clientNum ) ) {
 		ModPCSmoothingOffset_RegisterClientMove( clientNum, oldTime, level.clients[clientNum].ps.commandTime );
 	}
 }
@@ -419,6 +442,9 @@ LOGFUNCTION_VOID( ModPCSmoothingOffset_Init, ( void ), (), "G_MOD_INIT" ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
 		G_RegisterTrackedCvar( &MOD_STATE->g_smoothClientsOffset, "g_smoothClientsOffset", "0", 0, qfalse );
+
+		MOD_STATE->dedicatedServer = trap_Cvar_VariableIntegerValue( "dedicated" ) ||
+				!trap_Cvar_VariableIntegerValue( "cl_running" ) ? qtrue : qfalse;
 
 		INIT_FN_STACKABLE( ModConsoleCommand );
 		INIT_FN_STACKABLE( RunPlayerMove );

@@ -50,9 +50,7 @@ static struct {
 	smoothing_client_t clients[MAX_SMOOTHING_CLIENTS];
 
 	// For mod function stacking
-	ModFNType_PostPmoveActions Prev_PostPmoveActions;
 	ModFNType_CopyToBodyQue Prev_CopyToBodyQue;
-	ModFNType_PostRunFrame Prev_PostRunFrame;
 } *MOD_STATE;
 
 /*
@@ -102,46 +100,55 @@ static void ModPCSmoothing_ApplyClientSnap( int clientNum, const smoothing_clien
 
 /*
 ==============
-ModPCSmoothing_CheckLiftMoves
+ModPCSmoothing_CheckLiftMove
 
 Check for lift movement during server frame. If movement was detected, store the Z origin
 and increment the lift counter.
 ==============
 */
-static void ModPCSmoothing_CheckLiftMoves( void ) {
-	int i;
-	int clientCount = WORKING_CLIENT_COUNT;
-
-	for ( i = 0; i < clientCount; ++i ) {
-		if ( level.clients[i].pers.connected == CON_CONNECTED &&
-					MOD_STATE->clients[i].lastMoveZ != level.clients[i].ps.origin[2] ) {
-			MOD_STATE->clients[i].lastMoveZ = level.clients[i].ps.origin[2];
-			MOD_STATE->clients[i].liftCount++;
-		}
+static void ModPCSmoothing_CheckLiftMove( int clientNum ) {
+	if ( MOD_STATE->clients[clientNum].lastMoveZ != level.clients[clientNum].ps.origin[2] ) {
+		MOD_STATE->clients[clientNum].lastMoveZ = level.clients[clientNum].ps.origin[2];
+		MOD_STATE->clients[clientNum].liftCount++;
 	}
 }
 
 /*
 ==============
-ModPCSmoothing_RecordClientMove
+ModPCSmoothing_CheckTeleport
+
+If teleport is detected, reset prior snaps to avoid bad interpolations.
 ==============
 */
-static void ModPCSmoothing_RecordClientMove( int clientNum ) {
-	smoothing_client_t *modclient = &MOD_STATE->clients[clientNum];
-
+static void ModPCSmoothing_CheckTeleport( int clientNum ) {
 	qboolean teleportFlag = ( level.clients[clientNum].ps.eFlags & EF_TELEPORT_BIT ) ? qtrue : qfalse;
-	if ( modclient->teleportFlag != teleportFlag ) {
-		modclient->teleportFlag = teleportFlag;
-		modclient->snapCounter = 0;
+	if ( MOD_STATE->clients[clientNum].teleportFlag != teleportFlag ) {
+		MOD_STATE->clients[clientNum].teleportFlag = teleportFlag;
+		MOD_STATE->clients[clientNum].snapCounter = 0;
 	}
+}
 
-	modclient->lastMoveZ = level.clients[clientNum].ps.origin[2];
+/*
+==============
+ModPCSmoothing_Static_RecordClientMove
 
-	if ( !modclient->snapCounter || CLIENT_SNAP( clientNum, modclient->snapCounter - 1 ).commandTime + MINIMUM_SNAP_LENGTH
-			<= level.clients[clientNum].ps.commandTime ) {
-		smoothing_client_snap_t *snap = &CLIENT_SNAP( clientNum, modclient->snapCounter );
-		modclient->snapCounter++;
-		ModPCSmoothing_ReadClientSnap( clientNum, snap );
+Record client positions after each move fragment.
+==============
+*/
+void ModPCSmoothing_Static_RecordClientMove( int clientNum ) {
+	if ( MOD_STATE && ModPingcomp_Static_SmoothingEnabledForClient( clientNum ) ) {
+		smoothing_client_t *modclient = &MOD_STATE->clients[clientNum];
+
+		ModPCSmoothing_CheckTeleport( clientNum );
+
+		modclient->lastMoveZ = level.clients[clientNum].ps.origin[2];
+
+		if ( !modclient->snapCounter || CLIENT_SNAP( clientNum, modclient->snapCounter - 1 ).commandTime + MINIMUM_SNAP_LENGTH
+				<= level.clients[clientNum].ps.commandTime ) {
+			smoothing_client_snap_t *snap = &CLIENT_SNAP( clientNum, modclient->snapCounter );
+			modclient->snapCounter++;
+			ModPCSmoothing_ReadClientSnap( clientNum, snap );
+		}
 	}
 }
 
@@ -199,6 +206,7 @@ static qboolean ModPCSmoothing_RetrieveClientSnap( int clientNum, int time, smoo
 					(float)( next_snap->commandTime - current_snap->commandTime );
 
 			ModPCSmoothing_LerpVector( current_snap->origin, next_snap->origin, lerpFraction, snap->origin );
+			snap->commandTime = time;
 		}
 
 		return qtrue;
@@ -221,7 +229,13 @@ qboolean ModPCSmoothing_Static_ShiftClient( int clientNum, Smoothing_ShiftInfo_t
 		gclient_t *client = &level.clients[clientNum];
 		smoothing_client_t *modclient = &MOD_STATE->clients[clientNum];
 		smoothing_client_snap_t snap;
+		int targetTime;
 
+		// Perform some once-per-server-frame checks here.
+		ModPCSmoothing_CheckTeleport( clientNum );
+		ModPCSmoothing_CheckLiftMove( clientNum );
+
+		// Process dead clients.
 		if ( client->ps.pm_type == PM_DEAD ) {
 			if ( modclient->deadOnMover ) {
 				return qfalse;
@@ -250,7 +264,9 @@ qboolean ModPCSmoothing_Static_ShiftClient( int clientNum, Smoothing_ShiftInfo_t
 			modclient->deadOnMover = qfalse;
 		}
 
-		if ( ModPCSmoothing_RetrieveClientSnap( clientNum, level.time - ModPCSmoothingOffset_Shared_GetOffset( clientNum ), &snap ) ) {
+		// Apply smoothed position to client entity.
+		targetTime = level.time - ModPCSmoothingOffset_Shared_GetOffset( clientNum );
+		if ( ModPCSmoothing_RetrieveClientSnap( clientNum, targetTime, &snap ) ) {
 			qboolean liftMoved = snap.liftCount != modclient->liftCount ? qtrue : qfalse;
 			ModPCSmoothing_ApplyClientSnap( clientNum, &snap, liftMoved );
 			if ( info_out ) {
@@ -258,28 +274,12 @@ qboolean ModPCSmoothing_Static_ShiftClient( int clientNum, Smoothing_ShiftInfo_t
 				VECTORCOPY_INT( snap.maxs, info_out->maxs );
 			}
 
-			ModPCSmoothingDebug_Static_LogFrame( clientNum, snap.commandTime );
+			ModPCSmoothingDebug_Static_LogFrame( clientNum, targetTime, snap.commandTime );
 			return qtrue;
 		}
 	}
 
 	return qfalse;
-}
-
-/*
-==============
-(ModFN) PostPmoveActions
-
-Record client positions after each move fragment.
-==============
-*/
-LOGFUNCTION_SVOID( MOD_PREFIX(PostPmoveActions), ( pmove_t *pmove, int clientNum, int oldEventSequence ),
-		( pmove, clientNum, oldEventSequence ), "G_MODFN_POSTPMOVEACTIONS" ) {
-	MOD_STATE->Prev_PostPmoveActions( pmove, clientNum, oldEventSequence );
-
-	if ( ModPingcomp_Static_SmoothingEnabledForClient( clientNum ) ) {
-		ModPCSmoothing_RecordClientMove( clientNum );
-	}
 }
 
 /*
@@ -297,19 +297,6 @@ LOGFUNCTION_SRET( gentity_t *, MOD_PREFIX(CopyToBodyQue), ( int clientNum ), ( c
 
 /*
 ================
-(ModFN) PostRunFrame
-================
-*/
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) {
-	if ( ModPingcomp_Static_SmoothingEnabled() ) {
-		ModPCSmoothing_CheckLiftMoves();
-	}
-
-	MOD_STATE->Prev_PostRunFrame();
-}
-
-/*
-================
 ModPCSmoothing_Init
 ================
 */
@@ -317,10 +304,9 @@ LOGFUNCTION_VOID( ModPCSmoothing_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		INIT_FN_STACKABLE( PostPmoveActions );
 		INIT_FN_STACKABLE( CopyToBodyQue );
-		INIT_FN_STACKABLE( PostRunFrame );
 
+		ModPlayerMove_Init();	// for ModPCSmoothing_Static_RecordClientMove callback
 		ModPCSmoothingDebug_Init();
 		ModPCSmoothingOffset_Init();
 		ModPCProjectileImpact_Init();

@@ -12,8 +12,8 @@
 #include "mods/features/pingcomp/pc_local.h"
 
 static struct {
-	trackedCvar_t g_unlagged;
-	trackedCvar_t g_smoothClients;
+	trackedCvar_t g_unlagged;	// 0 = disabled, 1 = instant hit only, 2 = all weapons
+	trackedCvar_t g_smoothClients;	// 0 = disabled, 1 = enabled
 } *MOD_STATE;
 
 /*
@@ -51,9 +51,6 @@ ModPingcomp_Static_SmoothingEnabledForClient
 qboolean ModPingcomp_Static_SmoothingEnabledForClient( int clientNum ) {
 	if ( !ModPingcomp_Static_SmoothingEnabled() || !G_IsConnectedClient( clientNum ) ||
 			level.clients[clientNum].pers.connected != CON_CONNECTED || clientNum >= MAX_SMOOTHING_CLIENTS ) {
-		return qfalse;
-	}
-	if ( g_entities[clientNum].r.svFlags & SVF_BOT ) {
 		return qfalse;
 	}
 	return qtrue;

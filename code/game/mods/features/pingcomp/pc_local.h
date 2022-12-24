@@ -47,7 +47,7 @@ typedef struct {
 qboolean ModPCSmoothing_Static_ShiftClient( int clientNum, Smoothing_ShiftInfo_t *info_out );
 
 // Smoothing debug - pc_smoothing_debug.c
-void ModPCSmoothingDebug_Static_LogFrame( int clientNum, int smoothedCommandTime );
+void ModPCSmoothingDebug_Static_LogFrame( int clientNum, int targetTime, int resultTime );
 
 // Smoothing offset calc - pc_smoothing_offset.c
 int ModPCSmoothingOffset_Shared_GetOffset( int clientNum );

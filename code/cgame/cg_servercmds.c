@@ -153,7 +153,7 @@ void CG_ParseModConfig( void ) {
 	for ( i = 0; i < MAX_CONFIGSTRINGS; ++i ) {
 		const char *str = CG_ConfigString( i );
 
-		if ( str[0] == '!' && !Q_stricmpn( str, "!modcfg ", 8 ) && strlen( str ) < BIG_INFO_STRING ) {
+		if ( str[0] == '!' && !Q_stricmpn( str, "!modcfg ", 8 ) && EF_WARN_ASSERT( strlen( str ) < BIG_INFO_STRING ) ) {
 			const char *cur = &str[8];
 
 			// load values

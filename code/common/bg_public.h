@@ -808,10 +808,18 @@ unsigned int BG_PredictableRNG_Rand( predictableRNG_t *rng, int time );
 qboolean VMExt_GVCommand( char *buffer, unsigned int bufferSize, const char *command );
 int VMExt_GVCommandInt( const char *command, int defaultValue );
 
+#ifdef MODULE_UI
 qboolean VMExt_FNAvailable_LAN_ServerStatus_Ext( void );
 int VMExt_FN_LAN_ServerStatus_Ext( const char *serverAddress, char *serverStatus, int maxLen, char *extString, int extLen );
+#endif
+#ifdef MODULE_CGAME
 qboolean VMExt_FNAvailable_AltSwap_SetState( void );
 void VMExt_FN_AltSwap_SetState( qboolean swapState );
+#endif
+#ifdef MODULE_GAME
+qboolean VMExt_FNAvailable_StatusScoresOverride_SetArray( void );
+void VMExt_FN_StatusScoresOverride_SetArray( int *sharedArray, int clientCount );
+#endif
 
 //
 // logging.c

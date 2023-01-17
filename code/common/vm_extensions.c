@@ -99,6 +99,7 @@ static void VMExt_UpdateCachedValue( const char *key, vmext_cached_value_t *outp
 	}
 }
 
+#ifdef MODULE_UI
 static vmext_cached_value_t trap_lan_serverstatus;
 
 /*
@@ -120,7 +121,7 @@ VMExt_FN_LAN_ServerStatus_Ext
 */
 int VMExt_FN_LAN_ServerStatus_Ext( const char *serverAddress, char *serverStatus, int maxLen, char *extString, int extLen ) {
 	VMExt_UpdateCachedValue( "trap_lan_serverstatus_ext", &trap_lan_serverstatus );
-	if ( trap_lan_serverstatus.value ) {
+	if ( EF_WARN_ASSERT( trap_lan_serverstatus.value ) ) {
 		return SYSCALL( trap_lan_serverstatus.value,
 			( const char *serverAddress, char *serverStatus, int maxLen, char *extString, int extLen ),
 			( serverAddress, serverStatus, maxLen, extString, extLen ),
@@ -129,7 +130,9 @@ int VMExt_FN_LAN_ServerStatus_Ext( const char *serverAddress, char *serverStatus
 	}
 	return 0;
 }
+#endif
 
+#ifdef MODULE_CGAME
 static vmext_cached_value_t trap_altswap_set_state;
 
 /*
@@ -153,7 +156,7 @@ Sets whether the engine should swap the alt fire and primary fire buttons.
 */
 void VMExt_FN_AltSwap_SetState( qboolean swapState ) {
 	VMExt_UpdateCachedValue( "trap_altswap_set_state", &trap_altswap_set_state );
-	if ( trap_altswap_set_state.value ) {
+	if ( EF_WARN_ASSERT( trap_altswap_set_state.value ) ) {
 		SYSCALL( trap_altswap_set_state.value,
 			( qboolean swapState ),
 			( swapState ),
@@ -161,6 +164,7 @@ void VMExt_FN_AltSwap_SetState( qboolean swapState ) {
 		);
 	}
 }
+#endif
 
 #ifdef MODULE_GAME
 static vmext_cached_value_t trap_status_scores_override_set_array;

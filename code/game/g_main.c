@@ -830,7 +830,6 @@ void BeginIntermission( void ) {
 	if (!doingLevelshot)
 		SpawnModelsOnVictoryPads();
 
-
 	// move all clients to the intermission point
 	for (i=0 ; i< level.maxclients ; i++) {
 		client = g_entities + i;
@@ -1365,7 +1364,6 @@ G_RunFrame
 Advances the non-player objects in the world
 ================
 */
-void CheckHealthInfoMessage( void );
 void G_RunFrame( int levelTime ) {
 	int			i;
 	gentity_t	*ent;

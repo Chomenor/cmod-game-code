@@ -16,7 +16,7 @@ G_ModsInit
 */
 LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 	// 2 = enable all mods, 1 = only mods from original game, 0 = disable all mods
-	int modsEnabled = G_ModUtils_GetLatchedValue( "g_mods_enabled", "2", 0 );
+	int modsEnabled = G_ModUtils_GetLatchedValue( "g_modsEnabled", "2", 0 );
 
 	// Initialize default mod functions
 #define MOD_FUNCTION_DEF( name, returntype, parameters ) \
@@ -36,8 +36,11 @@ LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 	trap_Cvar_Register( NULL, "g_pModSpecialties", "0", CVAR_SERVERINFO | CVAR_LATCH );
 	trap_Cvar_Register( NULL, "g_pModElimination", "0", CVAR_SERVERINFO | CVAR_LATCH );
 
-	// Default mods
+	// Core mods
 	ModTeamGroups_Init();
+	ModVoting_Init();
+
+	// Default mods
 	if ( modsEnabled >= 2 ) {
 		ModPlayerMove_Init();
 		ModAltSwapHandler_Init();
@@ -45,7 +48,6 @@ LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 		ModSpectPassThrough_Init();
 		ModSpawnProtect_Init();
 		ModBotAdding_Init();
-		ModVoting_Init();
 		ModStatusScores_Init();
 	}
 

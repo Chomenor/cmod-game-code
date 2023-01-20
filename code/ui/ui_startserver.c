@@ -1304,6 +1304,10 @@ static int botSkill_list[] =
 	0
 };
 
+// If sv_maxclients has already been set through advanced server menu, skip the range check
+// when launching server, because it can be incorrect due to factors such as cvar latching
+static qboolean maxClientsSet = qfalse;
+
 
 /*
 =================
@@ -1386,7 +1390,9 @@ static void ServerOptions_Start( void ) {
   // TS 10.12.2001
 	trap_Cvar_Set("g_motd", s_serveroptions.motd.field.buffer );
 
-	trap_Cvar_SetValue( "sv_maxclients", Com_Clamp( 12, 64, trap_Cvar_VariableValue( "sv_maxclients" ) ) );
+	if ( !maxClientsSet ) {
+		trap_Cvar_SetValue( "sv_maxclients", Com_Clamp( 12, 64, trap_Cvar_VariableValue( "sv_maxclients" ) ) );
+	}
 	trap_Cvar_SetValue( "dedicated", Com_Clamp( 0, 2, dedicated ) );
 	trap_Cvar_SetValue ("timelimit", Com_Clamp( 0, timelimit, timelimit ) );
 	trap_Cvar_SetValue ("fraglimit", Com_Clamp( 0, fraglimit, fraglimit ) );
@@ -3281,7 +3287,7 @@ static void AdvancedServer_Update( void)
 	s_advancedserver.nojointimeout.field.titlecolor				= CT_DKGOLD1;
 	s_advancedserver.classchangetimeout.field.titlecolor		= CT_DKGOLD1;
 
-
+	s_advancedserver.errorFlag = 0;
 
 	holdInt	 = atoi( s_advancedserver.repawntime.field.buffer );
 	if ((holdInt < 1) || (holdInt > 60))
@@ -3289,9 +3295,9 @@ static void AdvancedServer_Update( void)
 		s_advancedserver.errorFlag = ERR_RESPAWNTIME;
 		s_advancedserver.repawntime.field.titlecolor	= CT_LTRED1;
 		Menu_SetCursorToItem(&s_advancedserver.menu,&s_advancedserver.repawntime);
-		return;
+	} else {
+		trap_Cvar_SetValue( "g_weaponrespawn", holdInt );
 	}
-	trap_Cvar_SetValue( "g_weaponrespawn", holdInt );
 
 
 	holdInt	 = atoi( s_advancedserver.maxclients.field.buffer );
@@ -3300,9 +3306,10 @@ static void AdvancedServer_Update( void)
 		s_advancedserver.errorFlag = ERR_MAXCLIENTS;
 		s_advancedserver.maxclients.field.titlecolor	= CT_LTRED1;
 		Menu_SetCursorToItem(&s_advancedserver.menu,&s_advancedserver.maxclients);
-		return;
+	} else {
+		trap_Cvar_SetValue( "sv_maxclients", holdInt );
+		maxClientsSet = qtrue;
 	}
-	trap_Cvar_SetValue( "sv_maxclients", holdInt );
 
 
 	holdInt	 = atoi( s_advancedserver.runspeed.field.buffer );
@@ -3311,9 +3318,9 @@ static void AdvancedServer_Update( void)
 		s_advancedserver.errorFlag = ERR_RUNSPEED;
 		s_advancedserver.runspeed.field.titlecolor	= CT_LTRED1;
 		Menu_SetCursorToItem(&s_advancedserver.menu,&s_advancedserver.runspeed);
-		return;
+	} else {
+		trap_Cvar_SetValue( "g_speed", holdInt );
 	}
-	trap_Cvar_SetValue( "g_speed", holdInt );
 
 
 	holdInt	 = atoi( s_advancedserver.gravity.field.buffer );
@@ -3322,9 +3329,9 @@ static void AdvancedServer_Update( void)
 		s_advancedserver.errorFlag = ERR_GRAVITY;
 		s_advancedserver.gravity.field.titlecolor	= CT_LTRED1;
 		Menu_SetCursorToItem(&s_advancedserver.menu,&s_advancedserver.gravity);
-		return;
+	} else {
+		trap_Cvar_SetValue( "g_gravity", holdInt );
 	}
-	trap_Cvar_SetValue( "g_gravity", holdInt );
 
 
 	holdInt	 = atoi( s_advancedserver.knockback.field.buffer );
@@ -3333,9 +3340,9 @@ static void AdvancedServer_Update( void)
 		s_advancedserver.errorFlag = ERR_KNOCKBACK;
 		s_advancedserver.knockback.field.titlecolor	= CT_LTRED1;
 		Menu_SetCursorToItem(&s_advancedserver.menu,&s_advancedserver.knockback);
-		return;
+	} else {
+		trap_Cvar_SetValue( "g_knockback", holdInt );
 	}
-	trap_Cvar_SetValue( "g_knockback", holdInt );
 
 
 	holdFloat	 = atof( s_advancedserver.dmgmult.field.buffer );
@@ -3344,9 +3351,9 @@ static void AdvancedServer_Update( void)
 		s_advancedserver.errorFlag = ERR_DMGMULT;
 		s_advancedserver.dmgmult.field.titlecolor	= CT_LTRED1;
 		Menu_SetCursorToItem(&s_advancedserver.menu,&s_advancedserver.dmgmult);
-		return;
+	} else {
+		trap_Cvar_SetValue( "g_dmgmult", holdFloat );
 	}
-	trap_Cvar_SetValue( "g_dmgmult", holdFloat );
 
 
 	holdInt	 = atoi( s_advancedserver.bot_minplayers.field.buffer );
@@ -3355,9 +3362,9 @@ static void AdvancedServer_Update( void)
 		s_advancedserver.errorFlag = ERR_BOT_MINPLAYERS;
 		s_advancedserver.bot_minplayers.field.titlecolor	= CT_LTRED1;
 		Menu_SetCursorToItem(&s_advancedserver.menu,&s_advancedserver.bot_minplayers);
-		return;
+	} else {
+		trap_Cvar_SetValue( "bot_minplayers", holdInt );
 	}
-	trap_Cvar_SetValue( "bot_minplayers", holdInt );
 
 
 	// Range check on forceplayerrespawn
@@ -3367,9 +3374,9 @@ static void AdvancedServer_Update( void)
 		s_advancedserver.errorFlag = ERR_FORCEPLAYERRESPAWN;
 		s_advancedserver.forceplayerrespawn.field.titlecolor	= CT_LTRED1;
 		Menu_SetCursorToItem(&s_advancedserver.menu,&s_advancedserver.forceplayerrespawn);
-		return;
+	} else {
+		trap_Cvar_SetValue( "g_forcerespawn", holdInt );
 	}
-	trap_Cvar_SetValue( "g_forcerespawn", holdInt );
 
 
 	// Range check on respawnGhostTime
@@ -3379,9 +3386,9 @@ static void AdvancedServer_Update( void)
 		s_advancedserver.errorFlag = ERR_RESPAWNINVULNERABILITY;
 		s_advancedserver.respawninvulnerability.field.titlecolor	= CT_LTRED1;
 		Menu_SetCursorToItem(&s_advancedserver.menu,&s_advancedserver.respawninvulnerability);
-		return;
+	} else {
+		trap_Cvar_SetValue( "g_ghostRespawn", holdInt );
 	}
-	trap_Cvar_SetValue( "g_ghostRespawn", holdInt );
 
 	// Range check on dowarmup
 	holdInt	 = atoi( s_advancedserver.dowarmup.field.buffer );
@@ -3390,20 +3397,17 @@ static void AdvancedServer_Update( void)
 		s_advancedserver.errorFlag = ERR_DOWARMUP;
 		s_advancedserver.dowarmup.field.titlecolor	= CT_LTRED1;
 		Menu_SetCursorToItem(&s_advancedserver.menu,&s_advancedserver.dowarmup);
-		return;
+	} else {
+		if (holdInt == 0)
+		{
+			trap_Cvar_SetValue( "g_dowarmup", holdInt );
+		}
+		else
+		{
+			trap_Cvar_SetValue( "g_dowarmup", 1 );
+			trap_Cvar_SetValue( "g_warmup", holdInt );
+		}
 	}
-
-	if (holdInt == 0)
-	{
-		trap_Cvar_SetValue( "g_dowarmup", holdInt );
-	}
-	else
-	{
-		trap_Cvar_SetValue( "g_dowarmup", 1 );
-		trap_Cvar_SetValue( "g_warmup", holdInt );
-	}
-
-	s_advancedserver.errorFlag = 0;
 
 	holdInt	 = atoi( s_advancedserver.nojointimeout.field.buffer );
 	if ((holdInt < 0) || (holdInt > 600))
@@ -3411,9 +3415,9 @@ static void AdvancedServer_Update( void)
 		s_advancedserver.errorFlag = ERR_NOJOINTIMEOUT;
 		s_advancedserver.nojointimeout.field.titlecolor	= CT_LTRED1;
 		Menu_SetCursorToItem(&s_advancedserver.menu,&s_advancedserver.nojointimeout);
-		return;
+	} else {
+		trap_Cvar_SetValue( "g_nojointimeout", holdInt );
 	}
-	trap_Cvar_SetValue( "g_nojointimeout", holdInt );
 
 
 	holdInt	 = atoi( s_advancedserver.classchangetimeout.field.buffer );
@@ -3422,9 +3426,9 @@ static void AdvancedServer_Update( void)
 		s_advancedserver.errorFlag = ERR_CLASSCHANGETIMEOUT;
 		s_advancedserver.classchangetimeout.field.titlecolor	= CT_LTRED1;
 		Menu_SetCursorToItem(&s_advancedserver.menu,&s_advancedserver.classchangetimeout);
-		return;
+	} else {
+		trap_Cvar_SetValue( "g_classChangeDebounceTime", holdInt );
 	}
-	trap_Cvar_SetValue( "g_classChangeDebounceTime", holdInt );
 
 	s_serveroptions.specialties = s_advancedserver.specialties.curvalue;
 	ServerOptions_MenuInit2();
@@ -3743,6 +3747,23 @@ static void AdvanceServer_MenuDraw (void)
 
 /*
 =================
+AdvanceServer_MenuKey
+=================
+*/
+static sfxHandle_t AdvanceServer_MenuKey (int key)
+{
+	if (key == K_ESCAPE || key == K_MOUSE2)
+	{
+		// Update settings if they are valid, but don't block on error like back button.
+		AdvancedServer_Update();
+		StartServerSetModButtons();
+	}
+
+	return ( Menu_DefaultKey( &s_advancedserver.menu, key ) );
+}
+
+/*
+=================
 UI_AdvancedServerMenu_Init
 =================
 */
@@ -3756,6 +3777,7 @@ static void UI_AdvancedServerMenu_Init(int fromMenu)
 	s_advancedserver.menu.wrapAround				= qtrue;
 	s_advancedserver.menu.fullscreen				= qtrue;
 	s_advancedserver.menu.draw						= AdvanceServer_MenuDraw;
+	s_advancedserver.menu.key						= AdvanceServer_MenuKey;
 	s_advancedserver.menu.fullscreen				= qtrue;
 	s_advancedserver.menu.descX						= MENU_DESC_X;
 	s_advancedserver.menu.descY						= MENU_DESC_Y;

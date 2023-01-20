@@ -1023,7 +1023,7 @@ void UI_BrightnessMenu_Init( void )
 	s_brightness.template_plain.generic.y				= 324;
 	s_brightness.template_plain.generic.name			= GRAPHIC_SQUARE;
 	s_brightness.template_plain.generic.callback		= UI_BrightnessCallback;
-	s_brightness.template_plain.textEnum				= MBT_VIDEO_LIGHTING_PLAIN;
+	s_brightness.template_plain.textEnum				= MBT_VIDEO_LIGHTING_DEFAULT;
 	s_brightness.template_plain.textcolor				= CT_BLACK;
 	s_brightness.template_plain.textcolor2				= CT_WHITE;
 	s_brightness.template_plain.color					= CT_DKORANGE;

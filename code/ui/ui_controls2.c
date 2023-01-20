@@ -3490,7 +3490,6 @@ void M_ControlsMouseJoyStickMenu_Graphics (void)
 
 	trap_R_SetColor( colorTable[CT_LTORANGE]);
 	UI_DrawProportionalString(  MENU_TITLE_X, 440, menu_normal_text[MNT_MOUSEJOYSTICK_SETUP],UI_RIGHT | UI_SMALLFONT, colorTable[CT_LTORANGE]);
-	UI_MenuBottomLineEnd_Graphics (menu_normal_text[MNT_MOUSEJOYSTICK_SETUP],CT_LTBROWN1);
 
 	trap_R_SetColor( colorTable[CT_DKBLUE2]);
 	UI_DrawHandlePic( 235,  166,  377,  20, uis.whiteShader);	// Long thick line above mouse stuff

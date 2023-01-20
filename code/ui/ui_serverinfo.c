@@ -98,7 +98,7 @@ void Favorites_Add( void )
 		}
 
 		// use first empty or non-numeric available slot
-		if ((adrstr[0]  < '0' || adrstr[0] > '9' ) && !best)
+		if (adrstr[0] != '[' && (adrstr[0]  < '0' || adrstr[0] > '9' ) && !best)
 			best = i+1;
 	}
 

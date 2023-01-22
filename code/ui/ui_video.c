@@ -27,6 +27,7 @@ typedef struct {
 	qboolean supportMultisample;
 	qboolean supportVSync;
 	qboolean supportMaxAnisotropy;
+	qboolean supportFramebuffer;
 } videoEngineConfig_t;
 
 static videoEngineConfig_t videoEngineConfig;
@@ -97,6 +98,12 @@ static void UI_InitVideoEngineConfig( void ) {
 
 		if ( freeSlots > 0 ) {
 			videoEngineConfig.anisotropicFilteringVideoMenu = qtrue;
+			--freeSlots;
+		}
+
+		if ( freeSlots > 0 && VMExt_GVCommandInt( "ui_support_cmd_set_framebuffer", 0 ) &&
+				VMExt_GVCommandInt( "ui_support_cmd_get_framebuffer", 0 ) ) {
+			videoEngineConfig.supportFramebuffer = qtrue;
 			--freeSlots;
 		}
 	}
@@ -1337,6 +1344,7 @@ typedef struct {
 	menulist_s		anisotropic;
 	menulist_s		multisample;
 	menulist_s		vsync;
+	menulist_s		framebuffer;
 
 	menuaction_s	apply;
 
@@ -1359,6 +1367,7 @@ typedef struct
 	int compresstextures;
 	int anisotropic;
 	int multisample;
+	int framebuffer;
 	int renderer;
 	int vsync;
 } InitialVideoOptions_s;
@@ -1388,16 +1397,16 @@ static InitialVideoOptions_s s_ivo_templates[NUM_VIDEO_TEMPLATES] =
 static InitialVideoOptions_s s_ivo_modern_templates[NUM_VIDEO_TEMPLATES] =
 {
 	{
-		0, qtrue, 1, 0, 1, 0, 1, 0, 0, qtrue, 0, 0, 0, 0,
+		0, qtrue, 1, 0, 1, 0, 1, 0, 0, qtrue, 0, 0, 0, 0, qfalse,
 	},
 	{
-		1, qtrue, 2, 0, 0, 0, 2, 1, 0, qtrue, 0, 0, 2, 0,
+		1, qtrue, 2, 0, 0, 0, 2, 1, 0, qtrue, 0, 0, 2, 0, qfalse,
 	},
 	{
-		2, qtrue, 3, 0, 2, 2, 2, 1, 0, qtrue, 0, 0, 4, 0,
+		2, qtrue, 3, 0, 2, 2, 2, 1, 0, qtrue, 0, 0, 4, 0, qtrue,
 	},
 	{
-		2, qtrue, 3, 0, 2, 2, 2, 1, 0, qtrue, 0, 0,	4, 2,
+		2, qtrue, 3, 0, 2, 2, 2, 1, 0, qtrue, 0, 0,	4, 2, qtrue,
 	},
 };
 
@@ -1426,7 +1435,8 @@ static void GraphicsOptions_GetInitialVideo( void )
 	s_ivo.renderer    = s_graphicsoptions.renderer.curvalue;
 	s_ivo.anisotropic = s_graphicsoptions.anisotropic.curvalue;
 	s_ivo.multisample = s_graphicsoptions.multisample.curvalue;
-	s_ivo.vsync = s_graphicsoptions.vsync.curvalue;
+	s_ivo.vsync       = s_graphicsoptions.vsync.curvalue;
+	s_ivo.framebuffer = s_graphicsoptions.framebuffer.curvalue;
 }
 
 /*
@@ -1477,6 +1487,9 @@ static qboolean GraphicsOptions_CompareTemplate( InitialVideoOptions_s template 
 	if ( videoEngineConfig.supportMultisample && videoEngineConfig.modern_templates &&
 			template.multisample != s_graphicsoptions.multisample.curvalue )
 		return qfalse;
+	if ( videoEngineConfig.supportFramebuffer && videoEngineConfig.modern_templates &&
+			template.framebuffer != s_graphicsoptions.framebuffer.curvalue )
+		return qfalse;
 	return qtrue;
 }
 
@@ -1503,6 +1516,8 @@ static void GraphicsOptions_ApplyTemplate( const InitialVideoOptions_s *template
 		s_graphicsoptions.anisotropic.curvalue	= ANISOTROPIC_TEMPLATE_VALUE( template->anisotropic );
 	if ( videoEngineConfig.modern_templates )
 		s_graphicsoptions.multisample.curvalue	= template->multisample;
+	if ( videoEngineConfig.modern_templates )
+		s_graphicsoptions.framebuffer.curvalue	= template->framebuffer;
 }
 
 /*
@@ -1662,6 +1677,12 @@ static void GraphicsOptions_UpdateMenuItems( void )
 		s_graphicsoptions.apply.generic.flags |= QMF_BLINK;
 	}
 
+	if ( videoEngineConfig.supportFramebuffer && s_ivo.framebuffer != s_graphicsoptions.framebuffer.curvalue )
+	{
+		s_graphicsoptions.apply.generic.flags &= ~QMF_GRAYED;
+		s_graphicsoptions.apply.generic.flags |= QMF_BLINK;
+	}
+
 	GraphicsOptions_CheckConfig();
 }
 
@@ -1783,6 +1804,10 @@ static void GraphicsOptions_ApplyChanges( void *unused, int notification )
 
 	if ( videoEngineConfig.supportVSync ) {
 		trap_Cvar_Set( "r_swapInterval", s_graphicsoptions.vsync.curvalue ? "1" : "0" );
+	}
+
+	if ( videoEngineConfig.supportFramebuffer ) {
+		VMExt_GVCommandInt( va( "cmd_set_framebuffer %i", s_graphicsoptions.framebuffer.curvalue ? 1 : 0 ), 0 );
 	}
 
 	trap_Cmd_ExecuteText( EXEC_APPEND, "vid_restart\n" );
@@ -1986,6 +2011,10 @@ static void GraphicsOptions_SetMenuItems( void )
 
 	if ( videoEngineConfig.supportVSync ) {
 		s_graphicsoptions.vsync.curvalue = trap_Cvar_VariableValue( "r_swapInterval" ) ? 1 : 0;
+	}
+
+	if ( videoEngineConfig.supportFramebuffer ) {
+		s_graphicsoptions.framebuffer.curvalue = VMExt_GVCommandInt( "cmd_get_framebuffer", 0 ) ? 1 : 0;
 	}
 
 	if ( s_graphicsoptions.fs.curvalue == 0 )
@@ -2507,6 +2536,23 @@ static void VideoData_MenuInit( void )
 		s_graphicsoptions.vsync.width					= width;
 	}
 
+	if ( videoEngineConfig.supportFramebuffer ) {
+		y += inc;
+		s_graphicsoptions.framebuffer.generic.type		= MTYPE_SPINCONTROL;
+		s_graphicsoptions.framebuffer.generic.flags		= QMF_HIGHLIGHT_IF_FOCUS;
+		s_graphicsoptions.framebuffer.generic.x			= x;
+		s_graphicsoptions.framebuffer.generic.y			= y;
+		s_graphicsoptions.framebuffer.textEnum			= MBT_VIDEO_FRAMEBUFFER;
+		s_graphicsoptions.framebuffer.textcolor			= CT_BLACK;
+		s_graphicsoptions.framebuffer.textcolor2		= CT_WHITE;
+		s_graphicsoptions.framebuffer.color				= CT_DKPURPLE1;
+		s_graphicsoptions.framebuffer.color2			= CT_LTPURPLE1;
+		s_graphicsoptions.framebuffer.textX				= 5;
+		s_graphicsoptions.framebuffer.textY				= 2;
+		s_graphicsoptions.framebuffer.listnames			= s_OffOnNone_Names;
+		s_graphicsoptions.framebuffer.width				= width;
+	}
+
 	s_graphicsoptions.apply.generic.type				= MTYPE_ACTION;
 	s_graphicsoptions.apply.generic.flags				= QMF_HIGHLIGHT_IF_FOCUS|QMF_GRAYED;
 	s_graphicsoptions.apply.generic.x					= 501;
@@ -2563,6 +2609,9 @@ static void VideoData_MenuInit( void )
 	}
 	if ( videoEngineConfig.supportVSync ) {
 		Menu_AddItem( &s_videodata.menu, ( void * )&s_graphicsoptions.vsync);
+	}
+	if ( videoEngineConfig.supportFramebuffer ) {
+		Menu_AddItem( &s_videodata.menu, ( void * )&s_graphicsoptions.framebuffer);
 	}
 	Menu_AddItem( &s_videodata.menu, ( void * )&s_graphicsoptions.apply);
 

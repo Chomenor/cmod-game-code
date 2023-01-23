@@ -230,7 +230,7 @@ static int s_graphics_options_Names[NUM_VIDEO_TEMPLATES + 2] =
 
 static int s_graphics_options_modern_Names[NUM_VIDEO_TEMPLATES + 2] =
 {
-	MNT_VIDEO_LOW_QUALITY,
+	MNT_VIDEO_FAST,
 	MNT_VIDEO_MEDIUM_QUALITY,
 	MNT_VIDEO_HIGH_QUALITY,
 	MNT_VIDEO_HIGHEST_QUALITY,
@@ -1397,10 +1397,10 @@ static InitialVideoOptions_s s_ivo_templates[NUM_VIDEO_TEMPLATES] =
 static InitialVideoOptions_s s_ivo_modern_templates[NUM_VIDEO_TEMPLATES] =
 {
 	{
-		0, qtrue, 1, 0, 1, 0, 1, 0, 0, qtrue, 0, 0, 0, 0, qfalse,
+		2, qtrue, 2, 0, 2, 2, 2, 0, 0, qtrue, 0, 0, 0, 0, qfalse,
 	},
 	{
-		1, qtrue, 2, 0, 0, 0, 2, 1, 0, qtrue, 0, 0, 2, 0, qfalse,
+		2, qtrue, 3, 0, 2, 2, 2, 1, 0, qtrue, 0, 0, 2, 0, qfalse,
 	},
 	{
 		2, qtrue, 3, 0, 2, 2, 2, 1, 0, qtrue, 0, 0, 4, 0, qtrue,

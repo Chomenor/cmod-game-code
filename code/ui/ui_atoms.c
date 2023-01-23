@@ -2103,8 +2103,7 @@ void UI_LoadMenuText()
 	menu_normal_text[MNT_BROWSER_SCAN_PROGRESS] = "Scanning %d of %d Servers...";
 	menu_normal_text[MNT_BROWSER_INTERNET_ALL] = "INTERNET-ALL";
 	menu_normal_text[MNT_VIDEO_ADDITIONAL_OPTIONS] = "Additional Options";
-	menu_normal_text[MNT_VIDEO_LOW_QUALITY] = "LOW QUALITY";
-	menu_normal_text[MNT_VIDEO_MEDIUM_QUALITY] = "MEDIUM QUALITY";
+	menu_normal_text[MNT_VIDEO_MEDIUM_QUALITY] = "MEDIUM";
 	menu_normal_text[MNT_VIDEO_HIGHEST_QUALITY] = "HIGHEST QUALITY";
 	menu_normal_text[MNT_VIDEO_RENDERER_OPENGL1] = "OPENGL1";
 	menu_normal_text[MNT_VIDEO_RENDERER_OPENGL2] = "OPENGL2";
@@ -2140,8 +2139,7 @@ void UI_LoadMenuText()
 		menu_normal_text[MNT_BROWSER_SCAN_PROGRESS] = "Scannen von %d von %d Servern...";
 		menu_normal_text[MNT_BROWSER_INTERNET_ALL] = "INTERNET-ALLES";
 		menu_normal_text[MNT_VIDEO_ADDITIONAL_OPTIONS] = "Zusätzliche Optionen";
-		menu_normal_text[MNT_VIDEO_LOW_QUALITY] = "GERINGE QUALITÄT";
-		menu_normal_text[MNT_VIDEO_MEDIUM_QUALITY] = "MITTLERE QUALITÄT";
+		menu_normal_text[MNT_VIDEO_MEDIUM_QUALITY] = "MITTEL";
 		menu_normal_text[MNT_VIDEO_HIGHEST_QUALITY] = "HÖCHSTE QUALITÄT";
 		menu_normal_text[MNT_ALTSWAP_SWAPPED] = "INVERTIERT";
 		menu_normal_text[MNT_ALTSWAP_AUTO] = "AUTOMATISCH";
@@ -2186,8 +2184,7 @@ void UI_LoadMenuText()
 		menu_normal_text[MNT_BROWSER_SCAN_PROGRESS] = "Analyse de %d des %d serveurs...";
 		menu_normal_text[MNT_BROWSER_INTERNET_ALL] = "INTERNET-TOUT";
 		menu_normal_text[MNT_VIDEO_ADDITIONAL_OPTIONS] = "Options supplémentaires";
-		menu_normal_text[MNT_VIDEO_LOW_QUALITY] = "BASSE QUALITÉ";
-		menu_normal_text[MNT_VIDEO_MEDIUM_QUALITY] = "QUALITÉ MOYENNE";
+		menu_normal_text[MNT_VIDEO_MEDIUM_QUALITY] = "MOYENNE";
 		menu_normal_text[MNT_VIDEO_HIGHEST_QUALITY] = "MEILLEURE QUALITÉ";
 		menu_normal_text[MNT_ALTSWAP_STANDARD] = "LA NORME";
 		menu_normal_text[MNT_ALTSWAP_SWAPPED] = "INVERSÉ";

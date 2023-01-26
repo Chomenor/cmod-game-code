@@ -1249,7 +1249,6 @@ typedef struct
 {
 	menucommon_s generic;
 
-	int	oldvalue;
 	int curvalue;
 	int	numitems;
 	int	top;

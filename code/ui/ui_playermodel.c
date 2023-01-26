@@ -329,6 +329,20 @@ static sfxHandle_t PlayerModel_MenuKey( int key )
 		case K_ESCAPE:
 			PlayerModel_SaveChanges();
 			break;
+
+		case K_MWHEELUP:
+			if ( s_playermodel.modelpage > 0 ) {
+				s_playermodel.modelpage--;
+				PlayerModel_UpdateGrid();
+			}
+			return menu_null_sound;
+
+		case K_MWHEELDOWN:
+			if ( s_playermodel.modelpage < s_playermodel.numpages - 1 ) {
+				s_playermodel.modelpage++;
+				PlayerModel_UpdateGrid();
+			}
+			return menu_null_sound;
 	}
 
 	return ( Menu_DefaultKey( &s_playermodel.menu, key ) );

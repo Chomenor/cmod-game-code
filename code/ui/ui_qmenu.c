@@ -1443,7 +1443,6 @@ static void ScrollList_Init( menulist_s *l )
 {
 	int		w;
 
-	l->oldvalue = 0;
 	l->curvalue = 0;
 	l->top      = 0;
 
@@ -1470,6 +1469,25 @@ static void ScrollList_Init( menulist_s *l )
 
 /*
 =================
+ScrollList_OrientView
+
+Shift scroll list view position if necessary to show current selected item.
+Currently only supports 1 column scroll lists.
+=================
+*/
+static void ScrollList_OrientView( menulist_s *l ) {
+	if ( l->columns == 1 ) {
+		if ( l->top > l->curvalue ) {
+			l->top = l->curvalue;
+		}
+		if ( l->top < l->curvalue - l->height + 1 ) {
+			l->top = l->curvalue - l->height + 1;
+		}
+	}
+}
+
+/*
+=================
 ScrollList_Key
 =================
 */
@@ -1485,6 +1503,7 @@ sfxHandle_t ScrollList_Key( menulist_s *l, int key )
 	int	cursory;
 	int	column;
 	int	index;
+	int oldvalue;
 
 	switch (key)
 	{
@@ -1506,10 +1525,10 @@ sfxHandle_t ScrollList_Key( menulist_s *l, int key )
 					index = column * l->height + cursory;
 					if (l->top + index < l->numitems)
 					{
-						l->oldvalue = l->curvalue;
+						oldvalue = l->curvalue;
 						l->curvalue = l->top + index;
 
-						if (l->oldvalue != l->curvalue && l->generic.callback)
+						if (oldvalue != l->curvalue && l->generic.callback)
 						{
 							l->generic.callback( l, QM_GOTFOCUS );
 							return (menu_move_sound);
@@ -1524,11 +1543,11 @@ sfxHandle_t ScrollList_Key( menulist_s *l, int key )
 
 		case K_KP_HOME:
 		case K_HOME:
-			l->oldvalue = l->curvalue;
+			oldvalue = l->curvalue;
 			l->curvalue = 0;
 			l->top      = 0;
 
-			if (l->oldvalue != l->curvalue && l->generic.callback)
+			if (oldvalue != l->curvalue && l->generic.callback)
 			{
 				l->generic.callback( l, QM_GOTFOCUS );
 				return (menu_move_sound);
@@ -1537,7 +1556,7 @@ sfxHandle_t ScrollList_Key( menulist_s *l, int key )
 
 		case K_KP_END:
 		case K_END:
-			l->oldvalue = l->curvalue;
+			oldvalue = l->curvalue;
 			l->curvalue = l->numitems-1;
 			if( l->columns > 1 ) {
 				c = (l->curvalue / l->height + 1) * l->height;
@@ -1549,7 +1568,9 @@ sfxHandle_t ScrollList_Key( menulist_s *l, int key )
 			if (l->top < 0)
 				l->top = 0;
 
-			if (l->oldvalue != l->curvalue && l->generic.callback)
+			ScrollList_OrientView( l );
+
+			if (oldvalue != l->curvalue && l->generic.callback)
 			{
 				l->generic.callback( l, QM_GOTFOCUS );
 				return (menu_move_sound);
@@ -1564,19 +1585,17 @@ sfxHandle_t ScrollList_Key( menulist_s *l, int key )
 
 			if (l->curvalue > 0)
 			{
-				l->oldvalue = l->curvalue;
 				l->curvalue -= l->height-1;
 				if (l->curvalue < 0)
 					l->curvalue = 0;
-				l->top = l->curvalue;
-				if (l->top < 0)
-					l->top = 0;
 
 				if (l->generic.callback)
 					l->generic.callback( l, QM_GOTFOCUS );
 
+				ScrollList_OrientView( l );
 				return (menu_move_sound);
 			}
+			ScrollList_OrientView( l );
 			return (menu_buzz_sound);
 
 		case K_PGDN:
@@ -1587,35 +1606,30 @@ sfxHandle_t ScrollList_Key( menulist_s *l, int key )
 
 			if (l->curvalue < l->numitems-1)
 			{
-				l->oldvalue = l->curvalue;
 				l->curvalue += l->height-1;
 				if (l->curvalue > l->numitems-1)
 					l->curvalue = l->numitems-1;
-				l->top = l->curvalue - (l->height-1);
-				if (l->top < 0)
-					l->top = 0;
 
 				if (l->generic.callback)
 					l->generic.callback( l, QM_GOTFOCUS );
 
+				ScrollList_OrientView( l );
 				return (menu_move_sound);
 			}
+			ScrollList_OrientView( l );
 			return (menu_buzz_sound);
 
 		case K_KP_UPARROW:
 		case K_UPARROW:
 			if( l->curvalue == 0 ) {
+				ScrollList_OrientView( l );
 				return menu_buzz_sound;
 			}
 
-			l->oldvalue = l->curvalue;
 			l->curvalue--;
 
 			if( l->curvalue < l->top ) {
-				if( l->columns == 1 ) {
-					l->top--;
-				}
-				else {
+				if( l->columns != 1 ) {
 					l->top -= l->height;
 				}
 			}
@@ -1624,22 +1638,20 @@ sfxHandle_t ScrollList_Key( menulist_s *l, int key )
 				l->generic.callback( l, QM_GOTFOCUS );
 			}
 
+			ScrollList_OrientView( l );
 			return (menu_move_sound);
 
 		case K_KP_DOWNARROW:
 		case K_DOWNARROW:
 			if( l->curvalue == l->numitems - 1 ) {
+				ScrollList_OrientView( l );
 				return menu_buzz_sound;
 			}
 
-			l->oldvalue = l->curvalue;
 			l->curvalue++;
 
 			if( l->curvalue >= l->top + l->columns * l->height ) {
-				if( l->columns == 1 ) {
-					l->top++;
-				}
-				else {
+				if( l->columns != 1 ) {
 					l->top += l->height;
 				}
 			}
@@ -1648,6 +1660,7 @@ sfxHandle_t ScrollList_Key( menulist_s *l, int key )
 				l->generic.callback( l, QM_GOTFOCUS );
 			}
 
+			ScrollList_OrientView( l );
 			return menu_move_sound;
 
 		case K_KP_LEFTARROW:
@@ -1660,7 +1673,6 @@ sfxHandle_t ScrollList_Key( menulist_s *l, int key )
 				return menu_buzz_sound;
 			}
 
-			l->oldvalue = l->curvalue;
 			l->curvalue -= l->height;
 
 			if( l->curvalue < l->top ) {
@@ -1685,7 +1697,6 @@ sfxHandle_t ScrollList_Key( menulist_s *l, int key )
 				return menu_buzz_sound;
 			}
 
-			l->oldvalue = l->curvalue;
 			l->curvalue = c;
 
 			if( l->curvalue > l->top + l->columns * l->height - 1 ) {
@@ -1697,6 +1708,18 @@ sfxHandle_t ScrollList_Key( menulist_s *l, int key )
 			}
 
 			return menu_move_sound;
+
+		case K_MWHEELUP:
+			if ( l->columns == 1 && l->top > 0 ) {
+				l->top--;
+			}
+			return menu_null_sound;
+
+		case K_MWHEELDOWN:
+			if ( l->columns == 1 && l->top < l->numitems - l->height ) {
+				l->top++;
+			}
+			return menu_null_sound;
 	}
 
 	// cycle look for ascii key inside list items
@@ -1735,7 +1758,6 @@ sfxHandle_t ScrollList_Key( menulist_s *l, int key )
 
 			if (l->curvalue != j)
 			{
-				l->oldvalue = l->curvalue;
 				l->curvalue = j;
 				if (l->generic.callback)
 					l->generic.callback( l, QM_GOTFOCUS );

@@ -182,7 +182,6 @@ sfxHandle_t UI_TeamOrdersMenu_Key( int key ) {
 			y = l->generic.top;
 			if( UI_CursorInRect( x, y, l->generic.right - x, l->generic.bottom - y ) ) {
 				index = (uis.cursory - y) / PROP_HEIGHT;
-				l->oldvalue = l->curvalue;
 				l->curvalue = index;
 
 				if( l->generic.callback ) {
@@ -194,8 +193,6 @@ sfxHandle_t UI_TeamOrdersMenu_Key( int key ) {
 
 		case K_KP_UPARROW:
 		case K_UPARROW:
-			l->oldvalue = l->curvalue;
-
 			if( l->curvalue == 0 ) {
 				l->curvalue = l->numitems - 1;
 			}
@@ -206,8 +203,6 @@ sfxHandle_t UI_TeamOrdersMenu_Key( int key ) {
 
 		case K_KP_DOWNARROW:
 		case K_DOWNARROW:
-			l->oldvalue = l->curvalue;
-
 			if( l->curvalue == l->numitems - 1 ) {
 				l->curvalue = 0;;
 			}

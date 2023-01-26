@@ -2,7 +2,7 @@
 //
 #include "ui_local.h"
 
-#define	MAX_VIDEODRIVER_LINES	20
+#define	MAX_SERVERINFO_LINES	20
 
 #define ID_ADD			100
 #define ID_MAINMENU		101
@@ -61,8 +61,8 @@ typedef struct
 	menutext_s		value18;
 	menutext_s		value19;
 	menutext_s		value20;
-	char			key[MAX_VIDEODRIVER_LINES][MAX_INFO_KEY];
-	char			value[MAX_VIDEODRIVER_LINES][MAX_INFO_VALUE];
+	char			key[MAX_SERVERINFO_LINES][MAX_INFO_KEY];
+	char			value[MAX_SERVERINFO_LINES][MAX_INFO_VALUE];
 } serverinfo_t;
 
 static serverinfo_t	s_serverinfo;
@@ -106,6 +106,31 @@ void Favorites_Add( void )
 		trap_Cvar_Set( va("server%d",best), serverbuff);
 }
 
+/*
+=================
+ServerInfo_Scroll
+
+Moves view up or down. Shift can be negative for number of lines up, positive for number of lines down,
+or 0 to just update enabled buttons.
+=================
+*/
+static void ServerInfo_Scroll( int shift ) {
+	s_serverinfo.lineStartCnt += shift;
+	s_serverinfo.arrowdwn.generic.flags &= ~( QMF_HIDDEN | QMF_INACTIVE );
+	s_serverinfo.arrowup.generic.flags &= ~( QMF_HIDDEN | QMF_INACTIVE );
+
+	if ( s_serverinfo.lineStartCnt >= s_serverinfo.lineCnt - MAX_SERVERINFO_LINES ) {
+		s_serverinfo.lineStartCnt = s_serverinfo.lineCnt - MAX_SERVERINFO_LINES;
+		s_serverinfo.arrowdwn.generic.flags |= ( QMF_HIDDEN | QMF_INACTIVE );
+	}
+
+	if ( s_serverinfo.lineStartCnt <= 0 ) {
+		s_serverinfo.lineStartCnt = 0;
+		s_serverinfo.arrowup.generic.flags |= ( QMF_HIDDEN | QMF_INACTIVE );
+	}
+
+	ServerInfo_LinePrep();
+}
 
 /*
 =================
@@ -132,40 +157,16 @@ static void ServerInfo_Event( void* ptr, int event )
 			break;
 
 		case ID_ARROWUP:
-			if (event != QM_ACTIVATED)
-				break;
-			s_serverinfo.lineStartCnt--;
-			if (s_serverinfo.lineStartCnt>=0)
-			{
-				ServerInfo_LinePrep();
-				s_serverinfo.arrowdwn.generic.flags &= ~QMF_HIDDEN;
-				s_serverinfo.arrowdwn.generic.flags &= ~QMF_INACTIVE;
-			}
-			else
-			{
-				s_serverinfo.arrowup.generic.flags |= QMF_HIDDEN|QMF_INACTIVE;
-				s_serverinfo.lineStartCnt=0;
+			if ( event == QM_ACTIVATED ) {
+				ServerInfo_Scroll( -1 );
 			}
 			break;
 
 		case ID_ARROWDWN:
-			if (event != QM_ACTIVATED)
-				break;
-			s_serverinfo.lineStartCnt++;
-			if ((s_serverinfo.lineStartCnt + MAX_VIDEODRIVER_LINES)  <=s_serverinfo.lineCnt)
-			{
-				ServerInfo_LinePrep();
-				s_serverinfo.arrowup.generic.flags &= ~QMF_HIDDEN;
-				s_serverinfo.arrowup.generic.flags &= ~QMF_INACTIVE;
-			}
-			else
-			{
-				s_serverinfo.arrowdwn.generic.flags |= QMF_HIDDEN|QMF_INACTIVE;
-
-				s_serverinfo.lineStartCnt = s_serverinfo.lineCnt - MAX_VIDEODRIVER_LINES;
+			if ( event == QM_ACTIVATED ) {
+				ServerInfo_Scroll( 1 );
 			}
 			break;
-
 	}
 }
 
@@ -228,7 +229,7 @@ static void ServerInfo_LinePrep( void)
 
 		Q_strcat( key, MAX_INFO_KEY, ":" );
 
-		if ((s_serverinfo.lineStartCnt <= s_serverinfo.lineCnt) && (i < MAX_VIDEODRIVER_LINES))
+		if ((s_serverinfo.lineStartCnt <= s_serverinfo.lineCnt) && (i < MAX_SERVERINFO_LINES))
 		{
 			Q_strncpyz(s_serverinfo.key[i], key, sizeof(key));
 			Q_strncpyz(s_serverinfo.value[i], value, sizeof(value));
@@ -246,6 +247,16 @@ ServerInfo_MenuKey
 */
 static sfxHandle_t ServerInfo_MenuKey( int key )
 {
+	if ( key == K_MWHEELUP ) {
+		ServerInfo_Scroll( -1 );
+		return menu_null_sound;
+	}
+
+	if ( key == K_MWHEELDOWN ) {
+		ServerInfo_Scroll( 1 );
+		return menu_null_sound;
+	}
+
 	return ( Menu_DefaultKey( &s_serverinfo.menu, key ) );
 }
 
@@ -370,7 +381,7 @@ static void UI_ServerInfoMenu_Init(void)
 	hold_value = &s_serverinfo.value1;
 	y = 62;
 	x = SCREEN_WIDTH*0.50;
-	for (i=0;i<MAX_VIDEODRIVER_LINES;i++)
+	for (i=0;i<MAX_SERVERINFO_LINES;i++)
 	{
 		hold_key->generic.x				= x-8;
 		hold_key->generic.y				= y;
@@ -405,10 +416,11 @@ static void UI_ServerInfoMenu_Init(void)
 
 	trap_GetConfigString( CS_SERVERINFO, s_serverinfo.info, MAX_INFO_STRING );
 
+	// set s_serverinfo.lineCnt
 	ServerInfo_LinePrep();
 
-	s_serverinfo.arrowup.generic.flags |= QMF_HIDDEN|QMF_INACTIVE;
-
+	// set button hidden flags
+	ServerInfo_Scroll( 0 );
 }
 
 /*

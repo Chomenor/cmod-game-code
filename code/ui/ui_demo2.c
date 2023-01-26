@@ -13,7 +13,8 @@ DEMOS MENU
 
 // Number of demos in the list
 #define MAX_DEMODISP 12
-#define SCROLL_SPEED MAX_DEMODISP
+#define BUTTON_SCROLL_SPEED MAX_DEMODISP
+#define MOUSE_SCROLL_SPEED 3
 #define MAX_DEMONAMELEN 48
 
 #define MAX_DEMOS			1024
@@ -225,6 +226,25 @@ static void Demos_MenuDraw (void)
 	Menu_Draw( &s_demos.menu );
 }
 
+/*
+=================
+UI_DemosMenu_Scroll
+
+Moves view up or down. Shift can be negative for number of lines up, or positive for number of lines down.
+=================
+*/
+static void UI_DemosMenu_Scroll( int shift ) {
+	s_demos.currentDemoIndex += shift;
+
+	if ( s_demos.currentDemoIndex > s_demos.numDemos - MAX_DEMODISP ) {
+		s_demos.currentDemoIndex = s_demos.numDemos - MAX_DEMODISP;
+	}
+	if ( s_demos.currentDemoIndex < 0 ) {
+		s_demos.currentDemoIndex = 0;
+	}
+
+	DemoMenu_PopulateList( s_demos.currentDemoIndex );
+}
 
 /*
 ===============
@@ -242,27 +262,12 @@ static void Demos_MenuEvent( void *ptr, int event )
 
 	switch( ((menucommon_s*)ptr)->id )
 	{
-
 		case ID_UP:
-			s_demos.currentDemoIndex -= SCROLL_SPEED;
-
-			if ( s_demos.currentDemoIndex < 0 )
-				s_demos.currentDemoIndex = 0;
-
-			DemoMenu_PopulateList( s_demos.currentDemoIndex );
+			UI_DemosMenu_Scroll( -BUTTON_SCROLL_SPEED );
 			break;
 
 		case ID_DOWN:
-			s_demos.currentDemoIndex += SCROLL_SPEED;
-
-			//TiM - cap it when the final entry comes into view
-			if ( s_demos.numDemos > MAX_DEMODISP
-				&& ( s_demos.currentDemoIndex + MAX_DEMODISP ) > s_demos.numDemos )
-			{
-				s_demos.currentDemoIndex = s_demos.numDemos-MAX_DEMODISP;
-			}
-
-			DemoMenu_PopulateList( s_demos.currentDemoIndex );
+			UI_DemosMenu_Scroll( BUTTON_SCROLL_SPEED );
 			break;
 
 		case ID_DEMOCOMMENT1:
@@ -306,9 +311,15 @@ UI_DemosMenu_Key
 */
 static sfxHandle_t UI_DemosMenu_Key( int key )
 {
-	menucommon_s	*item;
+	if ( key == K_MWHEELUP ) {
+		UI_DemosMenu_Scroll( -MOUSE_SCROLL_SPEED );
+		return menu_null_sound;
+	}
 
-	item = Menu_ItemAtCursor( &s_demos.menu );
+	if ( key == K_MWHEELDOWN ) {
+		UI_DemosMenu_Scroll( MOUSE_SCROLL_SPEED );
+		return menu_null_sound;
+	}
 
 	return Menu_DefaultKey( &s_demos.menu, key );
 }

@@ -766,6 +766,32 @@ void UI_SPLevelMenu_Cache( void )
 
 }
 
+/*
+=================
+UI_SPLevelMenu_MenuKey
+=================
+*/
+static sfxHandle_t UI_SPLevelMenu_MenuKey( int key ) {
+	if ( key == K_MWHEELUP ) {
+		if ( selectedArenaSet > minTier ) {
+			selectedArena = 0;
+			selectedArenaSet--;
+			UI_SPLevelMenu_SetMenuItems();
+		}
+		return menu_null_sound;
+	}
+
+	if ( key == K_MWHEELDOWN ) {
+		if ( selectedArenaSet < maxTier ) {
+			selectedArena = 0;
+			selectedArenaSet++;
+			UI_SPLevelMenu_SetMenuItems();
+		}
+		return menu_null_sound;
+	}
+
+	return Menu_DefaultKey( &levelMenuInfo.menu, key );
+}
 
 /*
 =================
@@ -793,6 +819,7 @@ static void UI_SPLevelMenu_Init( void )
 	levelMenuInfo.menu.fullscreen					= qtrue;
 	levelMenuInfo.menu.wrapAround					= qtrue;
 	levelMenuInfo.menu.draw							= UI_SPLevelMenu_MenuDraw;
+	levelMenuInfo.menu.key							= UI_SPLevelMenu_MenuKey;
 	levelMenuInfo.menu.descX						= MENU_DESC_X;
 	levelMenuInfo.menu.descY						= MENU_DESC_Y;
 	levelMenuInfo.menu.titleX						= MENU_TITLE_X;

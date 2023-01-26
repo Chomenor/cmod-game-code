@@ -465,6 +465,20 @@ BrowserServerInfo_MenuKey
 */
 static sfxHandle_t BrowserServerInfo_MenuKey( int key )
 {
+	if ( key == K_MWHEELUP ) {
+		if ( s_browserserverinfo.lineStartCnt > 0 ) {
+			s_browserserverinfo.lineStartCnt--;
+		}
+		return menu_null_sound;
+	}
+
+	if ( key == K_MWHEELDOWN ) {
+		if ( s_browserserverinfo.lineStartCnt < s_browserserverinfo.lineCnt - MAX_SERVERINFO_LINES ) {
+			s_browserserverinfo.lineStartCnt++;
+		}
+		return menu_null_sound;
+	}
+
 	return ( Menu_DefaultKey( &s_browserserverinfo.menu, key ) );
 }
 

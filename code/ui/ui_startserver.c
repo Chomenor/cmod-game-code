@@ -725,6 +725,36 @@ static void StartServer_MenuDraw( void )
 
 /*
 =================
+StartServer_MenuKey
+=================
+*/
+static sfxHandle_t StartServer_MenuKey( int key ) {
+	// limit to 1 scroll per frame, just to be safe
+	static int lastScroll;
+
+	if ( key == K_MWHEELUP ) {
+		if ( s_startserver.page > 0 && lastScroll != uis.realtime ) {
+			s_startserver.page--;
+			StartServer_LoadPage();
+			lastScroll = uis.realtime;
+		}
+		return menu_null_sound;
+	}
+
+	if ( key == K_MWHEELDOWN && lastScroll != uis.realtime ) {
+		if ( ( s_startserver.page + 1 ) * MAX_MAPSPERPAGE < s_startserver.msr.totalMaps && lastScroll != uis.realtime ) {
+			s_startserver.page++;
+			StartServer_LoadPage();
+			lastScroll = uis.realtime;
+		}
+		return menu_null_sound;
+	}
+
+	return Menu_DefaultKey( &s_startserver.menu, key );
+}
+
+/*
+=================
 StartServer_MenuInit
 =================
 */
@@ -744,6 +774,7 @@ static void StartServer_MenuInit(int multiplayer) {
 	s_startserver.menu.wrapAround = qtrue;
 	s_startserver.menu.fullscreen = qtrue;
 	s_startserver.menu.draw							= StartServer_MenuDraw;
+	s_startserver.menu.key							= StartServer_MenuKey;
 	s_startserver.menu.descX						= MENU_DESC_X;
 	s_startserver.menu.descY						= MENU_DESC_Y;
 	s_startserver.menu.titleX						= MENU_TITLE_X;

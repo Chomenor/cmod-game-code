@@ -2178,6 +2178,11 @@ char *CG_FindIgnore(char *ignores, char *findentry, int substring)
 	char *ignored = ignores, *end;
 	int foundcount = 0, iglen = strlen(findentry);
 
+	if ( !*findentry ) {
+		// shouldn't happen
+		return NULL;
+	}
+
 	while(ignored = Q_strstr(ignored, findentry))
 	{
 		// find the end of the entry
@@ -2233,7 +2238,7 @@ qboolean CG_IsIgnored(char *testnick)
 	char tnick[sizeof(cgs.clientinfo[0].name)];
 
 	Q_strncpyz(tnick, testnick, sizeof(tnick));
-	Q_StripColor(tnick);
+	//Q_StripColor(tnick);
 
 	trap_Cvar_VariableStringBuffer(IGNORE_CVARNAME, ignores, sizeof(ignores));
 

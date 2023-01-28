@@ -141,7 +141,7 @@ static void CG_Ignore_f(void)
 
 	if(*clientName)
 	{
-		Q_StripColor(clientName);
+		//Q_StripColor(clientName);
 
 		// user specified in console which nick to ignore
 		for(curclient = cgs.clientinfo; (curclient - cgs.clientinfo) < MAX_CLIENTS; curclient++)
@@ -150,7 +150,7 @@ static void CG_Ignore_f(void)
 				continue;
 
 			Q_strncpyz(tname, curclient->name, sizeof(tname));
-			Q_StripColor(tname);
+			//Q_StripColor(tname);
 
 			if((!substring && !Q_stricmp(tname, clientName)) || (substring && Q_strstr(tname, clientName)))
 			{
@@ -172,7 +172,7 @@ static void CG_Ignore_f(void)
 			curclient->ignore = qtrue;
 
 			Q_strncpyz(tname, curclient->name, sizeof(tname));
-			Q_StripColor(tname);
+			//Q_StripColor(tname);
 
 			if(CG_AddIgnore(tname))
 				Com_Printf("Ignoring player %s\n", tname);
@@ -196,7 +196,7 @@ static void CG_Unignore_f(void)
 
 	if(*clientName)
 	{
-		Q_StripColor(clientName);
+		//Q_StripColor(clientName);
 
 		// user specified in console which nick to ignore
 		for(curclient = cgs.clientinfo; (curclient - cgs.clientinfo) < MAX_CLIENTS; curclient++)
@@ -205,7 +205,7 @@ static void CG_Unignore_f(void)
 				continue;
 
 			Q_strncpyz(tname, curclient->name, sizeof(tname));
-			Q_StripColor(tname);
+			//Q_StripColor(tname);
 
 			if((!substring && !Q_stricmp(tname, clientName)) || (substring && Q_strstr(tname, clientName)))
 				curclient->ignore = qfalse;
@@ -222,7 +222,7 @@ static void CG_Unignore_f(void)
 			curclient->ignore = qfalse;
 
 			Q_strncpyz(tname, curclient->name, sizeof(tname));
-			Q_StripColor(tname);
+			//Q_StripColor(tname);
 
 			CG_DelIgnore(tname, 0);
 		}

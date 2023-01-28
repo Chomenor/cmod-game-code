@@ -2136,8 +2136,8 @@ CG_DrawCrosshairNames
 */
 static void CG_DrawCrosshairNames( void ) {
 	float		*color;
-	char		name[MAX_NAME_LENGTH];
 	int			team;
+	int			nameFlags = UI_CENTER|UI_SMALLFONT;
 
 	if ( !cg_drawCrosshair.integer )
 	{
@@ -2165,12 +2165,10 @@ static void CG_DrawCrosshairNames( void ) {
 
 	color[3] *= 0.9;
 
-	Q_strncpyz (name, cgs.clientinfo[ cg.crosshairClientNum ].name, sizeof (name) );
-
 	// Draw in red if red team, blue if blue team
 	if (cgs.gametype >= GT_TEAM)
 	{
-		Q_CleanStr(name);
+		nameFlags |= UI_FORCECOLOR;
 		team = cgs.clientinfo[ cg.crosshairClientNum ].team;
 		if ( cgs.clientinfo[ cg.crosshairClientNum ].pClass == PC_BORG )
 		{
@@ -2198,7 +2196,7 @@ static void CG_DrawCrosshairNames( void ) {
 		color[2] = colorTable[CT_YELLOW][2];
 	}
 
-	UI_DrawProportionalString(320,170,name,UI_CENTER|UI_SMALLFONT,color);
+	UI_DrawProportionalString(320,170, cgs.clientinfo[ cg.crosshairClientNum ].name, nameFlags, color);
 
 	//FIXME: need health (&armor?) of teammates (if not TEAM_FREE) or everyone (if SPECTATOR) (or just crosshairEnt?) sent to me
 	if ( (cgs.clientinfo[ cg.snap->ps.clientNum ].team == TEAM_SPECTATOR || cgs.clientinfo[ cg.snap->ps.clientNum ].pClass == PC_MEDIC) )

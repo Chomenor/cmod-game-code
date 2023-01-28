@@ -389,18 +389,17 @@ int UI_ProportionalStringWidth( const char* str,int style )
 	int				ch;
 	int				charWidth;
 	int				width;
-	char			holdStr[2048];
-
-	Q_strncpyz( holdStr, str, MAX_STRINGWIDTH );
-
-	Q_CleanStr(holdStr);
 
 	if (style & UI_TINYFONT)
 	{
-		s = holdStr;
+		s = str;
 		width = 0;
 		while ( *s )
 		{
+			if ( Q_IsColorString( s ) ) {
+				s += 2;
+				continue;
+			}
 			ch = *s & 255;
 			charWidth = propMapTiny[ch][2];
 			if ( charWidth != -1 )
@@ -415,10 +414,14 @@ int UI_ProportionalStringWidth( const char* str,int style )
 	}
 	else if (style & UI_BIGFONT)
 	{
-		s = holdStr;
+		s = str;
 		width = 0;
 		while ( *s )
 		{
+			if ( Q_IsColorString( s ) ) {
+				s += 2;
+				continue;
+			}
 			ch = *s & 255;
 			charWidth = propMapBig[ch][2];
 			if ( charWidth != -1 )
@@ -433,10 +436,14 @@ int UI_ProportionalStringWidth( const char* str,int style )
 	}
 	else
 	{
-		s = holdStr;
+		s = str;
 		width = 0;
 		while ( *s )
 		{
+			if ( Q_IsColorString( s ) ) {
+				s += 2;
+				continue;
+			}
 			ch = *s & 255;
 			charWidth = propMap[ch][2];
 			if ( charWidth != -1 )
@@ -597,7 +604,13 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 			}
 
 			ch = *s & 255;
-			if ( ch == ' ' )
+			if ( ch == '\v' ) {
+				// Special case for "flag" character
+				aw = (float)propMapTiny[ch][2] * sizeScale;
+				AspectCorrect_DrawAdjustedStretchPic( ax, ay, aw + (float)PROP_GAP_TINY_WIDTH * sizeScale,
+						PROP_TINY_HEIGHT * sizeScale, 0, 0, 1, 1, cgs.media.whiteShader );
+			}
+			else if ( ch == ' ' )
 			{
 				aw = (float)PROP_SPACE_TINY_WIDTH;
 			}
@@ -640,7 +653,13 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 			}
 
 			ch = *s & 255;
-			if ( ch == ' ' )
+			if ( ch == '\v' ) {
+				// Special case for "flag" character
+				aw = (float)propMapBig[ch][2] * sizeScale;
+				AspectCorrect_DrawAdjustedStretchPic( ax, ay, aw + (float)PROP_GAP_BIG_WIDTH * sizeScale,
+						PROP_BIG_HEIGHT * sizeScale, 0, 0, 1, 1, cgs.media.whiteShader );
+			}
+			else if ( ch == ' ' )
 			{
 				aw = (float)PROP_SPACE_BIG_WIDTH * sizeScale;
 			}
@@ -688,7 +707,13 @@ static void UI_DrawProportionalString2( int x, int y, const char* str, vec4_t co
 			}
 
 			ch = *s & 255;
-			if ( ch == ' ' )
+			if ( ch == '\v' ) {
+				// Special case for "flag" character
+				aw = (float)propMap[ch][2] * sizeScale;
+				AspectCorrect_DrawAdjustedStretchPic( ax, ay, aw + (float)PROP_GAP_WIDTH * sizeScale,
+						PROP_HEIGHT * sizeScale, 0, 0, 1, 1, cgs.media.whiteShader );
+			}
+			else if ( ch == ' ' )
 			{
 				aw = (float)PROP_SPACE_WIDTH * sizeScale;
 			}
@@ -1068,4 +1093,8 @@ void CG_LoadFonts(void)
 	holdBuf = CG_ParseFontParms( holdBuf,propMap);
 	holdBuf = CG_ParseFontParms( holdBuf,propMapBig);
 
+	// Special width for "flag" characters
+	propMapTiny['\v'][2] = 4;
+	propMap['\v'][2] = 6;
+	propMapBig['\v'][2] = 9;
 }

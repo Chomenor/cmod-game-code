@@ -617,7 +617,7 @@ static void UI_SPLevelMenu_MenuDraw( void )
 
 	// Draw player name
 	trap_Cvar_VariableStringBuffer( "name", string, 32 );
-	Q_CleanStr( string );
+	Q_StripColor( string );
 	UI_DrawProportionalString( 390, 223, string, UI_SMALLFONT, colorTable[CT_BLACK] );
 
 	// check for model changes

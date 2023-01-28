@@ -1489,7 +1489,7 @@ static void ServerOptions_InitPlayerItems( void ) {
 	s_serveroptions.playerType[0].generic.flags |= QMF_INACTIVE;
 	s_serveroptions.playerType[0].curvalue = PT_OPEN;
 	trap_Cvar_VariableStringBuffer( "name", buffer, sizeof(buffer) );
-	Q_CleanStr( buffer );
+	Q_StripColor( buffer );
 	Q_strncpyz(s_serveroptions.playerNameBuffers[0], buffer, sizeof(s_serveroptions.playerNameBuffers[0]) );
 
 	// init teams

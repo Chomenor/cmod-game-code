@@ -1439,14 +1439,20 @@ static void UI_InsertMaster( char *address ) {
 =================
 UI_UpdateMasters
 
-Attempt to add some modern master server addresses. This is a fix for old clients which may not
-have any working master servers loaded by default.
+Update master server addresses on old clients with more reliable community masters.
 =================
 */
 static void UI_UpdateMasters( void ) {
 	char cvarBuffer[256];
 
-	// replace the default raven master from the first slot, since it is currently offline
+	// only make changes on certain old clients
+	trap_Cvar_VariableStringBuffer( "version", cvarBuffer, sizeof( cvarBuffer ) );
+	if ( strcmp( cvarBuffer, "ST:V HM v1.20 win-x86 Apr 17 2001" ) &&
+			strcmp( cvarBuffer, "ioST:V HM v1.37 win_msvc-x86 Nov 13 2006" ) ) {
+		return;
+	}
+
+	// replace the default raven master from the first slot, since it is relatively unreliable
 	// it will be restored in a lower priority slot below, if free slots are available
 	trap_Cvar_VariableStringBuffer( "sv_master1", cvarBuffer, sizeof( cvarBuffer ) );
 	if ( UI_CompareMasterAddress( cvarBuffer, "master.stef1.ravensoft.com" ) ) {
@@ -1455,9 +1461,9 @@ static void UI_UpdateMasters( void ) {
 
 	// load the following masters in any free slot
 	UI_InsertMaster( "master.stvef.org" );
-	UI_InsertMaster( "efmaster.tjps.eu" );
-	UI_InsertMaster( "master.stef1.daggolin.de" );
 	UI_InsertMaster( "master.stef1.ravensoft.com" );
+	UI_InsertMaster( "master.stef1.daggolin.de" );
+	UI_InsertMaster( "efmaster.tjps.eu" );
 }
 
 /*

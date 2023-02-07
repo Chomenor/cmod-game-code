@@ -263,6 +263,7 @@
     <ClCompile Include="..\..\code\game\mods\components\comp_warmup_sequence.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_altswap_handler.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_bot_adding.c" />
+    <ClCompile Include="..\..\code\game\mods\features\feat_misc.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_player_move.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_spawn_protect.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_spect_passthrough.c" />

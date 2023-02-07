@@ -72,6 +72,7 @@ set src=game\mods\components&set name=comp_pending_item&call :compile
 set src=game\mods\components&set name=comp_warmup_sequence&call :compile
 set src=game\mods\features&set name=feat_altswap_handler&call :compile
 set src=game\mods\features&set name=feat_bot_adding&call :compile
+set src=game\mods\features&set name=feat_misc&call :compile
 set src=game\mods\features&set name=feat_player_move&call :compile
 set src=game\mods\features&set name=feat_spect_passthrough&call :compile
 set src=game\mods\features&set name=feat_spawn_protect&call :compile

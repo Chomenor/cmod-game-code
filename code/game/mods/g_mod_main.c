@@ -42,6 +42,7 @@ LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 
 	// Default mods
 	if ( modsEnabled >= 2 ) {
+		ModMiscFeatures_Init();
 		ModPlayerMove_Init();
 		ModAltSwapHandler_Init();
 		ModPingcomp_Init();

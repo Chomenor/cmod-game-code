@@ -37,6 +37,8 @@ LOGFUNCTION_VOID( ModMiscFeatures_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		INIT_FN_STACKABLE( AddModConfigInfo );
+		INIT_FN_STACKABLE_LCL( AddModConfigInfo );
+
+		ModModcfgCS_Init();
 	}
 }

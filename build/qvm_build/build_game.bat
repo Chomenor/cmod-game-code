@@ -66,6 +66,7 @@ set src=game\mods&set name=g_mod_utils&call :compile
 set src=game\mods\components&set name=comp_clicktojoin&call :compile
 set src=game\mods\components&set name=comp_holdable_transporter&call :compile
 set src=game\mods\components&set name=comp_intermission_ready&call :compile
+set src=game\mods\components&set name=comp_modcfg_cs&call :compile
 set src=game\mods\components&set name=comp_model_groups&call :compile
 set src=game\mods\components&set name=comp_model_selection&call :compile
 set src=game\mods\components&set name=comp_pending_item&call :compile

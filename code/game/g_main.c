@@ -195,32 +195,6 @@ void G_FindTeams( void ) {
 	G_Printf ("%i teams with %i entities\n", c, c2);
 }
 
-// Only set mod config after initialization is complete to avoid unnecessary configstring updates.
-static qboolean modConfigReady = qfalse;
-
-/*
-=================
-G_UpdateModConfigInfo
-
-Updates mod config configstring. Called on game startup and any time the value might have changed.
-=================
-*/
-void G_UpdateModConfigInfo( void ) {
-	if ( modConfigReady ) {
-		char buffer[BIG_INFO_STRING + 8];
-		char *info = buffer + 8;
-		Q_strncpyz( buffer, "!modcfg ", sizeof( buffer ) );
-
-		modfn.AddModConfigInfo( info );
-
-		if ( *info ) {
-			trap_SetConfigstring( CS_MOD_CONFIG, buffer );
-		} else {
-			trap_SetConfigstring( CS_MOD_CONFIG, "" );
-		}
-	}
-}
-
 /*
 =================
 G_UpdateNeedPass
@@ -464,10 +438,6 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	modfn.GeneralInit();
 
 	level.warmupRestarting = qfalse;
-
-	// set mod config string
-	modConfigReady = qtrue;
-	G_UpdateModConfigInfo();
 
 	G_Printf ("-----------------------------------\n");
 }

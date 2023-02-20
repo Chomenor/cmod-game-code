@@ -257,6 +257,7 @@
     <ClCompile Include="..\..\code\game\mods\components\comp_clicktojoin.c" />
     <ClCompile Include="..\..\code\game\mods\components\comp_holdable_transporter.c" />
     <ClCompile Include="..\..\code\game\mods\components\comp_intermission_ready.c" />
+    <ClCompile Include="..\..\code\game\mods\components\comp_modcfg_cs.c" />
     <ClCompile Include="..\..\code\game\mods\components\comp_model_groups.c" />
     <ClCompile Include="..\..\code\game\mods\components\comp_model_selection.c" />
     <ClCompile Include="..\..\code\game\mods\components\comp_pending_item.c" />

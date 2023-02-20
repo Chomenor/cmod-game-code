@@ -100,7 +100,7 @@ Make sure any configstrings for client prediction are updated.
 ================
 */
 static void ModPCClientPredict_CvarCallback( trackedCvar_t *cvar ) {
-	G_UpdateModConfigInfo();
+	ModModcfgCS_Static_Update();
 }
 
 /*
@@ -139,10 +139,12 @@ LOGFUNCTION_VOID( ModPCClientPredict_Init, ( void ), (), "G_MOD_INIT" ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
 		INIT_FN_STACKABLE( WeaponPredictableRNG );
-		INIT_FN_STACKABLE( AddModConfigInfo );
+		INIT_FN_STACKABLE_LCL( AddModConfigInfo );
 		INIT_FN_STACKABLE( PostRunFrame );
 
 		G_RegisterTrackedCvar( &MOD_STATE->g_unlaggedPredict, "g_unlaggedPredict", "1", 0, qfalse );
 		G_RegisterCvarCallback( &MOD_STATE->g_unlaggedPredict, ModPCClientPredict_CvarCallback, qfalse );
+
+		ModModcfgCS_Init();
 	}
 }

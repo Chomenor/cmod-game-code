@@ -82,10 +82,6 @@ LOGFUNCTION_RET( qboolean, ModFNDefault_ModClientCommand, ( int clientNum, const
 	return qfalse;
 }
 
-LOGFUNCTION_VOID( ModFNDefault_AddModConfigInfo, ( char *info ),
-		( info ), "G_MODFN_ADDMODCONFIGINFO" ) {
-}
-
 int ModFNDefault_AdjustScoreboardAttributes( int clientNum, scoreboardAttribute_t saType, int defaultValue ) {
 	return defaultValue;
 }

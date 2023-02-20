@@ -77,7 +77,7 @@ Make sure any configstrings for client prediction are updated.
 ================
 */
 static void ModPingcomp_CvarCallback( trackedCvar_t *cvar ) {
-	G_UpdateModConfigInfo();
+	ModModcfgCS_Static_Update();
 }
 
 /*

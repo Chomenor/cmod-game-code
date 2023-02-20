@@ -74,6 +74,7 @@ void ModTeamGroups_Shared_ForceConfigStrings( const char *redGroup, const char *
 void ModClickToJoin_Init( void );
 void ModHoldableTransporter_Init( void );
 void ModIntermissionReady_Init( void );
+void ModModcfgCS_Init( void );
 void ModModelGroups_Init( void );
 void ModModelSelection_Init( void );
 void ModPendingItem_Init( void );
@@ -124,6 +125,12 @@ extern ModIntermissionReady_shared_t *modIntermissionReady_shared;
 void ModIntermissionReady_Shared_UpdateConfig( void );
 void ModIntermissionReady_Shared_Suspend( void );
 void ModIntermissionReady_Shared_Resume( void );
+
+//
+// Modcfg Configstring Handling (comp_modcfg_cs.c)
+//
+
+void ModModcfgCS_Static_Update( void );
 
 //
 // Player model groups (comp_model_groups.c)

@@ -48,7 +48,7 @@ static void ModAltSwapHandler_CheckEnabled( void ) {
 
 	if ( enabled != MOD_STATE->enabled ) {
 		MOD_STATE->enabled = enabled;
-		G_UpdateModConfigInfo();
+		ModModcfgCS_Static_Update();
 		if ( !enabled ) {
 			memset( MOD_STATE->clients, 0, sizeof( MOD_STATE->clients ) );
 		}
@@ -169,9 +169,10 @@ LOGFUNCTION_VOID( ModAltSwapHandler_Init, ( void ), (), "G_MOD_INIT" ) {
 		INIT_FN_STACKABLE( GenerateClientSessionInfo );
 		INIT_FN_STACKABLE( ModClientCommand );
 		INIT_FN_STACKABLE( PmoveInit );
-		INIT_FN_STACKABLE( AddModConfigInfo );
+		INIT_FN_STACKABLE_LCL( AddModConfigInfo );
 		INIT_FN_STACKABLE( PostRunFrame );
 
+		ModModcfgCS_Init();
 		ModAltSwapHandler_CheckEnabled();
 	}
 }

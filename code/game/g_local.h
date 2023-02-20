@@ -558,7 +558,6 @@ qboolean G_FilterPacket (char *from);
 void QDECL G_Printf( const char *fmt, ... );
 void QDECL G_DedPrintf( const char *fmt, ... );
 void QDECL G_Error( const char *fmt, ... );
-void G_UpdateModConfigInfo( void );
 void G_RegisterTrackedCvar( trackedCvar_t *tc, const char *cvarName, const char *defaultValue, int flags, qboolean announceChanges );
 void G_RegisterCvarCallback( trackedCvar_t *tc, void ( *callback )( trackedCvar_t *tc ), qboolean callNow );
 void CalculateRanks( void );

@@ -174,7 +174,7 @@ Called when any of the cvars potentially affecting the content of the mod config
 ==============
 */
 static void ModPlayerMove_ModcfgCvarChanged( trackedCvar_t *cvar ) {
-	G_UpdateModConfigInfo();
+	ModModcfgCS_Static_Update();
 }
 
 /*
@@ -189,7 +189,7 @@ LOGFUNCTION_VOID( ModPlayerMove_Init, ( void ), (), "G_MOD_INIT" ) {
 		INIT_FN_BASE( PmoveFixedLength );
 		INIT_FN_BASE( RunPlayerMove );
 		INIT_FN_STACKABLE( PmoveInit );
-		INIT_FN_STACKABLE( AddModConfigInfo );
+		INIT_FN_STACKABLE_LCL( AddModConfigInfo );
 
 		G_RegisterTrackedCvar( &MOD_STATE->g_pMoveMsec, "g_pMoveMsec", "8", CVAR_ARCHIVE, qfalse );
 		G_RegisterTrackedCvar( &MOD_STATE->g_pMoveBotsMsec, "g_pMoveBotsMsec", "-1", CVAR_ARCHIVE, qfalse );
@@ -199,5 +199,7 @@ LOGFUNCTION_VOID( ModPlayerMove_Init, ( void ), (), "G_MOD_INIT" ) {
 		G_RegisterCvarCallback( &MOD_STATE->g_pMoveMsec, ModPlayerMove_ModcfgCvarChanged, qfalse );
 		G_RegisterCvarCallback( &MOD_STATE->g_pMoveTriggerMode, ModPlayerMove_ModcfgCvarChanged, qfalse );
 		G_RegisterCvarCallback( &MOD_STATE->g_noJumpKeySlowdown, ModPlayerMove_ModcfgCvarChanged, qfalse );
+
+		ModModcfgCS_Init();
 	}
 }

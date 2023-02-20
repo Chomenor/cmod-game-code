@@ -247,9 +247,6 @@ MOD_FUNCTION_DEF( ModConsoleCommand, qboolean, ( const char *cmd ) )
 // Can be called for connecting clients and during intermission.
 MOD_FUNCTION_DEF( ModClientCommand, qboolean, ( int clientNum, const char *cmd ) )
 
-// Allows mods to add values to the mod config configstring.
-MOD_FUNCTION_DEF( AddModConfigInfo, void, ( char *info ) )
-
 // Allows mods to adjust attributes sent to clients via "scores" command.
 MOD_FUNCTION_DEF( AdjustScoreboardAttributes, int, ( int clientNum, scoreboardAttribute_t saType, int defaultValue ) )
 
@@ -283,3 +280,7 @@ MOD_FUNCTION_DEF( IsBorgQueen, qboolean, ( int clientNum ) )
 
 // Called after main mod initialization is complete.
 MOD_FUNCTION_LOCAL( PostModInit, void, ( void ) )
+
+// Allows mods to add values to the mod config configstring.
+// Requires: ModModcfgCS_Init() from comp_modcfg_cs.c
+MOD_FUNCTION_LOCAL( AddModConfigInfo, void, ( char *info ) )

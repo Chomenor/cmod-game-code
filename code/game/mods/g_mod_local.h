@@ -185,6 +185,39 @@ void ModWarmupSequence_Static_AddEventToSequence( warmupSequence_t *sequence, in
 qboolean ModWarmupSequence_Static_SequenceInProgressOrPending( void );
 
 /* ************************************************************************* */
+// Local mod functions (modfn_lcl.*) - For mod functions only called by mods
+/* ************************************************************************* */
+
+// Ignore public defs
+#define MOD_FUNCTION_DEF( name, returntype, parameters )
+
+// Mod function types (ModFNType_*)
+#define MOD_FUNCTION_LOCAL( name, returntype, parameters ) \
+	typedef returntype ( *ModFNType_##name ) parameters;
+#include "mods/g_mod_defs.h"
+#undef MOD_FUNCTION_LOCAL
+
+// Default mod function declarations (ModFNDefault_*)
+#define MOD_FUNCTION_LOCAL( name, returntype, parameters ) \
+	returntype ModFNDefault_##name parameters;
+#include "mods/g_mod_defs.h"
+#undef MOD_FUNCTION_LOCAL
+
+// Mod functions structure
+typedef struct {
+
+#define MOD_FUNCTION_LOCAL( name, returntype, parameters ) \
+	ModFNType_##name name;
+#include "mods/g_mod_defs.h"
+#undef MOD_FUNCTION_LOCAL
+
+} mod_functions_local_t;
+
+#undef MOD_FUNCTION_DEF
+
+extern mod_functions_local_t modfn_lcl;
+
+/* ************************************************************************* */
 // Helper Macros
 /* ************************************************************************* */
 
@@ -201,4 +234,15 @@ qboolean ModWarmupSequence_Static_SequenceInProgressOrPending( void );
 #define INIT_FN_BASE( name ) \
 	EF_WARN_ASSERT( modfn.name == ModFNDefault_##name ); \
 	modfn.name = MOD_PREFIX(name);
+
+#define INIT_FN_STACKABLE_LCL( name ) \
+	MOD_STATE->Prev_##name = modfn_lcl.name; \
+	modfn_lcl.name = MOD_PREFIX(name);
+
+#define INIT_FN_OVERRIDE_LCL( name ) \
+	modfn_lcl.name = MOD_PREFIX(name);
+
+#define INIT_FN_BASE_LCL( name ) \
+	EF_WARN_ASSERT( modfn_lcl.name == ModFNDefault_##name ); \
+	modfn_lcl.name = MOD_PREFIX(name);
 #endif

@@ -7,6 +7,7 @@
 #include "mods/g_mod_local.h"
 
 mod_functions_t modfn;
+mod_functions_local_t modfn_lcl;
 mod_config_t modcfg;
 
 /*
@@ -19,9 +20,18 @@ LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 	int modsEnabled = G_ModUtils_GetLatchedValue( "g_modsEnabled", "2", 0 );
 
 	// Initialize default mod functions
+#define MOD_FUNCTION_LOCAL( name, returntype, parameters )
 #define MOD_FUNCTION_DEF( name, returntype, parameters ) \
 	modfn.name = ModFNDefault_##name;
 #include "mods/g_mod_defs.h"
+#undef MOD_FUNCTION_DEF
+#undef MOD_FUNCTION_LOCAL
+
+#define MOD_FUNCTION_DEF( name, returntype, parameters )
+#define MOD_FUNCTION_LOCAL( name, returntype, parameters ) \
+	modfn_lcl.name = ModFNDefault_##name;
+#include "mods/g_mod_defs.h"
+#undef MOD_FUNCTION_LOCAL
 #undef MOD_FUNCTION_DEF
 
 	if ( modsEnabled <= 0 ) {
@@ -74,5 +84,5 @@ LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 	trap_Cvar_Set( "g_pModDisintegration", modcfg.mods_enabled.disintegration ? "1" : "0" );
 	trap_Cvar_Set( "g_pModSpecialties", modcfg.mods_enabled.specialties ? "1" : "0" );
 
-	modfn.PostModInit();
+	modfn_lcl.PostModInit();
 }

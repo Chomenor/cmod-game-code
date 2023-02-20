@@ -63,6 +63,9 @@ typedef enum {
 // mod functions (modfn.*)
 //
 
+// Ignore local defs
+#define MOD_FUNCTION_LOCAL( name, returntype, parameters )
+
 // Mod function types (ModFNType_*)
 #define MOD_FUNCTION_DEF( name, returntype, parameters ) \
 	typedef returntype ( *ModFNType_##name ) parameters;
@@ -84,5 +87,7 @@ typedef struct {
 #undef MOD_FUNCTION_DEF
 
 } mod_functions_t;
+
+#undef MOD_FUNCTION_LOCAL
 
 extern mod_functions_t modfn;

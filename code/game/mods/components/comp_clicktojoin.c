@@ -88,6 +88,6 @@ LOGFUNCTION_VOID( ModClickToJoin_Init, ( void ), (), "G_MOD_INIT G_MOD_CLICKJOIN
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
 		INIT_FN_STACKABLE( RunPlayerMove );
-		INIT_FN_STACKABLE( PostModInit );
+		INIT_FN_STACKABLE_LCL( PostModInit );
 	}
 }

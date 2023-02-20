@@ -278,8 +278,8 @@ MOD_FUNCTION_DEF( IsBorgQueen, qboolean, ( int clientNum ) )
 
 //////////////////////////
 // internal
-// (only called from mod code)
+// only called from mod code; uses separate modfn_lcl structure
 //////////////////////////
 
 // Called after main mod initialization is complete.
-MOD_FUNCTION_DEF( PostModInit, void, ( void ) )
+MOD_FUNCTION_LOCAL( PostModInit, void, ( void ) )

@@ -159,6 +159,6 @@ LOGFUNCTION_VOID( ModTeamGroups_Init, ( void ), (), "G_MOD_INIT" ) {
 		MOD_STATE->Prev_RandomPlayerModel = ModModelSelection_shared->RandomPlayerModel;
 		ModModelSelection_shared->RandomPlayerModel = ModTeamGroups_RandomPlayerModel;
 
-		INIT_FN_STACKABLE( PostModInit );
+		INIT_FN_STACKABLE_LCL( PostModInit );
 	}
 }

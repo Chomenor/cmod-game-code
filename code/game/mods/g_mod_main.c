@@ -20,14 +20,8 @@ LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 	int modsEnabled = G_ModUtils_GetLatchedValue( "g_modsEnabled", "2", 0 );
 
 	// Initialize default mod functions
-#define MOD_FUNCTION_LOCAL( name, returntype, parameters )
 #define MOD_FUNCTION_DEF( name, returntype, parameters ) \
 	modfn.name = ModFNDefault_##name;
-#include "mods/g_mod_defs.h"
-#undef MOD_FUNCTION_DEF
-#undef MOD_FUNCTION_LOCAL
-
-#define MOD_FUNCTION_DEF( name, returntype, parameters )
 #define MOD_FUNCTION_LOCAL( name, returntype, parameters ) \
 	modfn_lcl.name = ModFNDefault_##name;
 #include "mods/g_mod_defs.h"

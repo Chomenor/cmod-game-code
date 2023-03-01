@@ -7,7 +7,7 @@
 * which could lead to the model randomly changing in the middle of the game.
 * 
 * This module implements a wrapper for the GetPlayerModel mod function that splits
-* the implementation into two functions - ConvertPlayerModel and RandomPlayerModel.
+* the implementation into two mod functions - ConvertPlayerModel and RandomPlayerModel.
 * 
 * ConvertPlayerModel is called to verify a player selected model, and can override
 * it if the mod wants to force a specific model. RandomPlayerModel is called only if
@@ -31,27 +31,25 @@ static struct {
 	ModFNType_GenerateClientSessionInfo Prev_GenerateClientSessionInfo;
 } *MOD_STATE;
 
-ModModelSelection_shared_t *ModModelSelection_shared;
-
 /*
 ===========
-ModModelSelection_DefaultConvertPlayerModel
+(ModFN) ConvertPlayerModel
 ============
 */
-LOGFUNCTION_SVOID( ModModelSelection_DefaultConvertPlayerModel,
+LOGFUNCTION_VOID( ModFNDefault_ConvertPlayerModel,
 		( int clientNum, const char *userinfo, const char *source_model, char *output, unsigned int outputSize ),
-		( clientNum, userinfo, source_model, output, outputSize ), "G_PLAYERMODELS" ) {
+		( clientNum, userinfo, source_model, output, outputSize ), "G_MODFN_CONVERTPLAYERMODEL G_PLAYERMODELS" ) {
 	Q_strncpyz( output, source_model, outputSize );
 }
 
 /*
 ===========
-ModModelSelection_DefaultRandomPlayerModel
+(ModFN) RandomPlayerModel
 ============
 */
-LOGFUNCTION_SVOID( ModModelSelection_DefaultRandomPlayerModel,
+LOGFUNCTION_VOID( ModFNDefault_RandomPlayerModel,
 		( int clientNum, const char *userinfo, char *output, unsigned int outputSize ),
-		( clientNum, userinfo, output, outputSize ), "G_PLAYERMODELS" ) {
+		( clientNum, userinfo, output, outputSize ), "G_MODFN_RANDOMPLAYERMODEL G_PLAYERMODELS" ) {
 }
 
 /*
@@ -72,7 +70,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(GetPlayerModel),
 
 	// Try to get model using current userinfo
 	*output = '\0';
-	ModModelSelection_shared->ConvertPlayerModel( clientNum, userinfo, userinfo_model, output, outputSize );
+	modfn_lcl.ConvertPlayerModel( clientNum, userinfo, userinfo_model, output, outputSize );
 	if ( *output ) {
 		Q_strncpyz( modClient->validModel, userinfo_model, sizeof( modClient->validModel ) );
 		return;
@@ -81,7 +79,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(GetPlayerModel),
 	// Try to get model from previous valid model
 	*output = '\0';
 	if ( *modClient->validModel ) {
-		ModModelSelection_shared->ConvertPlayerModel( clientNum, userinfo, modClient->validModel, output, outputSize );
+		modfn_lcl.ConvertPlayerModel( clientNum, userinfo, modClient->validModel, output, outputSize );
 	}
 	if ( *output ) {
 		return;
@@ -89,10 +87,10 @@ LOGFUNCTION_SVOID( MOD_PREFIX(GetPlayerModel),
 
 	// Try to get random model
 	*random_model = '\0';
-	ModModelSelection_shared->RandomPlayerModel( clientNum, userinfo, random_model, sizeof( random_model ) );
+	modfn_lcl.RandomPlayerModel( clientNum, userinfo, random_model, sizeof( random_model ) );
 	*output = '\0';
 	if ( *random_model ) {
-		ModModelSelection_shared->ConvertPlayerModel( clientNum, userinfo, random_model, output, outputSize );
+		modfn_lcl.ConvertPlayerModel( clientNum, userinfo, random_model, output, outputSize );
 	}
 	if ( *output ) {
 		Q_strncpyz( modClient->validModel, random_model, sizeof( modClient->validModel ) );
@@ -147,10 +145,6 @@ ModModelSelection_Init
 LOGFUNCTION_VOID( ModModelSelection_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
-		ModModelSelection_shared = G_Alloc( sizeof( *ModModelSelection_shared ) );
-
-		ModModelSelection_shared->ConvertPlayerModel = ModModelSelection_DefaultConvertPlayerModel;
-		ModModelSelection_shared->RandomPlayerModel = ModModelSelection_DefaultRandomPlayerModel;
 
 		INIT_FN_BASE( GetPlayerModel );
 		INIT_FN_STACKABLE( InitClientSession );

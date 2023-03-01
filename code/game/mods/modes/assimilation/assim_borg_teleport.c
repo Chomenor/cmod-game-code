@@ -15,6 +15,8 @@
 static struct {
 	// For mod function stacking
 	ModFNType_SpawnConfigureClient Prev_SpawnConfigureClient;
+	ModFNType_BorgTeleportEnabled Prev_BorgTeleportEnabled;
+	ModFNType_PostBorgTeleport Prev_PostBorgTeleport;
 } *MOD_STATE;
 
 /*
@@ -36,22 +38,24 @@ LOGFUNCTION_SVOID( MOD_PREFIX(SpawnConfigureClient), ( int clientNum ), ( client
 
 /*
 ================
-ModAssimBorgTeleport_BorgTeleportEnabled
+(ModFN) BorgTeleportEnabled
+
+Enable borg teleport for borg class.
 ================
 */
-LOGFUNCTION_SRET( qboolean, ModAssimBorgTeleport_BorgTeleportEnabled, ( int clientNum ), ( clientNum ), "" ) {
+LOGFUNCTION_SRET( qboolean, MOD_PREFIX(BorgTeleportEnabled), ( int clientNum ), ( clientNum ), "G_MODFN_BORGTELEPORTENABLED" ) {
 	gclient_t *client = &level.clients[clientNum];
 	return client->sess.sessionClass == PC_BORG;
 }
 
 /*
 ================
-ModAssimBorgTeleport_PostBorgTeleport
+(ModFN) PostBorgTeleport
 
 Called after a borg teleport has completed. Start countdown to get new teleporter.
 ================
 */
-LOGFUNCTION_SVOID( ModAssimBorgTeleport_PostBorgTeleport, ( int clientNum ), ( clientNum ), "" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(PostBorgTeleport), ( int clientNum ), ( clientNum ), "G_MODFN_POSTBORGTELEPORT" ) {
 	int delay = 15000;
 	if ( modfn.IsBorgQueen( clientNum ) ) {
 		delay = 60000;
@@ -71,11 +75,11 @@ LOGFUNCTION_VOID( ModAssimBorgTeleport_Init, ( void ), (), "G_MOD_INIT G_ASSIMIL
 
 		// Register mod functions
 		INIT_FN_STACKABLE( SpawnConfigureClient );
+		INIT_FN_STACKABLE_LCL( BorgTeleportEnabled );
+		INIT_FN_STACKABLE_LCL( PostBorgTeleport );
 
-		// Configure borg teleporters
+		// Support borg teleporters
 		ModHoldableTransporter_Init();
-		ModHoldableTransporter_config->borgTeleportEnabled = ModAssimBorgTeleport_BorgTeleportEnabled;
-		ModHoldableTransporter_config->postBorgTeleport = ModAssimBorgTeleport_PostBorgTeleport;
 
 		// Pending item support for transporter cooldown
 		ModPendingItem_Init();

@@ -87,20 +87,6 @@ void ModWarmupSequence_Init();
 qboolean ModClickToJoin_Static_ActiveForClient( int clientNum );
 
 //
-// Portable transporter & borg teleport (comp_holdable_transporter.c)
-//
-
-typedef struct {
-	// Determines whether to use borg teleporter for given client.
-	qboolean ( *borgTeleportEnabled )( int clientNum );
-
-	// Callback when borg teleport completes.
-	void ( *postBorgTeleport )( int clientNum );
-} ModHoldableTransporter_config_t;
-
-extern ModHoldableTransporter_config_t *ModHoldableTransporter_config;
-
-//
 // Intermission ready handling (comp_intermissionready.c)
 //
 
@@ -112,15 +98,7 @@ typedef struct {
 	int sustainedAnyReadyTime;	// time to exit after continuous period of at least one player being ready (resets if nobody is ready)
 	int minExitTime;			// don't exit before this time regardless of players ready
 	int maxExitTime;			// always exit at this time regardless of players ready
-} ModIntermissionReady_config_t;
-
-typedef void ( *IntermissionReady_ConfigFunction_t )( ModIntermissionReady_config_t *config );
-
-typedef struct {
-	IntermissionReady_ConfigFunction_t configFunction;
-} ModIntermissionReady_shared_t;
-
-extern ModIntermissionReady_shared_t *modIntermissionReady_shared;
+} modIntermissionReady_config_t;
 
 void ModIntermissionReady_Shared_UpdateConfig( void );
 void ModIntermissionReady_Shared_Suspend( void );
@@ -141,25 +119,7 @@ qboolean ModModelGroups_Shared_ListContainsRace(const char *race_list, const cha
 void ModModelGroups_Shared_RandomModelForRace( const char *race, char *model, unsigned int size );
 
 //
-// Player model selection (comp_model_selection.c)
-//
-
-// Performs processing/conversion of player model to fit mod requirements. Writes empty string to use random model instead.
-typedef void ( *PlayerModels_ConvertPlayerModel_t )( int clientNum, const char *userinfo, const char *source_model,
-		char *output, unsigned int outputSize );
-
-// Generates a random model which meets mod requirements. Called when convert function returns empty string.
-typedef void ( *PlayerModels_RandomPlayerModel_t )( int clientNum, const char *userinfo, char *output, unsigned int outputSize );
-
-typedef struct {
-	PlayerModels_ConvertPlayerModel_t ConvertPlayerModel;
-	PlayerModels_RandomPlayerModel_t RandomPlayerModel;
-} ModModelSelection_shared_t;
-
-extern ModModelSelection_shared_t *ModModelSelection_shared;
-
-//
-// Pending item handling (g_mod_pending_item.c)
+// Pending item handling (comp_pending_item.c)
 //
 
 void ModPendingItem_Shared_SchedulePendingItem( int clientNum, holdable_t item, int delay );
@@ -174,20 +134,15 @@ typedef struct {
 	int time;
 	void ( *operation )( const char *msg );
 	const char *msg;
-} warmupSequenceEvent_t;
+} modWarmupSequenceEvent_t;
 
 typedef struct {
 	int duration;
 	int eventCount;
-	warmupSequenceEvent_t events[MAX_INFO_SEQUENCE_EVENTS];
-} warmupSequence_t;
+	modWarmupSequenceEvent_t events[MAX_INFO_SEQUENCE_EVENTS];
+} modWarmupSequence_t;
 
-typedef struct {
-	qboolean ( *getSequence )( warmupSequence_t *sequence );
-} ModWarmupSequence_shared_t;
-
-extern ModWarmupSequence_shared_t *modWarmupSequence_shared;
-void ModWarmupSequence_Static_AddEventToSequence( warmupSequence_t *sequence, int time,
+void ModWarmupSequence_Static_AddEventToSequence( modWarmupSequence_t *sequence, int time,
 		void ( *operation )( const char *msg ), const char *msg );
 qboolean ModWarmupSequence_Static_SequenceInProgressOrPending( void );
 

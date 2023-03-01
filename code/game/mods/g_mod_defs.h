@@ -282,5 +282,35 @@ MOD_FUNCTION_DEF( IsBorgQueen, qboolean, ( int clientNum ) )
 MOD_FUNCTION_LOCAL( PostModInit, void, ( void ) )
 
 // Allows mods to add values to the mod config configstring.
+// Call ModModcfgCS_Static_Update() to trigger call to load new changes.
 // Requires: ModModcfgCS_Init() from comp_modcfg_cs.c
 MOD_FUNCTION_LOCAL( AddModConfigInfo, void, ( char *info ) )
+
+// Performs processing/conversion of player model to fit mod requirements.
+// Writes empty string to use random model instead.
+// Requires: ModModelSelection_Init() from comp_model_selection.c
+MOD_FUNCTION_LOCAL( ConvertPlayerModel, void, ( int clientNum, const char *userinfo, const char *source_model,
+		char *output, unsigned int outputSize ) )
+
+// Generates a random model which meets mod requirements. Called when convert function returns empty string.
+// Requires: ModModelSelection_Init() from comp_model_selection.c
+MOD_FUNCTION_LOCAL( RandomPlayerModel, void, ( int clientNum, const char *userinfo, char *output,
+		unsigned int outputSize ) )
+
+// Determine whether portable transporter activates borg teleport mode or regular teleport.
+// Requires: ModHoldableTransporter_Init() from comp_holdable_transporter.c
+MOD_FUNCTION_LOCAL( BorgTeleportEnabled, qboolean, ( int clientNum ) )
+
+// Called when borg teleport completes.
+// Requires: ModHoldableTransporter_Init() from comp_holdable_transporter.c
+MOD_FUNCTION_LOCAL( PostBorgTeleport, void, ( int clientNum ) )
+
+// Allows configuring the parameters for when the game exits from intermission to next map.
+// Call ModIntermissionReady_Shared_UpdateConfig() to trigger call to load new changes.
+// Requires: ModIntermissionReady_Init() from comp_intermission_ready.c
+MOD_FUNCTION_LOCAL( IntermissionReadyConfig, void, ( modIntermissionReady_config_t *config ) )
+
+// Retrieves sequence of messages or events to play during warmup. Returns qtrue and writes
+// sequence if enabled. Returns qfalse if disabled.
+// Requires: ModWarmupSequence_Init() from comp_warmup_sequence.c
+MOD_FUNCTION_LOCAL( GetWarmupSequence, qboolean, ( modWarmupSequence_t *sequence ) )

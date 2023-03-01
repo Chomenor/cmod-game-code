@@ -152,12 +152,12 @@ static void ModElimMultiRound_WarmupRoundMessage( const char *msg ) {
 
 /*
 ================
-ModElimMultiRound_GetWarmupSequence
+(ModFN) GetWarmupSequence
 
 Returns message sequence to use during warmup.
 ================
 */
-static qboolean ModElimMultiRound_GetWarmupSequence( warmupSequence_t *sequence ) {
+static qboolean MOD_PREFIX(GetWarmupSequence)( modWarmupSequence_t *sequence ) {
 	if ( !g_doWarmup.integer || !MULTI_ROUND_ENABLED ) {
 		return qfalse;
 	}
@@ -723,7 +723,7 @@ LOGFUNCTION_VOID( ModElimMultiRound_Init, ( void ), (), "G_MOD_INIT G_ELIMINATIO
 
 #ifdef FEATURE_WARMUP_MESSAGE_SEQUENCE
 	ModWarmupSequence_Init();
-	modWarmupSequence_shared->getSequence = ModElimMultiRound_GetWarmupSequence;
+	INIT_FN_OVERRIDE_LCL( GetWarmupSequence );
 #endif
 
 #ifdef FEATURE_FINAL_SCORES

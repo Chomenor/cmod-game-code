@@ -22,10 +22,9 @@ static struct {
 	char forceRedGroup[GROUP_NAME_LENGTH];
 	char forceBlueGroup[GROUP_NAME_LENGTH];
 
-	PlayerModels_ConvertPlayerModel_t Prev_ConvertPlayerModel;
-	PlayerModels_RandomPlayerModel_t Prev_RandomPlayerModel;
-
 	// For mod function stacking
+	ModFNType_ConvertPlayerModel Prev_ConvertPlayerModel;
+	ModFNType_RandomPlayerModel Prev_RandomPlayerModel;
 	ModFNType_PostModInit Prev_PostModInit;
 } *MOD_STATE;
 
@@ -62,15 +61,15 @@ LOGFUNCTION_VOID( ModTeamGroups_Shared_ForceConfigStrings, ( const char *redGrou
 
 /*
 ============
-ModTeamGroups_ConvertPlayerModel
+(ModFN) ConvertPlayerModel
 
 Check if current model matches team race. Returns empty string if source model is invalid
 and a random one should be selected instead.
 ============
 */
-LOGFUNCTION_SVOID( ModTeamGroups_ConvertPlayerModel,
+LOGFUNCTION_SVOID( MOD_PREFIX(ConvertPlayerModel),
 		( int clientNum, const char *userinfo, const char *source_model, char *output, unsigned int outputSize ),
-		( clientNum, userinfo, source_model, output, outputSize ), "G_PLAYERMODELS" ) {
+		( clientNum, userinfo, source_model, output, outputSize ), "G_PLAYERMODELS G_MODFN_CONVERTPLAYERMODEL" ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	if ( client->sess.sessionTeam == TEAM_RED || client->sess.sessionTeam == TEAM_BLUE ) {
@@ -90,13 +89,13 @@ LOGFUNCTION_SVOID( ModTeamGroups_ConvertPlayerModel,
 
 /*
 ============
-ModTeamGroups_RandomPlayerModel
+(ModFN) RandomPlayerModel
 
 Selects a random model that matches team race requirement. Returns empty string on error.
 ============
 */
-LOGFUNCTION_SVOID( ModTeamGroups_RandomPlayerModel, ( int clientNum, const char *userinfo, char *output, unsigned int outputSize ),
-		( clientNum, userinfo, output, outputSize ), "G_PLAYERMODELS" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(RandomPlayerModel), ( int clientNum, const char *userinfo, char *output, unsigned int outputSize ),
+		( clientNum, userinfo, output, outputSize ), "G_PLAYERMODELS G_MODFN_RANDOMPLAYERMODEL" ) {
 	gclient_t *client = &level.clients[clientNum];
 	*output = '\0';
 
@@ -153,12 +152,10 @@ LOGFUNCTION_VOID( ModTeamGroups_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		ModModelSelection_Init();
-		MOD_STATE->Prev_ConvertPlayerModel = ModModelSelection_shared->ConvertPlayerModel;
-		ModModelSelection_shared->ConvertPlayerModel = ModTeamGroups_ConvertPlayerModel;
-		MOD_STATE->Prev_RandomPlayerModel = ModModelSelection_shared->RandomPlayerModel;
-		ModModelSelection_shared->RandomPlayerModel = ModTeamGroups_RandomPlayerModel;
-
+		INIT_FN_STACKABLE_LCL( ConvertPlayerModel );
+		INIT_FN_STACKABLE_LCL( RandomPlayerModel );
 		INIT_FN_STACKABLE_LCL( PostModInit );
+
+		ModModelSelection_Init();
 	}
 }

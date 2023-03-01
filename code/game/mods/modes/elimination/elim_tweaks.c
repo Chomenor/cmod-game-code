@@ -60,11 +60,10 @@ static struct {
 	int oldTimelimit;
 #endif
 
-#ifdef FEATURE_INTERMISSION_READY_TWEAKS
-	IntermissionReady_ConfigFunction_t prevIntermissionReadyConfig;
-#endif
-
 	// For mod function stacking
+#ifdef FEATURE_INTERMISSION_READY_TWEAKS
+	ModFNType_IntermissionReadyConfig Prev_IntermissionReadyConfig;
+#endif
 	ModFNType_AdjustGeneralConstant Prev_AdjustGeneralConstant;
 	ModFNType_AdjustScoreboardAttributes Prev_AdjustScoreboardAttributes;
 	ModFNType_CheckSuicideAllowed Prev_CheckSuicideAllowed;
@@ -118,11 +117,11 @@ static void ModElimTweaks_EliminatedMessage( int clientNum, team_t oldTeam, qboo
 #ifdef FEATURE_INTERMISSION_READY_TWEAKS
 /*
 ================
-ModElimTweaks_IntermissionConfigFunction
+(ModFN) IntermissionReadyConfig
 ================
 */
-static void ModElimTweaks_IntermissionConfigFunction( ModIntermissionReady_config_t *config ) {
-	MOD_STATE->prevIntermissionReadyConfig( config );
+static void MOD_PREFIX(IntermissionReadyConfig)( modIntermissionReady_config_t *config ) {
+	MOD_STATE->Prev_IntermissionReadyConfig( config );
 	config->readySound = qtrue;
 	config->ignoreSpectators = qtrue;
 	config->noPlayersExit = qtrue;
@@ -314,8 +313,7 @@ LOGFUNCTION_VOID( ModElimTweaks_Init, ( void ), (), "G_MOD_INIT G_ELIMINATION" )
 
 #ifdef FEATURE_INTERMISSION_READY_TWEAKS
 		ModIntermissionReady_Init();
-		MOD_STATE->prevIntermissionReadyConfig = modIntermissionReady_shared->configFunction;
-		modIntermissionReady_shared->configFunction = ModElimTweaks_IntermissionConfigFunction;
+		INIT_FN_STACKABLE_LCL( IntermissionReadyConfig );
 		ModIntermissionReady_Shared_UpdateConfig();
 #endif
 	}

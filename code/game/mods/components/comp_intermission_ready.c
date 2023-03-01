@@ -10,7 +10,7 @@
 #include "mods/g_mod_local.h"
 
 static struct {
-	ModIntermissionReady_config_t config;
+	modIntermissionReady_config_t config;
 
 	qboolean playSoundWhenReady[MAX_CLIENTS];
 	qboolean suspended;
@@ -31,8 +31,6 @@ typedef struct {
 	qboolean enableSounds;
 } playerReadyState_t;
 
-ModIntermissionReady_shared_t *modIntermissionReady_shared;
-
 /*
 ================
 ModIntermissionReady_Shared_UpdateConfig
@@ -42,7 +40,8 @@ Calls shared config function to generate configuration.
 */
 void ModIntermissionReady_Shared_UpdateConfig( void ) {
 	EF_ERR_ASSERT( MOD_STATE );
-	modIntermissionReady_shared->configFunction( &MOD_STATE->config );
+	memset( &MOD_STATE->config, 0, sizeof( MOD_STATE->config ) );
+	modfn_lcl.IntermissionReadyConfig( &MOD_STATE->config );
 }
 
 /*
@@ -78,11 +77,10 @@ void ModIntermissionReady_Shared_Resume( void ) {
 
 /*
 ================
-ModIntermissionReady_DefaultConfigFunction
+(ModFN) IntermissionReadyConfig
 ================
 */
-static void ModIntermissionReady_DefaultConfigFunction( ModIntermissionReady_config_t *config ) {
-	memset( config, 0, sizeof( *config ) );
+void ModFNDefault_IntermissionReadyConfig( modIntermissionReady_config_t *config ) {
 	config->minExitTime = 5000;
 	config->sustainedAnyReadyTime = g_intermissionTime.integer * 1000;
 }
@@ -276,9 +274,6 @@ ModIntermissionReady_Init
 LOGFUNCTION_VOID( ModIntermissionReady_Init, ( void ), (), "G_MOD_INTERMISSIONREADY" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
-		modIntermissionReady_shared = G_Alloc( sizeof( *modIntermissionReady_shared ) );
-
-		modIntermissionReady_shared->configFunction = ModIntermissionReady_DefaultConfigFunction;
 
 		INIT_FN_BASE( IntermissionReadyIndicator );
 		INIT_FN_BASE( IntermissionReadyToExit );

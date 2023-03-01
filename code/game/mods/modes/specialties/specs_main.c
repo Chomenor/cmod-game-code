@@ -18,7 +18,6 @@ typedef struct {
 static struct {
 	specialties_client_t clients[MAX_CLIENTS];
 	trackedCvar_t g_classChangeDebounceTime;
-	PlayerModels_ConvertPlayerModel_t Prev_ConvertPlayerModel;
 
 	// For mod function stacking
 	ModFNType_InitClientSession Prev_InitClientSession;
@@ -34,6 +33,7 @@ static struct {
 	ModFNType_AdjustGeneralConstant Prev_AdjustGeneralConstant;
 	ModFNType_AdjustWeaponConstant Prev_AdjustWeaponConstant;
 	ModFNType_ModifyAmmoUsage Prev_ModifyAmmoUsage;
+	ModFNType_ConvertPlayerModel Prev_ConvertPlayerModel;
 } *MOD_STATE;
 
 /*
@@ -612,11 +612,6 @@ LOGFUNCTION_VOID( ModSpecialties_Init, ( void ), (), "G_MOD_INIT G_SPECIALTIES" 
 
 		G_RegisterTrackedCvar( &MOD_STATE->g_classChangeDebounceTime, "g_classChangeDebounceTime", "180", CVAR_ARCHIVE, qfalse );
 
-		ModModelGroups_Init();
-		ModModelSelection_Init();
-		MOD_STATE->Prev_ConvertPlayerModel = ModModelSelection_shared->ConvertPlayerModel;
-		ModModelSelection_shared->ConvertPlayerModel = ModSpecialties_ConvertPlayerModel;
-
 		// Register mod functions
 		INIT_FN_STACKABLE( InitClientSession );
 		INIT_FN_STACKABLE( PreClientSpawn );
@@ -632,6 +627,10 @@ LOGFUNCTION_VOID( ModSpecialties_Init, ( void ), (), "G_MOD_INIT G_SPECIALTIES" 
 		INIT_FN_STACKABLE( AdjustGeneralConstant );
 		INIT_FN_STACKABLE( AdjustWeaponConstant );
 		INIT_FN_STACKABLE( ModifyAmmoUsage );
+		INIT_FN_STACKABLE_LCL( ConvertPlayerModel );
+
+		ModModelGroups_Init();
+		ModModelSelection_Init();
 
 		// Pending item support for demolitionist detpack
 		ModPendingItem_Init();

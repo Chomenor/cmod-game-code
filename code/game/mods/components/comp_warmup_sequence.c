@@ -14,15 +14,13 @@
 
 static struct {
 	qboolean sequenceActive;
-	warmupSequence_t sequence;
+	modWarmupSequence_t sequence;
 	int nextEvent;
 
 	ModFNType_WarmupLength Prev_WarmupLength;
 	ModFNType_PostRunFrame Prev_PostRunFrame;
 	ModFNType_MatchStateTransition Prev_MatchStateTransition;
 } *MOD_STATE;
-
-ModWarmupSequence_shared_t *modWarmupSequence_shared;
 
 /*
 ================
@@ -31,15 +29,24 @@ ModWarmupSequence_Static_AddEventToSequence
 Adds event to warmup sequence.
 ================
 */
-void ModWarmupSequence_Static_AddEventToSequence( warmupSequence_t *sequence, int time,
+void ModWarmupSequence_Static_AddEventToSequence( modWarmupSequence_t *sequence, int time,
 		void ( *operation )( const char *msg ), const char *msg ) {
 	if ( EF_WARN_ASSERT( sequence->eventCount < MAX_INFO_SEQUENCE_EVENTS ) ) {
-		warmupSequenceEvent_t event;
+		modWarmupSequenceEvent_t event;
 		event.time = time;
 		event.operation = operation;
 		event.msg = msg;
 		sequence->events[sequence->eventCount++] = event;
 	}
+}
+
+/*
+================
+(ModFN) GetWarmupSequence
+================
+*/
+qboolean ModFNDefault_GetWarmupSequence( modWarmupSequence_t *sequence ) {
+	return qfalse;
 }
 
 /*
@@ -57,11 +64,11 @@ static int ModWarmupSequence_GetLength( void ) {
 			return MOD_STATE->sequence.duration;
 		}
 
-	} else if ( g_doWarmup.integer && modWarmupSequence_shared->getSequence ) {
+	} else if ( g_doWarmup.integer ) {
 		// Get the sequence to determine length of future warmup.
-		warmupSequence_t sequence;
+		modWarmupSequence_t sequence;
 		memset( &sequence, 0, sizeof( sequence ) );
-		if ( modWarmupSequence_shared->getSequence( &sequence ) )
+		if ( modfn_lcl.GetWarmupSequence( &sequence ) )
 			return sequence.duration;
 	}
 
@@ -121,7 +128,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME
 
 		// Dispatch events.
 		while ( MOD_STATE->nextEvent < MOD_STATE->sequence.eventCount ) {
-			const warmupSequenceEvent_t *event = &MOD_STATE->sequence.events[MOD_STATE->nextEvent];
+			const modWarmupSequenceEvent_t *event = &MOD_STATE->sequence.events[MOD_STATE->nextEvent];
 			if ( time < event->time ) {
 				return;
 			}
@@ -148,9 +155,10 @@ LOGFUNCTION_SVOID( MOD_PREFIX(MatchStateTransition), ( matchState_t oldState, ma
 	MOD_STATE->sequenceActive = qfalse;
 	MOD_STATE->nextEvent = 0;
 
-	if ( newState == MS_WARMUP && modWarmupSequence_shared->getSequence ) {
+	if ( newState == MS_WARMUP ) {
 		// Start the sequence.
-		if ( modWarmupSequence_shared->getSequence( &MOD_STATE->sequence ) ) {
+		memset( &MOD_STATE->sequence, 0, sizeof( MOD_STATE->sequence ) );
+		if ( modfn_lcl.GetWarmupSequence( &MOD_STATE->sequence ) ) {
 			MOD_STATE->sequenceActive = qtrue;
 		}
 	}
@@ -164,7 +172,6 @@ ModWarmupSequence_Init
 LOGFUNCTION_VOID( ModWarmupSequence_Init, ( void ), (), "G_MOD_INIT G_MOD_WARMUPSEQUENCE" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
-		modWarmupSequence_shared = G_Alloc( sizeof( *modWarmupSequence_shared ) );
 
 		INIT_FN_STACKABLE( WarmupLength );
 		INIT_FN_STACKABLE( PostRunFrame );

@@ -11,21 +11,21 @@
 #include "mods/modes/assimilation/assim_local.h"
 
 static struct {
-	PlayerModels_ConvertPlayerModel_t Prev_ConvertPlayerModel;
-	PlayerModels_RandomPlayerModel_t Prev_RandomPlayerModel;
+	ModFNType_ConvertPlayerModel Prev_ConvertPlayerModel;
+	ModFNType_RandomPlayerModel Prev_RandomPlayerModel;
 } *MOD_STATE;
 
 /*
 ================
-ModAssimModels_ConvertPlayerModel
+(ModFN) ConvertPlayerModel
 
 Verifies and converts model to meet borg/non-borg team requirements. Returns empty string
 to select random model instead.
 ================
 */
-LOGFUNCTION_SVOID( ModAssimModels_ConvertPlayerModel,
+LOGFUNCTION_SVOID( MOD_PREFIX(ConvertPlayerModel),
 		( int clientNum, const char *userinfo, const char *source_model, char *output, unsigned int outputSize ),
-		( clientNum, userinfo, source_model, output, outputSize ), "G_PLAYERMODELS" ) {
+		( clientNum, userinfo, source_model, output, outputSize ), "G_PLAYERMODELS G_MODFN_CONVERTPLAYERMODEL" ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	// Don't change model for spectators
@@ -83,13 +83,13 @@ LOGFUNCTION_SVOID( ModAssimModels_ConvertPlayerModel,
 
 /*
 ================
-ModAssimModels_RandomPlayerModel
+(ModFN) RandomPlayerModel
 
 Selects random model that meets borg/non-borg team requirements. Returns empty string on error.
 ================
 */
-LOGFUNCTION_SVOID( ModAssimModels_RandomPlayerModel, ( int clientNum, const char *userinfo, char *output, unsigned int outputSize ),
-		( clientNum, userinfo, output, outputSize ), "G_PLAYERMODELS" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(RandomPlayerModel), ( int clientNum, const char *userinfo, char *output, unsigned int outputSize ),
+		( clientNum, userinfo, output, outputSize ), "G_PLAYERMODELS G_MODFN_RANDOMPLAYERMODEL" ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	// Don't change model for spectators
@@ -154,11 +154,10 @@ LOGFUNCTION_VOID( ModAssimModels_Init, ( void ), (), "G_MOD_INIT G_ASSIMILATION"
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
+		INIT_FN_STACKABLE_LCL( ConvertPlayerModel );
+		INIT_FN_STACKABLE_LCL( RandomPlayerModel );
+
 		ModModelGroups_Init();
 		ModModelSelection_Init();
-		MOD_STATE->Prev_ConvertPlayerModel = ModModelSelection_shared->ConvertPlayerModel;
-		ModModelSelection_shared->ConvertPlayerModel = ModAssimModels_ConvertPlayerModel;
-		MOD_STATE->Prev_RandomPlayerModel = ModModelSelection_shared->RandomPlayerModel;
-		ModModelSelection_shared->RandomPlayerModel = ModAssimModels_RandomPlayerModel;
 	}
 }

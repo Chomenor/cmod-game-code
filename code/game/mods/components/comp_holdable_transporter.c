@@ -21,7 +21,22 @@ static struct {
 	ModFNType_PreRunFrame Prev_PreRunFrame;
 } *MOD_STATE;
 
-ModHoldableTransporter_config_t *ModHoldableTransporter_config;
+/*
+================
+(ModFN) BorgTeleportEnabled
+================
+*/
+LOGFUNCTION_RET( qboolean, ModFNDefault_BorgTeleportEnabled, ( int clientNum ), ( clientNum ), "G_MODFN_BORGTELEPORTENABLED" ) {
+	return qfalse;
+}
+
+/*
+================
+(ModFN) PostBorgTeleport
+================
+*/
+LOGFUNCTION_VOID( ModFNDefault_PostBorgTeleport, ( int clientNum ), ( clientNum ), "G_MODFN_POSTBORGTELEPORT" ) {
+}
 
 /*
 ================
@@ -46,9 +61,7 @@ LOGFUNCTION_SVOID( ModHoldableTransporter_Rematerialize, ( int clientNum ), ( cl
 	ent->client->ps.stats[STAT_HOLDABLE_ITEM] = 0;
 	ent->client->ps.stats[STAT_USEABLE_PLACED] = 0;
 
-	if ( ModHoldableTransporter_config->postBorgTeleport ) {
-		ModHoldableTransporter_config->postBorgTeleport( clientNum );
-	}
+	modfn_lcl.PostBorgTeleport( clientNum );
 }
 
 /*
@@ -68,7 +81,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PortableTransporterActivate), ( int clientNum ),
 		ModHoldableTransporter_Rematerialize( clientNum );
 	}
 
-	else if ( ModHoldableTransporter_config->borgTeleportEnabled && ModHoldableTransporter_config->borgTeleportEnabled( clientNum ) ) {
+	else if ( modfn_lcl.BorgTeleportEnabled( clientNum ) ) {
 		// go into free-roaming mode
 		gentity_t	*tent;
 		ent->flags |= FL_NOTARGET;
@@ -130,7 +143,6 @@ ModHoldableTransporter_Init
 LOGFUNCTION_VOID( ModHoldableTransporter_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
-		ModHoldableTransporter_config = G_Alloc( sizeof( *ModHoldableTransporter_config ) );
 
 		INIT_FN_STACKABLE( PortableTransporterActivate );
 		INIT_FN_STACKABLE( PreRunFrame );

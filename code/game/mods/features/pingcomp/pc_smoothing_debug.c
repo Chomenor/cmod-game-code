@@ -7,7 +7,7 @@
 * TODO: Add statistics tracking features.
 */
 
-#define MOD_PREFIX( x ) ModPCSmoothingDebug_##x
+#define MOD_NAME ModPCSmoothingDebug
 
 #include "mods/features/pingcomp/pc_local.h"
 
@@ -30,9 +30,6 @@ typedef struct {
 
 static struct {
 	SmoothingDebug_client_t clients[MAX_SMOOTHING_CLIENTS];
-
-	// For mod function stacking
-	ModFNType_ModConsoleCommand Prev_ModConsoleCommand;
 } *MOD_STATE;
 
 /*
@@ -102,13 +99,13 @@ void ModPCSmoothingDebug_Static_LogFrame( int clientNum, int targetTime, int res
 Handle smoothing_debug_frames command.
 ===================
 */
-LOGFUNCTION_SRET( qboolean, MOD_PREFIX(ModConsoleCommand), ( const char *cmd ), ( cmd ), "G_MODFN_MODCONSOLECOMMAND" ) {
+LOGFUNCTION_SRET( qboolean, MOD_PREFIX(ModConsoleCommand), ( MODFN_CTV, const char *cmd ), ( MODFN_CTN, cmd ), "G_MODFN_MODCONSOLECOMMAND" ) {
 	if (Q_stricmp (cmd, "smoothing_debug_frames") == 0) {
 		ModPCSmoothingDebug_PrintFrames();
 		return qtrue;
 	}
 
-	return MOD_STATE->Prev_ModConsoleCommand( cmd );
+	return MODFN_NEXT( ModConsoleCommand, ( MODFN_NC, cmd ) );
 }
 
 /*
@@ -120,6 +117,6 @@ LOGFUNCTION_VOID( ModPCSmoothingDebug_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		INIT_FN_STACKABLE( ModConsoleCommand );
+		MODFN_REGISTER( ModConsoleCommand );
 	}
 }

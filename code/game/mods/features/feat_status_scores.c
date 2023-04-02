@@ -15,16 +15,12 @@
 * If not available, this mod will not have any effect.
 */
 
-#define MOD_PREFIX( x ) ModStatusScores_##x
+#define MOD_NAME ModStatusScores
 
 #include "mods/g_mod_local.h"
 
 static struct {
 	int sharedScores[MAX_CLIENTS];
-
-	// For mod function stacking
-	ModFNType_PostRunFrame Prev_PostRunFrame;
-	ModFNType_GeneralInit Prev_GeneralInit;
 } *MOD_STATE;
 
 /*
@@ -34,9 +30,9 @@ static struct {
 Update scores array.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), (void), (), "G_MODFN_POSTRUNFRAME" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
 	int i;
-	MOD_STATE->Prev_PostRunFrame();
+	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 
 	for ( i = 0; i < level.maxclients; ++i ) {
 		if ( level.clients[i].pers.connected >= CON_CONNECTING ) {
@@ -54,8 +50,8 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), (void), (), "G_MODFN_POSTRUNFRAME" 
 Delay set array call until level.maxclients is initialized.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(GeneralInit), ( void ), (), "G_MODFN_GENERALINIT" ) {
-	MOD_STATE->Prev_GeneralInit();
+LOGFUNCTION_SVOID( MOD_PREFIX(GeneralInit), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_GENERALINIT" ) {
+	MODFN_NEXT( GeneralInit, ( MODFN_NC ) );
 	VMExt_FN_StatusScoresOverride_SetArray( MOD_STATE->sharedScores, level.maxclients );
 }
 
@@ -68,7 +64,7 @@ LOGFUNCTION_VOID( ModStatusScores_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE && VMExt_FNAvailable_StatusScoresOverride_SetArray() ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		INIT_FN_STACKABLE( PostRunFrame );
-		INIT_FN_STACKABLE( GeneralInit );
+		MODFN_REGISTER( PostRunFrame );
+		MODFN_REGISTER( GeneralInit );
 	}
 }

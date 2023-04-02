@@ -10,7 +10,7 @@
 * resulting in the appeareance of smooth movement.
 */
 
-#define MOD_PREFIX( x ) ModPCSmoothing_##x
+#define MOD_NAME ModPCSmoothing
 
 #include "mods/features/pingcomp/pc_local.h"
 
@@ -48,9 +48,6 @@ typedef struct {
 
 static struct {
 	smoothing_client_t clients[MAX_SMOOTHING_CLIENTS];
-
-	// For mod function stacking
-	ModFNType_CopyToBodyQue Prev_CopyToBodyQue;
 } *MOD_STATE;
 
 /*
@@ -290,9 +287,9 @@ Use smoothed position when creating body entity so it stays in the same visible 
 as the player entity body.
 =============
 */
-LOGFUNCTION_SRET( gentity_t *, MOD_PREFIX(CopyToBodyQue), ( int clientNum ), ( clientNum ), "G_MODFN_COPYTOBODYQUE" ) {
+LOGFUNCTION_SRET( gentity_t *, MOD_PREFIX(CopyToBodyQue), ( MODFN_CTV, int clientNum ), ( MODFN_CTN, clientNum ), "G_MODFN_COPYTOBODYQUE" ) {
 	ModPCSmoothing_Static_ShiftClient( clientNum, NULL );
-	return MOD_STATE->Prev_CopyToBodyQue( clientNum );
+	return MODFN_NEXT( CopyToBodyQue, ( MODFN_NC, clientNum ) );
 }
 
 /*
@@ -304,7 +301,7 @@ LOGFUNCTION_VOID( ModPCSmoothing_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		INIT_FN_STACKABLE( CopyToBodyQue );
+		MODFN_REGISTER( CopyToBodyQue );
 
 		ModPlayerMove_Init();	// for ModPCSmoothing_Static_RecordClientMove callback
 		ModPCSmoothingDebug_Init();

@@ -15,7 +15,7 @@
 * the same as long as it is needed.
 */
 
-#define MOD_PREFIX( x ) ModModelSelection_##x
+#define MOD_NAME ModModelSelection
 
 #include "mods/g_mod_local.h"
 
@@ -25,10 +25,6 @@ typedef struct {
 
 static struct {
 	modClient_t clients[MAX_CLIENTS];
-
-	// For mod function stacking
-	ModFNType_InitClientSession Prev_InitClientSession;
-	ModFNType_GenerateClientSessionInfo Prev_GenerateClientSessionInfo;
 } *MOD_STATE;
 
 /*
@@ -60,8 +56,8 @@ Retrieves player model string for client, performing any mod conversions as need
 ============
 */
 LOGFUNCTION_SVOID( MOD_PREFIX(GetPlayerModel),
-		( int clientNum, const char *userinfo, char *output, unsigned int outputSize ),
-		( clientNum, userinfo, output, outputSize ), "G_MODFN_GETPLAYERMODEL G_PLAYERMODELS" ) {
+		( MODFN_CTV, int clientNum, const char *userinfo, char *output, unsigned int outputSize ),
+		( MODFN_CTN, clientNum, userinfo, output, outputSize ), "G_MODFN_GETPLAYERMODEL G_PLAYERMODELS" ) {
 	gclient_t *client = &level.clients[clientNum];
 	modClient_t *modClient = &MOD_STATE->clients[clientNum];
 	char random_model[64];
@@ -112,11 +108,11 @@ LOGFUNCTION_SVOID( MOD_PREFIX(GetPlayerModel),
 (ModFN) InitClientSession
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(InitClientSession), ( int clientNum, qboolean initialConnect, const info_string_t *info ),
-		( clientNum, initialConnect, info ), "G_MODFN_INITCLIENTSESSION" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(InitClientSession), ( MODFN_CTV, int clientNum, qboolean initialConnect, const info_string_t *info ),
+		( MODFN_CTN, clientNum, initialConnect, info ), "G_MODFN_INITCLIENTSESSION" ) {
 	modClient_t *modClient = &MOD_STATE->clients[clientNum];
 
-	MOD_STATE->Prev_InitClientSession( clientNum, initialConnect, info );
+	MODFN_NEXT( InitClientSession, ( MODFN_NC, clientNum, initialConnect, info ) );
 
 	Q_strncpyz( modClient->validModel, Info_ValueForKey( info->s, "validModel" ), sizeof( modClient->validModel ) );
 }
@@ -126,11 +122,11 @@ LOGFUNCTION_SVOID( MOD_PREFIX(InitClientSession), ( int clientNum, qboolean init
 (ModFN) GenerateClientSessionInfo
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(GenerateClientSessionInfo), ( int clientNum, info_string_t *info ),
-		( clientNum, info ), "G_MODFN_GENERATECLIENTSESSIONINFO" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(GenerateClientSessionInfo), ( MODFN_CTV, int clientNum, info_string_t *info ),
+		( MODFN_CTN, clientNum, info ), "G_MODFN_GENERATECLIENTSESSIONINFO" ) {
 	modClient_t *modClient = &MOD_STATE->clients[clientNum];
 
-	MOD_STATE->Prev_GenerateClientSessionInfo( clientNum, info );
+	MODFN_NEXT( GenerateClientSessionInfo, ( MODFN_NC, clientNum, info ) );
 
 	if ( *modClient->validModel ) {
 		Info_SetValueForKey_Big( info->s, "validModel", modClient->validModel );
@@ -146,8 +142,8 @@ LOGFUNCTION_VOID( ModModelSelection_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		INIT_FN_BASE( GetPlayerModel );
-		INIT_FN_STACKABLE( InitClientSession );
-		INIT_FN_STACKABLE( GenerateClientSessionInfo );
+		MODFN_REGISTER( GetPlayerModel );
+		MODFN_REGISTER( InitClientSession );
+		MODFN_REGISTER( GenerateClientSessionInfo );
 	}
 }

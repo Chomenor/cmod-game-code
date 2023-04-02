@@ -7,20 +7,12 @@
 * has been waiting the longest.
 */
 
-#define MOD_PREFIX( x ) ModTournament_##x
+#define MOD_NAME ModTournament
 
 #include "mods/g_mod_local.h"
 
 static struct {
 	int losingClient;
-
-	// For mod function stacking
-	ModFNType_CheckJoinAllowed Prev_CheckJoinAllowed;
-	ModFNType_PrePlayerLeaveTeam Prev_PrePlayerLeaveTeam;
-	ModFNType_GenerateClientSessionStructure Prev_GenerateClientSessionStructure;
-	ModFNType_AdjustGeneralConstant Prev_AdjustGeneralConstant;
-	ModFNType_PostRunFrame Prev_PostRunFrame;
-	ModFNType_MatchStateTransition Prev_MatchStateTransition;
 } *MOD_STATE;
 
 /*
@@ -30,7 +22,7 @@ static struct {
 Currently tournament just restarts the rounds indefinitely rather than changing map.
 =============
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(ExitLevel), ( void ), (), "G_MATCHSTATE" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(ExitLevel), ( MODFN_CTV ), ( MODFN_CTN ), "G_MATCHSTATE" ) {
 	trap_SendConsoleCommand( EXEC_APPEND, "map_restart 0\n" );
 }
 
@@ -43,8 +35,8 @@ Check if joining or changing team/class is disabled due to match in progress.
 If join was blocked and messageClientNum >= 0, sends appropriate notification message to client.
 ================
 */
-LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckJoinAllowed), ( int clientNum, join_allowed_type_t type, team_t targetTeam ),
-		( clientNum, type, targetTeam ), "G_MODFN_CHECKJOINALLOWED" ) {
+LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckJoinAllowed), ( MODFN_CTV, int clientNum, join_allowed_type_t type, team_t targetTeam ),
+		( MODFN_CTN, clientNum, type, targetTeam ), "G_MODFN_CHECKJOINALLOWED" ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	// Class changes are allowed only during warmup
@@ -63,7 +55,7 @@ LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckJoinAllowed), ( int clientNum, join_
 		return qfalse;
 	}
 
-	return MOD_STATE->Prev_CheckJoinAllowed( clientNum, type, targetTeam );
+	return MODFN_NEXT( CheckJoinAllowed, ( MODFN_NC, clientNum, type, targetTeam ) );
 }
 
 /*
@@ -73,11 +65,11 @@ LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckJoinAllowed), ( int clientNum, join_
 If we are playing in a tournament game and losing, give a win to other player
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PrePlayerLeaveTeam), ( int clientNum, team_t oldTeam ),
-		( clientNum, oldTeam ), "G_MODFN_PREPLAYERLEAVETEAM" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(PrePlayerLeaveTeam), ( MODFN_CTV, int clientNum, team_t oldTeam ),
+		( MODFN_CTN, clientNum, oldTeam ), "G_MODFN_PREPLAYERLEAVETEAM" ) {
 	gclient_t *client = &level.clients[clientNum];
 
-	MOD_STATE->Prev_PrePlayerLeaveTeam( clientNum, oldTeam );
+	MODFN_NEXT( PrePlayerLeaveTeam, ( MODFN_NC, clientNum, oldTeam ) );
 
 	if ( !level.warmupTime && !level.intermissionQueued && !level.intermissiontime &&
 			level.numPlayingClients == 2 && level.sortedClients[1] == clientNum ) {
@@ -103,11 +95,11 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PrePlayerLeaveTeam), ( int clientNum, team_t oldTe
 Save wins, losses, and wait time state for client.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(GenerateClientSessionStructure), ( int clientNum, clientSession_t *sess ),
-		( clientNum, sess ), "G_MODFN_GENERATECLIENTSESSIONSTRUCTURE" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(GenerateClientSessionStructure), ( MODFN_CTV, int clientNum, clientSession_t *sess ),
+		( MODFN_CTN, clientNum, sess ), "G_MODFN_GENERATECLIENTSESSIONSTRUCTURE" ) {
 	gclient_t *client = &level.clients[clientNum];
 
-	MOD_STATE->Prev_GenerateClientSessionStructure( clientNum, sess );
+	MODFN_NEXT( GenerateClientSessionStructure, ( MODFN_NC, clientNum, sess ) );
 
 	sess->spectatorTime = client->sess.spectatorTime;
 	sess->wins = client->sess.wins;
@@ -126,12 +118,12 @@ LOGFUNCTION_SVOID( MOD_PREFIX(GenerateClientSessionStructure), ( int clientNum, 
 (ModFN) AdjustGeneralConstant
 ==================
 */
-static int MOD_PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defaultValue ) {
+static int MOD_PREFIX(AdjustGeneralConstant)( MODFN_CTV, generalConstant_t gcType, int defaultValue ) {
 	// Currently no enter game message in tournament.
 	if ( gcType == GC_SKIP_ENTER_GAME_PRINT )
 		return 1;
 
-	return MOD_STATE->Prev_AdjustGeneralConstant( gcType, defaultValue );
+	return MODFN_NEXT( AdjustGeneralConstant, ( MODFN_NC, gcType, defaultValue ) );
 }
 
 /*
@@ -141,8 +133,8 @@ static int MOD_PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defa
 Prints info messages to clients during ClientSpawn.
 ============
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(SpawnCenterPrintMessage), ( int clientNum, clientSpawnType_t spawnType ),
-		( clientNum, spawnType ), "G_MODFN_SPAWNCENTERPRINTMESSAGE" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(SpawnCenterPrintMessage), ( MODFN_CTV, int clientNum, clientSpawnType_t spawnType ),
+		( MODFN_CTN, clientNum, spawnType ), "G_MODFN_SPAWNCENTERPRINTMESSAGE" ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	if ( client->sess.sessionTeam == TEAM_SPECTATOR || spawnType != CST_RESPAWN ) {
@@ -213,8 +205,8 @@ static void ModTournament_CheckAddPlayers( void ) {
 Check for adding more players to match.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) {
-	MOD_STATE->Prev_PostRunFrame();
+LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
+	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 
 	ModTournament_CheckAddPlayers();
 }
@@ -224,9 +216,9 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME
 (ModFN) MatchStateTransition
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(MatchStateTransition), ( matchState_t oldState, matchState_t newState ),
-		( oldState, newState ), "G_MODFN_MATCHSTATETRANSITION" ) {
-	MOD_STATE->Prev_MatchStateTransition( oldState, newState );
+LOGFUNCTION_SVOID( MOD_PREFIX(MatchStateTransition), ( MODFN_CTV, matchState_t oldState, matchState_t newState ),
+		( MODFN_CTN, oldState, newState ), "G_MODFN_MATCHSTATETRANSITION" ) {
+	MODFN_NEXT( MatchStateTransition, ( MODFN_NC, oldState, newState ) );
 
 	// If exit was triggered, it means we should have a valid winner and loser, so update scores
 	if ( newState == MS_INTERMISSION_QUEUED && EF_WARN_ASSERT( oldState < MS_INTERMISSION_QUEUED )
@@ -252,8 +244,8 @@ LOGFUNCTION_VOID( ModTournament_Init, ( void ), (), "G_MOD_INIT G_TOURNAMENT" ) 
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 		MOD_STATE->losingClient = -1;
 
-		INIT_FN_BASE( ExitLevel );
-		INIT_FN_BASE( SpawnCenterPrintMessage );
+		MODFN_REGISTER( ExitLevel );
+		MODFN_REGISTER( SpawnCenterPrintMessage );
 
 		if ( G_ModUtils_GetLatchedValue( "g_pModElimination", "0", 0 ) ) {
 			ModElimination_Init();
@@ -263,11 +255,11 @@ LOGFUNCTION_VOID( ModTournament_Init, ( void ), (), "G_MOD_INIT G_TOURNAMENT" ) 
 			ModSpecialties_Init();
 		}
 
-		INIT_FN_STACKABLE( CheckJoinAllowed );
-		INIT_FN_STACKABLE( PrePlayerLeaveTeam );
-		INIT_FN_STACKABLE( GenerateClientSessionStructure );
-		INIT_FN_STACKABLE( AdjustGeneralConstant );
-		INIT_FN_STACKABLE( PostRunFrame );
-		INIT_FN_STACKABLE( MatchStateTransition );
+		MODFN_REGISTER( CheckJoinAllowed );
+		MODFN_REGISTER( PrePlayerLeaveTeam );
+		MODFN_REGISTER( GenerateClientSessionStructure );
+		MODFN_REGISTER( AdjustGeneralConstant );
+		MODFN_REGISTER( PostRunFrame );
+		MODFN_REGISTER( MatchStateTransition );
 	}
 }

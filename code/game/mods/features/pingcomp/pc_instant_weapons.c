@@ -6,7 +6,7 @@
 * the player firing the weapon.
 */
 
-#define MOD_PREFIX( x ) ModPCInstantWeapons_##x
+#define MOD_NAME ModPCInstantWeapons
 
 #include "mods/features/pingcomp/pc_local.h"
 
@@ -16,10 +16,6 @@
 static struct {
 	qboolean postPmoveActive;
 	int postPmoveClient;
-
-	// For mod function stacking
-	ModFNType_PostPmoveActions Prev_PostPmoveActions;
-	ModFNType_TrapTrace Prev_TrapTrace;
 } *MOD_STATE;
 
 /*
@@ -27,13 +23,13 @@ static struct {
 ModPCInstantWeapons_ShiftedTrace
 ==============
 */
-static void ModPCInstantWeapons_ShiftedTrace( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs,
+static void ModPCInstantWeapons_ShiftedTrace( MODFN_CTV, trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs,
 		const vec3_t end, int passEntityNum, int contentmask, int modFlags, int shiftTime, int ignoreClient ) {
 	positionShiftState_t oldState = ModPCPositionShift_Shared_GetShiftState();
 
 	ModPCPositionShift_Shared_TimeShiftClients( ignoreClient, shiftTime );
 
-	MOD_STATE->Prev_TrapTrace( results, start, mins, maxs, end, passEntityNum, contentmask, modFlags );
+	MODFN_NEXT( TrapTrace, ( MODFN_NC, results, start, mins, maxs, end, passEntityNum, contentmask, modFlags ) );
 
 	ModPCPositionShift_Shared_SetShiftState( &oldState );
 }
@@ -45,12 +41,12 @@ static void ModPCInstantWeapons_ShiftedTrace( trace_t *results, const vec3_t sta
 Store the currently active client while move is in progress.
 ==============
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostPmoveActions), ( pmove_t *pmove, int clientNum, int oldEventSequence ),
-		( pmove, clientNum, oldEventSequence ), "G_MODFN_POSTPMOVEACTIONS" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(PostPmoveActions), ( MODFN_CTV, pmove_t *pmove, int clientNum, int oldEventSequence ),
+		( MODFN_CTN, pmove, clientNum, oldEventSequence ), "G_MODFN_POSTPMOVEACTIONS" ) {
 	MOD_STATE->postPmoveActive = qtrue;
 	MOD_STATE->postPmoveClient = clientNum;
 
-	MOD_STATE->Prev_PostPmoveActions( pmove, clientNum, oldEventSequence );
+	MODFN_NEXT( PostPmoveActions, ( MODFN_NC, pmove, clientNum, oldEventSequence ) );
 
 	MOD_STATE->postPmoveActive = qfalse;
 }
@@ -60,9 +56,9 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostPmoveActions), ( pmove_t *pmove, int clientNum
 (ModFN) TrapTrace
 ==============
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(TrapTrace), ( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs,
+LOGFUNCTION_SVOID( MOD_PREFIX(TrapTrace), ( MODFN_CTV, trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs,
 		const vec3_t end, int passEntityNum, int contentmask, int modFlags ),
-		( results, start, mins, maxs, end, passEntityNum, contentmask, modFlags ), "G_MODFN_TRAPTRACE" ) {
+		( MODFN_CTN, results, start, mins, maxs, end, passEntityNum, contentmask, modFlags ), "G_MODFN_TRAPTRACE" ) {
 	int shiftTime = 0;
 	if ( MOD_STATE->postPmoveActive ) {
 		gclient_t *client = &level.clients[MOD_STATE->postPmoveClient];
@@ -81,10 +77,10 @@ LOGFUNCTION_SVOID( MOD_PREFIX(TrapTrace), ( trace_t *results, const vec3_t start
 	}
 
 	if ( shiftTime ) {
-		ModPCInstantWeapons_ShiftedTrace( results, start, mins, maxs, end, passEntityNum, contentmask, modFlags,
+		ModPCInstantWeapons_ShiftedTrace( MODFN_CTN, results, start, mins, maxs, end, passEntityNum, contentmask, modFlags,
 				shiftTime, MOD_STATE->postPmoveClient );
 	} else {
-		MOD_STATE->Prev_TrapTrace( results, start, mins, maxs, end, passEntityNum, contentmask, modFlags );
+		MODFN_NEXT( TrapTrace, ( MODFN_NC, results, start, mins, maxs, end, passEntityNum, contentmask, modFlags ) );
 	}
 }
 
@@ -99,7 +95,7 @@ LOGFUNCTION_VOID( ModPCInstantWeapons_Init, ( void ), (), "G_MOD_INIT" ) {
 
 		ModPCPositionShift_Init();
 
-		INIT_FN_STACKABLE( PostPmoveActions );
-		INIT_FN_STACKABLE( TrapTrace );
+		MODFN_REGISTER( PostPmoveActions );
+		MODFN_REGISTER( TrapTrace );
 	}
 }

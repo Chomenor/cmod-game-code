@@ -6,7 +6,7 @@
 * Enabled by g_mod_elimTweaks cvar.
 */
 
-#define MOD_PREFIX( x ) ModElimTweaks##x
+#define MOD_NAME ModElimTweaks
 
 #include "mods/modes/elimination/elim_local.h"
 
@@ -59,18 +59,6 @@ static struct {
 	qboolean onlyBotsTimelimitActive;
 	int oldTimelimit;
 #endif
-
-	// For mod function stacking
-#ifdef FEATURE_INTERMISSION_READY_TWEAKS
-	ModFNType_IntermissionReadyConfig Prev_IntermissionReadyConfig;
-#endif
-	ModFNType_AdjustGeneralConstant Prev_AdjustGeneralConstant;
-	ModFNType_AdjustScoreboardAttributes Prev_AdjustScoreboardAttributes;
-	ModFNType_CheckSuicideAllowed Prev_CheckSuicideAllowed;
-	ModFNType_PostPlayerDie Prev_PostPlayerDie;
-	ModFNType_PrePlayerLeaveTeam Prev_PrePlayerLeaveTeam;
-	ModFNType_PostRunFrame Prev_PostRunFrame;
-	ModFNType_MatchStateTransition Prev_MatchStateTransition;
 } *MOD_STATE;
 
 #ifdef FEATURE_ELIMINATED_MESSAGES
@@ -120,8 +108,8 @@ static void ModElimTweaks_EliminatedMessage( int clientNum, team_t oldTeam, qboo
 (ModFN) IntermissionReadyConfig
 ================
 */
-static void MOD_PREFIX(IntermissionReadyConfig)( modIntermissionReady_config_t *config ) {
-	MOD_STATE->Prev_IntermissionReadyConfig( config );
+static void MOD_PREFIX(IntermissionReadyConfig)( MODFN_CTV, modIntermissionReady_config_t *config ) {
+	MODFN_NEXT( IntermissionReadyConfig, ( MODFN_NC, config ) );
 	config->readySound = qtrue;
 	config->ignoreSpectators = qtrue;
 	config->noPlayersExit = qtrue;
@@ -137,7 +125,7 @@ static void MOD_PREFIX(IntermissionReadyConfig)( modIntermissionReady_config_t *
 (ModFN) AdjustGeneralConstant
 ==================
 */
-static int MOD_PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defaultValue ) {
+static int MOD_PREFIX(AdjustGeneralConstant)( MODFN_CTV, generalConstant_t gcType, int defaultValue ) {
 #ifdef FEATURE_JOIN_MESSAGE_TWEAKS
 	if ( gcType == GC_SKIP_ENTER_GAME_PRINT )
 		return 1;
@@ -145,7 +133,7 @@ static int MOD_PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defa
 		return 1;
 #endif
 
-	return MOD_STATE->Prev_AdjustGeneralConstant( gcType, defaultValue );
+	return MODFN_NEXT( AdjustGeneralConstant, ( MODFN_NC, gcType, defaultValue ) );
 }
 
 /*
@@ -153,7 +141,7 @@ static int MOD_PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defa
 (ModFN) AdjustScoreboardAttributes
 ================
 */
-static int MOD_PREFIX(AdjustScoreboardAttributes)( int clientNum, scoreboardAttribute_t saType, int defaultValue ) {
+static int MOD_PREFIX(AdjustScoreboardAttributes)( MODFN_CTV, int clientNum, scoreboardAttribute_t saType, int defaultValue ) {
 #ifdef FEATURE_SCOREBOARD_TIME_INDICATOR
 	// Gladiator-style time indicator
 	if ( saType == SA_PLAYERTIME ) {
@@ -175,7 +163,7 @@ static int MOD_PREFIX(AdjustScoreboardAttributes)( int clientNum, scoreboardAttr
 	}
 #endif
 
-	return MOD_STATE->Prev_AdjustScoreboardAttributes( clientNum, saType, defaultValue );
+	return MODFN_NEXT( AdjustScoreboardAttributes, ( MODFN_NC, clientNum, saType, defaultValue ) );
 }
 
 /*
@@ -185,15 +173,15 @@ static int MOD_PREFIX(AdjustScoreboardAttributes)( int clientNum, scoreboardAttr
 Disable suicide during warmup.
 =================
 */
-LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckSuicideAllowed), ( int clientNum ),
-		( clientNum ), "G_MODFN_CHECKSUICIDEALLOWED" ) {
+LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckSuicideAllowed), ( MODFN_CTV, int clientNum ),
+		( MODFN_CTN, clientNum ), "G_MODFN_CHECKSUICIDEALLOWED" ) {
 #ifdef FEATURE_RESTRICT_SUICIDE
 	if ( level.matchState == MS_WARMUP || level.matchState >= MS_INTERMISSION_QUEUED ) {
 		return qfalse;
 	}
 #endif
 
-	return MOD_STATE->Prev_CheckSuicideAllowed( clientNum );
+	return MODFN_NEXT( CheckSuicideAllowed, ( MODFN_NC, clientNum ) );
 }
 
 /*
@@ -201,13 +189,13 @@ LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckSuicideAllowed), ( int clientNum ),
 (ModFN) PostPlayerDie
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostPlayerDie), ( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int meansOfDeath, int *awardPoints ),
-		( self, inflictor, attacker, meansOfDeath, awardPoints ), "G_MODFN_POSTPLAYERDIE" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(PostPlayerDie), ( MODFN_CTV, gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int meansOfDeath, int *awardPoints ),
+		( MODFN_CTN, self, inflictor, attacker, meansOfDeath, awardPoints ), "G_MODFN_POSTPLAYERDIE" ) {
 	int clientNum = self - g_entities;
 	gclient_t *client = &level.clients[clientNum];
 	elim_extras_client_t *modclient = &MOD_STATE->clients[clientNum];
 
-	MOD_STATE->Prev_PostPlayerDie( self, inflictor, attacker, meansOfDeath, awardPoints );
+	MODFN_NEXT( PostPlayerDie, ( MODFN_NC, self, inflictor, attacker, meansOfDeath, awardPoints ) );
 
 	if ( ModElimination_Static_IsPlayerEliminated( clientNum ) ) {
 #ifdef FEATURE_ELIMINATED_MESSAGES
@@ -229,9 +217,9 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostPlayerDie), ( gentity_t *self, gentity_t *infl
 Reset stats and eliminated state when player switches teams or becomes spectator.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PrePlayerLeaveTeam), ( int clientNum, team_t oldTeam ),
-		( clientNum, oldTeam ), "G_MODFN_PREPLAYERLEAVETEAM" ) {
-	MOD_STATE->Prev_PrePlayerLeaveTeam( clientNum, oldTeam );
+LOGFUNCTION_SVOID( MOD_PREFIX(PrePlayerLeaveTeam), ( MODFN_CTV, int clientNum, team_t oldTeam ),
+		( MODFN_CTN, clientNum, oldTeam ), "G_MODFN_PREPLAYERLEAVETEAM" ) {
+	MODFN_NEXT( PrePlayerLeaveTeam, ( MODFN_NC, clientNum, oldTeam ) );
 
 #ifdef FEATURE_ELIMINATED_MESSAGES
 	if ( level.matchState == MS_ACTIVE && oldTeam != TEAM_SPECTATOR && !ModElimination_Static_IsPlayerEliminated( clientNum ) ) {
@@ -245,8 +233,8 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PrePlayerLeaveTeam), ( int clientNum, team_t oldTe
 (ModFN) PostRunFrame
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), (void), (), "G_MODFN_POSTRUNFRAME" ) {
-	MOD_STATE->Prev_PostRunFrame();
+LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
+	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 
 #ifdef FEATURE_TIMELIMIT_RESTART
 	// Check for restart.
@@ -264,9 +252,9 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), (void), (), "G_MODFN_POSTRUNFRAME" 
 (ModFN) MatchStateTransition
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(MatchStateTransition), ( matchState_t oldState, matchState_t newState ),
-		( oldState, newState ), "G_MODFN_MATCHSTATETRANSITION" ) {
-	MOD_STATE->Prev_MatchStateTransition( oldState, newState );
+LOGFUNCTION_SVOID( MOD_PREFIX(MatchStateTransition), ( MODFN_CTV, matchState_t oldState, matchState_t newState ),
+		( MODFN_CTN, oldState, newState ), "G_MODFN_MATCHSTATETRANSITION" ) {
+	MODFN_NEXT( MatchStateTransition, ( MODFN_NC, oldState, newState ) );
 
 #ifdef FEATURE_SURVIVOR_MESSAGES
 	if ( newState == MS_INTERMISSION_QUEUED ) {
@@ -293,13 +281,13 @@ LOGFUNCTION_VOID( ModElimTweaks_Init, ( void ), (), "G_MOD_INIT G_ELIMINATION" )
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		INIT_FN_STACKABLE( AdjustGeneralConstant );
-		INIT_FN_STACKABLE( AdjustScoreboardAttributes );
-		INIT_FN_STACKABLE( CheckSuicideAllowed );
-		INIT_FN_STACKABLE( PostPlayerDie );
-		INIT_FN_STACKABLE( PrePlayerLeaveTeam );
-		INIT_FN_STACKABLE( PostRunFrame );
-		INIT_FN_STACKABLE( MatchStateTransition );
+		MODFN_REGISTER( AdjustGeneralConstant );
+		MODFN_REGISTER( AdjustScoreboardAttributes );
+		MODFN_REGISTER( CheckSuicideAllowed );
+		MODFN_REGISTER( PostPlayerDie );
+		MODFN_REGISTER( PrePlayerLeaveTeam );
+		MODFN_REGISTER( PostRunFrame );
+		MODFN_REGISTER( MatchStateTransition );
 
 #ifdef FEATURE_FINALIST_TIMELIMIT
 		ModElimTimelimit_Init();
@@ -313,7 +301,7 @@ LOGFUNCTION_VOID( ModElimTweaks_Init, ( void ), (), "G_MOD_INIT G_ELIMINATION" )
 
 #ifdef FEATURE_INTERMISSION_READY_TWEAKS
 		ModIntermissionReady_Init();
-		INIT_FN_STACKABLE_LCL( IntermissionReadyConfig );
+		MODFN_REGISTER( IntermissionReadyConfig );
 		ModIntermissionReady_Shared_UpdateConfig();
 #endif
 	}

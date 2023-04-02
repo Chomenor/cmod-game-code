@@ -5,7 +5,7 @@
 * teleporter in Assimilation and the demolitionist detpack in Specialties.
 */
 
-#define MOD_PREFIX( x ) ModPendingItem_##x
+#define MOD_NAME ModPendingItem
 
 #include "mods/g_mod_local.h"
 
@@ -16,10 +16,6 @@ typedef struct {
 
 static struct {
 	modClient_t clients[MAX_CLIENTS];
-
-	// For mod function stacking
-	ModFNType_PreClientSpawn Prev_PreClientSpawn;
-	ModFNType_PostRunFrame Prev_PostRunFrame;
 } *MOD_STATE;
 
 /*
@@ -29,12 +25,12 @@ static struct {
 Reset pending item when client spawns.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PreClientSpawn), ( int clientNum, clientSpawnType_t spawnType ),
-		( clientNum, spawnType ), "G_MODFN_PRECLIENTSPAWN" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(PreClientSpawn), ( MODFN_CTV, int clientNum, clientSpawnType_t spawnType ),
+		( MODFN_CTN, clientNum, spawnType ), "G_MODFN_PRECLIENTSPAWN" ) {
 	modClient_t *modclient = &MOD_STATE->clients[clientNum];
 	modclient->pendingItem = HI_NONE;
 	modclient->pendingItemTime = 0;
-	MOD_STATE->Prev_PreClientSpawn( clientNum, spawnType );
+	MODFN_NEXT( PreClientSpawn, ( MODFN_NC, clientNum, spawnType ) );
 }
 
 /*
@@ -42,9 +38,9 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PreClientSpawn), ( int clientNum, clientSpawnType_
 (ModFN) PostRunFrame
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
 	int i;
-	MOD_STATE->Prev_PostRunFrame();
+	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 
 	for ( i = 0; i < level.maxclients; i++ ) {
 		gclient_t *client = &level.clients[i];
@@ -92,7 +88,7 @@ LOGFUNCTION_VOID( ModPendingItem_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		INIT_FN_STACKABLE( PreClientSpawn );
-		INIT_FN_STACKABLE( PostRunFrame );
+		MODFN_REGISTER( PreClientSpawn );
+		MODFN_REGISTER( PostRunFrame );
 	}
 }

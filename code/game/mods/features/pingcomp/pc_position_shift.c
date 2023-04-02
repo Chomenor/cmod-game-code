@@ -13,7 +13,7 @@
 * useful for handling nested cases such as projectile movement and explosions.
 */
 
-#define MOD_PREFIX( x ) ModPCPositionShift_##x
+#define MOD_NAME ModPCPositionShift
 
 #include "mods/features/pingcomp/pc_local.h"
 
@@ -46,9 +46,6 @@ typedef struct {
 static struct {
 	position_client_t clients[POSITION_SHIFT_MAX_CLIENTS];
 	positionShiftState_t currentState;
-
-	// For mod function stacking
-	ModFNType_PostRunFrame Prev_PostRunFrame;
 } *MOD_STATE;
 
 /*
@@ -233,8 +230,8 @@ void ModPCPositionShift_Shared_SetShiftState( positionShiftState_t *shiftState )
 (ModFN) PostRunFrame
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) {
-	MOD_STATE->Prev_PostRunFrame();
+LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
+	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 
 	if ( ModPingcomp_Static_PositionShiftEnabled() ) {
 		ModPCPositionShift_RunServerFrame();
@@ -250,6 +247,6 @@ LOGFUNCTION_VOID( ModPCPositionShift_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		INIT_FN_STACKABLE( PostRunFrame );
+		MODFN_REGISTER( PostRunFrame );
 	}
 }

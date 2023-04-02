@@ -9,17 +9,14 @@
 * the most recent frame (level.time) during projectile movement.
 */
 
-#define MOD_PREFIX( x ) ModPCProjectileImpact_##x
+#define MOD_NAME ModPCProjectileImpact
 
 #include "mods/features/pingcomp/pc_local.h"
 
 #define STUCK_MISSILE( ent ) ( (ent)->s.pos.trType == TR_STATIONARY && ((ent)->s.eFlags&EF_MISSILE_STICK) )
 
 static struct {
-	// For mod function stacking
-	ModFNType_RadiusDamage Prev_RadiusDamage;
-	ModFNType_AdjustGeneralConstant Prev_AdjustGeneralConstant;
-	ModFNType_PostRunFrame Prev_PostRunFrame;
+	int _unused;
 } *MOD_STATE;
 
 /*
@@ -70,8 +67,8 @@ Shift clients during explosions for accurate radius damage.
 ============
 */
 LOGFUNCTION_SRET( qboolean, MOD_PREFIX(RadiusDamage),
-		( vec3_t origin, gentity_t *attacker, float damage, float radius, gentity_t *ignore, int dflags, int mod ),
-		( origin, attacker, damage, radius, ignore, dflags, mod ), "G_MODFN_RADIUSDAMAGE" ) {
+		( MODFN_CTV, vec3_t origin, gentity_t *attacker, float damage, float radius, gentity_t *ignore, int dflags, int mod ),
+		( MODFN_CTN, origin, attacker, damage, radius, ignore, dflags, mod ), "G_MODFN_RADIUSDAMAGE" ) {
 	if ( ModPingcomp_Static_SmoothingEnabled() ) {
 		if ( ( mod == MOD_GRENADE_SPLASH || mod == MOD_GRENADE_ALT_SPLASH ) && ( !ignore || ignore->s.eType != ET_PLAYER ) ) {
 			// Don't shift player positions for delayed explosion mines (tripmines and timed detonations).
@@ -87,13 +84,13 @@ LOGFUNCTION_SRET( qboolean, MOD_PREFIX(RadiusDamage),
 				ModPCPositionShift_Shared_TimeShiftClient( attackerNum, 0 );
 			}
 
-			result = MOD_STATE->Prev_RadiusDamage( origin, attacker, damage, radius, ignore, dflags, mod );
+			result = MODFN_NEXT( RadiusDamage, ( MODFN_NC, origin, attacker, damage, radius, ignore, dflags, mod ) );
 			ModPCPositionShift_Shared_SetShiftState( &oldState );
 			return result;
 		}
 	}
 
-	return MOD_STATE->Prev_RadiusDamage( origin, attacker, damage, radius, ignore, dflags, mod );
+	return MODFN_NEXT( RadiusDamage, ( MODFN_NC, origin, attacker, damage, radius, ignore, dflags, mod ) );
 }
 
 /*
@@ -103,12 +100,12 @@ LOGFUNCTION_SRET( qboolean, MOD_PREFIX(RadiusDamage),
 Disable the normal run missile routine.
 ==================
 */
-int MOD_PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defaultValue ) {
+int MOD_PREFIX(AdjustGeneralConstant)( MODFN_CTV, generalConstant_t gcType, int defaultValue ) {
 	if ( gcType == GC_SKIP_RUN_MISSILE && ModPingcomp_Static_SmoothingEnabled() ) {
 		return 1;
 	}
 
-	return MOD_STATE->Prev_AdjustGeneralConstant( gcType, defaultValue );
+	return MODFN_NEXT( AdjustGeneralConstant, ( MODFN_NC, gcType, defaultValue ) );
 }
 
 /*
@@ -118,8 +115,8 @@ int MOD_PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defaultValu
 Perform custom run missile routine.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) {
-	MOD_STATE->Prev_PostRunFrame();
+LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
+	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 
 	// At this point, PostRunFrame should have been called in the ModPCPositionShift module, so
 	// smoothing positions for this frame have been calculated and saved in the collision record.
@@ -140,8 +137,8 @@ LOGFUNCTION_VOID( ModPCProjectileImpact_Init, ( void ), (), "G_MOD_INIT" ) {
 
 		ModPCPositionShift_Init();
 
-		INIT_FN_STACKABLE( RadiusDamage );
-		INIT_FN_STACKABLE( AdjustGeneralConstant );
-		INIT_FN_STACKABLE( PostRunFrame );
+		MODFN_REGISTER( RadiusDamage );
+		MODFN_REGISTER( AdjustGeneralConstant );
+		MODFN_REGISTER( PostRunFrame );
 	}
 }

@@ -6,7 +6,7 @@
 * changed to a different one or shifted to the side to ensure there is space for the player.
 */
 
-#define MOD_PREFIX( x ) ModSpawnProtect_##x
+#define MOD_NAME ModSpawnProtect
 
 #include "mods/g_mod_local.h"
 
@@ -221,8 +221,8 @@ Checks if player spawn selected by the normal process would cause a telefrag, an
 replace it with a different or shifted spawn point.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PatchClientSpawn), ( int clientNum, gentity_t **spawn, vec3_t origin, vec3_t angles ),
-		( clientNum, spawn, origin, angles ), "G_MODFN_PATCHCLIENTSPAWN" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(PatchClientSpawn), ( MODFN_CTV, int clientNum, gentity_t **spawn, vec3_t origin, vec3_t angles ),
+		( MODFN_CTN, clientNum, spawn, origin, angles ), "G_MODFN_PATCHCLIENTSPAWN" ) {
 	if ( !*spawn || SpotWouldTelefrag( origin ) ) {
 		if ( SP_DEBUG ) {
 			if ( clientNum >= 0 ) {
@@ -270,6 +270,6 @@ LOGFUNCTION_VOID( ModSpawnProtect_Init, ( void ), (), "G_MOD_INIT" ) {
 
 		G_RegisterTrackedCvar( &MOD_STATE->g_debugSpawnProtect, "g_debugSpawnProtect", "0", 0, qfalse );
 
-		INIT_FN_BASE( PatchClientSpawn );
+		MODFN_REGISTER( PatchClientSpawn );
 	}
 }

@@ -10,7 +10,7 @@
 * g_bot_fastAdding: Increases the speed at which bots are added or removed.
 */
 
-#define MOD_PREFIX( x ) ModBotAdding_##x
+#define MOD_NAME ModBotAdding
 
 #include "mods/g_mod_local.h"
 
@@ -19,10 +19,6 @@ static struct {
 	trackedCvar_t g_bot_fastAdding;
 
 	int checkTime;
-
-	// For mod function stacking
-	ModFNType_AdjustGeneralConstant Prev_AdjustGeneralConstant;
-	ModFNType_PostRunFrame Prev_PostRunFrame;
 } *MOD_STATE;
 
 typedef struct {
@@ -281,12 +277,12 @@ static qboolean ModBotAdding_CheckBots( void ) {
 Disable standard bot_minplayers handling.
 ==================
 */
-int MOD_PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defaultValue ) {
+int MOD_PREFIX(AdjustGeneralConstant)( MODFN_CTV, generalConstant_t gcType, int defaultValue ) {
 	if ( gcType == GC_DISABLE_BOT_ADDING ) {
 		return 1;
 	}
 
-	return MOD_STATE->Prev_AdjustGeneralConstant( gcType, defaultValue );
+	return MODFN_NEXT( AdjustGeneralConstant, ( MODFN_NC, gcType, defaultValue ) );
 }
 
 /*
@@ -296,8 +292,8 @@ int MOD_PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defaultValu
 Check periodically for adding/removing bots.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) {
-	MOD_STATE->Prev_PostRunFrame();
+LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
+	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 
 	if ( level.matchState < MS_INTERMISSION_QUEUED && !level.restartClientsPending &&
 			level.time >= MOD_STATE->checkTime ) {
@@ -325,7 +321,7 @@ LOGFUNCTION_VOID( ModBotAdding_Init, ( void ), (), "G_MOD_INIT" ) {
 		G_RegisterTrackedCvar( &MOD_STATE->g_bot_doubleRemove, "g_bot_doubleRemove", "0", 0, qfalse );
 		G_RegisterTrackedCvar( &MOD_STATE->g_bot_fastAdding, "g_bot_fastAdding", "0", 0, qfalse );
 
-		INIT_FN_STACKABLE( AdjustGeneralConstant );
-		INIT_FN_STACKABLE( PostRunFrame );
+		MODFN_REGISTER( AdjustGeneralConstant );
+		MODFN_REGISTER( PostRunFrame );
 	}
 }

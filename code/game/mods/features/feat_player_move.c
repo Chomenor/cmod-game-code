@@ -14,7 +14,7 @@
 *    acceleration regardless of how long the jump key is held.
 */
 
-#define MOD_PREFIX( x ) ModPlayerMove_##x
+#define MOD_NAME ModPlayerMove
 
 #include "mods/g_mod_local.h"
 
@@ -26,10 +26,6 @@ static struct {
 	trackedCvar_t g_pMoveBotsMsec;
 	trackedCvar_t g_pMoveTriggerMode;
 	trackedCvar_t g_noJumpKeySlowdown;
-
-	// For mod function stacking
-	ModFNType_PmoveInit Prev_PmoveInit;
-	ModFNType_AddModConfigInfo Prev_AddModConfigInfo;
 } *MOD_STATE;
 
 typedef struct {
@@ -62,7 +58,7 @@ LOGFUNCTION_SVOID( ModPlayerMove_PostPmoveCallback, ( pmove_t *pmove, qboolean f
 Returns fixed frame length to use for player move, or 0 for no fixed length.
 ==============
 */
-int MOD_PREFIX(PmoveFixedLength)( qboolean isBot ) {
+static int MOD_PREFIX(PmoveFixedLength)( MODFN_CTV, qboolean isBot ) {
 	int time = MOD_STATE->g_pMoveMsec.integer;
 	if ( isBot && MOD_STATE->g_pMoveBotsMsec.integer >= 0 ) {
 		time = MOD_STATE->g_pMoveBotsMsec.integer;
@@ -83,7 +79,7 @@ int MOD_PREFIX(PmoveFixedLength)( qboolean isBot ) {
 Performs player movement corresponding to a single input usercmd from the client.
 ==============
 */
-LOGFUNCTION_VOID( MOD_PREFIX(RunPlayerMove), ( int clientNum ), ( clientNum ), "G_MODFN_RUNPLAYERMOVE" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(RunPlayerMove), ( MODFN_CTV, int clientNum ), ( MODFN_CTN, clientNum ), "G_MODFN_RUNPLAYERMOVE" ) {
 	gclient_t *client = &level.clients[clientNum];
 	playerState_t *ps = &client->ps;
 	pmove_t pmove;
@@ -123,9 +119,9 @@ LOGFUNCTION_VOID( MOD_PREFIX(RunPlayerMove), ( int clientNum ), ( clientNum ), "
 (ModFN) PmoveInit
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PmoveInit), ( int clientNum, pmove_t *pmove ),
-		( clientNum, pmove ), "G_MODFN_PMOVEINIT" ) {
-	MOD_STATE->Prev_PmoveInit( clientNum, pmove );
+LOGFUNCTION_SVOID( MOD_PREFIX(PmoveInit), ( MODFN_CTV, int clientNum, pmove_t *pmove ),
+		( MODFN_CTN, clientNum, pmove ), "G_MODFN_PMOVEINIT" ) {
+	MODFN_NEXT( PmoveInit, ( MODFN_NC, clientNum, pmove ) );
 
 	if ( MOD_STATE->g_noJumpKeySlowdown.integer ) {
 		pmove->noJumpKeySlowdown = qtrue;
@@ -143,7 +139,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PmoveInit), ( int clientNum, pmove_t *pmove ),
 (ModFN) AddModConfigInfo
 ==============
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(AddModConfigInfo), ( char *info ), ( info ), "G_MODFN_ADDMODCONFIGINFO" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(AddModConfigInfo), ( MODFN_CTV, char *info ), ( MODFN_CTN, info ), "G_MODFN_ADDMODCONFIGINFO" ) {
 	int pMoveFixed = modfn.PmoveFixedLength( qfalse );
 
 	if ( pMoveFixed ) {
@@ -163,7 +159,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(AddModConfigInfo), ( char *info ), ( info ), "G_MO
 	Info_SetValueForKey( info, "snapVectorGravLimit", SNAPVECTOR_GRAV_LIMIT_STR );
 	Info_SetValueForKey( info, "noFlyingDrift", "1" );
 
-	MOD_STATE->Prev_AddModConfigInfo( info );
+	MODFN_NEXT( AddModConfigInfo, ( MODFN_NC, info ) );
 }
 
 /*
@@ -186,10 +182,10 @@ LOGFUNCTION_VOID( ModPlayerMove_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		INIT_FN_BASE( PmoveFixedLength );
-		INIT_FN_BASE( RunPlayerMove );
-		INIT_FN_STACKABLE( PmoveInit );
-		INIT_FN_STACKABLE_LCL( AddModConfigInfo );
+		MODFN_REGISTER( PmoveFixedLength );
+		MODFN_REGISTER( RunPlayerMove );
+		MODFN_REGISTER( PmoveInit );
+		MODFN_REGISTER( AddModConfigInfo );
 
 		G_RegisterTrackedCvar( &MOD_STATE->g_pMoveMsec, "g_pMoveMsec", "8", CVAR_ARCHIVE, qfalse );
 		G_RegisterTrackedCvar( &MOD_STATE->g_pMoveBotsMsec, "g_pMoveBotsMsec", "-1", CVAR_ARCHIVE, qfalse );

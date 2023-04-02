@@ -4,7 +4,7 @@
 * Extra elimination features that don't need to be part of the main module.
 */
 
-#define MOD_PREFIX( x ) ModElimMisc##x
+#define MOD_NAME ModElimMisc
 
 #include "mods/modes/elimination/elim_local.h"
 
@@ -15,14 +15,10 @@
 #define FEATURE_ELIMINATION_ADAPT_RESPAWN
 
 static struct {
+	int _unused;
 #ifdef FEATURE_ELIMINATION_ADAPT_RESPAWN
 	trackedCvar_t g_adaptRespawnIgnoreEliminated;
 #endif
-
-	// For mod function stacking
-	ModFNType_AdaptRespawnNumPlayers Prev_AdaptRespawnNumPlayers;
-	ModFNType_SetScoresConfigStrings Prev_SetScoresConfigStrings;
-	ModFNType_PostRunFrame Prev_PostRunFrame;
 } *MOD_STATE;
 
 /*
@@ -32,14 +28,14 @@ static struct {
 Support ignoring eliminated players in adapt respawn calculations.
 ================
 */
-LOGFUNCTION_SRET( int, MOD_PREFIX(AdaptRespawnNumPlayers), ( void ), (), "G_MODFN_ADAPTRESPAWNNUMPLAYERS" ) {
+LOGFUNCTION_SRET( int, MOD_PREFIX(AdaptRespawnNumPlayers), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_ADAPTRESPAWNNUMPLAYERS" ) {
 #ifdef FEATURE_ELIMINATION_ADAPT_RESPAWN
 	if ( MOD_STATE->g_adaptRespawnIgnoreEliminated.integer ) {
 		return ModElimination_Static_CountPlayersAlive();
 	}
 #endif
 
-	return MOD_STATE->Prev_AdaptRespawnNumPlayers();
+	return MODFN_NEXT( AdaptRespawnNumPlayers, ( MODFN_NC ) );
 }
 
 /*
@@ -47,7 +43,7 @@ LOGFUNCTION_SRET( int, MOD_PREFIX(AdaptRespawnNumPlayers), ( void ), (), "G_MODF
 (ModFN) SetScoresConfigStrings
 ============
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(SetScoresConfigStrings), ( void ), (), "G_MODFN_SETSCORESCONFIGSTRINGS" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(SetScoresConfigStrings), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_SETSCORESCONFIGSTRINGS" ) {
 #ifdef FEATURE_HUD_ROUND_INDICATOR_FFA
 	if ( g_gametype.integer < GT_TEAM ) {
 		// Place round numbers in score configstrings.
@@ -57,7 +53,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(SetScoresConfigStrings), ( void ), (), "G_MODFN_SE
 	}
 #endif
 
-	MOD_STATE->Prev_SetScoresConfigStrings();
+	MODFN_NEXT( SetScoresConfigStrings, ( MODFN_NC ) );
 }
 
 /*
@@ -67,8 +63,8 @@ LOGFUNCTION_SVOID( MOD_PREFIX(SetScoresConfigStrings), ( void ), (), "G_MODFN_SE
 Assumed to be registered after main elimination version.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), (void), (), "G_MODFN_POSTRUNFRAME" ) {
-	MOD_STATE->Prev_PostRunFrame();
+LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
+	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 
 #ifdef FEATURE_HUD_ROUND_INDICATOR_FFA
 	if ( g_gametype.integer < GT_TEAM ) {
@@ -97,9 +93,9 @@ LOGFUNCTION_VOID( ModElimMisc_Init, ( void ), (), "G_MOD_INIT G_ELIMINATION" ) {
 		G_RegisterTrackedCvar( &MOD_STATE->g_adaptRespawnIgnoreEliminated, "g_adaptRespawnIgnoreEliminated", "0", 0, qfalse );
 #endif
 
-		INIT_FN_STACKABLE( AdaptRespawnNumPlayers );
-		INIT_FN_STACKABLE( SetScoresConfigStrings );
-		INIT_FN_STACKABLE( PostRunFrame );
+		MODFN_REGISTER( AdaptRespawnNumPlayers );
+		MODFN_REGISTER( SetScoresConfigStrings );
+		MODFN_REGISTER( PostRunFrame );
 
 		if ( G_ModUtils_GetLatchedValue( "g_mod_elimTweaks", "0", 0 ) ) {
 			ModElimTweaks_Init();

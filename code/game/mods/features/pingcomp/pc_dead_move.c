@@ -9,7 +9,7 @@
 * is simulated starting from the point of death.
 */
 
-#define MOD_PREFIX( x ) ModPCDeadMove_##x
+#define MOD_NAME ModPCDeadMove
 
 #include "mods/features/pingcomp/pc_local.h"
 
@@ -25,9 +25,6 @@ typedef struct {
 
 static struct {
 	PingcompDeadMove_deadState_t deadStates[MAX_SMOOTHING_CLIENTS];
-
-	// For mod function stacking
-	ModFNType_PostRunFrame Prev_PostRunFrame;
 } *MOD_STATE;
 
 /*
@@ -123,7 +120,7 @@ void ModPCDeadMove_Static_InitDeadMove( int clientNum, vec3_t smoothingOrigin ) 
 (ModFN) PostRunFrame
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
 	int i;
 	int clientCount = MAX_SMOOTHING_CLIENTS;
 
@@ -134,7 +131,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME
 		}
 	}
 
-	MOD_STATE->Prev_PostRunFrame();
+	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 }
 
 /*
@@ -146,6 +143,6 @@ LOGFUNCTION_VOID( ModPCDeadMove_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		INIT_FN_STACKABLE( PostRunFrame );
+		MODFN_REGISTER( PostRunFrame );
 	}
 }

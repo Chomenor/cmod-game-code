@@ -6,7 +6,7 @@
 * teams mode the goal is to eliminate everybody on the other team.
 */
 
-#define MOD_PREFIX( x ) ModElimination_##x
+#define MOD_NAME ModElimination
 
 #include "mods/modes/elimination/elim_local.h"
 
@@ -23,19 +23,6 @@ static struct {
 	// Current round state
 	int numEliminated;
 	int joinLimitTime;
-
-	// For mod function stacking
-	ModFNType_SpectatorClient Prev_SpectatorClient;
-	ModFNType_AdjustScoreboardAttributes Prev_AdjustScoreboardAttributes;
-	ModFNType_PreClientSpawn Prev_PreClientSpawn;
-	ModFNType_CheckRespawnTime Prev_CheckRespawnTime;
-	ModFNType_AdjustGeneralConstant Prev_AdjustGeneralConstant;
-	ModFNType_CheckJoinAllowed Prev_CheckJoinAllowed;
-	ModFNType_PostPlayerDie Prev_PostPlayerDie;
-	ModFNType_PrePlayerLeaveTeam Prev_PrePlayerLeaveTeam;
-	ModFNType_InitClientSession Prev_InitClientSession;
-	ModFNType_PostRunFrame Prev_PostRunFrame;
-	ModFNType_MatchStateTransition Prev_MatchStateTransition;
 } *MOD_STATE;
 
 /*
@@ -134,12 +121,12 @@ qboolean ModElimination_Shared_MatchLocked( void ) {
 Treat eliminated players as spectators.
 ================
 */
-static qboolean MOD_PREFIX(SpectatorClient)( int clientNum ) {
+static qboolean MOD_PREFIX(SpectatorClient)( MODFN_CTV, int clientNum ) {
 	if( G_AssertConnectedClient( clientNum ) && MOD_STATE->clients[clientNum].eliminatedSpect ) {
 		return qtrue;
 	}
 
-	return MOD_STATE->Prev_SpectatorClient( clientNum );
+	return MODFN_NEXT( SpectatorClient, ( MODFN_NC, clientNum ) );
 }
 
 /*
@@ -149,13 +136,13 @@ static qboolean MOD_PREFIX(SpectatorClient)( int clientNum ) {
 Display red 'X' next to eliminated players name.
 ================
 */
-static int MOD_PREFIX(AdjustScoreboardAttributes)( int clientNum, scoreboardAttribute_t saType, int defaultValue ) {
+static int MOD_PREFIX(AdjustScoreboardAttributes)( MODFN_CTV, int clientNum, scoreboardAttribute_t saType, int defaultValue ) {
 	if ( saType == SA_ELIMINATED ) {
 		elimination_client_t *modclient = &MOD_STATE->clients[clientNum];
 		return modclient->eliminated ? 1 : 0;
 	}
 
-	return MOD_STATE->Prev_AdjustScoreboardAttributes( clientNum, saType, defaultValue );
+	return MODFN_NEXT( AdjustScoreboardAttributes, ( MODFN_NC, clientNum, saType, defaultValue ) );
 }
 
 /*
@@ -166,7 +153,7 @@ Use elimination score instead of PERS_SCORE to avoid issues with follow spectato
 and for compatibility with round indicator features.
 ================
 */
-static int MOD_PREFIX(EffectiveScore)( int clientNum, effectiveScoreType_t type ) {
+static int MOD_PREFIX(EffectiveScore)( MODFN_CTV, int clientNum, effectiveScoreType_t type ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	if ( client->sess.sessionTeam != TEAM_SPECTATOR ) {
@@ -183,12 +170,12 @@ static int MOD_PREFIX(EffectiveScore)( int clientNum, effectiveScoreType_t type 
 Transition recently eliminated players into spectator mode.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PreClientSpawn), ( int clientNum, clientSpawnType_t spawnType ),
-		( clientNum, spawnType ), "G_MODFN_PRECLIENTSPAWN" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(PreClientSpawn), ( MODFN_CTV, int clientNum, clientSpawnType_t spawnType ),
+		( MODFN_CTN, clientNum, spawnType ), "G_MODFN_PRECLIENTSPAWN" ) {
 	gclient_t *client = &level.clients[clientNum];
 	elimination_client_t *modclient = &MOD_STATE->clients[clientNum];
 
-	MOD_STATE->Prev_PreClientSpawn( clientNum, spawnType );
+	MODFN_NEXT( PreClientSpawn, ( MODFN_NC, clientNum, spawnType ) );
 	modclient->eliminatedSpect = modclient->eliminated;
 }
 
@@ -199,8 +186,8 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PreClientSpawn), ( int clientNum, clientSpawnType_
 Print info messages to clients during ClientSpawn.
 ============
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(SpawnCenterPrintMessage), ( int clientNum, clientSpawnType_t spawnType ),
-		( clientNum, spawnType ), "G_MODFN_SPAWNCENTERPRINTMESSAGE" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(SpawnCenterPrintMessage), ( MODFN_CTV, int clientNum, clientSpawnType_t spawnType ),
+		( MODFN_CTN, clientNum, spawnType ), "G_MODFN_SPAWNCENTERPRINTMESSAGE" ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	// Don't print this if warmup sequence is playing or going to be played
@@ -220,15 +207,15 @@ LOGFUNCTION_SVOID( MOD_PREFIX(SpawnCenterPrintMessage), ( int clientNum, clientS
 Force respawn after 3 seconds.
 ==============
 */
-LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckRespawnTime), ( int clientNum, qboolean voluntary ),
-		( clientNum, voluntary ), "G_MODFN_CHECKRESPAWNTIME" ) {
+LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckRespawnTime), ( MODFN_CTV, int clientNum, qboolean voluntary ),
+		( MODFN_CTN, clientNum, voluntary ), "G_MODFN_CHECKRESPAWNTIME" ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	if ( !voluntary && level.time > client->respawnKilledTime + 3000 ) {
 		return qtrue;
 	}
 
-	return MOD_STATE->Prev_CheckRespawnTime( clientNum, voluntary );
+	return MODFN_NEXT( CheckRespawnTime, ( MODFN_NC, clientNum, voluntary ) );
 }
 
 /*
@@ -236,7 +223,7 @@ LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckRespawnTime), ( int clientNum, qbool
 (ModFN) AdjustGeneralConstant
 ==================
 */
-static int MOD_PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defaultValue ) {
+static int MOD_PREFIX(AdjustGeneralConstant)( MODFN_CTV, generalConstant_t gcType, int defaultValue ) {
 	// In original implementation, intermission countdown starts when last player "respawns" to spectator.
 	// Total time from final death to intermission ranges from ~3700 to ~5000 ms depending on whether
 	// they press the respawn button.
@@ -251,7 +238,7 @@ static int MOD_PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defa
 	if ( gcType == GC_DISABLE_ADDSCORE )
 		return 1;
 
-	return MOD_STATE->Prev_AdjustGeneralConstant( gcType, defaultValue );
+	return MODFN_NEXT( AdjustGeneralConstant, ( MODFN_NC, gcType, defaultValue ) );
 }
 
 /*
@@ -274,7 +261,7 @@ LOGFUNCTION_SVOID( ModElimination_ExitRound, ( team_t winningTeam ), ( winningTe
 (ModFN) CheckExitRules
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(CheckExitRules), ( void ), (), "G_MODFN_CHECKEXITRULES" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(CheckExitRules), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_CHECKEXITRULES" ) {
 	// Don't go to intermission if nobody was eliminated.
 	if ( MOD_STATE->numEliminated ) {
 		if ( g_gametype.integer >= GT_TEAM ) {
@@ -300,8 +287,8 @@ LOGFUNCTION_SVOID( MOD_PREFIX(CheckExitRules), ( void ), (), "G_MODFN_CHECKEXITR
 Check if joining or changing team/class is disabled due to match in progress.
 ================
 */
-LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckJoinAllowed), ( int clientNum, join_allowed_type_t type, team_t targetTeam ),
-		( clientNum, type, targetTeam ), "G_MODFN_CHECKJOINLOCKED" ) {
+LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckJoinAllowed), ( MODFN_CTV, int clientNum, join_allowed_type_t type, team_t targetTeam ),
+		( MODFN_CTN, clientNum, type, targetTeam ), "G_MODFN_CHECKJOINLOCKED" ) {
 	gclient_t *client = &level.clients[clientNum];
 	elimination_client_t *modclient = &MOD_STATE->clients[clientNum];
 
@@ -329,7 +316,7 @@ LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckJoinAllowed), ( int clientNum, join_
 		return qfalse;
 	}
 
-	return MOD_STATE->Prev_CheckJoinAllowed( clientNum, type, targetTeam );
+	return MODFN_NEXT( CheckJoinAllowed, ( MODFN_NC, clientNum, type, targetTeam ) );
 }
 
 /*
@@ -337,13 +324,13 @@ LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckJoinAllowed), ( int clientNum, join_
 (ModFN) PostPlayerDie
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostPlayerDie), ( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int meansOfDeath, int *awardPoints ),
-		( self, inflictor, attacker, meansOfDeath, awardPoints ), "G_MODFN_POSTPLAYERDIE" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(PostPlayerDie), ( MODFN_CTV, gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int meansOfDeath, int *awardPoints ),
+		( MODFN_CTN, self, inflictor, attacker, meansOfDeath, awardPoints ), "G_MODFN_POSTPLAYERDIE" ) {
 	int clientNum = self - g_entities;
 	gclient_t *client = &level.clients[clientNum];
 	elimination_client_t *modclient = &MOD_STATE->clients[clientNum];
 
-	MOD_STATE->Prev_PostPlayerDie( self, inflictor, attacker, meansOfDeath, awardPoints );
+	MODFN_NEXT( PostPlayerDie, ( MODFN_NC, self, inflictor, attacker, meansOfDeath, awardPoints ) );
 
 	// In elimination, you get scored by when you died, but knockout just respawns you, not kill you.
 	if ( meansOfDeath != MOD_KNOCKOUT ) {
@@ -394,11 +381,11 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostPlayerDie), ( gentity_t *self, gentity_t *infl
 Reset stats and eliminated state when player switches teams or becomes spectator.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PrePlayerLeaveTeam), ( int clientNum, team_t oldTeam ),
-		( clientNum, oldTeam ), "G_MODFN_PREPLAYERLEAVETEAM" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(PrePlayerLeaveTeam), ( MODFN_CTV, int clientNum, team_t oldTeam ),
+		( MODFN_CTN, clientNum, oldTeam ), "G_MODFN_PREPLAYERLEAVETEAM" ) {
 	elimination_client_t *modclient = &MOD_STATE->clients[clientNum];
 
-	MOD_STATE->Prev_PrePlayerLeaveTeam( clientNum, oldTeam );
+	MODFN_NEXT( PrePlayerLeaveTeam, ( MODFN_NC, clientNum, oldTeam ) );
 
 	// Reset eliminated state
 	modclient->eliminated = qfalse;
@@ -411,11 +398,11 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PrePlayerLeaveTeam), ( int clientNum, team_t oldTe
 (ModFN) InitClientSession
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(InitClientSession), ( int clientNum, qboolean initialConnect, const info_string_t *info ),
-		( clientNum, initialConnect, info ), "G_MODFN_INITCLIENTSESSION" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(InitClientSession), ( MODFN_CTV, int clientNum, qboolean initialConnect, const info_string_t *info ),
+		( MODFN_CTN, clientNum, initialConnect, info ), "G_MODFN_INITCLIENTSESSION" ) {
 	elimination_client_t *modclient = &MOD_STATE->clients[clientNum];
 
-	MOD_STATE->Prev_InitClientSession( clientNum, initialConnect, info );
+	MODFN_NEXT( InitClientSession, ( MODFN_NC, clientNum, initialConnect, info ) );
 	memset( modclient, 0, sizeof( *modclient ) );
 }
 
@@ -424,9 +411,9 @@ LOGFUNCTION_SVOID( MOD_PREFIX(InitClientSession), ( int clientNum, qboolean init
 (ModFN) PostRunFrame
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), (void), (), "G_MODFN_POSTRUNFRAME" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
 	int i;
-	MOD_STATE->Prev_PostRunFrame();
+	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 
 	for ( i = 0; i < level.maxclients; ++i ) {
 		gclient_t *client = &level.clients[i];
@@ -467,9 +454,9 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), (void), (), "G_MODFN_POSTRUNFRAME" 
 (ModFN) MatchStateTransition
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(MatchStateTransition), ( matchState_t oldState, matchState_t newState ),
-		( oldState, newState ), "G_MODFN_MATCHSTATETRANSITION" ) {
-	MOD_STATE->Prev_MatchStateTransition( oldState, newState );
+LOGFUNCTION_SVOID( MOD_PREFIX(MatchStateTransition), ( MODFN_CTV, matchState_t oldState, matchState_t newState ),
+		( MODFN_CTN, oldState, newState ), "G_MODFN_MATCHSTATETRANSITION" ) {
+	MODFN_NEXT( MatchStateTransition, ( MODFN_NC, oldState, newState ) );
 
 	if ( newState < MS_ACTIVE && !EF_WARN_ASSERT( MOD_STATE->numEliminated == 0 ) ) {
 		// Shouldn't happen - if players were eliminated we should hit CheckExitRules instead.
@@ -507,20 +494,20 @@ LOGFUNCTION_VOID( ModElimination_Init, ( void ), (), "G_MOD_INIT G_ELIMINATION" 
 			ModSpecialties_Init();
 		}
 
-		INIT_FN_STACKABLE( SpectatorClient );
-		INIT_FN_STACKABLE( AdjustScoreboardAttributes );
-		INIT_FN_OVERRIDE( EffectiveScore );
-		INIT_FN_STACKABLE( PreClientSpawn );
-		INIT_FN_OVERRIDE( SpawnCenterPrintMessage );
-		INIT_FN_STACKABLE( CheckRespawnTime );
-		INIT_FN_STACKABLE( AdjustGeneralConstant );
-		INIT_FN_BASE( CheckExitRules );
-		INIT_FN_STACKABLE( CheckJoinAllowed );
-		INIT_FN_STACKABLE( PostPlayerDie );
-		INIT_FN_STACKABLE( PrePlayerLeaveTeam );
-		INIT_FN_STACKABLE( InitClientSession );
-		INIT_FN_STACKABLE( PostRunFrame );
-		INIT_FN_STACKABLE( MatchStateTransition );
+		MODFN_REGISTER( SpectatorClient );
+		MODFN_REGISTER( AdjustScoreboardAttributes );
+		MODFN_REGISTER( EffectiveScore );
+		MODFN_REGISTER( PreClientSpawn );
+		MODFN_REGISTER( SpawnCenterPrintMessage );
+		MODFN_REGISTER( CheckRespawnTime );
+		MODFN_REGISTER( AdjustGeneralConstant );
+		MODFN_REGISTER( CheckExitRules );
+		MODFN_REGISTER( CheckJoinAllowed );
+		MODFN_REGISTER( PostPlayerDie );
+		MODFN_REGISTER( PrePlayerLeaveTeam );
+		MODFN_REGISTER( InitClientSession );
+		MODFN_REGISTER( PostRunFrame );
+		MODFN_REGISTER( MatchStateTransition );
 
 		// Initialize additional features
 		ModElimMisc_Init();

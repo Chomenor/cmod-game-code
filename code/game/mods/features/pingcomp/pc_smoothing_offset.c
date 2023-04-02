@@ -14,7 +14,7 @@
 * than more trivial implementations.
 */
 
-#define MOD_PREFIX( x ) ModPCSmoothingOffset_##x
+#define MOD_NAME ModPCSmoothingOffset
 
 #include "mods/features/pingcomp/pc_local.h"
 
@@ -73,12 +73,6 @@ static struct {
 	SmoothingOffset_client_t clients[MAX_SMOOTHING_CLIENTS];
 	int lastFrameTime;
 	qboolean dedicatedServer;
-
-	// For mod function stacking
-	ModFNType_ModConsoleCommand Prev_ModConsoleCommand;
-	ModFNType_RunPlayerMove Prev_RunPlayerMove;
-	ModFNType_InitClientSession Prev_InitClientSession;
-	ModFNType_PostRunFrame Prev_PostRunFrame;
 } *MOD_STATE;
 
 /*
@@ -378,13 +372,13 @@ static void ModPCSmoothingOffset_OffsetDebug( int clientNum ) {
 (ModFN) ModConsoleCommand
 ===================
 */
-LOGFUNCTION_SRET( qboolean, MOD_PREFIX(ModConsoleCommand), ( const char *cmd ), ( cmd ), "G_MODFN_MODCONSOLECOMMAND" ) {
+LOGFUNCTION_SRET( qboolean, MOD_PREFIX(ModConsoleCommand), ( MODFN_CTV, const char *cmd ), ( MODFN_CTN, cmd ), "G_MODFN_MODCONSOLECOMMAND" ) {
 	if (Q_stricmp (cmd, "smoothing_debug_offset") == 0) {
 		ModPCSmoothingOffset_OffsetDebug( 0 );
 		return qtrue;
 	}
 
-	return MOD_STATE->Prev_ModConsoleCommand( cmd );
+	return MODFN_NEXT( ModConsoleCommand, ( MODFN_NC, cmd ) );
 }
 
 /*
@@ -392,9 +386,9 @@ LOGFUNCTION_SRET( qboolean, MOD_PREFIX(ModConsoleCommand), ( const char *cmd ), 
 (ModFN) RunPlayerMove
 ==============
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(RunPlayerMove), ( int clientNum ), ( clientNum ), "G_MODFN_RUNPLAYERMOVE" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(RunPlayerMove), ( MODFN_CTV, int clientNum ), ( MODFN_CTN, clientNum ), "G_MODFN_RUNPLAYERMOVE" ) {
 	int oldTime = level.clients[clientNum].ps.commandTime;
-	MOD_STATE->Prev_RunPlayerMove( clientNum );
+	MODFN_NEXT( RunPlayerMove, ( MODFN_NC, clientNum ) );
 
 	if ( !SYNCHRONOUS_BOT( clientNum ) && ModPingcomp_Static_SmoothingEnabledForClient( clientNum ) ) {
 		ModPCSmoothingOffset_RegisterClientMove( clientNum, oldTime, level.clients[clientNum].ps.commandTime );
@@ -406,9 +400,9 @@ LOGFUNCTION_SVOID( MOD_PREFIX(RunPlayerMove), ( int clientNum ), ( clientNum ), 
 (ModFN) InitClientSession
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(InitClientSession), ( int clientNum, qboolean initialConnect, const info_string_t *info ),
-		( clientNum, initialConnect, info ), "G_MODFN_INITCLIENTSESSION" ) {
-	MOD_STATE->Prev_InitClientSession( clientNum, initialConnect, info );
+LOGFUNCTION_SVOID( MOD_PREFIX(InitClientSession), ( MODFN_CTV, int clientNum, qboolean initialConnect, const info_string_t *info ),
+		( MODFN_CTN, clientNum, initialConnect, info ), "G_MODFN_INITCLIENTSESSION" ) {
+	MODFN_NEXT( InitClientSession, ( MODFN_NC, clientNum, initialConnect, info ) );
 
 	if ( CLIENT_IN_RANGE( clientNum ) ) {
 		SmoothingOffset_client_t *modclient = &MOD_STATE->clients[clientNum];
@@ -423,8 +417,8 @@ LOGFUNCTION_SVOID( MOD_PREFIX(InitClientSession), ( int clientNum, qboolean init
 (ModFN) PostRunFrame
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) {
-	MOD_STATE->Prev_PostRunFrame();
+LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
+	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 
 	if ( ModPingcomp_Static_SmoothingEnabled() ) {
 		MOD_STATE->lastFrameTime = trap_Milliseconds();
@@ -446,9 +440,9 @@ LOGFUNCTION_VOID( ModPCSmoothingOffset_Init, ( void ), (), "G_MOD_INIT" ) {
 		MOD_STATE->dedicatedServer = trap_Cvar_VariableIntegerValue( "dedicated" ) ||
 				!trap_Cvar_VariableIntegerValue( "cl_running" ) ? qtrue : qfalse;
 
-		INIT_FN_STACKABLE( ModConsoleCommand );
-		INIT_FN_STACKABLE( RunPlayerMove );
-		INIT_FN_STACKABLE( InitClientSession );
-		INIT_FN_STACKABLE( PostRunFrame );
+		MODFN_REGISTER( ModConsoleCommand );
+		MODFN_REGISTER( RunPlayerMove );
+		MODFN_REGISTER( InitClientSession );
+		MODFN_REGISTER( PostRunFrame );
 	}
 }

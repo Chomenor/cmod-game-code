@@ -45,6 +45,7 @@ void ModTournament_Init( void );
 
 void ModAltSwapHandler_Init( void );
 void ModBotAdding_Init( void );
+void ModDebugModfn_Init( void );
 void ModMiscFeatures_Init( void );
 void ModPingcomp_Init( void );
 void ModPlayerMove_Init( void );
@@ -147,35 +148,77 @@ void ModWarmupSequence_Static_AddEventToSequence( modWarmupSequence_t *sequence,
 qboolean ModWarmupSequence_Static_SequenceInProgressOrPending( void );
 
 /* ************************************************************************* */
+// Mod Functions
+/* ************************************************************************* */
+
+#define MAX_MOD_CALLS 30
+
+typedef struct modFunctionBackendCall_s {
+	const char *source;
+	float priority;
+	modCall_t call;
+	struct modFunctionBackendCall_s *next;
+} modFunctionBackendCall_t;
+
+typedef struct {
+	const char *name;
+	modCall_t defaultCall;
+	modFunctionBackendCall_t *entries;
+	modCall_t callStack[MAX_MOD_CALLS + 1];		// +1 for default function
+} modFunctionBackendEntry_t;
+
+typedef struct {
+	modFunctionBackendCall_t *entries[MAX_MOD_CALLS];
+	int count;
+} modCallList_t;
+
+// Mod function backend
+// Backend stores the full mod function data including call priorities, debug information, etc.
+// which is used to generate the call stack.
+typedef struct {
+#define PREFIX2 next,
+#define VOID2 next
+#define MOD_FUNCTION_DEF( name, returntype, parameters, parameters_untyped, returnkw ) \
+	modFunctionBackendEntry_t name;
+#define MOD_FUNCTION_LOCAL( name, returntype, parameters, parameters_untyped, returnkw ) \
+	modFunctionBackendEntry_t name;
+#include "mods/g_mod_defs.h"
+} modFunctionsBackend_t;
+
+// Mod function types (ModFNType_*)
+// Generate the mod function signatures with context parameters included.
+#define PREFIX1 MODFN_CTV,
+#define VOID1 MODFN_CTV
+#define MOD_FUNCTION_DEF( modfnname, returntype, parameters, parameters_untyped, returnkw ) \
+	typedef returntype ( *ModFNType_##modfnname ) parameters;
+#define MOD_FUNCTION_LOCAL( modfnname, returntype, parameters, parameters_untyped, returnkw ) \
+	typedef returntype ( *ModFNType_##modfnname ) parameters;
+#include "mods/g_mod_defs.h"
+
+#define MODFN_NC next + 1	// "next context"
+#define MODFN_NEXT( type, parameters ) ((ModFNType_##type)*next) parameters		// call next modfn in sequence
+
+extern modFunctionsBackend_t modFunctionsBackend;
+void G_RegisterModFunctionCall( modFunctionBackendEntry_t *backendEntry, modCall_t call, const char *source );
+void G_GetModCallList( modFunctionBackendEntry_t *backendEntry, modCallList_t *out );
+
+/* ************************************************************************* */
 // Local mod functions (modfn_lcl.*) - For mod functions only called by mods
 /* ************************************************************************* */
 
-// Ignore public defs
-#define MOD_FUNCTION_DEF( name, returntype, parameters )
-
-// Mod function types (ModFNType_*)
-#define MOD_FUNCTION_LOCAL( name, returntype, parameters ) \
-	typedef returntype ( *ModFNType_##name ) parameters;
-#include "mods/g_mod_defs.h"
-#undef MOD_FUNCTION_LOCAL
-
 // Default mod function declarations (ModFNDefault_*)
-#define MOD_FUNCTION_LOCAL( name, returntype, parameters ) \
-	returntype ModFNDefault_##name parameters;
+#define VOID1 void
+#define MOD_FUNCTION_LOCAL( modfnname, returntype, parameters, parameters_untyped, returnkw ) \
+	returntype ModFNDefault_##modfnname parameters;
 #include "mods/g_mod_defs.h"
-#undef MOD_FUNCTION_LOCAL
 
-// Mod functions structure
+// modfn_lcl.* structure
 typedef struct {
-
-#define MOD_FUNCTION_LOCAL( name, returntype, parameters ) \
-	ModFNType_##name name;
+#define VOID1 void
+#define MOD_FUNCTION_LOCAL( modfnname, returntype, parameters, parameters_untyped, returnkw ) \
+	returntype (*modfnname) parameters;
 #include "mods/g_mod_defs.h"
-#undef MOD_FUNCTION_LOCAL
-
 } mod_functions_local_t;
-
-#undef MOD_FUNCTION_DEF
 
 extern mod_functions_local_t modfn_lcl;
 
@@ -183,28 +226,18 @@ extern mod_functions_local_t modfn_lcl;
 // Helper Macros
 /* ************************************************************************* */
 
-#ifdef MOD_PREFIX
+#ifdef MOD_NAME
+#define MOD_PREFIX3( x, y ) x##_##y
+#define MOD_PREFIX2( x, y ) MOD_PREFIX3( x, y )
+#define MOD_PREFIX( x ) MOD_PREFIX2( MOD_NAME, x )
+
+#define MOD_NAME_STR3( x ) #x
+#define MOD_NAME_STR2( x ) MOD_NAME_STR3( x )
+#define MOD_NAME_STR MOD_NAME_STR2( MOD_NAME )
+
 #define MOD_STATE MOD_PREFIX( state )
 
-#define INIT_FN_STACKABLE( name ) \
-	MOD_STATE->Prev_##name = modfn.name; \
-	modfn.name = MOD_PREFIX(name);
-
-#define INIT_FN_OVERRIDE( name ) \
-	modfn.name = MOD_PREFIX(name);
-
-#define INIT_FN_BASE( name ) \
-	EF_WARN_ASSERT( modfn.name == ModFNDefault_##name ); \
-	modfn.name = MOD_PREFIX(name);
-
-#define INIT_FN_STACKABLE_LCL( name ) \
-	MOD_STATE->Prev_##name = modfn_lcl.name; \
-	modfn_lcl.name = MOD_PREFIX(name);
-
-#define INIT_FN_OVERRIDE_LCL( name ) \
-	modfn_lcl.name = MOD_PREFIX(name);
-
-#define INIT_FN_BASE_LCL( name ) \
-	EF_WARN_ASSERT( modfn_lcl.name == ModFNDefault_##name ); \
-	modfn_lcl.name = MOD_PREFIX(name);
+#define MODFN_REGISTER( name ) { \
+	ModFNType_##name modfn = MOD_PREFIX(name); \
+	G_RegisterModFunctionCall( &modFunctionsBackend.name, (modCall_t)modfn, MOD_NAME_STR ); }
 #endif

@@ -12,16 +12,13 @@
 * by calling ModModcfgCS_Init during their own mod initialization.
 */
 
-#define MOD_PREFIX( x ) ModModcfgCS##x
+#define MOD_NAME ModModcfgCS
 
 #include "mods/g_mod_local.h"
 
 static struct {
 	// Only set mod config after initialization is complete to avoid unnecessary configstring updates.
 	qboolean modConfigReady;
-
-	// For mod function stacking
-	ModFNType_GeneralInit Prev_GeneralInit;
 } *MOD_STATE;
 
 /*
@@ -60,8 +57,8 @@ void ModModcfgCS_Static_Update( void ) {
 (ModFN) GeneralInit
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(GeneralInit), ( void ), (), "G_MODFN_GENERALINIT" ) {
-	MOD_STATE->Prev_GeneralInit();
+LOGFUNCTION_SVOID( MOD_PREFIX(GeneralInit), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_GENERALINIT" ) {
+	MODFN_NEXT( GeneralInit, ( MODFN_NC ) );
 	MOD_STATE->modConfigReady = qtrue;
 	ModModcfgCS_Static_Update();
 }
@@ -75,6 +72,6 @@ LOGFUNCTION_VOID( ModModcfgCS_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		INIT_FN_STACKABLE( GeneralInit );
+		MODFN_REGISTER( GeneralInit );
 	}
 }

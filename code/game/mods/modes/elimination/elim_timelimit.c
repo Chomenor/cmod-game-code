@@ -8,7 +8,7 @@
 * when down to the final 2 players in FFA or final 1 player on team.
 */
 
-#define MOD_PREFIX( x ) ModElimTimelimit##x
+#define MOD_NAME ModElimTimelimit
 
 #include "mods/modes/elimination/elim_local.h"
 
@@ -18,10 +18,6 @@ static struct {
 	qboolean finalistTimelimitActive;
 	qboolean onlyBotsTimelimitActive;
 	int oldTimelimit;
-
-	// For mod function stacking
-	ModFNType_PostGameShutdown Prev_PostGameShutdown;
-	ModFNType_PostRunFrame Prev_PostRunFrame;
 } *MOD_STATE;
 
 // Once timelimit is adjusted, original timelimit cvar needs to be restored at end of round.
@@ -125,8 +121,9 @@ static void ModElimTimelimit_CheckAdjustTimelimit( void ) {
 (ModFN) PostGameShutdown
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostGameShutdown), ( qboolean restart ), ( restart ), "G_MODFN_POSTGAMESHUTDOWN" ) {
-	MOD_STATE->Prev_PostGameShutdown( restart );
+LOGFUNCTION_SVOID( MOD_PREFIX(PostGameShutdown), ( MODFN_CTV, qboolean restart ),
+		( MODFN_CTN, restart ), "G_MODFN_POSTGAMESHUTDOWN" ) {
+	MODFN_NEXT( PostGameShutdown, ( MODFN_NC, restart ) );
 
 	// Restore original timelimit value.
 	if ( ADJUSTED_TIMELIMIT_ACTIVE ) {
@@ -139,8 +136,9 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostGameShutdown), ( qboolean restart ), ( restart
 (ModFN) PostRunFrame
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), (void), (), "G_MODFN_POSTRUNFRAME" ) {
-	MOD_STATE->Prev_PostRunFrame();
+LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ),
+		( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
+	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 	ModElimTimelimit_CheckAdjustTimelimit();
 }
 
@@ -153,8 +151,8 @@ LOGFUNCTION_VOID( ModElimTimelimit_Init, ( void ), (), "G_MOD_INIT G_ELIMINATION
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		INIT_FN_STACKABLE( PostGameShutdown );
-		INIT_FN_STACKABLE( PostRunFrame );
+		MODFN_REGISTER( PostGameShutdown );
+		MODFN_REGISTER( PostRunFrame );
 
 		G_RegisterTrackedCvar( &MOD_STATE->g_mod_finalistsTimelimit, "g_mod_finalistsTimelimit", "0", CVAR_ARCHIVE, qfalse );
 		G_RegisterTrackedCvar( &MOD_STATE->g_mod_onlyBotsTimelimit, "g_mod_onlyBotsTimelimit", "0", CVAR_ARCHIVE, qfalse );

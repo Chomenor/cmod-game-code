@@ -5,7 +5,7 @@
 * point to point transport with a temporary flight mode.
 */
 
-#define MOD_PREFIX( x ) ModHoldableTransporter_##x
+#define MOD_NAME ModHoldableTransporter
 
 #include "mods/g_mod_local.h"
 
@@ -16,9 +16,6 @@ typedef struct {
 static struct {
 	holdableTransporter_client_t clients[MAX_CLIENTS];
 	qboolean borgTeleportActive;	// any client is currently borg teleporting
-
-	ModFNType_PortableTransporterActivate Prev_PortableTransporterActivate;
-	ModFNType_PreRunFrame Prev_PreRunFrame;
 } *MOD_STATE;
 
 /*
@@ -71,8 +68,8 @@ LOGFUNCTION_SVOID( ModHoldableTransporter_Rematerialize, ( int clientNum ), ( cl
 Called when player triggers the holdable transporter powerup.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PortableTransporterActivate), ( int clientNum ),
-		( clientNum ), "G_MODFN_PORTABLETRANSPORTERACTIVATE" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(PortableTransporterActivate), ( MODFN_CTV, int clientNum ),
+		( MODFN_CTN, clientNum ), "G_MODFN_PORTABLETRANSPORTERACTIVATE" ) {
 	holdableTransporter_client_t *modclient = &MOD_STATE->clients[clientNum];
 	gclient_t *client = &level.clients[clientNum];
 	gentity_t *ent = &g_entities[clientNum];
@@ -99,7 +96,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PortableTransporterActivate), ( int clientNum ),
 	}
 
 	else {
-		MOD_STATE->Prev_PortableTransporterActivate( clientNum );
+		MODFN_NEXT( PortableTransporterActivate, ( MODFN_NC, clientNum ) );
 	}
 }
 
@@ -110,8 +107,8 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PortableTransporterActivate), ( int clientNum ),
 Check for expiring borg teleports.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PreRunFrame), ( void ), (), "G_MODFN_PRERUNFRAME" ) {
-	MOD_STATE->Prev_PreRunFrame();
+LOGFUNCTION_SVOID( MOD_PREFIX(PreRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_PRERUNFRAME" ) {
+	MODFN_NEXT( PreRunFrame, ( MODFN_NC ) );
 
 	if ( MOD_STATE->borgTeleportActive ) {
 		int i;
@@ -144,7 +141,7 @@ LOGFUNCTION_VOID( ModHoldableTransporter_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		INIT_FN_STACKABLE( PortableTransporterActivate );
-		INIT_FN_STACKABLE( PreRunFrame );
+		MODFN_REGISTER( PortableTransporterActivate );
+		MODFN_REGISTER( PreRunFrame );
 	}
 }

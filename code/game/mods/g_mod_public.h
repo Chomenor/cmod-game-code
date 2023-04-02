@@ -63,31 +63,25 @@ typedef enum {
 // mod functions (modfn.*)
 //
 
-// Ignore local defs
-#define MOD_FUNCTION_LOCAL( name, returntype, parameters )
+// Generic function pointer type, needed to avoid compiler warnings
+typedef void (*modCall_t)(void);
 
-// Mod function types (ModFNType_*)
-#define MOD_FUNCTION_DEF( name, returntype, parameters ) \
-	typedef returntype ( *ModFNType_##name ) parameters;
-#include "mods/g_mod_defs.h"
-#undef MOD_FUNCTION_DEF
+// Context parameters included in modfn calls
+#define MODFN_CTV modCall_t *next	// "context variables"
+#define MODFN_CTN next		// "context names"
 
 // Default mod function declarations (ModFNDefault_*)
-#define MOD_FUNCTION_DEF( name, returntype, parameters ) \
-	returntype ModFNDefault_##name parameters;
+#define VOID1 void
+#define MOD_FUNCTION_DEF( modfnname, returntype, parameters, parameters_untyped, returnkw ) \
+	returntype ModFNDefault_##modfnname parameters;
 #include "mods/g_mod_defs.h"
-#undef MOD_FUNCTION_DEF
 
-// Mod functions structure
+// modfn.* structure
 typedef struct {
-
-#define MOD_FUNCTION_DEF( name, returntype, parameters ) \
-	ModFNType_##name name;
+#define VOID1 void
+#define MOD_FUNCTION_DEF( modfnname, returntype, parameters, parameters_untyped, returnkw ) \
+	returntype (*modfnname) parameters;
 #include "mods/g_mod_defs.h"
-#undef MOD_FUNCTION_DEF
-
 } mod_functions_t;
-
-#undef MOD_FUNCTION_LOCAL
 
 extern mod_functions_t modfn;

@@ -7,7 +7,7 @@
 * of each feaure is handled through submodules.
 */
 
-#define MOD_PREFIX( x ) ModPingcomp_##x
+#define MOD_NAME ModPingcomp
 
 #include "mods/features/pingcomp/pc_local.h"
 

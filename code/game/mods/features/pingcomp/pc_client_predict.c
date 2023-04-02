@@ -4,7 +4,7 @@
 * This module provides server-side support for weapon fire prediction features on the client.
 */
 
-#define MOD_PREFIX( x ) ModPCClientPredict_##x
+#define MOD_NAME ModPCClientPredict
 
 #include "mods/features/pingcomp/pc_local.h"
 
@@ -18,11 +18,6 @@ static struct {
 	trackedCvar_t g_unlaggedPredict;
 
 	PingcompClientPredict_client_t clients[MAX_CLIENTS];
-
-	// For mod function stacking
-	ModFNType_WeaponPredictableRNG Prev_WeaponPredictableRNG;
-	ModFNType_AddModConfigInfo Prev_AddModConfigInfo;
-	ModFNType_PostRunFrame Prev_PostRunFrame;
 } *MOD_STATE;
 
 /*
@@ -33,12 +28,12 @@ Only use the predictable functions if prediction is actually enabled (it could h
 cheating security implications).
 ======================
 */
-LOGFUNCTION_SRET( unsigned int, MOD_PREFIX(WeaponPredictableRNG), ( int clientNum ), ( clientNum ), "G_MODFN_WEAPONPREDICTABLERNG" ) {
+LOGFUNCTION_SRET( unsigned int, MOD_PREFIX(WeaponPredictableRNG), ( MODFN_CTV, int clientNum ), ( MODFN_CTN, clientNum ), "G_MODFN_WEAPONPREDICTABLERNG" ) {
 	if ( PREDICTION_ENABLED && G_AssertConnectedClient( clientNum ) ) {
 		return BG_PredictableRNG_Rand( &MOD_STATE->clients[clientNum].rng, level.clients[clientNum].ps.commandTime );
 	}
 
-	return MOD_STATE->Prev_WeaponPredictableRNG( clientNum );
+	return MODFN_NEXT( WeaponPredictableRNG, ( MODFN_NC, clientNum ) );
 }
 
 /*
@@ -108,8 +103,8 @@ static void ModPCClientPredict_CvarCallback( trackedCvar_t *cvar ) {
 (ModFN) AddModConfigInfo
 ==============
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(AddModConfigInfo), ( char *info ), ( info ), "G_MODFN_ADDMODCONFIGINFO" ) {
-	MOD_STATE->Prev_AddModConfigInfo( info );
+LOGFUNCTION_SVOID( MOD_PREFIX(AddModConfigInfo), ( MODFN_CTV, char *info ), ( MODFN_CTN, info ), "G_MODFN_ADDMODCONFIGINFO" ) {
+	MODFN_NEXT( AddModConfigInfo, ( MODFN_NC, info ) );
 
 	if ( PREDICTION_ENABLED ) {
 		ModPCClientPredict_AddInfo( info );
@@ -121,8 +116,8 @@ LOGFUNCTION_SVOID( MOD_PREFIX(AddModConfigInfo), ( char *info ), ( info ), "G_MO
 (ModFN) PostRunFrame
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) {
-	MOD_STATE->Prev_PostRunFrame();
+LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
+	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 
 	if ( PREDICTION_ENABLED ) {
 		ModPCClientPredict_SetNoDamageFlags();
@@ -138,9 +133,9 @@ LOGFUNCTION_VOID( ModPCClientPredict_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		INIT_FN_STACKABLE( WeaponPredictableRNG );
-		INIT_FN_STACKABLE_LCL( AddModConfigInfo );
-		INIT_FN_STACKABLE( PostRunFrame );
+		MODFN_REGISTER( WeaponPredictableRNG );
+		MODFN_REGISTER( AddModConfigInfo );
+		MODFN_REGISTER( PostRunFrame );
 
 		G_RegisterTrackedCvar( &MOD_STATE->g_unlaggedPredict, "g_unlaggedPredict", "1", 0, qfalse );
 		G_RegisterCvarCallback( &MOD_STATE->g_unlaggedPredict, ModPCClientPredict_CvarCallback, qfalse );

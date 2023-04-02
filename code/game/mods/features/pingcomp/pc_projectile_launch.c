@@ -13,7 +13,7 @@
 * would be advanced by 100ms as soon as it is fired, in 25ms increments.
 */
 
-#define MOD_PREFIX( x ) ModPCProjectileLaunch_##x
+#define MOD_NAME ModPCProjectileLaunch
 
 #include "mods/features/pingcomp/pc_local.h"
 
@@ -28,12 +28,6 @@ static struct {
 	// Keep track of server frame times
 	int frameRecord[MAX_FRAME_RECORD];
 	unsigned int frameCounter;
-
-	// For mod function stacking
-	ModFNType_AdjustWeaponConstant Prev_AdjustWeaponConstant;
-	ModFNType_AdjustGeneralConstant Prev_AdjustGeneralConstant;
-	ModFNType_PostFireProjectile Prev_PostFireProjectile;
-	ModFNType_PostRunFrame Prev_PostRunFrame;
 } *MOD_STATE;
 
 /*
@@ -115,13 +109,13 @@ static void ModPCProjectileLaunch_AdvanceProjectile( gentity_t *projectile ) {
 (ModFN) AdjustWeaponConstant
 ======================
 */
-static int MOD_PREFIX(AdjustWeaponConstant)( weaponConstant_t wcType, int defaultValue ) {
+static int MOD_PREFIX(AdjustWeaponConstant)( MODFN_CTV, weaponConstant_t wcType, int defaultValue ) {
 	// Disable initial welder projectile think, so it can be handled here with appropriate shifting
 	if ( wcType == WC_WELDER_SKIP_INITIAL_THINK && ModPingcomp_Static_ProjectileCompensationEnabled() ) {
 		return 1;
 	}
 
-	return MOD_STATE->Prev_AdjustWeaponConstant( wcType, defaultValue );
+	return MODFN_NEXT( AdjustWeaponConstant, ( MODFN_NC, wcType, defaultValue ) );
 }
 
 /*
@@ -129,12 +123,12 @@ static int MOD_PREFIX(AdjustWeaponConstant)( weaponConstant_t wcType, int defaul
 (ModFN) AdjustGeneralConstant
 ==================
 */
-int MOD_PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defaultValue ) {
+int MOD_PREFIX(AdjustGeneralConstant)( MODFN_CTV, generalConstant_t gcType, int defaultValue ) {
 	if ( gcType == GC_EVENT_TIME_OFFSET ) {
 		return MOD_STATE->eventTimeOffset;
 	}
 
-	return MOD_STATE->Prev_AdjustGeneralConstant( gcType, defaultValue );
+	return MODFN_NEXT( AdjustGeneralConstant, ( MODFN_NC, gcType, defaultValue ) );
 }
 
 /*
@@ -142,13 +136,13 @@ int MOD_PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defaultValu
 (ModFN) PostFireProjectile
 ======================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostFireProjectile), ( gentity_t *projectile ), ( projectile ), "G_MODFN_POSTFIREPROJECTILE" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(PostFireProjectile), ( MODFN_CTV, gentity_t *projectile ), ( MODFN_CTN, projectile ), "G_MODFN_POSTFIREPROJECTILE" ) {
 	if ( projectile->inuse && ModPingcomp_Static_ProjectileCompensationEnabled() ) {
 		ModPCProjectileLaunch_AdvanceProjectile( projectile );
 	}
 
 	if ( projectile->inuse ) {
-		MOD_STATE->Prev_PostFireProjectile( projectile );
+		MODFN_NEXT( PostFireProjectile, ( MODFN_NC, projectile ) );
 	}
 }
 
@@ -159,9 +153,9 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostFireProjectile), ( gentity_t *projectile ), ( 
 Log the frame time in order to replay frames accurately.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), (void), (), "G_MODFN_POSTRUNFRAME" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
 	MOD_STATE->frameRecord[( MOD_STATE->frameCounter++ ) % MAX_FRAME_RECORD] = level.time;
-	MOD_STATE->Prev_PostRunFrame();
+	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 }
 
 /*
@@ -175,9 +169,9 @@ LOGFUNCTION_VOID( ModPCProjectileLaunch_Init, ( void ), (), "G_MOD_INIT" ) {
 
 		ModPCPositionShift_Init();
 
-		INIT_FN_STACKABLE( AdjustWeaponConstant );
-		INIT_FN_STACKABLE( AdjustGeneralConstant );
-		INIT_FN_STACKABLE( PostFireProjectile );
-		INIT_FN_STACKABLE( PostRunFrame );
+		MODFN_REGISTER( AdjustWeaponConstant );
+		MODFN_REGISTER( AdjustGeneralConstant );
+		MODFN_REGISTER( PostFireProjectile );
+		MODFN_REGISTER( PostRunFrame );
 	}
 }

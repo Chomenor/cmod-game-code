@@ -6,13 +6,12 @@
 * queen has a specific unique model.
 */
 
-#define MOD_PREFIX( x ) ModAssimModels_##x
+#define MOD_NAME ModAssimModels
 
 #include "mods/modes/assimilation/assim_local.h"
 
 static struct {
-	ModFNType_ConvertPlayerModel Prev_ConvertPlayerModel;
-	ModFNType_RandomPlayerModel Prev_RandomPlayerModel;
+	int _unused;
 } *MOD_STATE;
 
 /*
@@ -24,13 +23,13 @@ to select random model instead.
 ================
 */
 LOGFUNCTION_SVOID( MOD_PREFIX(ConvertPlayerModel),
-		( int clientNum, const char *userinfo, const char *source_model, char *output, unsigned int outputSize ),
-		( clientNum, userinfo, source_model, output, outputSize ), "G_PLAYERMODELS G_MODFN_CONVERTPLAYERMODEL" ) {
+		( MODFN_CTV, int clientNum, const char *userinfo, const char *source_model, char *output, unsigned int outputSize ),
+		( MODFN_CTN, clientNum, userinfo, source_model, output, outputSize ), "G_PLAYERMODELS G_MODFN_CONVERTPLAYERMODEL" ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	// Don't change model for spectators
 	if ( modfn.SpectatorClient( clientNum ) ) {
-		MOD_STATE->Prev_ConvertPlayerModel( clientNum, userinfo, source_model, output, outputSize );
+		MODFN_NEXT( ConvertPlayerModel, ( MODFN_NC, clientNum, userinfo, source_model, output, outputSize ) );
 		return;
 	}
 
@@ -70,7 +69,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(ConvertPlayerModel),
 
 	else {
 		// Perform base conversions
-		MOD_STATE->Prev_ConvertPlayerModel( clientNum, userinfo, source_model, output, outputSize );
+		MODFN_NEXT( ConvertPlayerModel, ( MODFN_NC, clientNum, userinfo, source_model, output, outputSize ) );
 
 		// Ensure model isn't borg
 		if ( !Q_strncmp( "borgqueen", output, 9 ) ||
@@ -88,13 +87,13 @@ LOGFUNCTION_SVOID( MOD_PREFIX(ConvertPlayerModel),
 Selects random model that meets borg/non-borg team requirements. Returns empty string on error.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(RandomPlayerModel), ( int clientNum, const char *userinfo, char *output, unsigned int outputSize ),
-		( clientNum, userinfo, output, outputSize ), "G_PLAYERMODELS G_MODFN_RANDOMPLAYERMODEL" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(RandomPlayerModel), ( MODFN_CTV, int clientNum, const char *userinfo, char *output, unsigned int outputSize ),
+		( MODFN_CTN, clientNum, userinfo, output, outputSize ), "G_PLAYERMODELS G_MODFN_RANDOMPLAYERMODEL" ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	// Don't change model for spectators
 	if ( modfn.SpectatorClient( clientNum ) ) {
-		MOD_STATE->Prev_RandomPlayerModel( clientNum, userinfo, output, outputSize );
+		MODFN_NEXT( RandomPlayerModel, ( MODFN_NC, clientNum, userinfo, output, outputSize ) );
 		return;
 	}
 
@@ -135,7 +134,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(RandomPlayerModel), ( int clientNum, const char *u
 	else {
 		// Give the base selection a chance to pick a non-borg model
 		// (maybe a team group specified for the non-borg team)
-		MOD_STATE->Prev_RandomPlayerModel( clientNum, userinfo, output, outputSize );
+		MODFN_NEXT( RandomPlayerModel, ( MODFN_NC, clientNum, userinfo, output, outputSize ) );
 
 		// Select non-borg model
 		if ( !*output || !Q_strncmp( "borgqueen", output, 9 ) ||
@@ -154,8 +153,8 @@ LOGFUNCTION_VOID( ModAssimModels_Init, ( void ), (), "G_MOD_INIT G_ASSIMILATION"
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		INIT_FN_STACKABLE_LCL( ConvertPlayerModel );
-		INIT_FN_STACKABLE_LCL( RandomPlayerModel );
+		MODFN_REGISTER( ConvertPlayerModel );
+		MODFN_REGISTER( RandomPlayerModel );
 
 		ModModelGroups_Init();
 		ModModelSelection_Init();

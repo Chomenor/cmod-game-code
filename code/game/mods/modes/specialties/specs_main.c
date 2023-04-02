@@ -6,7 +6,7 @@
 * combination with the CTF gametype.
 */
 
-#define MOD_PREFIX( x ) ModSpecialties_##x
+#define MOD_NAME ModSpecialties
 
 #include "mods/modes/specialties/specs_local.h"
 
@@ -18,22 +18,6 @@ typedef struct {
 static struct {
 	specialties_client_t clients[MAX_CLIENTS];
 	trackedCvar_t g_classChangeDebounceTime;
-
-	// For mod function stacking
-	ModFNType_InitClientSession Prev_InitClientSession;
-	ModFNType_PreClientSpawn Prev_PreClientSpawn;
-	ModFNType_GenerateClientSessionStructure Prev_GenerateClientSessionStructure;
-	ModFNType_ModClientCommand Prev_ModClientCommand;
-	ModFNType_EffectiveHandicap Prev_EffectiveHandicap;
-	ModFNType_SpawnConfigureClient Prev_SpawnConfigureClient;
-	ModFNType_CheckItemSpawnDisabled Prev_CheckItemSpawnDisabled;
-	ModFNType_CanItemBeDropped Prev_CanItemBeDropped;
-	ModFNType_AddRegisteredItems Prev_AddRegisteredItems;
-	ModFNType_KnockbackMass Prev_KnockbackMass;
-	ModFNType_AdjustGeneralConstant Prev_AdjustGeneralConstant;
-	ModFNType_AdjustWeaponConstant Prev_AdjustWeaponConstant;
-	ModFNType_ModifyAmmoUsage Prev_ModifyAmmoUsage;
-	ModFNType_ConvertPlayerModel Prev_ConvertPlayerModel;
 } *MOD_STATE;
 
 /*
@@ -41,11 +25,11 @@ static struct {
 (ModFN) InitClientSession
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(InitClientSession), ( int clientNum, qboolean initialConnect, const info_string_t *info ),
-		( clientNum, initialConnect, info ), "G_MODFN_INITCLIENTSESSION" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(InitClientSession), ( MODFN_CTV, int clientNum, qboolean initialConnect, const info_string_t *info ),
+		( MODFN_CTN, clientNum, initialConnect, info ), "G_MODFN_INITCLIENTSESSION" ) {
 	specialties_client_t *modclient = &MOD_STATE->clients[clientNum];
 
-	MOD_STATE->Prev_InitClientSession( clientNum, initialConnect, info );
+	MODFN_NEXT( InitClientSession, ( MODFN_NC, clientNum, initialConnect, info ) );
 	memset( modclient, 0, sizeof( *modclient ) );
 }
 
@@ -56,11 +40,11 @@ LOGFUNCTION_SVOID( MOD_PREFIX(InitClientSession), ( int clientNum, qboolean init
 Reset class change time limit when player joins a new team.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PreClientSpawn), ( int clientNum, clientSpawnType_t spawnType ),
-		( clientNum, spawnType ), "G_MODFN_PRECLIENTSPAWN" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(PreClientSpawn), ( MODFN_CTV, int clientNum, clientSpawnType_t spawnType ),
+		( MODFN_CTN, clientNum, spawnType ), "G_MODFN_PRECLIENTSPAWN" ) {
 	specialties_client_t *modclient = &MOD_STATE->clients[clientNum];
 
-	MOD_STATE->Prev_PreClientSpawn( clientNum, spawnType );
+	MODFN_NEXT( PreClientSpawn, ( MODFN_NC, clientNum, spawnType ) );
 
 	if ( spawnType != CST_RESPAWN ) {
 		modclient->classChangeTime = 0;
@@ -86,12 +70,12 @@ static qboolean ModSpecialties_IsSpecialtiesClass( pclass_t pclass ) {
 Save specialties class for next round.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(GenerateClientSessionStructure), ( int clientNum, clientSession_t *sess ),
-		( clientNum, sess ), "G_MODFN_GENERATECLIENTSESSIONSTRUCTURE" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(GenerateClientSessionStructure), ( MODFN_CTV, int clientNum, clientSession_t *sess ),
+		( MODFN_CTN, clientNum, sess ), "G_MODFN_GENERATECLIENTSESSIONSTRUCTURE" ) {
 	gclient_t *client = &level.clients[clientNum];
 	pclass_t pclass;
 
-	MOD_STATE->Prev_GenerateClientSessionStructure( clientNum, sess );
+	MODFN_NEXT( GenerateClientSessionStructure, ( MODFN_NC, clientNum, sess ) );
 
 	pclass = modfn.RealSessionClass( clientNum );
 	if ( ModSpecialties_IsSpecialtiesClass( pclass ) ) {
@@ -266,8 +250,8 @@ LOGFUNCTION_SVOID( ModSpecialties_SetClassCmd, ( int clientNum ), ( clientNum ),
 Handle class command.
 ================
 */
-LOGFUNCTION_SRET( qboolean, MOD_PREFIX(ModClientCommand), ( int clientNum, const char *cmd ),
-		( clientNum, cmd ), "G_MODFN_MODCLIENTCOMMAND" ) {
+LOGFUNCTION_SRET( qboolean, MOD_PREFIX(ModClientCommand), ( MODFN_CTV, int clientNum, const char *cmd ),
+		( MODFN_CTN, clientNum, cmd ), "G_MODFN_MODCLIENTCOMMAND" ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	// Allow this command for connecting clients, because it can sometimes be called before
@@ -281,7 +265,7 @@ LOGFUNCTION_SRET( qboolean, MOD_PREFIX(ModClientCommand), ( int clientNum, const
 		return qtrue;
 	}
 
-	return MOD_STATE->Prev_ModClientCommand( clientNum, cmd );
+	return MODFN_NEXT( ModClientCommand, ( MODFN_NC, clientNum, cmd ) );
 }
 
 /*
@@ -291,8 +275,8 @@ LOGFUNCTION_SRET( qboolean, MOD_PREFIX(ModClientCommand), ( int clientNum, const
 Pick random class for players coming into the game.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(UpdateSessionClass), ( int clientNum ),
-		( clientNum ), "G_MODFN_UPDATESESSIONCLASS" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(UpdateSessionClass), ( MODFN_CTV, int clientNum ),
+		( MODFN_CTN, clientNum ), "G_MODFN_UPDATESESSIONCLASS" ) {
 	gentity_t *ent = &g_entities[clientNum];
 	gclient_t *client = &level.clients[clientNum];
 
@@ -309,8 +293,8 @@ Force handicap values for infiltrator and heavy. Also ignore handicap for other 
 the scoreboard doesn't support displaying it and for consistency with original behavior.
 ================
 */
-LOGFUNCTION_SRET( int, MOD_PREFIX(EffectiveHandicap), ( int clientNum, effectiveHandicapType_t type ),
-		( clientNum, type ), "G_MODFN_EFFECTIVEHANDICAP" ) {
+LOGFUNCTION_SRET( int, MOD_PREFIX(EffectiveHandicap), ( MODFN_CTV, int clientNum, effectiveHandicapType_t type ),
+		( MODFN_CTN, clientNum, type ), "G_MODFN_EFFECTIVEHANDICAP" ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	if ( ModSpecialties_IsSpecialtiesClass( client->sess.sessionClass ) ) {
@@ -323,7 +307,7 @@ LOGFUNCTION_SRET( int, MOD_PREFIX(EffectiveHandicap), ( int clientNum, effective
 		return 100;
 	}
 
-	return MOD_STATE->Prev_EffectiveHandicap( clientNum, type );
+	return MODFN_NEXT( EffectiveHandicap, ( MODFN_NC, clientNum, type ) );
 }
 
 /*
@@ -331,12 +315,12 @@ LOGFUNCTION_SRET( int, MOD_PREFIX(EffectiveHandicap), ( int clientNum, effective
 (ModFN) SpawnConfigureClient
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(SpawnConfigureClient), ( int clientNum ), ( clientNum ), "G_MODFN_SPAWNCONFIGURECLIENT" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(SpawnConfigureClient), ( MODFN_CTV, int clientNum ), ( MODFN_CTN, clientNum ), "G_MODFN_SPAWNCONFIGURECLIENT" ) {
 	gentity_t *ent = &g_entities[clientNum];
 	gclient_t *client = &level.clients[clientNum];
 	specialties_client_t *modclient = &MOD_STATE->clients[clientNum];
 
-	MOD_STATE->Prev_SpawnConfigureClient( clientNum );
+	MODFN_NEXT( SpawnConfigureClient, ( MODFN_NC, clientNum ) );
 
 	if ( ModSpecialties_IsSpecialtiesClass( client->sess.sessionClass ) ) {
 		// STAT_MAX_HEALTH should already be determined via EffectiveHandicap
@@ -426,7 +410,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(SpawnConfigureClient), ( int clientNum ), ( client
 (ModFN) CheckItemSpawnDisabled
 ================
 */
-LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckItemSpawnDisabled), ( gitem_t *item ), ( item ), "G_MODFN_CHECKITEMSPAWNDISABLED" ) {
+LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckItemSpawnDisabled), ( MODFN_CTV, gitem_t *item ), ( MODFN_CTN, item ), "G_MODFN_CHECKITEMSPAWNDISABLED" ) {
 	switch ( item->giType ) {
 		case IT_ARMOR: //given to classes
 		case IT_WEAPON: //spread out among classes
@@ -444,7 +428,7 @@ LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckItemSpawnDisabled), ( gitem_t *item 
 			}
 	}
 
-	return MOD_STATE->Prev_CheckItemSpawnDisabled( item );
+	return MODFN_NEXT( CheckItemSpawnDisabled, ( MODFN_NC, item ) );
 }
 
 /*
@@ -454,13 +438,13 @@ LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckItemSpawnDisabled), ( gitem_t *item 
 Disable dropping any items except flag.
 ============
 */
-LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CanItemBeDropped), ( gitem_t *item, int clientNum ),
-		( item, clientNum ), "G_MODFN_CANITEMBEDROPPED" ) {
+LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CanItemBeDropped), ( MODFN_CTV, gitem_t *item, int clientNum ),
+		( MODFN_CTN, item, clientNum ), "G_MODFN_CANITEMBEDROPPED" ) {
 	if ( item->giType != IT_TEAM ) {
 		return qfalse;
 	}
 
-	return MOD_STATE->Prev_CanItemBeDropped( item, clientNum );
+	return MODFN_NEXT( CanItemBeDropped, ( MODFN_NC, item, clientNum ) );
 }
 
 /*
@@ -468,8 +452,8 @@ LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CanItemBeDropped), ( gitem_t *item, int c
 (ModFN) AddRegisteredItems
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(AddRegisteredItems), ( void ), (), "G_MODFN_ADDREGISTEREDITEMS" ) {
-	MOD_STATE->Prev_AddRegisteredItems();
+LOGFUNCTION_SVOID( MOD_PREFIX(AddRegisteredItems), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_ADDREGISTEREDITEMS" ) {
+	MODFN_NEXT( AddRegisteredItems, ( MODFN_NC ) );
 
 	//weapons
 	RegisterItem( BG_FindItemForWeapon( WP_IMOD ) );	//PC_SNIPER
@@ -506,14 +490,14 @@ LOGFUNCTION_SVOID( MOD_PREFIX(AddRegisteredItems), ( void ), (), "G_MODFN_ADDREG
 Determine class-specific mass value for knockback calculations.
 ================
 */
-LOGFUNCTION_SRET( float, MOD_PREFIX(KnockbackMass), ( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+LOGFUNCTION_SRET( float, MOD_PREFIX(KnockbackMass), ( MODFN_CTV, gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		vec3_t dir, vec3_t point, int damage, int dflags, int mod ),
-		( targ, inflictor, attacker, dir, point, damage, dflags, mod ), "G_MODFN_KNOCKBACKMASS G_DAMAGE" ) {
+		( MODFN_CTN, targ, inflictor, attacker, dir, point, damage, dflags, mod ), "G_MODFN_KNOCKBACKMASS G_DAMAGE" ) {
 	if ( targ->client->sess.sessionClass == PC_INFILTRATOR )
 		return 100;
 	if ( targ->client->sess.sessionClass == PC_HEAVY )
 		return 400;
-	return MOD_STATE->Prev_KnockbackMass( targ, inflictor, attacker, dir, point, damage, dflags, mod );
+	return MODFN_NEXT( KnockbackMass, ( MODFN_NC, targ, inflictor, attacker, dir, point, damage, dflags, mod ) );
 }
 
 /*
@@ -521,11 +505,11 @@ LOGFUNCTION_SRET( float, MOD_PREFIX(KnockbackMass), ( gentity_t *targ, gentity_t
 (ModFN) AdjustGeneralConstant
 ==================
 */
-static int MOD_PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defaultValue ) {
+static int MOD_PREFIX(AdjustGeneralConstant)( MODFN_CTV, generalConstant_t gcType, int defaultValue ) {
 	if ( gcType == GC_ALLOW_BOT_CLASS_SPECIFIER )
 		return 1;
 
-	return MOD_STATE->Prev_AdjustGeneralConstant( gcType, defaultValue );
+	return MODFN_NEXT( AdjustGeneralConstant, ( MODFN_NC, gcType, defaultValue ) );
 }
 
 /*
@@ -535,11 +519,11 @@ static int MOD_PREFIX(AdjustGeneralConstant)( generalConstant_t gcType, int defa
 Enable tripmines for the demolitionist's grenade launcher.
 ======================
 */
-static int MOD_PREFIX(AdjustWeaponConstant)( weaponConstant_t wcType, int defaultValue ) {
+static int MOD_PREFIX(AdjustWeaponConstant)( MODFN_CTV, weaponConstant_t wcType, int defaultValue ) {
 	if ( wcType == WC_USE_TRIPMINES )
 		return 1;
 
-	return MOD_STATE->Prev_AdjustWeaponConstant( wcType, defaultValue );
+	return MODFN_NEXT( AdjustWeaponConstant, ( MODFN_NC, wcType, defaultValue ) );
 }
 
 /*
@@ -549,13 +533,13 @@ static int MOD_PREFIX(AdjustWeaponConstant)( weaponConstant_t wcType, int defaul
 Tripmines use more ammo.
 ==============
 */
-LOGFUNCTION_SRET( int, MOD_PREFIX(ModifyAmmoUsage), ( int defaultValue, int weapon, qboolean alt ),
-		( defaultValue, weapon, alt ), "G_MODFN_MODIFYAMMOUSAGE" ) {
+LOGFUNCTION_SRET( int, MOD_PREFIX(ModifyAmmoUsage), ( MODFN_CTV, int defaultValue, int weapon, qboolean alt ),
+		( MODFN_CTN, defaultValue, weapon, alt ), "G_MODFN_MODIFYAMMOUSAGE" ) {
 	if ( weapon == WP_GRENADE_LAUNCHER && alt ) {
 		return 3;
 	}
 
-	return MOD_STATE->Prev_ModifyAmmoUsage( defaultValue, weapon, alt );
+	return MODFN_NEXT( ModifyAmmoUsage, ( MODFN_NC, defaultValue, weapon, alt ) );
 }
 
 /*
@@ -566,8 +550,8 @@ Set special player models for specialties classes.
 ================
 */
 LOGFUNCTION_SVOID( MOD_PREFIX(ConvertPlayerModel),
-		( int clientNum, const char *userinfo, const char *source_model, char *output, unsigned int outputSize ),
-		( clientNum, userinfo, source_model, output, outputSize ), "G_MODFN_CONVERTPLAYERMODEL" ) {
+		( MODFN_CTV, int clientNum, const char *userinfo, const char *source_model, char *output, unsigned int outputSize ),
+		( MODFN_CTN, clientNum, userinfo, source_model, output, outputSize ), "G_MODFN_CONVERTPLAYERMODEL" ) {
 	gclient_t *client = &level.clients[clientNum];
 	char *oldModel;
 
@@ -596,7 +580,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(ConvertPlayerModel),
 			Q_strncpyz( output, "chell", outputSize );
 			return;
 		default:
-			MOD_STATE->Prev_ConvertPlayerModel( clientNum, userinfo, source_model, output, outputSize );
+			MODFN_NEXT( ConvertPlayerModel, ( MODFN_NC, clientNum, userinfo, source_model, output, outputSize ) );
 	}
 }
 
@@ -613,21 +597,21 @@ LOGFUNCTION_VOID( ModSpecialties_Init, ( void ), (), "G_MOD_INIT G_SPECIALTIES" 
 		G_RegisterTrackedCvar( &MOD_STATE->g_classChangeDebounceTime, "g_classChangeDebounceTime", "180", CVAR_ARCHIVE, qfalse );
 
 		// Register mod functions
-		INIT_FN_STACKABLE( InitClientSession );
-		INIT_FN_STACKABLE( PreClientSpawn );
-		INIT_FN_STACKABLE( GenerateClientSessionStructure );
-		INIT_FN_STACKABLE( ModClientCommand );
-		INIT_FN_BASE( UpdateSessionClass );
-		INIT_FN_STACKABLE( EffectiveHandicap );
-		INIT_FN_STACKABLE( SpawnConfigureClient );
-		INIT_FN_STACKABLE( CheckItemSpawnDisabled );
-		INIT_FN_STACKABLE( CanItemBeDropped );
-		INIT_FN_STACKABLE( AddRegisteredItems );
-		INIT_FN_STACKABLE( KnockbackMass );
-		INIT_FN_STACKABLE( AdjustGeneralConstant );
-		INIT_FN_STACKABLE( AdjustWeaponConstant );
-		INIT_FN_STACKABLE( ModifyAmmoUsage );
-		INIT_FN_STACKABLE_LCL( ConvertPlayerModel );
+		MODFN_REGISTER( InitClientSession );
+		MODFN_REGISTER( PreClientSpawn );
+		MODFN_REGISTER( GenerateClientSessionStructure );
+		MODFN_REGISTER( ModClientCommand );
+		MODFN_REGISTER( UpdateSessionClass );
+		MODFN_REGISTER( EffectiveHandicap );
+		MODFN_REGISTER( SpawnConfigureClient );
+		MODFN_REGISTER( CheckItemSpawnDisabled );
+		MODFN_REGISTER( CanItemBeDropped );
+		MODFN_REGISTER( AddRegisteredItems );
+		MODFN_REGISTER( KnockbackMass );
+		MODFN_REGISTER( AdjustGeneralConstant );
+		MODFN_REGISTER( AdjustWeaponConstant );
+		MODFN_REGISTER( ModifyAmmoUsage );
+		MODFN_REGISTER( ConvertPlayerModel );
 
 		ModModelGroups_Init();
 		ModModelSelection_Init();

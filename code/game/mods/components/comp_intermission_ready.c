@@ -5,7 +5,7 @@
 * exit conditions and display parameters of the end-of-match ready system.
 */
 
-#define MOD_PREFIX( x ) ModIntermissionReady_##x
+#define MOD_NAME ModIntermissionReady
 
 #include "mods/g_mod_local.h"
 
@@ -14,9 +14,6 @@ static struct {
 
 	qboolean playSoundWhenReady[MAX_CLIENTS];
 	qboolean suspended;
-
-	ModFNType_PostRunFrame Prev_PostRunFrame;
-	ModFNType_GeneralInit Prev_GeneralInit;
 } *MOD_STATE;
 
 typedef enum {
@@ -137,7 +134,7 @@ static playerReadyState_t GetPlayerReadyState( int clientNum ) {
 Determines whether to display green 'ready' indicator next to player's name during intermission.
 =================
 */
-static qboolean MOD_PREFIX(IntermissionReadyIndicator)( int clientNum ) {
+static qboolean MOD_PREFIX(IntermissionReadyIndicator)( MODFN_CTV, int clientNum ) {
 	return GetPlayerReadyState( clientNum ).indicateReady;
 }
 
@@ -148,7 +145,7 @@ static qboolean MOD_PREFIX(IntermissionReadyIndicator)( int clientNum ) {
 Determine whether it is time to exit intermission.
 =================
 */
-static qboolean MOD_PREFIX(IntermissionReadyToExit)( void ) {
+static qboolean MOD_PREFIX(IntermissionReadyToExit)( MODFN_CTV ) {
 	int i;
 	int ready = 0;
 	int notReady = 0;
@@ -223,8 +220,8 @@ static qboolean MOD_PREFIX(IntermissionReadyToExit)( void ) {
 (ModFN) PostRunFrame
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME" ) {
-	MOD_STATE->Prev_PostRunFrame();
+LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
+	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 
 	if ( level.intermissiontime ) {
 		int i;
@@ -258,8 +255,8 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( void ), (), "G_MODFN_POSTRUNFRAME
 (ModFN) GeneralInit
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(GeneralInit), ( void ), (), "G_MODFN_GENERALINIT" ) {
-	MOD_STATE->Prev_GeneralInit();
+LOGFUNCTION_SVOID( MOD_PREFIX(GeneralInit), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_GENERALINIT" ) {
+	MODFN_NEXT( GeneralInit, ( MODFN_NC ) );
 
 	// Update config after cvar initialization is complete, for access to g_intermissionTime.
 	ModIntermissionReady_Shared_UpdateConfig();
@@ -275,9 +272,9 @@ LOGFUNCTION_VOID( ModIntermissionReady_Init, ( void ), (), "G_MOD_INTERMISSIONRE
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		INIT_FN_BASE( IntermissionReadyIndicator );
-		INIT_FN_BASE( IntermissionReadyToExit );
-		INIT_FN_STACKABLE( PostRunFrame );
-		INIT_FN_STACKABLE( GeneralInit );
+		MODFN_REGISTER( IntermissionReadyIndicator );
+		MODFN_REGISTER( IntermissionReadyToExit );
+		MODFN_REGISTER( PostRunFrame );
+		MODFN_REGISTER( GeneralInit );
 	}
 }

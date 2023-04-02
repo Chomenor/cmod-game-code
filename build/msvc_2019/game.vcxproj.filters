@@ -290,6 +290,9 @@
     <ClCompile Include="..\..\code\game\mods\features\feat_bot_adding.c">
       <Filter>game\mods\features</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\features\feat_debug_modfn.c">
+      <Filter>game\mods\features</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\code\game\mods\features\feat_misc.c">
       <Filter>game\mods\features</Filter>
     </ClCompile>

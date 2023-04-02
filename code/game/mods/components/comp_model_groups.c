@@ -4,7 +4,7 @@
 * This module provides functions for determining the race of player models.
 */
 
-#define MOD_PREFIX( x ) ModModelGroups_##x
+#define MOD_NAME ModModelGroups
 
 #include "mods/g_mod_local.h"
 

@@ -6,7 +6,7 @@
 * team must belong to that race, or a random one will be selected instead.
 */
 
-#define MOD_PREFIX( x ) ModTeamGroups_##x
+#define MOD_NAME ModTeamGroups
 
 #include "mods/g_mod_local.h"
 
@@ -21,11 +21,6 @@ static struct {
 	qboolean csInitialized;
 	char forceRedGroup[GROUP_NAME_LENGTH];
 	char forceBlueGroup[GROUP_NAME_LENGTH];
-
-	// For mod function stacking
-	ModFNType_ConvertPlayerModel Prev_ConvertPlayerModel;
-	ModFNType_RandomPlayerModel Prev_RandomPlayerModel;
-	ModFNType_PostModInit Prev_PostModInit;
 } *MOD_STATE;
 
 /*
@@ -68,8 +63,8 @@ and a random one should be selected instead.
 ============
 */
 LOGFUNCTION_SVOID( MOD_PREFIX(ConvertPlayerModel),
-		( int clientNum, const char *userinfo, const char *source_model, char *output, unsigned int outputSize ),
-		( clientNum, userinfo, source_model, output, outputSize ), "G_PLAYERMODELS G_MODFN_CONVERTPLAYERMODEL" ) {
+		( MODFN_CTV, int clientNum, const char *userinfo, const char *source_model, char *output, unsigned int outputSize ),
+		( MODFN_CTN, clientNum, userinfo, source_model, output, outputSize ), "G_PLAYERMODELS G_MODFN_CONVERTPLAYERMODEL" ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	if ( client->sess.sessionTeam == TEAM_RED || client->sess.sessionTeam == TEAM_BLUE ) {
@@ -84,7 +79,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(ConvertPlayerModel),
 		}
 	}
 
-	MOD_STATE->Prev_ConvertPlayerModel( clientNum, userinfo, source_model, output, outputSize );
+	MODFN_NEXT( ConvertPlayerModel, ( MODFN_NC, clientNum, userinfo, source_model, output, outputSize ) );
 }
 
 /*
@@ -94,8 +89,8 @@ LOGFUNCTION_SVOID( MOD_PREFIX(ConvertPlayerModel),
 Selects a random model that matches team race requirement. Returns empty string on error.
 ============
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(RandomPlayerModel), ( int clientNum, const char *userinfo, char *output, unsigned int outputSize ),
-		( clientNum, userinfo, output, outputSize ), "G_PLAYERMODELS G_MODFN_RANDOMPLAYERMODEL" ) {
+LOGFUNCTION_SVOID( MOD_PREFIX(RandomPlayerModel), ( MODFN_CTV, int clientNum, const char *userinfo, char *output, unsigned int outputSize ),
+		( MODFN_CTN, clientNum, userinfo, output, outputSize ), "G_PLAYERMODELS G_MODFN_RANDOMPLAYERMODEL" ) {
 	gclient_t *client = &level.clients[clientNum];
 	*output = '\0';
 
@@ -110,7 +105,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(RandomPlayerModel), ( int clientNum, const char *u
 		}
 	}
 
-	MOD_STATE->Prev_RandomPlayerModel( clientNum, userinfo, output, outputSize );
+	MODFN_NEXT( RandomPlayerModel, ( MODFN_NC, clientNum, userinfo, output, outputSize ) );
 }
 
 /*
@@ -120,8 +115,8 @@ LOGFUNCTION_SVOID( MOD_PREFIX(RandomPlayerModel), ( int clientNum, const char *u
 Delay full initialization until g_gametype is determined, because other mods might have modified it.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostModInit), ( void ), (), "G_MODFN_POSTMODINIT" ) {
-	MOD_STATE->Prev_PostModInit();
+LOGFUNCTION_SVOID( MOD_PREFIX(PostModInit), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTMODINIT" ) {
+	MODFN_NEXT( PostModInit, ( MODFN_NC ) );
 
 	if ( G_ModUtils_GetLatchedValue( "g_gametype", "0", 0 ) >= GT_TEAM ) {
 		// Grab group names from cvars
@@ -152,9 +147,9 @@ LOGFUNCTION_VOID( ModTeamGroups_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		INIT_FN_STACKABLE_LCL( ConvertPlayerModel );
-		INIT_FN_STACKABLE_LCL( RandomPlayerModel );
-		INIT_FN_STACKABLE_LCL( PostModInit );
+		MODFN_REGISTER( ConvertPlayerModel );
+		MODFN_REGISTER( RandomPlayerModel );
+		MODFN_REGISTER( PostModInit );
 
 		ModModelSelection_Init();
 	}

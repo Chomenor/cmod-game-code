@@ -151,8 +151,8 @@ LOGFUNCTION_VOID( ModElimTimelimit_Init, ( void ), (), "G_MOD_INIT G_ELIMINATION
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		MODFN_REGISTER( PostGameShutdown );
-		MODFN_REGISTER( PostRunFrame );
+		MODFN_REGISTER( PostGameShutdown, ++modePriorityLevel );
+		MODFN_REGISTER( PostRunFrame, ++modePriorityLevel );
 
 		G_RegisterTrackedCvar( &MOD_STATE->g_mod_finalistsTimelimit, "g_mod_finalistsTimelimit", "0", CVAR_ARCHIVE, qfalse );
 		G_RegisterTrackedCvar( &MOD_STATE->g_mod_onlyBotsTimelimit, "g_mod_onlyBotsTimelimit", "0", CVAR_ARCHIVE, qfalse );

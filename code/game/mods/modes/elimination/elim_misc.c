@@ -93,9 +93,9 @@ LOGFUNCTION_VOID( ModElimMisc_Init, ( void ), (), "G_MOD_INIT G_ELIMINATION" ) {
 		G_RegisterTrackedCvar( &MOD_STATE->g_adaptRespawnIgnoreEliminated, "g_adaptRespawnIgnoreEliminated", "0", 0, qfalse );
 #endif
 
-		MODFN_REGISTER( AdaptRespawnNumPlayers );
-		MODFN_REGISTER( SetScoresConfigStrings );
-		MODFN_REGISTER( PostRunFrame );
+		MODFN_REGISTER( AdaptRespawnNumPlayers, ++modePriorityLevel );
+		MODFN_REGISTER( SetScoresConfigStrings, ++modePriorityLevel );
+		MODFN_REGISTER( PostRunFrame, ++modePriorityLevel );
 
 		if ( G_ModUtils_GetLatchedValue( "g_mod_elimTweaks", "0", 0 ) ) {
 			ModElimTweaks_Init();

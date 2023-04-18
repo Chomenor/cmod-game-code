@@ -166,13 +166,13 @@ LOGFUNCTION_VOID( ModDisintegration_Init, ( void ), (), "G_MOD_INIT G_DISINTEGRA
 		modcfg.mods_enabled.disintegration = qtrue;
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		MODFN_REGISTER( SpawnConfigureClient );
-		MODFN_REGISTER( AdjustWeaponConstant );
-		MODFN_REGISTER( AdjustGeneralConstant );
-		MODFN_REGISTER( ModifyAmmoUsage );
-		MODFN_REGISTER( PmoveInit );
-		MODFN_REGISTER( CanItemBeDropped );
-		MODFN_REGISTER( ModifyDamageFlags );
-		MODFN_REGISTER( CheckItemSpawnDisabled );
+		MODFN_REGISTER( SpawnConfigureClient, ++modePriorityLevel );
+		MODFN_REGISTER( AdjustWeaponConstant, ++modePriorityLevel );
+		MODFN_REGISTER( AdjustGeneralConstant, ++modePriorityLevel );
+		MODFN_REGISTER( ModifyAmmoUsage, ++modePriorityLevel );
+		MODFN_REGISTER( PmoveInit, ++modePriorityLevel );
+		MODFN_REGISTER( CanItemBeDropped, ++modePriorityLevel );
+		MODFN_REGISTER( ModifyDamageFlags, ++modePriorityLevel );
+		MODFN_REGISTER( CheckItemSpawnDisabled, ++modePriorityLevel );
 	}
 }

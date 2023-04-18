@@ -6,6 +6,8 @@
 
 #include "mods/g_mod_local.h"
 
+float modePriorityLevel = MODPRIORITY_MODES;
+
 /*
 ================
 G_ModUtils_GetLatchedValue

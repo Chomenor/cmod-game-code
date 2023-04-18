@@ -34,6 +34,30 @@ static void ModfnDebugPrintEntry( modFunctionBackendEntry_t *entry ) {
 
 /*
 ===================
+ModfnCountSamePriority
+
+Returns number of calls attached to the mod function with the same priority value as another call.
+
+Used to highlight cases where the order is ambiguous (determined alphabetically by the name of the
+registering module). In some cases this is fine, but in other cases it may need additional scrutiny.
+===================
+*/
+static int ModfnCountSamePriority( const modCallList_t *callList ) {
+	int count = 0;
+	int i, j;
+	for ( i = 0; i < callList->count; ++i ) {
+		for ( j = 0; j < callList->count; ++j ) {
+			if ( i != j && callList->entries[i]->priority == callList->entries[j]->priority ) {
+				++count;
+				break;
+			}
+		}
+	}
+	return count;
+}
+
+/*
+===================
 ModfnDebugCmd
 ===================
 */
@@ -59,8 +83,11 @@ static void ModfnDebugCmd( void ) {
 		modCallList_t callList;
 		for ( i = 0; i < MODFN_COUNT; ++i ) {
 			modFunctionBackendEntry_t *entry = (modFunctionBackendEntry_t *)&modFunctionsBackend + i;
+			int indeterminate;
 			G_GetModCallList( entry, &callList );
-			G_Printf( "%s: %i calls\n", entry->name, callList.count );
+			indeterminate = ModfnCountSamePriority( &callList );
+			G_Printf( "%s: %i calls%s\n", entry->name, callList.count,
+					indeterminate ? va( " (%i same priority)", indeterminate ) : "" );
 		}
 
 		G_Printf( "\nTo show call list:\nmodfn_debug <mod function name>\n" );
@@ -91,6 +118,6 @@ LOGFUNCTION_VOID( ModDebugModfn_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		MODFN_REGISTER( ModConsoleCommand );
+		MODFN_REGISTER( ModConsoleCommand, MODPRIORITY_GENERAL );
 	}
 }

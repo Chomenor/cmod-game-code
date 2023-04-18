@@ -66,18 +66,6 @@ LOGFUNCTION_SVOID( MOD_PREFIX(SpawnCenterPrintMessage), ( MODFN_CTV, int clientN
 
 /*
 ================
-(ModFN) PostModInit
-================
-*/
-LOGFUNCTION_SVOID( MOD_PREFIX(PostModInit), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTMODINIT" ) {
-	MODFN_NEXT( PostModInit, ( MODFN_NC ) );
-
-	// Initialize here to ensure overriding any other messages.
-	MODFN_REGISTER( SpawnCenterPrintMessage );
-}
-
-/*
-================
 ModClickToJoin_Init
 ================
 */
@@ -85,7 +73,9 @@ LOGFUNCTION_VOID( ModClickToJoin_Init, ( void ), (), "G_MOD_INIT G_MOD_CLICKJOIN
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		MODFN_REGISTER( RunPlayerMove );
-		MODFN_REGISTER( PostModInit );
+		MODFN_REGISTER( RunPlayerMove, MODPRIORITY_GENERAL );
+
+		// high priority to override any other messages
+		MODFN_REGISTER( SpawnCenterPrintMessage, MODPRIORITY_HIGH );
 	}
 }

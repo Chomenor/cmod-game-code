@@ -76,7 +76,7 @@ LOGFUNCTION_VOID( ModSpectPassThrough_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		MODFN_REGISTER( PmoveInit );
-		MODFN_REGISTER( AdjustGeneralConstant );
+		MODFN_REGISTER( PmoveInit, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( AdjustGeneralConstant, MODPRIORITY_GENERAL );
 	}
 }

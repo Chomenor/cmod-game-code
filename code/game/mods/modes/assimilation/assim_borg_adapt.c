@@ -127,6 +127,6 @@ LOGFUNCTION_VOID( ModAssimBorgAdapt_Init, ( void ), (), "G_MOD_INIT G_ASSIMILATI
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		MODFN_REGISTER( CheckBorgAdapt );
+		MODFN_REGISTER( CheckBorgAdapt, ++modePriorityLevel );
 	}
 }

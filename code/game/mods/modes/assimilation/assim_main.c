@@ -843,30 +843,30 @@ LOGFUNCTION_VOID( ModAssimilation_Init, ( void ), (), "G_MOD_INIT G_ASSIMILATION
 		}
 
 		// Register mod functions
-		MODFN_REGISTER( IsBorgQueen );
-		MODFN_REGISTER( GenerateGlobalSessionInfo );
-		MODFN_REGISTER( CheckJoinAllowed );
-		MODFN_REGISTER( PostPlayerDie );
-		MODFN_REGISTER( PrePlayerLeaveTeam );
-		MODFN_REGISTER( PreClientConnect );
-		MODFN_REGISTER( InitClientSession );
-		MODFN_REGISTER( UpdateSessionClass );
-		MODFN_REGISTER( SpawnConfigureClient );
-		MODFN_REGISTER( SpawnCenterPrintMessage );
-		MODFN_REGISTER( SpawnTransporterEffect );
-		MODFN_REGISTER( RealSessionClass );
-		MODFN_REGISTER( RealSessionTeam );
-		MODFN_REGISTER( CheckExitRules );
-		MODFN_REGISTER( ClientRespawn );
-		MODFN_REGISTER( CheckRespawnTime );
-		MODFN_REGISTER( CheckReplaceItem );
-		MODFN_REGISTER( CanItemBeDropped );
-		MODFN_REGISTER( AddRegisteredItems );
-		MODFN_REGISTER( CheckSuicideAllowed );
-		MODFN_REGISTER( ModClientCommand );
-		MODFN_REGISTER( AdjustGeneralConstant );
-		MODFN_REGISTER( PostRunFrame );
-		MODFN_REGISTER( MatchStateTransition );
+		MODFN_REGISTER( IsBorgQueen, ++modePriorityLevel );
+		MODFN_REGISTER( GenerateGlobalSessionInfo, ++modePriorityLevel );
+		MODFN_REGISTER( CheckJoinAllowed, ++modePriorityLevel );
+		MODFN_REGISTER( PostPlayerDie, ++modePriorityLevel );
+		MODFN_REGISTER( PrePlayerLeaveTeam, ++modePriorityLevel );
+		MODFN_REGISTER( PreClientConnect, ++modePriorityLevel );
+		MODFN_REGISTER( InitClientSession, ++modePriorityLevel );
+		MODFN_REGISTER( UpdateSessionClass, ++modePriorityLevel );
+		MODFN_REGISTER( SpawnConfigureClient, ++modePriorityLevel );
+		MODFN_REGISTER( SpawnCenterPrintMessage, ++modePriorityLevel );
+		MODFN_REGISTER( SpawnTransporterEffect, ++modePriorityLevel );
+		MODFN_REGISTER( RealSessionClass, ++modePriorityLevel );
+		MODFN_REGISTER( RealSessionTeam, ++modePriorityLevel );
+		MODFN_REGISTER( CheckExitRules, ++modePriorityLevel );
+		MODFN_REGISTER( ClientRespawn, ++modePriorityLevel );
+		MODFN_REGISTER( CheckRespawnTime, ++modePriorityLevel );
+		MODFN_REGISTER( CheckReplaceItem, ++modePriorityLevel );
+		MODFN_REGISTER( CanItemBeDropped, ++modePriorityLevel );
+		MODFN_REGISTER( AddRegisteredItems, ++modePriorityLevel );
+		MODFN_REGISTER( CheckSuicideAllowed, ++modePriorityLevel );
+		MODFN_REGISTER( ModClientCommand, ++modePriorityLevel );
+		MODFN_REGISTER( AdjustGeneralConstant, ++modePriorityLevel );
+		MODFN_REGISTER( PostRunFrame, ++modePriorityLevel );
+		MODFN_REGISTER( MatchStateTransition, ++modePriorityLevel );
 
 		// Support ModTeamGroups_Shared_ForceConfigStrings function
 		ModTeamGroups_Init();

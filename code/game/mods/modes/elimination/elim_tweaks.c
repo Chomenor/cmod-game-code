@@ -281,13 +281,13 @@ LOGFUNCTION_VOID( ModElimTweaks_Init, ( void ), (), "G_MOD_INIT G_ELIMINATION" )
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		MODFN_REGISTER( AdjustGeneralConstant );
-		MODFN_REGISTER( AdjustScoreboardAttributes );
-		MODFN_REGISTER( CheckSuicideAllowed );
-		MODFN_REGISTER( PostPlayerDie );
-		MODFN_REGISTER( PrePlayerLeaveTeam );
-		MODFN_REGISTER( PostRunFrame );
-		MODFN_REGISTER( MatchStateTransition );
+		MODFN_REGISTER( AdjustGeneralConstant, ++modePriorityLevel );
+		MODFN_REGISTER( AdjustScoreboardAttributes, ++modePriorityLevel );
+		MODFN_REGISTER( CheckSuicideAllowed, ++modePriorityLevel );
+		MODFN_REGISTER( PostPlayerDie, ++modePriorityLevel );
+		MODFN_REGISTER( PrePlayerLeaveTeam, ++modePriorityLevel );
+		MODFN_REGISTER( PostRunFrame, ++modePriorityLevel );
+		MODFN_REGISTER( MatchStateTransition, ++modePriorityLevel );
 
 #ifdef FEATURE_FINALIST_TIMELIMIT
 		ModElimTimelimit_Init();
@@ -301,7 +301,7 @@ LOGFUNCTION_VOID( ModElimTweaks_Init, ( void ), (), "G_MOD_INIT G_ELIMINATION" )
 
 #ifdef FEATURE_INTERMISSION_READY_TWEAKS
 		ModIntermissionReady_Init();
-		MODFN_REGISTER( IntermissionReadyConfig );
+		MODFN_REGISTER( IntermissionReadyConfig, ++modePriorityLevel );
 		ModIntermissionReady_Shared_UpdateConfig();
 #endif
 	}

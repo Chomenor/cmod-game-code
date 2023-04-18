@@ -117,6 +117,6 @@ LOGFUNCTION_VOID( ModPCSmoothingDebug_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		MODFN_REGISTER( ModConsoleCommand );
+		MODFN_REGISTER( ModConsoleCommand, MODPRIORITY_GENERAL );
 	}
 }

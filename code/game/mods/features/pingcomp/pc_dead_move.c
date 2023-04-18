@@ -143,6 +143,6 @@ LOGFUNCTION_VOID( ModPCDeadMove_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		MODFN_REGISTER( PostRunFrame );
+		MODFN_REGISTER( PostRunFrame, MODPRIORITY_GENERAL );
 	}
 }

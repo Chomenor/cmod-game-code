@@ -153,8 +153,8 @@ LOGFUNCTION_VOID( ModAssimModels_Init, ( void ), (), "G_MOD_INIT G_ASSIMILATION"
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		MODFN_REGISTER( ConvertPlayerModel );
-		MODFN_REGISTER( RandomPlayerModel );
+		MODFN_REGISTER( ConvertPlayerModel, ++modePriorityLevel );
+		MODFN_REGISTER( RandomPlayerModel, ++modePriorityLevel );
 
 		ModModelGroups_Init();
 		ModModelSelection_Init();

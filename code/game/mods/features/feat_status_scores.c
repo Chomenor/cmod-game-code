@@ -64,7 +64,7 @@ LOGFUNCTION_VOID( ModStatusScores_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE && VMExt_FNAvailable_StatusScoresOverride_SetArray() ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		MODFN_REGISTER( PostRunFrame );
-		MODFN_REGISTER( GeneralInit );
+		MODFN_REGISTER( PostRunFrame, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( GeneralInit, MODPRIORITY_GENERAL );
 	}
 }

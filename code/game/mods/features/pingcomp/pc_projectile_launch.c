@@ -169,9 +169,9 @@ LOGFUNCTION_VOID( ModPCProjectileLaunch_Init, ( void ), (), "G_MOD_INIT" ) {
 
 		ModPCPositionShift_Init();
 
-		MODFN_REGISTER( AdjustWeaponConstant );
-		MODFN_REGISTER( AdjustGeneralConstant );
-		MODFN_REGISTER( PostFireProjectile );
-		MODFN_REGISTER( PostRunFrame );
+		MODFN_REGISTER( AdjustWeaponConstant, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( AdjustGeneralConstant, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( PostFireProjectile, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( PostRunFrame, MODPRIORITY_GENERAL );
 	}
 }

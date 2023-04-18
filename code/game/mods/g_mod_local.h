@@ -28,6 +28,17 @@ extern mod_config_t modcfg;
 int G_ModUtils_GetLatchedValue( const char *cvar_name, const char *default_value, int flags );
 char *G_ModUtils_AllocateString( const char *string );
 
+// Mod Function Priority
+
+#define MODPRIORITY_LOW 0	// should be called last
+#define MODPRIORITY_GENERAL 1000	// for regular components or features
+#define MODPRIORITY_MODES 2000		// for game type modifications
+#define MODPRIORITY_MODIFICATIONS 3000		// for extra customizations
+#define MODPRIORITY_HIGH 4000	// should be called first
+
+// Priority counter to support last-registered-first-called model for modes
+extern float modePriorityLevel;
+
 /* ************************************************************************* */
 // Modes - Modules loaded directly from G_ModsInit to change game mechanics
 /* ************************************************************************* */
@@ -199,7 +210,7 @@ typedef struct {
 #define MODFN_NEXT( type, parameters ) ((ModFNType_##type)*next) parameters		// call next modfn in sequence
 
 extern modFunctionsBackend_t modFunctionsBackend;
-void G_RegisterModFunctionCall( modFunctionBackendEntry_t *backendEntry, modCall_t call, const char *source );
+void G_RegisterModFunctionCall( modFunctionBackendEntry_t *backendEntry, modCall_t call, const char *source, float priority );
 void G_GetModCallList( modFunctionBackendEntry_t *backendEntry, modCallList_t *out );
 
 /* ************************************************************************* */
@@ -237,7 +248,7 @@ extern mod_functions_local_t modfn_lcl;
 
 #define MOD_STATE MOD_PREFIX( state )
 
-#define MODFN_REGISTER( name ) { \
+#define MODFN_REGISTER( name, priority ) { \
 	ModFNType_##name modfn = MOD_PREFIX(name); \
-	G_RegisterModFunctionCall( &modFunctionsBackend.name, (modCall_t)modfn, MOD_NAME_STR ); }
+	G_RegisterModFunctionCall( &modFunctionsBackend.name, (modCall_t)modfn, MOD_NAME_STR, priority ); }
 #endif

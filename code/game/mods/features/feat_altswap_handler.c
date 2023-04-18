@@ -157,12 +157,12 @@ LOGFUNCTION_VOID( ModAltSwapHandler_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		MODFN_REGISTER( InitClientSession );
-		MODFN_REGISTER( GenerateClientSessionInfo );
-		MODFN_REGISTER( ModClientCommand );
-		MODFN_REGISTER( PmoveInit );
-		MODFN_REGISTER( AddModConfigInfo );
-		MODFN_REGISTER( PostRunFrame );
+		MODFN_REGISTER( InitClientSession, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( GenerateClientSessionInfo, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( ModClientCommand, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( PmoveInit, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( AddModConfigInfo, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( PostRunFrame, MODPRIORITY_GENERAL );
 
 		ModModcfgCS_Init();
 		ModAltSwapHandler_CheckEnabled();

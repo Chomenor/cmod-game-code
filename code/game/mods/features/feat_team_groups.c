@@ -147,9 +147,9 @@ LOGFUNCTION_VOID( ModTeamGroups_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		MODFN_REGISTER( ConvertPlayerModel );
-		MODFN_REGISTER( RandomPlayerModel );
-		MODFN_REGISTER( PostModInit );
+		MODFN_REGISTER( ConvertPlayerModel, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( RandomPlayerModel, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( PostModInit, MODPRIORITY_GENERAL );
 
 		ModModelSelection_Init();
 	}

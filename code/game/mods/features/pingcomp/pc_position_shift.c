@@ -231,11 +231,11 @@ void ModPCPositionShift_Shared_SetShiftState( positionShiftState_t *shiftState )
 ================
 */
 LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
-	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
-
 	if ( ModPingcomp_Static_PositionShiftEnabled() ) {
 		ModPCPositionShift_RunServerFrame();
 	}
+
+	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 }
 
 /*
@@ -247,6 +247,6 @@ LOGFUNCTION_VOID( ModPCPositionShift_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		MODFN_REGISTER( PostRunFrame );
+		MODFN_REGISTER( PostRunFrame, MODPRIORITY_GENERAL );
 	}
 }

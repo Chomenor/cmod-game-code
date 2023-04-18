@@ -272,9 +272,9 @@ LOGFUNCTION_VOID( ModIntermissionReady_Init, ( void ), (), "G_MOD_INTERMISSIONRE
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		MODFN_REGISTER( IntermissionReadyIndicator );
-		MODFN_REGISTER( IntermissionReadyToExit );
-		MODFN_REGISTER( PostRunFrame );
-		MODFN_REGISTER( GeneralInit );
+		MODFN_REGISTER( IntermissionReadyIndicator, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( IntermissionReadyToExit, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( PostRunFrame, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( GeneralInit, MODPRIORITY_GENERAL );
 	}
 }

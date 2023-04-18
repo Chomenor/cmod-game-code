@@ -182,10 +182,10 @@ LOGFUNCTION_VOID( ModPlayerMove_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		MODFN_REGISTER( PmoveFixedLength );
-		MODFN_REGISTER( RunPlayerMove );
-		MODFN_REGISTER( PmoveInit );
-		MODFN_REGISTER( AddModConfigInfo );
+		MODFN_REGISTER( PmoveFixedLength, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( RunPlayerMove, MODPRIORITY_LOW );
+		MODFN_REGISTER( PmoveInit, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( AddModConfigInfo, MODPRIORITY_GENERAL );
 
 		G_RegisterTrackedCvar( &MOD_STATE->g_pMoveMsec, "g_pMoveMsec", "8", CVAR_ARCHIVE, qfalse );
 		G_RegisterTrackedCvar( &MOD_STATE->g_pMoveBotsMsec, "g_pMoveBotsMsec", "-1", CVAR_ARCHIVE, qfalse );

@@ -301,7 +301,7 @@ LOGFUNCTION_VOID( ModPCSmoothing_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		MODFN_REGISTER( CopyToBodyQue );
+		MODFN_REGISTER( CopyToBodyQue, MODPRIORITY_GENERAL );
 
 		ModPlayerMove_Init();	// for ModPCSmoothing_Static_RecordClientMove callback
 		ModPCSmoothingDebug_Init();

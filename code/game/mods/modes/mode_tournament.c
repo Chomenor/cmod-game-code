@@ -244,8 +244,8 @@ LOGFUNCTION_VOID( ModTournament_Init, ( void ), (), "G_MOD_INIT G_TOURNAMENT" ) 
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 		MOD_STATE->losingClient = -1;
 
-		MODFN_REGISTER( ExitLevel );
-		MODFN_REGISTER( SpawnCenterPrintMessage );
+		MODFN_REGISTER( ExitLevel, ++modePriorityLevel );
+		MODFN_REGISTER( SpawnCenterPrintMessage, ++modePriorityLevel );
 
 		if ( G_ModUtils_GetLatchedValue( "g_pModElimination", "0", 0 ) ) {
 			ModElimination_Init();
@@ -255,11 +255,11 @@ LOGFUNCTION_VOID( ModTournament_Init, ( void ), (), "G_MOD_INIT G_TOURNAMENT" ) 
 			ModSpecialties_Init();
 		}
 
-		MODFN_REGISTER( CheckJoinAllowed );
-		MODFN_REGISTER( PrePlayerLeaveTeam );
-		MODFN_REGISTER( GenerateClientSessionStructure );
-		MODFN_REGISTER( AdjustGeneralConstant );
-		MODFN_REGISTER( PostRunFrame );
-		MODFN_REGISTER( MatchStateTransition );
+		MODFN_REGISTER( CheckJoinAllowed, ++modePriorityLevel );
+		MODFN_REGISTER( PrePlayerLeaveTeam, ++modePriorityLevel );
+		MODFN_REGISTER( GenerateClientSessionStructure, ++modePriorityLevel );
+		MODFN_REGISTER( AdjustGeneralConstant, ++modePriorityLevel );
+		MODFN_REGISTER( PostRunFrame, ++modePriorityLevel );
+		MODFN_REGISTER( MatchStateTransition, ++modePriorityLevel );
 	}
 }

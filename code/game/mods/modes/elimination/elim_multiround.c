@@ -686,19 +686,19 @@ LOGFUNCTION_VOID( ModElimMultiRound_Init, ( void ), (), "G_MOD_INIT G_ELIMINATIO
 
 	MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-	MODFN_REGISTER( AdjustScoreboardAttributes );
-	MODFN_REGISTER( EffectiveScore );
-	MODFN_REGISTER( CalculateAwards );
-	MODFN_REGISTER( SetScoresConfigStrings );
-	MODFN_REGISTER( ExitLevel );
-	MODFN_REGISTER( PostPlayerDie );
-	MODFN_REGISTER( GenerateGlobalSessionInfo );
-	MODFN_REGISTER( GenerateClientSessionInfo );
-	MODFN_REGISTER( InitClientSession );
-	MODFN_REGISTER( PrePlayerLeaveTeam );
-	MODFN_REGISTER( PostGameShutdown );
-	MODFN_REGISTER( PostRunFrame );
-	MODFN_REGISTER( MatchStateTransition );
+	MODFN_REGISTER( AdjustScoreboardAttributes, ++modePriorityLevel );
+	MODFN_REGISTER( EffectiveScore, ++modePriorityLevel );
+	MODFN_REGISTER( CalculateAwards, ++modePriorityLevel );
+	MODFN_REGISTER( SetScoresConfigStrings, ++modePriorityLevel );
+	MODFN_REGISTER( ExitLevel, ++modePriorityLevel );
+	MODFN_REGISTER( PostPlayerDie, ++modePriorityLevel );
+	MODFN_REGISTER( GenerateGlobalSessionInfo, ++modePriorityLevel );
+	MODFN_REGISTER( GenerateClientSessionInfo, ++modePriorityLevel );
+	MODFN_REGISTER( InitClientSession, ++modePriorityLevel );
+	MODFN_REGISTER( PrePlayerLeaveTeam, ++modePriorityLevel );
+	MODFN_REGISTER( PostGameShutdown, ++modePriorityLevel );
+	MODFN_REGISTER( PostRunFrame, ++modePriorityLevel );
+	MODFN_REGISTER( MatchStateTransition, ++modePriorityLevel );
 
 	MOD_STATE->currentRound = 1;
 	G_RegisterTrackedCvar( &MOD_STATE->g_mod_noOfGamesPerMatch, "g_mod_noOfGamesPerMatch", "1", CVAR_ARCHIVE, qfalse );
@@ -708,7 +708,7 @@ LOGFUNCTION_VOID( ModElimMultiRound_Init, ( void ), (), "G_MOD_INIT G_ELIMINATIO
 
 #ifdef FEATURE_WARMUP_MESSAGE_SEQUENCE
 	ModWarmupSequence_Init();
-	MODFN_REGISTER( GetWarmupSequence );
+	MODFN_REGISTER( GetWarmupSequence, ++modePriorityLevel );
 #endif
 
 #ifdef FEATURE_FINAL_SCORES

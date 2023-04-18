@@ -78,11 +78,7 @@ G_RegisterModFunctionCall
 Add a new call to a mod function's call list.
 ================
 */
-void G_RegisterModFunctionCall( modFunctionBackendEntry_t *backendEntry, modCall_t call, const char *source ) {
-	// Until a more permanent system is implemented, emulate the previous behavior
-	// where last modfn registered is called first.
-	static float modfnPriorityCounter = 0.0f;
-
+void G_RegisterModFunctionCall( modFunctionBackendEntry_t *backendEntry, modCall_t call, const char *source, float priority ) {
 	// verify no duplicate name
 	modFunctionBackendCall_t *curEntry = backendEntry->entries;
 	while ( curEntry ) {
@@ -96,7 +92,7 @@ void G_RegisterModFunctionCall( modFunctionBackendEntry_t *backendEntry, modCall
 	curEntry = G_Alloc( sizeof( *curEntry ) );
 	curEntry->call = call;
 	curEntry->source = source;
-	curEntry->priority = ++modfnPriorityCounter;
+	curEntry->priority = priority;
 	curEntry->next = backendEntry->entries;
 	backendEntry->entries = curEntry;
 

@@ -169,8 +169,8 @@ LOGFUNCTION_VOID( ModWarmupSequence_Init, ( void ), (), "G_MOD_INIT G_MOD_WARMUP
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		MODFN_REGISTER( WarmupLength );
-		MODFN_REGISTER( PostRunFrame );
-		MODFN_REGISTER( MatchStateTransition );
+		MODFN_REGISTER( WarmupLength, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( PostRunFrame, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( MatchStateTransition, MODPRIORITY_GENERAL );
 	}
 }

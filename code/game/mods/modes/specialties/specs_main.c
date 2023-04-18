@@ -597,21 +597,21 @@ LOGFUNCTION_VOID( ModSpecialties_Init, ( void ), (), "G_MOD_INIT G_SPECIALTIES" 
 		G_RegisterTrackedCvar( &MOD_STATE->g_classChangeDebounceTime, "g_classChangeDebounceTime", "180", CVAR_ARCHIVE, qfalse );
 
 		// Register mod functions
-		MODFN_REGISTER( InitClientSession );
-		MODFN_REGISTER( PreClientSpawn );
-		MODFN_REGISTER( GenerateClientSessionStructure );
-		MODFN_REGISTER( ModClientCommand );
-		MODFN_REGISTER( UpdateSessionClass );
-		MODFN_REGISTER( EffectiveHandicap );
-		MODFN_REGISTER( SpawnConfigureClient );
-		MODFN_REGISTER( CheckItemSpawnDisabled );
-		MODFN_REGISTER( CanItemBeDropped );
-		MODFN_REGISTER( AddRegisteredItems );
-		MODFN_REGISTER( KnockbackMass );
-		MODFN_REGISTER( AdjustGeneralConstant );
-		MODFN_REGISTER( AdjustWeaponConstant );
-		MODFN_REGISTER( ModifyAmmoUsage );
-		MODFN_REGISTER( ConvertPlayerModel );
+		MODFN_REGISTER( InitClientSession, ++modePriorityLevel );
+		MODFN_REGISTER( PreClientSpawn, ++modePriorityLevel );
+		MODFN_REGISTER( GenerateClientSessionStructure, ++modePriorityLevel );
+		MODFN_REGISTER( ModClientCommand, ++modePriorityLevel );
+		MODFN_REGISTER( UpdateSessionClass, ++modePriorityLevel );
+		MODFN_REGISTER( EffectiveHandicap, ++modePriorityLevel );
+		MODFN_REGISTER( SpawnConfigureClient, ++modePriorityLevel );
+		MODFN_REGISTER( CheckItemSpawnDisabled, ++modePriorityLevel );
+		MODFN_REGISTER( CanItemBeDropped, ++modePriorityLevel );
+		MODFN_REGISTER( AddRegisteredItems, ++modePriorityLevel );
+		MODFN_REGISTER( KnockbackMass, ++modePriorityLevel );
+		MODFN_REGISTER( AdjustGeneralConstant, ++modePriorityLevel );
+		MODFN_REGISTER( AdjustWeaponConstant, ++modePriorityLevel );
+		MODFN_REGISTER( ModifyAmmoUsage, ++modePriorityLevel );
+		MODFN_REGISTER( ConvertPlayerModel, ++modePriorityLevel );
 
 		ModModelGroups_Init();
 		ModModelSelection_Init();

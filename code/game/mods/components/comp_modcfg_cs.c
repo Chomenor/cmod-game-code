@@ -72,6 +72,6 @@ LOGFUNCTION_VOID( ModModcfgCS_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		MODFN_REGISTER( GeneralInit );
+		MODFN_REGISTER( GeneralInit, MODPRIORITY_GENERAL );
 	}
 }

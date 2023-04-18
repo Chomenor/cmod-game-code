@@ -320,16 +320,16 @@ LOGFUNCTION_VOID( ModActionHero_Init, ( void ), (), "G_MOD_INIT G_ACTIONHERO" ) 
 		MOD_STATE->actionHeroClientNum = -1;
 
 		// Register mod functions
-		MODFN_REGISTER( UpdateSessionClass );
-		MODFN_REGISTER( EffectiveHandicap );
-		MODFN_REGISTER( SpawnConfigureClient );
-		MODFN_REGISTER( SpawnCenterPrintMessage );
-		MODFN_REGISTER( PostClientSpawn );
-		MODFN_REGISTER( PostPlayerDie );
-		MODFN_REGISTER( PrePlayerLeaveTeam );
-		MODFN_REGISTER( CanItemBeDropped );
-		MODFN_REGISTER( AddRegisteredItems );
-		MODFN_REGISTER( PostRunFrame );
+		MODFN_REGISTER( UpdateSessionClass, ++modePriorityLevel );
+		MODFN_REGISTER( EffectiveHandicap, ++modePriorityLevel );
+		MODFN_REGISTER( SpawnConfigureClient, ++modePriorityLevel );
+		MODFN_REGISTER( SpawnCenterPrintMessage, ++modePriorityLevel );
+		MODFN_REGISTER( PostClientSpawn, ++modePriorityLevel );
+		MODFN_REGISTER( PostPlayerDie, ++modePriorityLevel );
+		MODFN_REGISTER( PrePlayerLeaveTeam, ++modePriorityLevel );
+		MODFN_REGISTER( CanItemBeDropped, ++modePriorityLevel );
+		MODFN_REGISTER( AddRegisteredItems, ++modePriorityLevel );
+		MODFN_REGISTER( PostRunFrame, ++modePriorityLevel );
 
 		// Make sure the gametype is set to FFA
 		if ( trap_Cvar_VariableIntegerValue( "g_gametype" ) != GT_FFA &&

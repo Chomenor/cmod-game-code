@@ -133,9 +133,9 @@ LOGFUNCTION_VOID( ModPCClientPredict_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		MODFN_REGISTER( WeaponPredictableRNG );
-		MODFN_REGISTER( AddModConfigInfo );
-		MODFN_REGISTER( PostRunFrame );
+		MODFN_REGISTER( WeaponPredictableRNG, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( AddModConfigInfo, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( PostRunFrame, MODPRIORITY_GENERAL );
 
 		G_RegisterTrackedCvar( &MOD_STATE->g_unlaggedPredict, "g_unlaggedPredict", "1", 0, qfalse );
 		G_RegisterCvarCallback( &MOD_STATE->g_unlaggedPredict, ModPCClientPredict_CvarCallback, qfalse );

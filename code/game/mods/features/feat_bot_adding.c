@@ -321,7 +321,7 @@ LOGFUNCTION_VOID( ModBotAdding_Init, ( void ), (), "G_MOD_INIT" ) {
 		G_RegisterTrackedCvar( &MOD_STATE->g_bot_doubleRemove, "g_bot_doubleRemove", "0", 0, qfalse );
 		G_RegisterTrackedCvar( &MOD_STATE->g_bot_fastAdding, "g_bot_fastAdding", "0", 0, qfalse );
 
-		MODFN_REGISTER( AdjustGeneralConstant );
-		MODFN_REGISTER( PostRunFrame );
+		MODFN_REGISTER( AdjustGeneralConstant, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( PostRunFrame, MODPRIORITY_GENERAL );
 	}
 }

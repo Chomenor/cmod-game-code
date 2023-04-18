@@ -142,8 +142,8 @@ LOGFUNCTION_VOID( ModModelSelection_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		MODFN_REGISTER( GetPlayerModel );
-		MODFN_REGISTER( InitClientSession );
-		MODFN_REGISTER( GenerateClientSessionInfo );
+		MODFN_REGISTER( GetPlayerModel, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( InitClientSession, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( GenerateClientSessionInfo, MODPRIORITY_GENERAL );
 	}
 }

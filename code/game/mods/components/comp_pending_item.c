@@ -88,7 +88,7 @@ LOGFUNCTION_VOID( ModPendingItem_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		MODFN_REGISTER( PreClientSpawn );
-		MODFN_REGISTER( PostRunFrame );
+		MODFN_REGISTER( PreClientSpawn, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( PostRunFrame, MODPRIORITY_GENERAL );
 	}
 }

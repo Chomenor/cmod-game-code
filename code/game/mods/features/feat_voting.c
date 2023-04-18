@@ -317,9 +317,9 @@ LOGFUNCTION_VOID( ModVoting_Init, ( void ), (), "G_MOD_INIT" ) {
 
 		G_RegisterTrackedCvar( &MOD_STATE->g_allowVote, "g_allowVote", "1", CVAR_SERVERINFO, qfalse );
 
-		MODFN_REGISTER( ModClientCommand );
-		MODFN_REGISTER( ExitLevel );
-		MODFN_REGISTER( InitClientSession );
-		MODFN_REGISTER( PostRunFrame );
+		MODFN_REGISTER( ModClientCommand, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( ExitLevel, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( InitClientSession, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( PostRunFrame, MODPRIORITY_GENERAL );
 	}
 }

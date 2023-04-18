@@ -71,9 +71,9 @@ LOGFUNCTION_VOID( ModAssimBorgTeleport_Init, ( void ), (), "G_MOD_INIT G_ASSIMIL
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
 		// Register mod functions
-		MODFN_REGISTER( SpawnConfigureClient );
-		MODFN_REGISTER( BorgTeleportEnabled );
-		MODFN_REGISTER( PostBorgTeleport );
+		MODFN_REGISTER( SpawnConfigureClient, ++modePriorityLevel );
+		MODFN_REGISTER( BorgTeleportEnabled, ++modePriorityLevel );
+		MODFN_REGISTER( PostBorgTeleport, ++modePriorityLevel );
 
 		// Support borg teleporters
 		ModHoldableTransporter_Init();

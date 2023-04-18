@@ -118,9 +118,7 @@ Perform custom run missile routine.
 LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
 	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 
-	// At this point, PostRunFrame should have been called in the ModPCPositionShift module, so
-	// smoothing positions for this frame have been calculated and saved in the collision record.
-
+	// At this point collision positions for this frame should have be calculated via ModPCPositionShift.
 	if ( ModPingcomp_Static_SmoothingEnabled() ) {
 		ModPCProjectileImpact_RunMissiles();
 	}
@@ -137,8 +135,8 @@ LOGFUNCTION_VOID( ModPCProjectileImpact_Init, ( void ), (), "G_MOD_INIT" ) {
 
 		ModPCPositionShift_Init();
 
-		MODFN_REGISTER( RadiusDamage );
-		MODFN_REGISTER( AdjustGeneralConstant );
-		MODFN_REGISTER( PostRunFrame );
+		MODFN_REGISTER( RadiusDamage, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( AdjustGeneralConstant, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( PostRunFrame, MODPRIORITY_GENERAL );
 	}
 }

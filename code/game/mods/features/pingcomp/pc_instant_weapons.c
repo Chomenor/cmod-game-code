@@ -95,7 +95,7 @@ LOGFUNCTION_VOID( ModPCInstantWeapons_Init, ( void ), (), "G_MOD_INIT" ) {
 
 		ModPCPositionShift_Init();
 
-		MODFN_REGISTER( PostPmoveActions );
-		MODFN_REGISTER( TrapTrace );
+		MODFN_REGISTER( PostPmoveActions, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( TrapTrace, MODPRIORITY_GENERAL );
 	}
 }

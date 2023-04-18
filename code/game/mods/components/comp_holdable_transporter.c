@@ -141,7 +141,7 @@ LOGFUNCTION_VOID( ModHoldableTransporter_Init, ( void ), (), "G_MOD_INIT" ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		MODFN_REGISTER( PortableTransporterActivate );
-		MODFN_REGISTER( PreRunFrame );
+		MODFN_REGISTER( PortableTransporterActivate, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( PreRunFrame, MODPRIORITY_GENERAL );
 	}
 }

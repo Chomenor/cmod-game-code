@@ -494,20 +494,20 @@ LOGFUNCTION_VOID( ModElimination_Init, ( void ), (), "G_MOD_INIT G_ELIMINATION" 
 			ModSpecialties_Init();
 		}
 
-		MODFN_REGISTER( SpectatorClient );
-		MODFN_REGISTER( AdjustScoreboardAttributes );
-		MODFN_REGISTER( EffectiveScore );
-		MODFN_REGISTER( PreClientSpawn );
-		MODFN_REGISTER( SpawnCenterPrintMessage );
-		MODFN_REGISTER( CheckRespawnTime );
-		MODFN_REGISTER( AdjustGeneralConstant );
-		MODFN_REGISTER( CheckExitRules );
-		MODFN_REGISTER( CheckJoinAllowed );
-		MODFN_REGISTER( PostPlayerDie );
-		MODFN_REGISTER( PrePlayerLeaveTeam );
-		MODFN_REGISTER( InitClientSession );
-		MODFN_REGISTER( PostRunFrame );
-		MODFN_REGISTER( MatchStateTransition );
+		MODFN_REGISTER( SpectatorClient, ++modePriorityLevel );
+		MODFN_REGISTER( AdjustScoreboardAttributes, ++modePriorityLevel );
+		MODFN_REGISTER( EffectiveScore, ++modePriorityLevel );
+		MODFN_REGISTER( PreClientSpawn, ++modePriorityLevel );
+		MODFN_REGISTER( SpawnCenterPrintMessage, ++modePriorityLevel );
+		MODFN_REGISTER( CheckRespawnTime, ++modePriorityLevel );
+		MODFN_REGISTER( AdjustGeneralConstant, ++modePriorityLevel );
+		MODFN_REGISTER( CheckExitRules, ++modePriorityLevel );
+		MODFN_REGISTER( CheckJoinAllowed, ++modePriorityLevel );
+		MODFN_REGISTER( PostPlayerDie, ++modePriorityLevel );
+		MODFN_REGISTER( PrePlayerLeaveTeam, ++modePriorityLevel );
+		MODFN_REGISTER( InitClientSession, ++modePriorityLevel );
+		MODFN_REGISTER( PostRunFrame, ++modePriorityLevel );
+		MODFN_REGISTER( MatchStateTransition, ++modePriorityLevel );
 
 		// Initialize additional features
 		ModElimMisc_Init();

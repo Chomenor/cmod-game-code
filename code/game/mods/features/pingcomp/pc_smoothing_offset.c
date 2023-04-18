@@ -440,9 +440,9 @@ LOGFUNCTION_VOID( ModPCSmoothingOffset_Init, ( void ), (), "G_MOD_INIT" ) {
 		MOD_STATE->dedicatedServer = trap_Cvar_VariableIntegerValue( "dedicated" ) ||
 				!trap_Cvar_VariableIntegerValue( "cl_running" ) ? qtrue : qfalse;
 
-		MODFN_REGISTER( ModConsoleCommand );
-		MODFN_REGISTER( RunPlayerMove );
-		MODFN_REGISTER( InitClientSession );
-		MODFN_REGISTER( PostRunFrame );
+		MODFN_REGISTER( ModConsoleCommand, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( RunPlayerMove, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( InitClientSession, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( PostRunFrame, MODPRIORITY_GENERAL );
 	}
 }

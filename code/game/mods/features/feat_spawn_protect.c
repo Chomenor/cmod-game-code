@@ -270,6 +270,6 @@ LOGFUNCTION_VOID( ModSpawnProtect_Init, ( void ), (), "G_MOD_INIT" ) {
 
 		G_RegisterTrackedCvar( &MOD_STATE->g_debugSpawnProtect, "g_debugSpawnProtect", "0", 0, qfalse );
 
-		MODFN_REGISTER( PatchClientSpawn );
+		MODFN_REGISTER( PatchClientSpawn, MODPRIORITY_GENERAL );
 	}
 }

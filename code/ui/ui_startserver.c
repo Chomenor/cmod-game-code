@@ -292,13 +292,6 @@ void SetServerButtons( int gameType, menulist_s *assimilation, menulist_s *speci
 		elimination->generic.flags |= QMF_HIDDEN;
 	}
 
-	// Set action hero button
-	if ( gameType < GT_TEAM ) {
-		actionhero->generic.flags &= ~QMF_HIDDEN;
-	} else {
-		actionhero->generic.flags |= QMF_HIDDEN;
-	}
-
 	// Ungray everything
 	actionhero->generic.flags &= ~QMF_GRAYED;
 	assimilation->generic.flags &= ~QMF_GRAYED;
@@ -365,12 +358,6 @@ void ServerGameMods(int gametype,int *pModAssimilation,int *pModSpecialties,int 
 		trap_Cvar_SetValue( "g_pModElimination", 0);
 	}
 
-	// Check action hero
-	if ( gametype >= GT_TEAM )
-	{
-		trap_Cvar_SetValue( "g_pModActionHero", 0);
-	}
-
 //now get these game mod values again
 	*pModAssimilation = Com_Clamp( 0, 1, trap_Cvar_VariableValue( "g_pModAssimilation"));
 	*pModDisintegration = Com_Clamp( 0, 1, trap_Cvar_VariableValue( "g_pModDisintegration"));
@@ -419,16 +406,6 @@ void ServerGameMods(int gametype,int *pModAssimilation,int *pModSpecialties,int 
 		trap_Cvar_SetValue( "g_pModElimination", 0);
 		trap_Cvar_SetValue( "g_pModDisintegration", 0);
 	}
-
-	// Check Assimilation
-	if ( *pModActionHero )
-	{
-		trap_Cvar_SetValue( "g_pModAssimilation", 0);
-		trap_Cvar_SetValue( "g_pModSpecialties", 0);
-		trap_Cvar_SetValue( "g_pModElimination", 0);
-		trap_Cvar_SetValue( "g_pModDisintegration", 0);
-	}
-
 }
 
 // Calls for the StartServer screen

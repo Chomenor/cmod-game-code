@@ -253,6 +253,8 @@ LOGFUNCTION_VOID( ModTournament_Init, ( void ), (), "G_MOD_INIT G_TOURNAMENT" ) 
 			ModDisintegration_Init();
 		} else if ( G_ModUtils_GetLatchedValue( "g_pModSpecialties", "0", 0 ) ) {
 			ModSpecialties_Init();
+		} else if ( G_ModUtils_GetLatchedValue( "g_pModActionHero", "0", 0 ) ) {
+			ModActionHero_Init();
 		}
 
 		MODFN_REGISTER( CheckJoinAllowed, ++modePriorityLevel );

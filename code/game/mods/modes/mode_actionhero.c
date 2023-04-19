@@ -65,10 +65,25 @@ LOGFUNCTION_SVOID( ModActionHero_CheckReplaceHero, ( int exclude_client ), ( exc
 		int count = 0;
 		int i;
 
-		for ( i = 0; i < level.maxclients; i++ ) {
-			gclient_t *client = &level.clients[i];
-			if ( client->pers.connected == CON_CONNECTED && !modfn.SpectatorClient( i ) && i != exclude_client ) {
-				candidates[count++] = i;
+		if ( g_gametype.integer >= GT_TEAM && exclude_client >= 0 ) {
+			// try to pick from the team opposite the action hero that just died/quit
+			team_t oldTeam = level.clients[exclude_client].sess.sessionTeam;
+			for ( i = 0; i < level.maxclients; i++ ) {
+				gclient_t *client = &level.clients[i];
+				if ( client->pers.connected == CON_CONNECTED && !modfn.SpectatorClient( i ) &&
+						level.clients[i].sess.sessionTeam != oldTeam ) {
+					candidates[count++] = i;
+				}
+			}
+		}
+
+		if ( count <= 0 ) {
+			// try to pick any player
+			for ( i = 0; i < level.maxclients; i++ ) {
+				gclient_t *client = &level.clients[i];
+				if ( client->pers.connected == CON_CONNECTED && !modfn.SpectatorClient( i ) && i != exclude_client ) {
+					candidates[count++] = i;
+				}
 			}
 		}
 
@@ -98,7 +113,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostPlayerDie), ( MODFN_CTV, gentity_t *self, gent
 		self->client->ps.persistant[PERS_CLASS] = self->client->sess.sessionClass = PC_NOCLASS;
 		ClientUserinfoChanged( clientNum );
 
-		if ( attacker && attacker->client && attacker != self ) {
+		if ( attacker && attacker->client && attacker != self && !OnSameTeam( attacker, self ) ) {
 			// killer of action hero becomes action hero
 			ModActionhero_SetHero( attacker - g_entities );
 
@@ -330,11 +345,5 @@ LOGFUNCTION_VOID( ModActionHero_Init, ( void ), (), "G_MOD_INIT G_ACTIONHERO" ) 
 		MODFN_REGISTER( CanItemBeDropped, ++modePriorityLevel );
 		MODFN_REGISTER( AddRegisteredItems, ++modePriorityLevel );
 		MODFN_REGISTER( PostRunFrame, ++modePriorityLevel );
-
-		// Make sure the gametype is set to FFA
-		if ( trap_Cvar_VariableIntegerValue( "g_gametype" ) != GT_FFA &&
-				trap_Cvar_VariableIntegerValue( "g_gametype" ) != GT_SINGLE_PLAYER ) {
-			trap_Cvar_Set( "g_gametype", "0" );
-		}
 	}
 }

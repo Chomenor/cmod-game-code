@@ -1606,16 +1606,33 @@ void UI_DrawRect( float x, float y, float width, float height, const float *colo
 
 /*
 =================
+UI_SeedRandom
+=================
+*/
+static void UI_SeedRandom( void ) {
+	unsigned int x = uis.realtime;
+	// from https://github.com/skeeto/hash-prospector
+	x ^= x >> 16;
+	x *= 0x7feb352d;
+	x ^= x >> 15;
+	x *= 0x846ca68b;
+	x ^= x >> 16;
+	srand( x );
+}
+
+/*
+=================
 UI_Refresh
 =================
 */
 void UI_Refresh( int realtime )
 {
 	vec4_t color;
-	srand( realtime );
 
 	uis.frametime = realtime - uis.realtime;
 	uis.realtime  = realtime;
+
+	UI_SeedRandom();
 
 	if ( !( trap_Key_GetCatcher() & KEYCATCH_UI ) ) {
 		return;

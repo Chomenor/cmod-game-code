@@ -85,7 +85,7 @@ static void ModPingcomp_CvarCallback( trackedCvar_t *cvar ) {
 ModPingcomp_Init
 ================
 */
-LOGFUNCTION_VOID( ModPingcomp_Init, ( void ), (), "G_MOD_INIT" ) {
+void ModPingcomp_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 

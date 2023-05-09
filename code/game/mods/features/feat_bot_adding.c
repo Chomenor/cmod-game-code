@@ -292,7 +292,7 @@ int MOD_PREFIX(AdjustGeneralConstant)( MODFN_CTV, generalConstant_t gcType, int 
 Check periodically for adding/removing bots.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
+static void MOD_PREFIX(PostRunFrame)( MODFN_CTV ) {
 	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 
 	if ( level.matchState < MS_INTERMISSION_QUEUED && !level.restartClientsPending &&
@@ -312,7 +312,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MO
 ModBotAdding_Init
 ================
 */
-LOGFUNCTION_VOID( ModBotAdding_Init, ( void ), (), "G_MOD_INIT" ) {
+void ModBotAdding_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 

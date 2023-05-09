@@ -19,7 +19,7 @@ static struct {
 ModActionhero_SetHero
 ================
 */
-LOGFUNCTION_SVOID( ModActionhero_SetHero, ( int clientNum ), ( clientNum ), "G_ACTIONHERO" ) {
+static void ModActionhero_SetHero( int clientNum ) {
 	if ( clientNum == MOD_STATE->actionHeroClientNum ) {
 		return;
 	}
@@ -47,7 +47,7 @@ ModActionHero_CheckReplaceHero
 Checks if current action hero is valid, and picks new one if necessary.
 ================
 */
-LOGFUNCTION_SVOID( ModActionHero_CheckReplaceHero, ( int exclude_client ), ( exclude_client ), "" ) {
+static void ModActionHero_CheckReplaceHero( int exclude_client ) {
 	// Check if existing hero is invalid.
 	// Shouldn't normally happen, as hero exits should be processed immediately.
 	if ( MOD_STATE->actionHeroClientNum != -1 ) {
@@ -100,8 +100,8 @@ LOGFUNCTION_SVOID( ModActionHero_CheckReplaceHero, ( int exclude_client ), ( exc
 Select a new action hero if the existing one was killed.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostPlayerDie), ( MODFN_CTV, gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int meansOfDeath, int *awardPoints ),
-		( MODFN_CTN, self, inflictor, attacker, meansOfDeath, awardPoints ), "G_MODFN_POSTPLAYERDIE" ) {
+static void MOD_PREFIX(PostPlayerDie)( MODFN_CTV, gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
+		int meansOfDeath, int *awardPoints ) {
 	int clientNum = self - g_entities;
 	gclient_t *client = &level.clients[clientNum];
 
@@ -135,8 +135,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostPlayerDie), ( MODFN_CTV, gentity_t *self, gent
 Check for action hero disconnecting or changing teams.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PrePlayerLeaveTeam), ( MODFN_CTV, int clientNum, team_t oldTeam ),
-		( MODFN_CTN, clientNum, oldTeam ), "G_MODFN_PREPLAYERLEAVETEAM" ) {
+static void MOD_PREFIX(PrePlayerLeaveTeam)( MODFN_CTV, int clientNum, team_t oldTeam ) {
 	MODFN_NEXT( PrePlayerLeaveTeam, ( MODFN_NC, clientNum, oldTeam ) );
 
 	if ( clientNum == MOD_STATE->actionHeroClientNum ) {
@@ -152,8 +151,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PrePlayerLeaveTeam), ( MODFN_CTV, int clientNum, t
 Checks if current player class is valid, and picks a new one if necessary.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(UpdateSessionClass), ( MODFN_CTV, int clientNum ),
-		( MODFN_CTN, clientNum ), "G_MODFN_UPDATESESSIONCLASS" ) {
+static void MOD_PREFIX(UpdateSessionClass)( MODFN_CTV, int clientNum ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	if ( clientNum == MOD_STATE->actionHeroClientNum ) {
@@ -173,8 +171,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(UpdateSessionClass), ( MODFN_CTV, int clientNum ),
 Force 1.5x "handicap" for action hero, consistent with original behavior.
 ================
 */
-LOGFUNCTION_SRET( int, MOD_PREFIX(EffectiveHandicap), ( MODFN_CTV, int clientNum, effectiveHandicapType_t type ),
-		( MODFN_CTN, clientNum, type ), "G_MODFN_EFFECTIVEHANDICAP" ) {
+static int MOD_PREFIX(EffectiveHandicap)( MODFN_CTV, int clientNum, effectiveHandicapType_t type ) {
 	gclient_t *client = &level.clients[clientNum];
 	pclass_t pclass = client->sess.sessionClass;
 
@@ -193,7 +190,7 @@ LOGFUNCTION_SRET( int, MOD_PREFIX(EffectiveHandicap), ( MODFN_CTV, int clientNum
 (ModFN) SpawnConfigureClient
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(SpawnConfigureClient), ( MODFN_CTV, int clientNum ), ( MODFN_CTN, clientNum ), "G_MODFN_SPAWNCONFIGURECLIENT" ) {
+static void MOD_PREFIX(SpawnConfigureClient)( MODFN_CTV, int clientNum ) {
 	gentity_t *ent = &g_entities[clientNum];
 	gclient_t *client = &level.clients[clientNum];
 
@@ -234,8 +231,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(SpawnConfigureClient), ( MODFN_CTV, int clientNum 
 Prints info messages to client during ClientSpawn.
 ============
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(SpawnCenterPrintMessage), ( MODFN_CTV, int clientNum, clientSpawnType_t spawnType ),
-		( MODFN_CTN, clientNum, spawnType ), "G_MODFN_SPAWNCENTERPRINTMESSAGE" ) {
+static void MOD_PREFIX(SpawnCenterPrintMessage)( MODFN_CTV, int clientNum, clientSpawnType_t spawnType ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	if ( client->sess.sessionClass == PC_ACTIONHERO ) {
@@ -260,8 +256,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(SpawnCenterPrintMessage), ( MODFN_CTV, int clientN
 Notify other clients when action hero is spawning.
 ============
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostClientSpawn), ( MODFN_CTV, int clientNum, clientSpawnType_t spawnType ),
-		( MODFN_CTN, clientNum, spawnType ), "G_MODFN_POSTCLIENTSPAWN" ) {
+static void MOD_PREFIX(PostClientSpawn)( MODFN_CTV, int clientNum, clientSpawnType_t spawnType ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	MODFN_NEXT( PostClientSpawn, ( MODFN_NC, clientNum, spawnType ) );
@@ -284,8 +279,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostClientSpawn), ( MODFN_CTV, int clientNum, clie
 Action hero doesn't drop items.
 ============
 */
-LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CanItemBeDropped), ( MODFN_CTV, gitem_t *item, int clientNum ),
-		( MODFN_CTN, item, clientNum ), "G_MODFN_CANITEMBEDROPPED" ) {
+static qboolean MOD_PREFIX(CanItemBeDropped)( MODFN_CTV, gitem_t *item, int clientNum ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	if ( client->sess.sessionClass == PC_ACTIONHERO && item->giType != IT_TEAM ) {
@@ -300,7 +294,7 @@ LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CanItemBeDropped), ( MODFN_CTV, gitem_t *
 (ModFN) AddRegisteredItems
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(AddRegisteredItems), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_ADDREGISTEREDITEMS" ) {
+static void MOD_PREFIX(AddRegisteredItems)( MODFN_CTV ) {
 	MODFN_NEXT( AddRegisteredItems, ( MODFN_NC ) );
 
 	RegisterItem( BG_FindItemForWeapon( WP_IMOD ) );
@@ -317,7 +311,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(AddRegisteredItems), ( MODFN_CTV ), ( MODFN_CTN ),
 (ModFN) PostRunFrame
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
+static void MOD_PREFIX(PostRunFrame)( MODFN_CTV ) {
 	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 	ModActionHero_CheckReplaceHero( -1 );
 }
@@ -327,7 +321,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MO
 ModActionHero_Init
 ================
 */
-LOGFUNCTION_VOID( ModActionHero_Init, ( void ), (), "G_MOD_INIT G_ACTIONHERO" ) {
+void ModActionHero_Init( void ) {
 	if ( EF_WARN_ASSERT( !MOD_STATE ) ) {
 		modcfg.mods_enabled.actionhero = qtrue;
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );

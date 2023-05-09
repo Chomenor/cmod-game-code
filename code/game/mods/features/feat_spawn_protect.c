@@ -221,8 +221,7 @@ Checks if player spawn selected by the normal process would cause a telefrag, an
 replace it with a different or shifted spawn point.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PatchClientSpawn), ( MODFN_CTV, int clientNum, gentity_t **spawn, vec3_t origin, vec3_t angles ),
-		( MODFN_CTN, clientNum, spawn, origin, angles ), "G_MODFN_PATCHCLIENTSPAWN" ) {
+static void MOD_PREFIX(PatchClientSpawn)( MODFN_CTV, int clientNum, gentity_t **spawn, vec3_t origin, vec3_t angles ) {
 	if ( !*spawn || SpotWouldTelefrag( origin ) ) {
 		if ( SP_DEBUG ) {
 			if ( clientNum >= 0 ) {
@@ -264,7 +263,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PatchClientSpawn), ( MODFN_CTV, int clientNum, gen
 ModSpawnProtect_Init
 ================
 */
-LOGFUNCTION_VOID( ModSpawnProtect_Init, ( void ), (), "G_MOD_INIT" ) {
+void ModSpawnProtect_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 

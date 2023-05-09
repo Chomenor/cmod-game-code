@@ -28,7 +28,7 @@ Only use the predictable functions if prediction is actually enabled (it could h
 cheating security implications).
 ======================
 */
-LOGFUNCTION_SRET( unsigned int, MOD_PREFIX(WeaponPredictableRNG), ( MODFN_CTV, int clientNum ), ( MODFN_CTN, clientNum ), "G_MODFN_WEAPONPREDICTABLERNG" ) {
+static unsigned int MOD_PREFIX(WeaponPredictableRNG)( MODFN_CTV, int clientNum ) {
 	if ( PREDICTION_ENABLED && G_AssertConnectedClient( clientNum ) ) {
 		return BG_PredictableRNG_Rand( &MOD_STATE->clients[clientNum].rng, level.clients[clientNum].ps.commandTime );
 	}
@@ -103,7 +103,7 @@ static void ModPCClientPredict_CvarCallback( trackedCvar_t *cvar ) {
 (ModFN) AddModConfigInfo
 ==============
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(AddModConfigInfo), ( MODFN_CTV, char *info ), ( MODFN_CTN, info ), "G_MODFN_ADDMODCONFIGINFO" ) {
+static void MOD_PREFIX(AddModConfigInfo)( MODFN_CTV, char *info ) {
 	MODFN_NEXT( AddModConfigInfo, ( MODFN_NC, info ) );
 
 	if ( PREDICTION_ENABLED ) {
@@ -116,7 +116,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(AddModConfigInfo), ( MODFN_CTV, char *info ), ( MO
 (ModFN) PostRunFrame
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
+static void MOD_PREFIX(PostRunFrame)( MODFN_CTV ) {
 	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 
 	if ( PREDICTION_ENABLED ) {
@@ -129,7 +129,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MO
 ModPCClientPredict_Init
 ================
 */
-LOGFUNCTION_VOID( ModPCClientPredict_Init, ( void ), (), "G_MOD_INIT" ) {
+void ModPCClientPredict_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 

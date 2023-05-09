@@ -208,7 +208,7 @@ void ModModelGroups_Shared_RandomModelForRace( const char *race, char *model, un
 ModModelGroups_Init
 ================
 */
-LOGFUNCTION_VOID( ModModelGroups_Init, ( void ), (), "G_MOD_INIT" ) {
+void ModModelGroups_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 

@@ -99,7 +99,7 @@ void ModPCSmoothingDebug_Static_LogFrame( int clientNum, int targetTime, int res
 Handle smoothing_debug_frames command.
 ===================
 */
-LOGFUNCTION_SRET( qboolean, MOD_PREFIX(ModConsoleCommand), ( MODFN_CTV, const char *cmd ), ( MODFN_CTN, cmd ), "G_MODFN_MODCONSOLECOMMAND" ) {
+static qboolean MOD_PREFIX(ModConsoleCommand)( MODFN_CTV, const char *cmd ) {
 	if (Q_stricmp (cmd, "smoothing_debug_frames") == 0) {
 		ModPCSmoothingDebug_PrintFrames();
 		return qtrue;
@@ -113,7 +113,7 @@ LOGFUNCTION_SRET( qboolean, MOD_PREFIX(ModConsoleCommand), ( MODFN_CTV, const ch
 ModPCSmoothingDebug_Init
 ================
 */
-LOGFUNCTION_VOID( ModPCSmoothingDebug_Init, ( void ), (), "G_MOD_INIT" ) {
+void ModPCSmoothingDebug_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 

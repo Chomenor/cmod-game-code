@@ -1595,7 +1595,7 @@ qboolean CalculateSection31Award(gentity_t *ent)
 Generates awards message string for specified client.
 ================
 */
-LOGFUNCTION_VOID( ModFNDefault_CalculateAwards, ( int clientNum, char *msg ), ( clientNum, msg ), "G_MODFN_CALCULATEAWARDS" ) {
+void ModFNDefault_CalculateAwards( int clientNum, char *msg ) {
 #ifdef LOGGING_WEAPONS
 	gentity_t	*ent = &g_entities[clientNum];
 	char		buf1[AWARDS_MSG_LENGTH], buf2[AWARDS_MSG_LENGTH];

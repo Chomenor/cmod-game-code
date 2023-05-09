@@ -342,7 +342,7 @@ If source player died with PW_DISINTEGRATE or PW_EXPLODE the body will be set to
 invisible but may still be able to be gibbed...
 =============
 */
-LOGFUNCTION_RET( gentity_t *, ModFNDefault_CopyToBodyQue, ( int clientNum ), ( clientNum ), "G_MODFN_COPYTOBODYQUE" ) {
+gentity_t *ModFNDefault_CopyToBodyQue( int clientNum ) {
 	gentity_t *ent = &g_entities[clientNum];
 	gentity_t		*body;
 	int			contents;
@@ -709,9 +709,7 @@ void SetSkinForModel( const char *model, const char *skin, char *output, unsigne
 Retrieves player model string for client, performing any mod conversions as needed.
 ============
 */
-LOGFUNCTION_VOID( ModFNDefault_GetPlayerModel,
-		( int clientNum, const char *userinfo, char *output, unsigned int outputSize ),
-		( clientNum, userinfo, output, outputSize ), "G_MODFN_GETPLAYERMODEL" ) {
+void ModFNDefault_GetPlayerModel( int clientNum, const char *userinfo, char *output, unsigned int outputSize ) {
 	Q_strncpyz( output, Info_ValueForKey( userinfo, "model" ), outputSize );
 }
 
@@ -722,8 +720,7 @@ LOGFUNCTION_VOID( ModFNDefault_GetPlayerModel,
 Returns effective handicap values to use for client.
 ============
 */
-LOGFUNCTION_RET( int, ModFNDefault_EffectiveHandicap, ( int clientNum, effectiveHandicapType_t type ),
-		( clientNum, type ), "G_MODFN_EFFECTIVEHANDICAP" ) {
+int ModFNDefault_EffectiveHandicap( int clientNum, effectiveHandicapType_t type ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	if ( client->pers.handicap < 1 || client->pers.handicap > 100 ) {
@@ -1072,8 +1069,7 @@ void G_ResetClient( int clientNum ) {
 Checks if current player class is valid, and picks a new one if necessary.
 ============
 */
-LOGFUNCTION_VOID( ModFNDefault_UpdateSessionClass, ( int clientNum ),
-		( clientNum ), "G_MODFN_UPDATESESSIONCLASS" ) {
+void ModFNDefault_UpdateSessionClass( int clientNum ) {
 	// With no mods enabled, always use no class.
 	gclient_t *client = &level.clients[clientNum];
 	client->sess.sessionClass = PC_NOCLASS;
@@ -1087,8 +1083,7 @@ Configures class and other client parameters during ClientSpawn.
 Not called for spectators.
 ============
 */
-LOGFUNCTION_VOID( ModFNDefault_SpawnConfigureClient, ( int clientNum ),
-		( clientNum ), "G_MODFN_SPAWNCONFIGURECLIENT" ) {
+void ModFNDefault_SpawnConfigureClient( int clientNum ) {
 	gentity_t *ent = &g_entities[clientNum];
 	gclient_t *client = &level.clients[clientNum];
 
@@ -1109,8 +1104,7 @@ LOGFUNCTION_VOID( ModFNDefault_SpawnConfigureClient, ( int clientNum ),
 Prints info messages to clients during ClientSpawn.
 ============
 */
-LOGFUNCTION_VOID( ModFNDefault_SpawnCenterPrintMessage, ( int clientNum, clientSpawnType_t spawnType ),
-		( clientNum, spawnType ), "G_MODFN_SPAWNCENTERPRINTMESSAGE" ) {
+void ModFNDefault_SpawnCenterPrintMessage( int clientNum, clientSpawnType_t spawnType ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	if ( spawnType != CST_RESPAWN || client->sess.sessionTeam == TEAM_SPECTATOR ) {
@@ -1138,8 +1132,7 @@ LOGFUNCTION_VOID( ModFNDefault_SpawnCenterPrintMessage, ( int clientNum, clientS
 Play transporter effect when player spawns.
 ============
 */
-LOGFUNCTION_VOID( ModFNDefault_SpawnTransporterEffect, ( int clientNum, clientSpawnType_t spawnType ),
-		( clientNum, spawnType ), "G_MODFN_SPAWNTRANSPORTEREFFECT" ) {
+void ModFNDefault_SpawnTransporterEffect( int clientNum, clientSpawnType_t spawnType ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	if ( spawnType != CST_MAPRESTART ) {

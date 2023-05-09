@@ -79,7 +79,7 @@ static	vec3_t	muzzle;
 (ModFN) WeaponPredictableRNG
 ======================
 */
-LOGFUNCTION_RET( unsigned int, ModFNDefault_WeaponPredictableRNG, ( int clientNum ), ( clientNum ), "G_MODFN_WEAPONPREDICTABLERNG" ) {
+unsigned int ModFNDefault_WeaponPredictableRNG( int clientNum ) {
 	return (unsigned int)rand();
 }
 

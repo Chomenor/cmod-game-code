@@ -1355,8 +1355,7 @@ void G_GiveHoldable( gclient_t *client, holdable_t item )
 Called when player triggers the holdable transporter powerup.
 ================
 */
-LOGFUNCTION_VOID( ModFNDefault_PortableTransporterActivate, ( int clientNum ),
-		( clientNum ), "G_MODFN_PORTABLETRANSPORTERACTIVATE" ) {
+void ModFNDefault_PortableTransporterActivate( int clientNum ) {
 	// get rid of transporter and go to random spawnpoint
 	gentity_t *ent = &g_entities[clientNum];
 	vec3_t	origin, angles;
@@ -1566,8 +1565,7 @@ Returns true if time to respawn dead player has been reached. Called with volunt
 is pressing the respawn button, and voluntary false to check for forced respawns.
 ==============
 */
-LOGFUNCTION_RET( qboolean, ModFNDefault_CheckRespawnTime, ( int clientNum, qboolean voluntary ),
-		( clientNum, voluntary ), "G_MODFN_CHECKRESPAWNTIME" ) {
+qboolean ModFNDefault_CheckRespawnTime( int clientNum, qboolean voluntary ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	if ( voluntary && level.time > client->respawnKilledTime + 1700 ) {
@@ -1598,7 +1596,7 @@ int ModFNDefault_PmoveFixedLength( qboolean isBot ) {
 (ModFN) PmoveInit
 ==============
 */
-LOGFUNCTION_VOID( ModFNDefault_PmoveInit, ( int clientNum, pmove_t *pmove ), ( clientNum, pmove ), "G_MODFN_PMOVEINIT" ) {
+void ModFNDefault_PmoveInit( int clientNum, pmove_t *pmove ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	memset( pmove, 0, sizeof( *pmove ) );
@@ -1625,8 +1623,7 @@ Process triggers and other operations after player move(s) have completed.
 This may be called 0, 1, or multiple times per input usercmd depending on move partitioning.
 ==============
 */
-LOGFUNCTION_VOID( ModFNDefault_PostPmoveActions, ( pmove_t *pmove, int clientNum, int oldEventSequence ),
-		( pmove, clientNum, oldEventSequence ), "G_MODFN_POSTPMOVEACTIONS" ) {
+void ModFNDefault_PostPmoveActions( pmove_t *pmove, int clientNum, int oldEventSequence ) {
 	gentity_t *ent = &g_entities[clientNum];
 	gclient_t *client = &level.clients[clientNum];
 
@@ -1682,7 +1679,7 @@ LOGFUNCTION_VOID( ModFNDefault_PostPmoveActions, ( pmove_t *pmove, int clientNum
 Performs player movement corresponding to a single input usercmd from the client.
 ==============
 */
-LOGFUNCTION_VOID( ModFNDefault_RunPlayerMove, ( int clientNum ), ( clientNum ), "G_MODFN_RUNPLAYERMOVE" ) {
+void ModFNDefault_RunPlayerMove( int clientNum ) {
 	gclient_t *client = &level.clients[clientNum];
 	playerState_t *ps = &client->ps;
 	pmove_t pmove;

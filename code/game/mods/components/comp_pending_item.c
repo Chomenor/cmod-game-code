@@ -25,8 +25,7 @@ static struct {
 Reset pending item when client spawns.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PreClientSpawn), ( MODFN_CTV, int clientNum, clientSpawnType_t spawnType ),
-		( MODFN_CTN, clientNum, spawnType ), "G_MODFN_PRECLIENTSPAWN" ) {
+static void MOD_PREFIX(PreClientSpawn)( MODFN_CTV, int clientNum, clientSpawnType_t spawnType ) {
 	modClient_t *modclient = &MOD_STATE->clients[clientNum];
 	modclient->pendingItem = HI_NONE;
 	modclient->pendingItemTime = 0;
@@ -38,7 +37,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PreClientSpawn), ( MODFN_CTV, int clientNum, clien
 (ModFN) PostRunFrame
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
+static void MOD_PREFIX(PostRunFrame)( MODFN_CTV ) {
 	int i;
 	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 
@@ -84,7 +83,7 @@ void ModPendingItem_Shared_SchedulePendingItem( int clientNum, holdable_t item, 
 ModPendingItem_Init
 ================
 */
-LOGFUNCTION_VOID( ModPendingItem_Init, ( void ), (), "G_MOD_INIT" ) {
+void ModPendingItem_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 

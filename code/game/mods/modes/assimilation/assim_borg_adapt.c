@@ -107,9 +107,8 @@ static qboolean ModAssimBorgAdapt_CheckAdapted( int clientNum, int mod, int dama
 Check for borg shield adaptation.
 ================
 */
-LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckBorgAdapt), ( MODFN_CTV, gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
-		vec3_t dir, vec3_t point, int damage, int dflags, int mod ),
-		( MODFN_CTN, targ, inflictor, attacker, dir, point, damage, dflags, mod ), "G_MODFN_CHECKBORGADAPT" ) {
+static qboolean MOD_PREFIX(CheckBorgAdapt)( MODFN_CTV, gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+		vec3_t dir, vec3_t point, int damage, int dflags, int mod ) {
 	if( targ->client && targ->client->sess.sessionClass == PC_BORG ) {
 		int clientNum = targ - g_entities;
 		return ModAssimBorgAdapt_CheckAdapted( clientNum, mod, damage );
@@ -123,7 +122,7 @@ LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckBorgAdapt), ( MODFN_CTV, gentity_t *
 ModAssimBorgAdapt_Init
 ================
 */
-LOGFUNCTION_VOID( ModAssimBorgAdapt_Init, ( void ), (), "G_MOD_INIT G_ASSIMILATION" ) {
+void ModAssimBorgAdapt_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 

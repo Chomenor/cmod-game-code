@@ -41,8 +41,7 @@ static void ModPCInstantWeapons_ShiftedTrace( MODFN_CTV, trace_t *results, const
 Store the currently active client while move is in progress.
 ==============
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostPmoveActions), ( MODFN_CTV, pmove_t *pmove, int clientNum, int oldEventSequence ),
-		( MODFN_CTN, pmove, clientNum, oldEventSequence ), "G_MODFN_POSTPMOVEACTIONS" ) {
+static void MOD_PREFIX(PostPmoveActions)( MODFN_CTV, pmove_t *pmove, int clientNum, int oldEventSequence ) {
 	MOD_STATE->postPmoveActive = qtrue;
 	MOD_STATE->postPmoveClient = clientNum;
 
@@ -56,9 +55,8 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostPmoveActions), ( MODFN_CTV, pmove_t *pmove, in
 (ModFN) TrapTrace
 ==============
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(TrapTrace), ( MODFN_CTV, trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs,
-		const vec3_t end, int passEntityNum, int contentmask, int modFlags ),
-		( MODFN_CTN, results, start, mins, maxs, end, passEntityNum, contentmask, modFlags ), "G_MODFN_TRAPTRACE" ) {
+static void MOD_PREFIX(TrapTrace)( MODFN_CTV, trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs,
+		const vec3_t end, int passEntityNum, int contentmask, int modFlags ) {
 	int shiftTime = 0;
 	if ( MOD_STATE->postPmoveActive ) {
 		gclient_t *client = &level.clients[MOD_STATE->postPmoveClient];
@@ -89,7 +87,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(TrapTrace), ( MODFN_CTV, trace_t *results, const v
 ModPCInstantWeapons_Init
 ================
 */
-LOGFUNCTION_VOID( ModPCInstantWeapons_Init, ( void ), (), "G_MOD_INIT" ) {
+void ModPCInstantWeapons_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 

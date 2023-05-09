@@ -25,8 +25,7 @@ static struct {
 (ModFN) InitClientSession
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(InitClientSession), ( MODFN_CTV, int clientNum, qboolean initialConnect, const info_string_t *info ),
-		( MODFN_CTN, clientNum, initialConnect, info ), "G_MODFN_INITCLIENTSESSION" ) {
+static void MOD_PREFIX(InitClientSession)( MODFN_CTV, int clientNum, qboolean initialConnect, const info_string_t *info ) {
 	specialties_client_t *modclient = &MOD_STATE->clients[clientNum];
 
 	MODFN_NEXT( InitClientSession, ( MODFN_NC, clientNum, initialConnect, info ) );
@@ -40,8 +39,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(InitClientSession), ( MODFN_CTV, int clientNum, qb
 Reset class change time limit when player joins a new team.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PreClientSpawn), ( MODFN_CTV, int clientNum, clientSpawnType_t spawnType ),
-		( MODFN_CTN, clientNum, spawnType ), "G_MODFN_PRECLIENTSPAWN" ) {
+static void MOD_PREFIX(PreClientSpawn)( MODFN_CTV, int clientNum, clientSpawnType_t spawnType ) {
 	specialties_client_t *modclient = &MOD_STATE->clients[clientNum];
 
 	MODFN_NEXT( PreClientSpawn, ( MODFN_NC, clientNum, spawnType ) );
@@ -70,8 +68,7 @@ static qboolean ModSpecialties_IsSpecialtiesClass( pclass_t pclass ) {
 Save specialties class for next round.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(GenerateClientSessionStructure), ( MODFN_CTV, int clientNum, clientSession_t *sess ),
-		( MODFN_CTN, clientNum, sess ), "G_MODFN_GENERATECLIENTSESSIONSTRUCTURE" ) {
+static void MOD_PREFIX(GenerateClientSessionStructure)( MODFN_CTV, int clientNum, clientSession_t *sess ) {
 	gclient_t *client = &level.clients[clientNum];
 	pclass_t pclass;
 
@@ -156,7 +153,7 @@ static void ModSpecialties_BroadcastClassChange( gclient_t *client )
 ModSpecialties_SetClassCmd
 ================
 */
-LOGFUNCTION_SVOID( ModSpecialties_SetClassCmd, ( int clientNum ), ( clientNum ), "" ) {
+static void ModSpecialties_SetClassCmd( int clientNum ) {
 	gentity_t *ent = &g_entities[clientNum];
 	gclient_t *client = &level.clients[clientNum];
 	specialties_client_t *modclient = &MOD_STATE->clients[clientNum];
@@ -250,8 +247,7 @@ LOGFUNCTION_SVOID( ModSpecialties_SetClassCmd, ( int clientNum ), ( clientNum ),
 Handle class command.
 ================
 */
-LOGFUNCTION_SRET( qboolean, MOD_PREFIX(ModClientCommand), ( MODFN_CTV, int clientNum, const char *cmd ),
-		( MODFN_CTN, clientNum, cmd ), "G_MODFN_MODCLIENTCOMMAND" ) {
+static qboolean MOD_PREFIX(ModClientCommand)( MODFN_CTV, int clientNum, const char *cmd ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	// Allow this command for connecting clients, because it can sometimes be called before
@@ -275,8 +271,7 @@ LOGFUNCTION_SRET( qboolean, MOD_PREFIX(ModClientCommand), ( MODFN_CTV, int clien
 Pick random class for players coming into the game.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(UpdateSessionClass), ( MODFN_CTV, int clientNum ),
-		( MODFN_CTN, clientNum ), "G_MODFN_UPDATESESSIONCLASS" ) {
+static void MOD_PREFIX(UpdateSessionClass)( MODFN_CTV, int clientNum ) {
 	gentity_t *ent = &g_entities[clientNum];
 	gclient_t *client = &level.clients[clientNum];
 
@@ -293,8 +288,7 @@ Force handicap values for infiltrator and heavy. Also ignore handicap for other 
 the scoreboard doesn't support displaying it and for consistency with original behavior.
 ================
 */
-LOGFUNCTION_SRET( int, MOD_PREFIX(EffectiveHandicap), ( MODFN_CTV, int clientNum, effectiveHandicapType_t type ),
-		( MODFN_CTN, clientNum, type ), "G_MODFN_EFFECTIVEHANDICAP" ) {
+static int MOD_PREFIX(EffectiveHandicap)( MODFN_CTV, int clientNum, effectiveHandicapType_t type ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	if ( ModSpecialties_IsSpecialtiesClass( client->sess.sessionClass ) ) {
@@ -315,7 +309,7 @@ LOGFUNCTION_SRET( int, MOD_PREFIX(EffectiveHandicap), ( MODFN_CTV, int clientNum
 (ModFN) SpawnConfigureClient
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(SpawnConfigureClient), ( MODFN_CTV, int clientNum ), ( MODFN_CTN, clientNum ), "G_MODFN_SPAWNCONFIGURECLIENT" ) {
+static void MOD_PREFIX(SpawnConfigureClient)( MODFN_CTV, int clientNum ) {
 	gentity_t *ent = &g_entities[clientNum];
 	gclient_t *client = &level.clients[clientNum];
 	specialties_client_t *modclient = &MOD_STATE->clients[clientNum];
@@ -410,7 +404,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(SpawnConfigureClient), ( MODFN_CTV, int clientNum 
 (ModFN) CheckItemSpawnDisabled
 ================
 */
-LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckItemSpawnDisabled), ( MODFN_CTV, gitem_t *item ), ( MODFN_CTN, item ), "G_MODFN_CHECKITEMSPAWNDISABLED" ) {
+static qboolean MOD_PREFIX(CheckItemSpawnDisabled)( MODFN_CTV, gitem_t *item ) {
 	switch ( item->giType ) {
 		case IT_ARMOR: //given to classes
 		case IT_WEAPON: //spread out among classes
@@ -438,8 +432,7 @@ LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckItemSpawnDisabled), ( MODFN_CTV, git
 Disable dropping any items except flag.
 ============
 */
-LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CanItemBeDropped), ( MODFN_CTV, gitem_t *item, int clientNum ),
-		( MODFN_CTN, item, clientNum ), "G_MODFN_CANITEMBEDROPPED" ) {
+static qboolean MOD_PREFIX(CanItemBeDropped)( MODFN_CTV, gitem_t *item, int clientNum ) {
 	if ( item->giType != IT_TEAM ) {
 		return qfalse;
 	}
@@ -452,7 +445,7 @@ LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CanItemBeDropped), ( MODFN_CTV, gitem_t *
 (ModFN) AddRegisteredItems
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(AddRegisteredItems), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_ADDREGISTEREDITEMS" ) {
+static void MOD_PREFIX(AddRegisteredItems)( MODFN_CTV ) {
 	MODFN_NEXT( AddRegisteredItems, ( MODFN_NC ) );
 
 	//weapons
@@ -490,9 +483,8 @@ LOGFUNCTION_SVOID( MOD_PREFIX(AddRegisteredItems), ( MODFN_CTV ), ( MODFN_CTN ),
 Determine class-specific mass value for knockback calculations.
 ================
 */
-LOGFUNCTION_SRET( float, MOD_PREFIX(KnockbackMass), ( MODFN_CTV, gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
-		vec3_t dir, vec3_t point, int damage, int dflags, int mod ),
-		( MODFN_CTN, targ, inflictor, attacker, dir, point, damage, dflags, mod ), "G_MODFN_KNOCKBACKMASS G_DAMAGE" ) {
+static float MOD_PREFIX(KnockbackMass)( MODFN_CTV, gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+		vec3_t dir, vec3_t point, int damage, int dflags, int mod ) {
 	if ( targ->client->sess.sessionClass == PC_INFILTRATOR )
 		return 100;
 	if ( targ->client->sess.sessionClass == PC_HEAVY )
@@ -533,8 +525,7 @@ static int MOD_PREFIX(AdjustWeaponConstant)( MODFN_CTV, weaponConstant_t wcType,
 Tripmines use more ammo.
 ==============
 */
-LOGFUNCTION_SRET( int, MOD_PREFIX(ModifyAmmoUsage), ( MODFN_CTV, int defaultValue, int weapon, qboolean alt ),
-		( MODFN_CTN, defaultValue, weapon, alt ), "G_MODFN_MODIFYAMMOUSAGE" ) {
+static int MOD_PREFIX(ModifyAmmoUsage)( MODFN_CTV, int defaultValue, int weapon, qboolean alt ) {
 	if ( weapon == WP_GRENADE_LAUNCHER && alt ) {
 		return 3;
 	}
@@ -549,9 +540,8 @@ LOGFUNCTION_SRET( int, MOD_PREFIX(ModifyAmmoUsage), ( MODFN_CTV, int defaultValu
 Set special player models for specialties classes.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(ConvertPlayerModel),
-		( MODFN_CTV, int clientNum, const char *userinfo, const char *source_model, char *output, unsigned int outputSize ),
-		( MODFN_CTN, clientNum, userinfo, source_model, output, outputSize ), "G_MODFN_CONVERTPLAYERMODEL" ) {
+static void MOD_PREFIX(ConvertPlayerModel)( MODFN_CTV, int clientNum, const char *userinfo, const char *source_model,
+		char *output, unsigned int outputSize ) {
 	gclient_t *client = &level.clients[clientNum];
 	char *oldModel;
 
@@ -589,7 +579,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(ConvertPlayerModel),
 ModSpecialties_Init
 ================
 */
-LOGFUNCTION_VOID( ModSpecialties_Init, ( void ), (), "G_MOD_INIT G_SPECIALTIES" ) {
+void ModSpecialties_Init( void ) {
 	if ( EF_WARN_ASSERT( !MOD_STATE ) ) {
 		modcfg.mods_enabled.specialties = qtrue;
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );

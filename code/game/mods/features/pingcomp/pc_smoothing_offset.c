@@ -372,7 +372,7 @@ static void ModPCSmoothingOffset_OffsetDebug( int clientNum ) {
 (ModFN) ModConsoleCommand
 ===================
 */
-LOGFUNCTION_SRET( qboolean, MOD_PREFIX(ModConsoleCommand), ( MODFN_CTV, const char *cmd ), ( MODFN_CTN, cmd ), "G_MODFN_MODCONSOLECOMMAND" ) {
+static qboolean MOD_PREFIX(ModConsoleCommand)( MODFN_CTV, const char *cmd ) {
 	if (Q_stricmp (cmd, "smoothing_debug_offset") == 0) {
 		ModPCSmoothingOffset_OffsetDebug( 0 );
 		return qtrue;
@@ -386,7 +386,7 @@ LOGFUNCTION_SRET( qboolean, MOD_PREFIX(ModConsoleCommand), ( MODFN_CTV, const ch
 (ModFN) RunPlayerMove
 ==============
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(RunPlayerMove), ( MODFN_CTV, int clientNum ), ( MODFN_CTN, clientNum ), "G_MODFN_RUNPLAYERMOVE" ) {
+static void MOD_PREFIX(RunPlayerMove)( MODFN_CTV, int clientNum ) {
 	int oldTime = level.clients[clientNum].ps.commandTime;
 	MODFN_NEXT( RunPlayerMove, ( MODFN_NC, clientNum ) );
 
@@ -400,8 +400,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(RunPlayerMove), ( MODFN_CTV, int clientNum ), ( MO
 (ModFN) InitClientSession
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(InitClientSession), ( MODFN_CTV, int clientNum, qboolean initialConnect, const info_string_t *info ),
-		( MODFN_CTN, clientNum, initialConnect, info ), "G_MODFN_INITCLIENTSESSION" ) {
+static void MOD_PREFIX(InitClientSession)( MODFN_CTV, int clientNum, qboolean initialConnect, const info_string_t *info ) {
 	MODFN_NEXT( InitClientSession, ( MODFN_NC, clientNum, initialConnect, info ) );
 
 	if ( CLIENT_IN_RANGE( clientNum ) ) {
@@ -417,7 +416,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(InitClientSession), ( MODFN_CTV, int clientNum, qb
 (ModFN) PostRunFrame
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
+static void MOD_PREFIX(PostRunFrame)( MODFN_CTV ) {
 	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 
 	if ( ModPingcomp_Static_SmoothingEnabled() ) {
@@ -431,7 +430,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MO
 ModPCSmoothingOffset_Init
 ================
 */
-LOGFUNCTION_VOID( ModPCSmoothingOffset_Init, ( void ), (), "G_MOD_INIT" ) {
+void ModPCSmoothingOffset_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 

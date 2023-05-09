@@ -44,8 +44,7 @@ void AddScore( gentity_t *ent, int score ) {
 Check if item can be tossed on death/disconnect.
 ============
 */
-LOGFUNCTION_RET( qboolean, ModFNDefault_CanItemBeDropped, ( gitem_t *item, int clientNum ),
-		( item, clientNum ), "G_MODFN_CANITEMBEDROPPED" ) {
+qboolean ModFNDefault_CanItemBeDropped( gitem_t *item, int clientNum ) {
 	if ( item->giType == IT_POWERUP && g_gametype.integer == GT_TEAM ) {
 		// no powerup drops in THM mode
 		return qfalse;
@@ -624,9 +623,8 @@ Returns whether borg adaptive shields have blocked damage.
 Also sets PW_BORG_ADAPT to play effect on target if needed.
 ============
 */
-LOGFUNCTION_RET( qboolean, ModFNDefault_CheckBorgAdapt, ( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
-		vec3_t dir, vec3_t point, int damage, int dflags, int mod ),
-		( targ, inflictor, attacker, dir, point, damage, dflags, mod ), "G_MODFN_CHECKBORGADAPT" ) {
+qboolean ModFNDefault_CheckBorgAdapt( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+		vec3_t dir, vec3_t point, int damage, int dflags, int mod ) {
 	return qfalse;
 }
 
@@ -637,9 +635,8 @@ LOGFUNCTION_RET( qboolean, ModFNDefault_CheckBorgAdapt, ( gentity_t *targ, genti
 Returns mass value for knockback calculations.
 ============
 */
-LOGFUNCTION_RET( float, ModFNDefault_KnockbackMass, ( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
-		vec3_t dir, vec3_t point, int damage, int dflags, int mod ),
-		( targ, inflictor, attacker, dir, point, damage, dflags, mod ), "G_MODFN_KNOCKBACKMASS G_DAMAGE" ) {
+float ModFNDefault_KnockbackMass( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+		vec3_t dir, vec3_t point, int damage, int dflags, int mod ) {
 	return 200;
 }
 
@@ -1023,9 +1020,7 @@ extern void tripwireThink ( gentity_t *ent );
 (ModFN) RadiusDamage
 ============
 */
-LOGFUNCTION_RET( qboolean, ModFNDefault_RadiusDamage,
-		( vec3_t origin, gentity_t *attacker, float damage, float radius, gentity_t *ignore, int dflags, int mod ),
-		( origin, attacker, damage, radius, ignore, dflags, mod ), "G_MODFN_RADIUSDAMAGE" ) {
+qboolean ModFNDefault_RadiusDamage( vec3_t origin, gentity_t *attacker, float damage, float radius, gentity_t *ignore, int dflags, int mod ) {
 	float		points, dist;
 	gentity_t	*ent;
 	int			entityList[MAX_GENTITIES];

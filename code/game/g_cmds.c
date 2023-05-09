@@ -391,8 +391,7 @@ void Cmd_LevelShot_f( gentity_t *ent ) {
 Check if suicide is allowed. If not, prints notification to client.
 =================
 */
-LOGFUNCTION_RET( qboolean, ModFNDefault_CheckSuicideAllowed, ( int clientNum ),
-		( clientNum ), "G_MODFN_CHECKSUICIDEALLOWED" ) {
+qboolean ModFNDefault_CheckSuicideAllowed( int clientNum ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	if( client->pers.suicideTime && client->pers.suicideTime > level.time - 30000 ) {
@@ -518,8 +517,7 @@ Check if client is allowed to join game or change team/class.
 If join was blocked, sends appropriate notification message to client.
 =================
 */
-LOGFUNCTION_RET( qboolean, ModFNDefault_CheckJoinAllowed, ( int clientNum, join_allowed_type_t type, team_t targetTeam ),
-		( clientNum, type, targetTeam ), "G_MODFN_CHECKJOINALLOWED" ) {
+qboolean ModFNDefault_CheckJoinAllowed( int clientNum, join_allowed_type_t type, team_t targetTeam ) {
 	// Check for g_maxGameClients limits
 	if ( g_maxGameClients.integer > 0 && level.numNonSpectatorClients >= g_maxGameClients.integer && type != CJA_SETCLASS ) {
 		if ( type != CJA_AUTOJOIN ) {

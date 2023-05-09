@@ -18,8 +18,7 @@ static struct {
 (ModFN) AddModConfigInfo
 ==============
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(AddModConfigInfo), ( MODFN_CTV, char *info ),
-		( MODFN_CTN, info ), "G_MODFN_ADDMODCONFIGINFO" ) {
+static void MOD_PREFIX(AddModConfigInfo)( MODFN_CTV, char *info ) {
 	// Indicate to cMod client to use preferred default UI module if possible, to avoid
 	// potential settings reset on disconnect or other engine incompatibilities.
 	// This should be disabled if creating a mod that has a need for a customized UI.
@@ -33,7 +32,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(AddModConfigInfo), ( MODFN_CTV, char *info ),
 ModMiscFeatures_Init
 ================
 */
-LOGFUNCTION_VOID( ModMiscFeatures_Init, ( void ), (), "G_MOD_INIT" ) {
+void ModMiscFeatures_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 

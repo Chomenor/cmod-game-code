@@ -26,7 +26,7 @@ static struct {
 (ModFN) AddModConfigInfo
 ================
 */
-LOGFUNCTION_VOID( ModFNDefault_AddModConfigInfo, ( char *info ), ( info ), "G_MODFN_ADDMODCONFIGINFO" ) {
+void ModFNDefault_AddModConfigInfo( char *info ) {
 }
 
 /*
@@ -57,7 +57,7 @@ void ModModcfgCS_Static_Update( void ) {
 (ModFN) GeneralInit
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(GeneralInit), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_GENERALINIT" ) {
+static void MOD_PREFIX(GeneralInit)( MODFN_CTV ) {
 	MODFN_NEXT( GeneralInit, ( MODFN_NC ) );
 	MOD_STATE->modConfigReady = qtrue;
 	ModModcfgCS_Static_Update();
@@ -68,7 +68,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(GeneralInit), ( MODFN_CTV ), ( MODFN_CTN ), "G_MOD
 ModModcfgCS_Init
 ================
 */
-LOGFUNCTION_VOID( ModModcfgCS_Init, ( void ), (), "G_MOD_INIT" ) {
+void ModModcfgCS_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 

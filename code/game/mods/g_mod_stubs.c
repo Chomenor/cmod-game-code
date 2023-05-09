@@ -7,65 +7,52 @@
 
 #include "g_local.h"
 
-LOGFUNCTION_VOID( ModFNDefault_GeneralInit, ( void ),
-		(), "G_MODFN_GENERALINIT" ) {
+void ModFNDefault_GeneralInit( void ) {
 }
 
-LOGFUNCTION_VOID( ModFNDefault_PreRunFrame, ( void ),
-		(), "G_MODFN_PRERUNFRAME" ) {
+void ModFNDefault_PreRunFrame( void ) {
 }
 
-LOGFUNCTION_VOID( ModFNDefault_PostRunFrame, ( void ),
-		(), "G_MODFN_POSTRUNFRAME" ) {
+void ModFNDefault_PostRunFrame( void ) {
 }
 
-LOGFUNCTION_VOID( ModFNDefault_PostGameShutdown, ( qboolean restart ),
-		( restart ), "G_MODFN_POSTGAMESHUTDOWN" ) {
+void ModFNDefault_PostGameShutdown( qboolean restart ) {
 }
 
-LOGFUNCTION_VOID( ModFNDefault_MatchStateTransition, ( matchState_t oldState, matchState_t newState ),
-		( oldState, newState ), "G_MODFN_MATCHSTATETRANSITION" ) {
+void ModFNDefault_MatchStateTransition( matchState_t oldState, matchState_t newState ) {
 }
 
-LOGFUNCTION_VOID( ModFNDefault_PreClientConnect, ( int clientNum, qboolean firstTime, qboolean isBot ),
-		( clientNum, firstTime, isBot ), "G_MODFN_PRECLIENTCONNECT" ) {
+void ModFNDefault_PreClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 }
 
-LOGFUNCTION_VOID( ModFNDefault_PreClientSpawn, ( int clientNum, clientSpawnType_t spawnType ),
-		( clientNum, spawnType ), "G_MODFN_PRECLIENTSPAWN" ) {
+void ModFNDefault_PreClientSpawn( int clientNum, clientSpawnType_t spawnType ) {
 }
 
-LOGFUNCTION_VOID( ModFNDefault_PostClientSpawn, ( int clientNum, clientSpawnType_t spawnType ),
-		( clientNum, spawnType ), "G_MODFN_POSTCLIENTSPAWN" ) {
+void ModFNDefault_PostClientSpawn( int clientNum, clientSpawnType_t spawnType ) {
 }
 
-LOGFUNCTION_VOID( ModFNDefault_PrePlayerLeaveTeam, ( int clientNum, team_t oldTeam ),
-		( clientNum, oldTeam ), "G_MODFN_PREPLAYERLEAVETEAM" ) {
+void ModFNDefault_PrePlayerLeaveTeam( int clientNum, team_t oldTeam ) {
 }
 
-LOGFUNCTION_VOID( ModFNDefault_PostPlayerDie, ( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int meansOfDeath, int *awardPoints ),
-		( self, inflictor, attacker, meansOfDeath, awardPoints ), "G_MODFN_POSTPLAYERDIE" ) {
+void ModFNDefault_PostPlayerDie( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int meansOfDeath, int *awardPoints ) {
 }
 
-LOGFUNCTION_VOID( ModFNDefault_PatchClientSpawn, ( int clientNum, gentity_t **spawn, vec3_t origin, vec3_t angles ),
-		( clientNum, spawn, origin, angles ), "G_MODFN_PATCHCLIENTSPAWN" ) {
+void ModFNDefault_PatchClientSpawn( int clientNum, gentity_t **spawn, vec3_t origin, vec3_t angles ) {
 }
 
 int ModFNDefault_AdjustWeaponConstant( weaponConstant_t wcType, int defaultValue ) {
 	return defaultValue;
 }
 
-LOGFUNCTION_VOID( ModFNDefault_PostFireProjectile, ( gentity_t *projectile ), ( projectile ), "G_MODFN_POSTFIREPROJECTILE" ) {
+void ModFNDefault_PostFireProjectile( gentity_t *projectile ) {
 }
 
-LOGFUNCTION_RET( int, ModFNDefault_ModifyDamageFlags, ( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
-		vec3_t dir, vec3_t point, int damage, int dflags, int mod ),
-		( targ, inflictor, attacker, dir, point, damage, dflags, mod ), "G_MODFN_MODIFYDAMAGEFLAGS" ) {
+int ModFNDefault_ModifyDamageFlags( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+		vec3_t dir, vec3_t point, int damage, int dflags, int mod ) {
 	return dflags;
 }
 
-LOGFUNCTION_RET( int, ModFNDefault_ModifyAmmoUsage, ( int defaultValue, int weapon, qboolean alt ),
-		( defaultValue, weapon, alt ), "G_MODFN_MODIFYAMMOUSAGE" ) {
+int ModFNDefault_ModifyAmmoUsage( int defaultValue, int weapon, qboolean alt ) {
 	return defaultValue;
 }
 
@@ -73,12 +60,11 @@ int ModFNDefault_AdjustGeneralConstant( generalConstant_t gcType, int defaultVal
 	return defaultValue;
 }
 
-LOGFUNCTION_RET( qboolean, ModFNDefault_ModConsoleCommand, ( const char *cmd ), ( cmd ), "G_MODFN_MODCONSOLECOMMAND" ) {
+qboolean ModFNDefault_ModConsoleCommand( const char *cmd ) {
 	return qfalse;
 }
 
-LOGFUNCTION_RET( qboolean, ModFNDefault_ModClientCommand, ( int clientNum, const char *cmd ),
-		( clientNum, cmd ), "G_MODFN_MODCLIENTCOMMAND" ) {
+qboolean ModFNDefault_ModClientCommand( int clientNum, const char *cmd ) {
 	return qfalse;
 }
 
@@ -86,16 +72,14 @@ int ModFNDefault_AdjustScoreboardAttributes( int clientNum, scoreboardAttribute_
 	return defaultValue;
 }
 
-LOGFUNCTION_VOID( ModFNDefault_TrapTrace, ( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs,
-		const vec3_t end, int passEntityNum, int contentmask, int modFlags ),
-		( results, start, mins, maxs, end, passEntityNum, contentmask, modFlags ), "G_MODFN_TRAPTRACE" ) {
+void ModFNDefault_TrapTrace( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs,
+		const vec3_t end, int passEntityNum, int contentmask, int modFlags ) {
 	trap_Trace( results, start, mins, maxs, end, passEntityNum, contentmask );
 }
 
-LOGFUNCTION_RET( qboolean, ModFNDefault_IsBorgQueen, ( int clientNum ),
-		( clientNum ), "G_MODFN_ISBORGQUEEN" ) {
+qboolean ModFNDefault_IsBorgQueen( int clientNum ) {
 	return qfalse;
 }
 
-LOGFUNCTION_VOID( ModFNDefault_PostModInit, ( void ), (), "G_MODFN_POSTMODINIT" ) {
+void ModFNDefault_PostModInit( void ) {
 }

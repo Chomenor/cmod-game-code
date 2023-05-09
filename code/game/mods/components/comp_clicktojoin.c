@@ -30,7 +30,7 @@ qboolean ModClickToJoin_Static_ActiveForClient( int clientNum ) {
 (ModFN) RunPlayerMove
 ==============
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(RunPlayerMove), ( MODFN_CTV, int clientNum ), ( MODFN_CTN, clientNum ), "G_MODFN_RUNPLAYERMOVE" ) {
+static void MOD_PREFIX(RunPlayerMove)( MODFN_CTV, int clientNum ) {
 	gclient_t *client = &level.clients[clientNum];
 	static qboolean recursive = qfalse;
 
@@ -51,8 +51,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(RunPlayerMove), ( MODFN_CTV, int clientNum ), ( MO
 Show info message when click to join is available.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(SpawnCenterPrintMessage), ( MODFN_CTV, int clientNum, clientSpawnType_t spawnType ),
-		( MODFN_CTN, clientNum, spawnType ), "G_MODFN_SPAWNCENTERPRINTMESSAGE" ) {
+static void MOD_PREFIX(SpawnCenterPrintMessage)( MODFN_CTV, int clientNum, clientSpawnType_t spawnType ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	if ( ModClickToJoin_Static_ActiveForClient( clientNum ) ) {
@@ -69,7 +68,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(SpawnCenterPrintMessage), ( MODFN_CTV, int clientN
 ModClickToJoin_Init
 ================
 */
-LOGFUNCTION_VOID( ModClickToJoin_Init, ( void ), (), "G_MOD_INIT G_MOD_CLICKJOIN" ) {
+void ModClickToJoin_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 

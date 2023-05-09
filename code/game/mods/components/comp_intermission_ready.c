@@ -220,7 +220,7 @@ static qboolean MOD_PREFIX(IntermissionReadyToExit)( MODFN_CTV ) {
 (ModFN) PostRunFrame
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
+static void MOD_PREFIX(PostRunFrame)( MODFN_CTV ) {
 	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 
 	if ( level.intermissiontime ) {
@@ -255,7 +255,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MO
 (ModFN) GeneralInit
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(GeneralInit), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_GENERALINIT" ) {
+static void MOD_PREFIX(GeneralInit)( MODFN_CTV ) {
 	MODFN_NEXT( GeneralInit, ( MODFN_NC ) );
 
 	// Update config after cvar initialization is complete, for access to g_intermissionTime.
@@ -268,7 +268,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(GeneralInit), ( MODFN_CTV ), ( MODFN_CTN ), "G_MOD
 ModIntermissionReady_Init
 ================
 */
-LOGFUNCTION_VOID( ModIntermissionReady_Init, ( void ), (), "G_MOD_INTERMISSIONREADY" ) {
+void ModIntermissionReady_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 

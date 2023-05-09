@@ -22,8 +22,7 @@ and tournament restarts.
 (ModFN) InitClientSession
 ================
 */
-LOGFUNCTION_VOID( ModFNDefault_InitClientSession, ( int clientNum, qboolean initialConnect, const info_string_t *info ),
-		( clientNum, initialConnect, info ), "G_MODFN_INITCLIENTSESSION" ) {
+void ModFNDefault_InitClientSession( int clientNum, qboolean initialConnect, const info_string_t *info ) {
 }
 
 /*
@@ -31,8 +30,7 @@ LOGFUNCTION_VOID( ModFNDefault_InitClientSession, ( int clientNum, qboolean init
 (ModFN) GenerateClientSessionInfo
 ================
 */
-LOGFUNCTION_VOID( ModFNDefault_GenerateClientSessionInfo, ( int clientNum, info_string_t *info ),
-		( clientNum, info ), "G_MODFN_GENERATECLIENTSESSIONINFO" ) {
+void ModFNDefault_GenerateClientSessionInfo( int clientNum, info_string_t *info ) {
 }
 
 /*
@@ -40,8 +38,7 @@ LOGFUNCTION_VOID( ModFNDefault_GenerateClientSessionInfo, ( int clientNum, info_
 (ModFN) GenerateClientSessionStructure
 ================
 */
-LOGFUNCTION_VOID( ModFNDefault_GenerateClientSessionStructure, ( int clientNum, clientSession_t *sess ),
-		( clientNum, sess ), "G_MODFN_GENERATECLIENTSESSIONSTRUCTURE" ) {
+void ModFNDefault_GenerateClientSessionStructure( int clientNum, clientSession_t *sess ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	sess->sessionTeam = modfn.RealSessionTeam( clientNum );
@@ -54,8 +51,7 @@ LOGFUNCTION_VOID( ModFNDefault_GenerateClientSessionStructure, ( int clientNum, 
 (ModFN) GenerateGlobalSessionInfo
 ================
 */
-LOGFUNCTION_VOID( ModFNDefault_GenerateGlobalSessionInfo, ( info_string_t *info ),
-		( info ), "G_MODFN_GENERATEGLOBALSESSIONINFO" ) {
+void ModFNDefault_GenerateGlobalSessionInfo( info_string_t *info ) {
 	Info_SetValueForKey_Big( info->s, "numConnected", va( "%i", level.numConnectedClients ) );
 	Info_SetValueForKey_Big( info->s, "warmupRestarting", level.warmupRestarting ? "1" : "0" );
 }

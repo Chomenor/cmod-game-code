@@ -170,8 +170,7 @@ static int MOD_PREFIX(EffectiveScore)( MODFN_CTV, int clientNum, effectiveScoreT
 Transition recently eliminated players into spectator mode.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PreClientSpawn), ( MODFN_CTV, int clientNum, clientSpawnType_t spawnType ),
-		( MODFN_CTN, clientNum, spawnType ), "G_MODFN_PRECLIENTSPAWN" ) {
+static void MOD_PREFIX(PreClientSpawn)( MODFN_CTV, int clientNum, clientSpawnType_t spawnType ) {
 	gclient_t *client = &level.clients[clientNum];
 	elimination_client_t *modclient = &MOD_STATE->clients[clientNum];
 
@@ -186,8 +185,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PreClientSpawn), ( MODFN_CTV, int clientNum, clien
 Print info messages to clients during ClientSpawn.
 ============
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(SpawnCenterPrintMessage), ( MODFN_CTV, int clientNum, clientSpawnType_t spawnType ),
-		( MODFN_CTN, clientNum, spawnType ), "G_MODFN_SPAWNCENTERPRINTMESSAGE" ) {
+static void MOD_PREFIX(SpawnCenterPrintMessage)( MODFN_CTV, int clientNum, clientSpawnType_t spawnType ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	// Don't print this if warmup sequence is playing or going to be played
@@ -207,8 +205,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(SpawnCenterPrintMessage), ( MODFN_CTV, int clientN
 Force respawn after 3 seconds.
 ==============
 */
-LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckRespawnTime), ( MODFN_CTV, int clientNum, qboolean voluntary ),
-		( MODFN_CTN, clientNum, voluntary ), "G_MODFN_CHECKRESPAWNTIME" ) {
+static qboolean MOD_PREFIX(CheckRespawnTime)( MODFN_CTV, int clientNum, qboolean voluntary ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	if ( !voluntary && level.time > client->respawnKilledTime + 3000 ) {
@@ -246,7 +243,7 @@ static int MOD_PREFIX(AdjustGeneralConstant)( MODFN_CTV, generalConstant_t gcTyp
 ModElimination_ExitRound
 ================
 */
-LOGFUNCTION_SVOID( ModElimination_ExitRound, ( team_t winningTeam ), ( winningTeam ), "" ) {
+static void ModElimination_ExitRound( team_t winningTeam ) {
 	if ( g_gametype.integer >= GT_TEAM ) {
 		// Make sure surviving team wins, not just team with most points.
 		level.forceWinningTeam = winningTeam;
@@ -261,7 +258,7 @@ LOGFUNCTION_SVOID( ModElimination_ExitRound, ( team_t winningTeam ), ( winningTe
 (ModFN) CheckExitRules
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(CheckExitRules), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_CHECKEXITRULES" ) {
+static void MOD_PREFIX(CheckExitRules)( MODFN_CTV ) {
 	// Don't go to intermission if nobody was eliminated.
 	if ( MOD_STATE->numEliminated ) {
 		if ( g_gametype.integer >= GT_TEAM ) {
@@ -287,8 +284,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(CheckExitRules), ( MODFN_CTV ), ( MODFN_CTN ), "G_
 Check if joining or changing team/class is disabled due to match in progress.
 ================
 */
-LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckJoinAllowed), ( MODFN_CTV, int clientNum, join_allowed_type_t type, team_t targetTeam ),
-		( MODFN_CTN, clientNum, type, targetTeam ), "G_MODFN_CHECKJOINLOCKED" ) {
+static qboolean MOD_PREFIX(CheckJoinAllowed)( MODFN_CTV, int clientNum, join_allowed_type_t type, team_t targetTeam ) {
 	gclient_t *client = &level.clients[clientNum];
 	elimination_client_t *modclient = &MOD_STATE->clients[clientNum];
 
@@ -324,8 +320,8 @@ LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckJoinAllowed), ( MODFN_CTV, int clien
 (ModFN) PostPlayerDie
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostPlayerDie), ( MODFN_CTV, gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int meansOfDeath, int *awardPoints ),
-		( MODFN_CTN, self, inflictor, attacker, meansOfDeath, awardPoints ), "G_MODFN_POSTPLAYERDIE" ) {
+static void MOD_PREFIX(PostPlayerDie)( MODFN_CTV, gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
+		int meansOfDeath, int *awardPoints ) {
 	int clientNum = self - g_entities;
 	gclient_t *client = &level.clients[clientNum];
 	elimination_client_t *modclient = &MOD_STATE->clients[clientNum];
@@ -381,8 +377,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostPlayerDie), ( MODFN_CTV, gentity_t *self, gent
 Reset stats and eliminated state when player switches teams or becomes spectator.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PrePlayerLeaveTeam), ( MODFN_CTV, int clientNum, team_t oldTeam ),
-		( MODFN_CTN, clientNum, oldTeam ), "G_MODFN_PREPLAYERLEAVETEAM" ) {
+static void MOD_PREFIX(PrePlayerLeaveTeam)( MODFN_CTV, int clientNum, team_t oldTeam ) {
 	elimination_client_t *modclient = &MOD_STATE->clients[clientNum];
 
 	MODFN_NEXT( PrePlayerLeaveTeam, ( MODFN_NC, clientNum, oldTeam ) );
@@ -398,8 +393,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PrePlayerLeaveTeam), ( MODFN_CTV, int clientNum, t
 (ModFN) InitClientSession
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(InitClientSession), ( MODFN_CTV, int clientNum, qboolean initialConnect, const info_string_t *info ),
-		( MODFN_CTN, clientNum, initialConnect, info ), "G_MODFN_INITCLIENTSESSION" ) {
+static void MOD_PREFIX(InitClientSession)( MODFN_CTV, int clientNum, qboolean initialConnect, const info_string_t *info ) {
 	elimination_client_t *modclient = &MOD_STATE->clients[clientNum];
 
 	MODFN_NEXT( InitClientSession, ( MODFN_NC, clientNum, initialConnect, info ) );
@@ -411,7 +405,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(InitClientSession), ( MODFN_CTV, int clientNum, qb
 (ModFN) PostRunFrame
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
+static void MOD_PREFIX(PostRunFrame)( MODFN_CTV ) {
 	int i;
 	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 
@@ -454,8 +448,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MO
 (ModFN) MatchStateTransition
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(MatchStateTransition), ( MODFN_CTV, matchState_t oldState, matchState_t newState ),
-		( MODFN_CTN, oldState, newState ), "G_MODFN_MATCHSTATETRANSITION" ) {
+static void MOD_PREFIX(MatchStateTransition)( MODFN_CTV, matchState_t oldState, matchState_t newState ) {
 	MODFN_NEXT( MatchStateTransition, ( MODFN_NC, oldState, newState ) );
 
 	if ( newState < MS_ACTIVE && !EF_WARN_ASSERT( MOD_STATE->numEliminated == 0 ) ) {
@@ -480,7 +473,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(MatchStateTransition), ( MODFN_CTV, matchState_t o
 ModElimination_Init
 ================
 */
-LOGFUNCTION_VOID( ModElimination_Init, ( void ), (), "G_MOD_INIT G_ELIMINATION" ) {
+void ModElimination_Init( void ) {
 	if ( EF_WARN_ASSERT( !MOD_STATE ) ) {
 		modcfg.mods_enabled.elimination = qtrue;
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );

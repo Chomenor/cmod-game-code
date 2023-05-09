@@ -22,9 +22,8 @@ Verifies and converts model to meet borg/non-borg team requirements. Returns emp
 to select random model instead.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(ConvertPlayerModel),
-		( MODFN_CTV, int clientNum, const char *userinfo, const char *source_model, char *output, unsigned int outputSize ),
-		( MODFN_CTN, clientNum, userinfo, source_model, output, outputSize ), "G_PLAYERMODELS G_MODFN_CONVERTPLAYERMODEL" ) {
+static void MOD_PREFIX(ConvertPlayerModel)( MODFN_CTV, int clientNum, const char *userinfo, const char *source_model,
+		char *output, unsigned int outputSize ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	// Don't change model for spectators
@@ -87,8 +86,8 @@ LOGFUNCTION_SVOID( MOD_PREFIX(ConvertPlayerModel),
 Selects random model that meets borg/non-borg team requirements. Returns empty string on error.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(RandomPlayerModel), ( MODFN_CTV, int clientNum, const char *userinfo, char *output, unsigned int outputSize ),
-		( MODFN_CTN, clientNum, userinfo, output, outputSize ), "G_PLAYERMODELS G_MODFN_RANDOMPLAYERMODEL" ) {
+static void MOD_PREFIX(RandomPlayerModel)( MODFN_CTV, int clientNum, const char *userinfo,
+		char *output, unsigned int outputSize ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	// Don't change model for spectators
@@ -149,7 +148,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(RandomPlayerModel), ( MODFN_CTV, int clientNum, co
 ModAssimModels_Init
 ================
 */
-LOGFUNCTION_VOID( ModAssimModels_Init, ( void ), (), "G_MOD_INIT G_ASSIMILATION" ) {
+void ModAssimModels_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 

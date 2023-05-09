@@ -44,8 +44,7 @@ static void ModSpectPassThrough_Trace( trace_t *results, const vec3_t start, con
 Override trace function for spectators.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PmoveInit), ( MODFN_CTV, int clientNum, pmove_t *pmove ),
-		( MODFN_CTN, clientNum, pmove ), "G_MODFN_PMOVEINIT" ) {
+static void MOD_PREFIX(PmoveInit)( MODFN_CTV, int clientNum, pmove_t *pmove ) {
 	MODFN_NEXT( PmoveInit, ( MODFN_NC, clientNum, pmove ) );
 
 	if ( modfn.SpectatorClient( clientNum ) ) {
@@ -72,7 +71,7 @@ int MOD_PREFIX(AdjustGeneralConstant)( MODFN_CTV, generalConstant_t gcType, int 
 ModSpectPassThrough_Init
 ================
 */
-LOGFUNCTION_VOID( ModSpectPassThrough_Init, ( void ), (), "G_MOD_INIT" ) {
+void ModSpectPassThrough_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 

@@ -173,8 +173,7 @@ static int MOD_PREFIX(AdjustScoreboardAttributes)( MODFN_CTV, int clientNum, sco
 Disable suicide during warmup.
 =================
 */
-LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckSuicideAllowed), ( MODFN_CTV, int clientNum ),
-		( MODFN_CTN, clientNum ), "G_MODFN_CHECKSUICIDEALLOWED" ) {
+static qboolean MOD_PREFIX(CheckSuicideAllowed)( MODFN_CTV, int clientNum ) {
 #ifdef FEATURE_RESTRICT_SUICIDE
 	if ( level.matchState == MS_WARMUP || level.matchState >= MS_INTERMISSION_QUEUED ) {
 		return qfalse;
@@ -189,8 +188,8 @@ LOGFUNCTION_SRET( qboolean, MOD_PREFIX(CheckSuicideAllowed), ( MODFN_CTV, int cl
 (ModFN) PostPlayerDie
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostPlayerDie), ( MODFN_CTV, gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int meansOfDeath, int *awardPoints ),
-		( MODFN_CTN, self, inflictor, attacker, meansOfDeath, awardPoints ), "G_MODFN_POSTPLAYERDIE" ) {
+static void MOD_PREFIX(PostPlayerDie)( MODFN_CTV, gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
+		int meansOfDeath, int *awardPoints ) {
 	int clientNum = self - g_entities;
 	gclient_t *client = &level.clients[clientNum];
 	elim_extras_client_t *modclient = &MOD_STATE->clients[clientNum];
@@ -217,8 +216,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostPlayerDie), ( MODFN_CTV, gentity_t *self, gent
 Reset stats and eliminated state when player switches teams or becomes spectator.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PrePlayerLeaveTeam), ( MODFN_CTV, int clientNum, team_t oldTeam ),
-		( MODFN_CTN, clientNum, oldTeam ), "G_MODFN_PREPLAYERLEAVETEAM" ) {
+static void MOD_PREFIX(PrePlayerLeaveTeam)( MODFN_CTV, int clientNum, team_t oldTeam ) {
 	MODFN_NEXT( PrePlayerLeaveTeam, ( MODFN_NC, clientNum, oldTeam ) );
 
 #ifdef FEATURE_ELIMINATED_MESSAGES
@@ -233,7 +231,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PrePlayerLeaveTeam), ( MODFN_CTV, int clientNum, t
 (ModFN) PostRunFrame
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
+static void MOD_PREFIX(PostRunFrame)( MODFN_CTV ) {
 	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 
 #ifdef FEATURE_TIMELIMIT_RESTART
@@ -252,8 +250,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MO
 (ModFN) MatchStateTransition
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(MatchStateTransition), ( MODFN_CTV, matchState_t oldState, matchState_t newState ),
-		( MODFN_CTN, oldState, newState ), "G_MODFN_MATCHSTATETRANSITION" ) {
+static void MOD_PREFIX(MatchStateTransition)( MODFN_CTV, matchState_t oldState, matchState_t newState ) {
 	MODFN_NEXT( MatchStateTransition, ( MODFN_NC, oldState, newState ) );
 
 #ifdef FEATURE_SURVIVOR_MESSAGES
@@ -277,7 +274,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(MatchStateTransition), ( MODFN_CTV, matchState_t o
 ModElimTweaks_Init
 ================
 */
-LOGFUNCTION_VOID( ModElimTweaks_Init, ( void ), (), "G_MOD_INIT G_ELIMINATION" ) {
+void ModElimTweaks_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 

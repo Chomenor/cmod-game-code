@@ -30,7 +30,7 @@ static struct {
 Update scores array.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
+static void MOD_PREFIX(PostRunFrame)( MODFN_CTV ) {
 	int i;
 	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 
@@ -50,7 +50,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MO
 Delay set array call until level.maxclients is initialized.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(GeneralInit), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_GENERALINIT" ) {
+static void MOD_PREFIX(GeneralInit)( MODFN_CTV ) {
 	MODFN_NEXT( GeneralInit, ( MODFN_NC ) );
 	VMExt_FN_StatusScoresOverride_SetArray( MOD_STATE->sharedScores, level.maxclients );
 }
@@ -60,7 +60,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(GeneralInit), ( MODFN_CTV ), ( MODFN_CTN ), "G_MOD
 ModStatusScores_Init
 ================
 */
-LOGFUNCTION_VOID( ModStatusScores_Init, ( void ), (), "G_MOD_INIT" ) {
+void ModStatusScores_Init( void ) {
 	if ( !MOD_STATE && VMExt_FNAvailable_StatusScoresOverride_SetArray() ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 

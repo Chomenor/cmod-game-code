@@ -23,7 +23,7 @@ static struct {
 (ModFN) BorgTeleportEnabled
 ================
 */
-LOGFUNCTION_RET( qboolean, ModFNDefault_BorgTeleportEnabled, ( int clientNum ), ( clientNum ), "G_MODFN_BORGTELEPORTENABLED" ) {
+qboolean ModFNDefault_BorgTeleportEnabled( int clientNum ) {
 	return qfalse;
 }
 
@@ -32,7 +32,7 @@ LOGFUNCTION_RET( qboolean, ModFNDefault_BorgTeleportEnabled, ( int clientNum ), 
 (ModFN) PostBorgTeleport
 ================
 */
-LOGFUNCTION_VOID( ModFNDefault_PostBorgTeleport, ( int clientNum ), ( clientNum ), "G_MODFN_POSTBORGTELEPORT" ) {
+void ModFNDefault_PostBorgTeleport( int clientNum ) {
 }
 
 /*
@@ -42,7 +42,7 @@ ModHoldableTransporter_Rematerialize
 Take player out of borg teleport mode.
 ================
 */
-LOGFUNCTION_SVOID( ModHoldableTransporter_Rematerialize, ( int clientNum ), ( clientNum ), "" ) {
+static void ModHoldableTransporter_Rematerialize( int clientNum ) {
 	holdableTransporter_client_t *modclient = &MOD_STATE->clients[clientNum];
 	gentity_t *ent = &g_entities[clientNum];
 
@@ -68,8 +68,7 @@ LOGFUNCTION_SVOID( ModHoldableTransporter_Rematerialize, ( int clientNum ), ( cl
 Called when player triggers the holdable transporter powerup.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PortableTransporterActivate), ( MODFN_CTV, int clientNum ),
-		( MODFN_CTN, clientNum ), "G_MODFN_PORTABLETRANSPORTERACTIVATE" ) {
+static void MOD_PREFIX(PortableTransporterActivate)( MODFN_CTV, int clientNum ) {
 	holdableTransporter_client_t *modclient = &MOD_STATE->clients[clientNum];
 	gclient_t *client = &level.clients[clientNum];
 	gentity_t *ent = &g_entities[clientNum];
@@ -107,7 +106,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PortableTransporterActivate), ( MODFN_CTV, int cli
 Check for expiring borg teleports.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PreRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_PRERUNFRAME" ) {
+static void MOD_PREFIX(PreRunFrame)( MODFN_CTV ) {
 	MODFN_NEXT( PreRunFrame, ( MODFN_NC ) );
 
 	if ( MOD_STATE->borgTeleportActive ) {
@@ -137,7 +136,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PreRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MOD
 ModHoldableTransporter_Init
 ================
 */
-LOGFUNCTION_VOID( ModHoldableTransporter_Init, ( void ), (), "G_MOD_INIT" ) {
+void ModHoldableTransporter_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 

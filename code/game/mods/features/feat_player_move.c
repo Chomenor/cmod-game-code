@@ -38,8 +38,7 @@ typedef struct {
 ModPlayerMove_PostPmoveCallback
 ==============
 */
-LOGFUNCTION_SVOID( ModPlayerMove_PostPmoveCallback, ( pmove_t *pmove, qboolean finalFragment, void *context ),
-		( pmove, finalFragment, context ), "" ) {
+static void ModPlayerMove_PostPmoveCallback( pmove_t *pmove, qboolean finalFragment, void *context ) {
 	postMoveContext_t *pmc = (postMoveContext_t *)context;
 
 	if ( finalFragment || MOD_STATE->g_pMoveTriggerMode.integer ) {
@@ -79,7 +78,7 @@ static int MOD_PREFIX(PmoveFixedLength)( MODFN_CTV, qboolean isBot ) {
 Performs player movement corresponding to a single input usercmd from the client.
 ==============
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(RunPlayerMove), ( MODFN_CTV, int clientNum ), ( MODFN_CTN, clientNum ), "G_MODFN_RUNPLAYERMOVE" ) {
+static void MOD_PREFIX(RunPlayerMove)( MODFN_CTV, int clientNum ) {
 	gclient_t *client = &level.clients[clientNum];
 	playerState_t *ps = &client->ps;
 	pmove_t pmove;
@@ -119,8 +118,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(RunPlayerMove), ( MODFN_CTV, int clientNum ), ( MO
 (ModFN) PmoveInit
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PmoveInit), ( MODFN_CTV, int clientNum, pmove_t *pmove ),
-		( MODFN_CTN, clientNum, pmove ), "G_MODFN_PMOVEINIT" ) {
+static void MOD_PREFIX(PmoveInit)( MODFN_CTV, int clientNum, pmove_t *pmove ) {
 	MODFN_NEXT( PmoveInit, ( MODFN_NC, clientNum, pmove ) );
 
 	if ( MOD_STATE->g_noJumpKeySlowdown.integer ) {
@@ -139,7 +137,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PmoveInit), ( MODFN_CTV, int clientNum, pmove_t *p
 (ModFN) AddModConfigInfo
 ==============
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(AddModConfigInfo), ( MODFN_CTV, char *info ), ( MODFN_CTN, info ), "G_MODFN_ADDMODCONFIGINFO" ) {
+static void MOD_PREFIX(AddModConfigInfo)( MODFN_CTV, char *info ) {
 	int pMoveFixed = modfn.PmoveFixedLength( qfalse );
 
 	if ( pMoveFixed ) {
@@ -178,7 +176,7 @@ static void ModPlayerMove_ModcfgCvarChanged( trackedCvar_t *cvar ) {
 ModPlayerMove_Init
 ================
 */
-LOGFUNCTION_VOID( ModPlayerMove_Init, ( void ), (), "G_MOD_INIT" ) {
+void ModPlayerMove_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 

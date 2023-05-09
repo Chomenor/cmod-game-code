@@ -287,7 +287,7 @@ Use smoothed position when creating body entity so it stays in the same visible 
 as the player entity body.
 =============
 */
-LOGFUNCTION_SRET( gentity_t *, MOD_PREFIX(CopyToBodyQue), ( MODFN_CTV, int clientNum ), ( MODFN_CTN, clientNum ), "G_MODFN_COPYTOBODYQUE" ) {
+static gentity_t *MOD_PREFIX(CopyToBodyQue)( MODFN_CTV, int clientNum ) {
 	ModPCSmoothing_Static_ShiftClient( clientNum, NULL );
 	return MODFN_NEXT( CopyToBodyQue, ( MODFN_NC, clientNum ) );
 }
@@ -297,7 +297,7 @@ LOGFUNCTION_SRET( gentity_t *, MOD_PREFIX(CopyToBodyQue), ( MODFN_CTV, int clien
 ModPCSmoothing_Init
 ================
 */
-LOGFUNCTION_VOID( ModPCSmoothing_Init, ( void ), (), "G_MOD_INIT" ) {
+void ModPCSmoothing_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 

@@ -120,7 +120,7 @@ void ModPCDeadMove_Static_InitDeadMove( int clientNum, vec3_t smoothingOrigin ) 
 (ModFN) PostRunFrame
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
+static void MOD_PREFIX(PostRunFrame)( MODFN_CTV ) {
 	int i;
 	int clientCount = MAX_SMOOTHING_CLIENTS;
 
@@ -139,7 +139,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MO
 ModPCDeadMove_Init
 ================
 */
-LOGFUNCTION_VOID( ModPCDeadMove_Init, ( void ), (), "G_MOD_INIT" ) {
+void ModPCDeadMove_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 

@@ -121,8 +121,7 @@ static void ModElimTimelimit_CheckAdjustTimelimit( void ) {
 (ModFN) PostGameShutdown
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostGameShutdown), ( MODFN_CTV, qboolean restart ),
-		( MODFN_CTN, restart ), "G_MODFN_POSTGAMESHUTDOWN" ) {
+static void MOD_PREFIX(PostGameShutdown)( MODFN_CTV, qboolean restart ) {
 	MODFN_NEXT( PostGameShutdown, ( MODFN_NC, restart ) );
 
 	// Restore original timelimit value.
@@ -136,8 +135,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostGameShutdown), ( MODFN_CTV, qboolean restart )
 (ModFN) PostRunFrame
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ),
-		( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
+static void MOD_PREFIX(PostRunFrame)( MODFN_CTV ) {
 	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 	ModElimTimelimit_CheckAdjustTimelimit();
 }
@@ -147,7 +145,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ),
 ModElimTimelimit_Init
 ================
 */
-LOGFUNCTION_VOID( ModElimTimelimit_Init, ( void ), (), "G_MOD_INIT G_ELIMINATION" ) {
+void ModElimTimelimit_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 

@@ -66,9 +66,8 @@ static void ModPCProjectileImpact_RunMissiles( void ) {
 Shift clients during explosions for accurate radius damage.
 ============
 */
-LOGFUNCTION_SRET( qboolean, MOD_PREFIX(RadiusDamage),
-		( MODFN_CTV, vec3_t origin, gentity_t *attacker, float damage, float radius, gentity_t *ignore, int dflags, int mod ),
-		( MODFN_CTN, origin, attacker, damage, radius, ignore, dflags, mod ), "G_MODFN_RADIUSDAMAGE" ) {
+static qboolean MOD_PREFIX(RadiusDamage)( MODFN_CTV, vec3_t origin, gentity_t *attacker,
+		float damage, float radius, gentity_t *ignore, int dflags, int mod ) {
 	if ( ModPingcomp_Static_SmoothingEnabled() ) {
 		if ( ( mod == MOD_GRENADE_SPLASH || mod == MOD_GRENADE_ALT_SPLASH ) && ( !ignore || ignore->s.eType != ET_PLAYER ) ) {
 			// Don't shift player positions for delayed explosion mines (tripmines and timed detonations).
@@ -115,7 +114,7 @@ int MOD_PREFIX(AdjustGeneralConstant)( MODFN_CTV, generalConstant_t gcType, int 
 Perform custom run missile routine.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
+static void MOD_PREFIX(PostRunFrame)( MODFN_CTV ) {
 	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 
 	// At this point collision positions for this frame should have be calculated via ModPCPositionShift.
@@ -129,7 +128,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MO
 ModPCProjectileImpact_Init
 ================
 */
-LOGFUNCTION_VOID( ModPCProjectileImpact_Init, ( void ), (), "G_MOD_INIT" ) {
+void ModPCProjectileImpact_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 

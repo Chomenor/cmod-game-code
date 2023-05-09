@@ -28,7 +28,7 @@ static struct {
 Support ignoring eliminated players in adapt respawn calculations.
 ================
 */
-LOGFUNCTION_SRET( int, MOD_PREFIX(AdaptRespawnNumPlayers), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_ADAPTRESPAWNNUMPLAYERS" ) {
+static int MOD_PREFIX(AdaptRespawnNumPlayers)( MODFN_CTV ) {
 #ifdef FEATURE_ELIMINATION_ADAPT_RESPAWN
 	if ( MOD_STATE->g_adaptRespawnIgnoreEliminated.integer ) {
 		return ModElimination_Static_CountPlayersAlive();
@@ -43,7 +43,7 @@ LOGFUNCTION_SRET( int, MOD_PREFIX(AdaptRespawnNumPlayers), ( MODFN_CTV ), ( MODF
 (ModFN) SetScoresConfigStrings
 ============
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(SetScoresConfigStrings), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_SETSCORESCONFIGSTRINGS" ) {
+static void MOD_PREFIX(SetScoresConfigStrings)( MODFN_CTV ) {
 #ifdef FEATURE_HUD_ROUND_INDICATOR_FFA
 	if ( g_gametype.integer < GT_TEAM ) {
 		// Place round numbers in score configstrings.
@@ -63,7 +63,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(SetScoresConfigStrings), ( MODFN_CTV ), ( MODFN_CT
 Assumed to be registered after main elimination version.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
+static void MOD_PREFIX(PostRunFrame)( MODFN_CTV ) {
 	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 
 #ifdef FEATURE_HUD_ROUND_INDICATOR_FFA
@@ -85,7 +85,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MO
 ModElimMisc_Init
 ================
 */
-LOGFUNCTION_VOID( ModElimMisc_Init, ( void ), (), "G_MOD_INIT G_ELIMINATION" ) {
+void ModElimMisc_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 

@@ -99,8 +99,7 @@ static void ModfnDebugCmd( void ) {
 (ModFN) ModConsoleCommand
 ===================
 */
-LOGFUNCTION_SRET( qboolean, MOD_PREFIX(ModConsoleCommand), ( MODFN_CTV, const char *cmd ),
-		( MODFN_CTN, cmd ), "G_MODFN_MODCONSOLECOMMAND" ) {
+static qboolean MOD_PREFIX(ModConsoleCommand)( MODFN_CTV, const char *cmd ) {
 	if ( !Q_stricmp( cmd, "modfn_debug" ) ) {
 		ModfnDebugCmd();
 		return qtrue;
@@ -114,7 +113,7 @@ LOGFUNCTION_SRET( qboolean, MOD_PREFIX(ModConsoleCommand), ( MODFN_CTV, const ch
 ModDebugModfn_Init
 ================
 */
-LOGFUNCTION_VOID( ModDebugModfn_Init, ( void ), (), "G_MOD_INIT" ) {
+void ModDebugModfn_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 

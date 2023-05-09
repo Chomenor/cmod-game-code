@@ -101,7 +101,7 @@ qboolean ModWarmupSequence_Static_SequenceInProgressOrPending( void ) {
 Returns length in milliseconds to use for warmup if enabled, or <= 0 if warmup disabled.
 ==================
 */
-LOGFUNCTION_SRET( int, MOD_PREFIX(WarmupLength), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_WARMUPLENGTH" ) {
+static int MOD_PREFIX(WarmupLength)( MODFN_CTV ) {
 	int sequenceLength = ModWarmupSequence_GetLength();
 	if ( sequenceLength ) {
 		return sequenceLength;
@@ -115,7 +115,7 @@ LOGFUNCTION_SRET( int, MOD_PREFIX(WarmupLength), ( MODFN_CTV ), ( MODFN_CTN ), "
 (ModFN) PostRunFrame
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
+static void MOD_PREFIX(PostRunFrame)( MODFN_CTV ) {
 	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 
 	if ( ModWarmupSequence_SequenceInProgress() ) {
@@ -142,8 +142,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MO
 (ModFN) MatchStateTransition
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(MatchStateTransition), ( MODFN_CTV, matchState_t oldState, matchState_t newState ),
-		( MODFN_CTN, oldState, newState ), "G_MODFN_MATCHSTATETRANSITION" ) {
+static void MOD_PREFIX(MatchStateTransition)( MODFN_CTV, matchState_t oldState, matchState_t newState ) {
 	MODFN_NEXT( MatchStateTransition, ( MODFN_NC, oldState, newState ) );
 
 	// Clear existing sequence.
@@ -165,7 +164,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(MatchStateTransition), ( MODFN_CTV, matchState_t o
 ModWarmupSequence_Init
 ================
 */
-LOGFUNCTION_VOID( ModWarmupSequence_Init, ( void ), (), "G_MOD_INIT G_MOD_WARMUPSEQUENCE" ) {
+void ModWarmupSequence_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 

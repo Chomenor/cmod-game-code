@@ -253,8 +253,7 @@ static void ModVoting_CheckVote( void ) {
 (ModFN) ModClientCommand
 ================
 */
-LOGFUNCTION_SRET( qboolean, MOD_PREFIX(ModClientCommand), ( MODFN_CTV, int clientNum, const char *cmd ),
-		( MODFN_CTN, clientNum, cmd ), "G_MODFN_MODCLIENTCOMMAND" ) {
+static qboolean MOD_PREFIX(ModClientCommand)( MODFN_CTV, int clientNum, const char *cmd ) {
 	if ( level.clients[clientNum].pers.connected == CON_CONNECTED && level.matchState < MS_INTERMISSION_QUEUED ) {
 		if ( !Q_stricmp( cmd, "callvote" ) ) {
 			ModVoting_CallVote_f( clientNum );
@@ -276,7 +275,7 @@ LOGFUNCTION_SRET( qboolean, MOD_PREFIX(ModClientCommand), ( MODFN_CTV, int clien
 Run pending nextmap if it was voted.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(ExitLevel), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_EXITLEVEL" ) {
+static void MOD_PREFIX(ExitLevel)( MODFN_CTV ) {
 	if ( *MOD_STATE->nextmapPending ) {
 		ModVoting_LaunchMap( MOD_STATE->nextmapPending );
 	} else {
@@ -289,8 +288,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(ExitLevel), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN
 (ModFN) InitClientSession
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(InitClientSession), ( MODFN_CTV, int clientNum, qboolean initialConnect, const info_string_t *info ),
-		( MODFN_CTN, clientNum, initialConnect, info ), "G_MODFN_INITCLIENTSESSION" ) {
+static void MOD_PREFIX(InitClientSession)( MODFN_CTV, int clientNum, qboolean initialConnect, const info_string_t *info ) {
 	ModVotingClient_t *modclient = &MOD_STATE->clients[clientNum];
 	memset( modclient, 0, sizeof( *modclient ) );
 	MODFN_NEXT( InitClientSession, ( MODFN_NC, clientNum, initialConnect, info ) );
@@ -301,7 +299,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(InitClientSession), ( MODFN_CTV, int clientNum, qb
 (ModFN) PostRunFrame
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
+static void MOD_PREFIX(PostRunFrame)( MODFN_CTV ) {
 	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 	ModVoting_CheckVote();
 }
@@ -311,7 +309,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MO
 ModVoting_Init
 ================
 */
-LOGFUNCTION_VOID( ModVoting_Init, ( void ), (), "G_MOD_INIT" ) {
+void ModVoting_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 

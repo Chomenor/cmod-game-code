@@ -21,7 +21,7 @@ static struct {
 (ModFN) SpawnConfigureClient
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(SpawnConfigureClient), ( MODFN_CTV, int clientNum ), ( MODFN_CTN, clientNum ), "G_MODFN_SPAWNCONFIGURECLIENT" ) {
+static void MOD_PREFIX(SpawnConfigureClient)( MODFN_CTV, int clientNum ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	MODFN_NEXT( SpawnConfigureClient, ( MODFN_NC, clientNum ) );
@@ -40,7 +40,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(SpawnConfigureClient), ( MODFN_CTV, int clientNum 
 Enable borg teleport for borg class.
 ================
 */
-LOGFUNCTION_SRET( qboolean, MOD_PREFIX(BorgTeleportEnabled), ( MODFN_CTV, int clientNum ), ( MODFN_CTN, clientNum ), "G_MODFN_BORGTELEPORTENABLED" ) {
+static qboolean MOD_PREFIX(BorgTeleportEnabled)( MODFN_CTV, int clientNum ) {
 	gclient_t *client = &level.clients[clientNum];
 	return client->sess.sessionClass == PC_BORG;
 }
@@ -52,7 +52,7 @@ LOGFUNCTION_SRET( qboolean, MOD_PREFIX(BorgTeleportEnabled), ( MODFN_CTV, int cl
 Called after a borg teleport has completed. Start countdown to get new teleporter.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostBorgTeleport), ( MODFN_CTV, int clientNum ), ( MODFN_CTN, clientNum ), "G_MODFN_POSTBORGTELEPORT" ) {
+static void MOD_PREFIX(PostBorgTeleport)( MODFN_CTV, int clientNum ) {
 	int delay = 15000;
 	if ( modfn.IsBorgQueen( clientNum ) ) {
 		delay = 60000;
@@ -66,7 +66,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostBorgTeleport), ( MODFN_CTV, int clientNum ), (
 ModAssimBorgTeleport_Init
 ================
 */
-LOGFUNCTION_VOID( ModAssimBorgTeleport_Init, ( void ), (), "G_MOD_INIT G_ASSIMILATION" ) {
+void ModAssimBorgTeleport_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 

@@ -36,7 +36,7 @@ Bots in MP will go to these spots when there's nothing else to get- helps them p
 Returns the effective number of players to use for g_adaptRespawn calculation.
 ================
 */
-LOGFUNCTION_RET( int, ModFNDefault_AdaptRespawnNumPlayers, ( void ), (), "G_MODFN_ADAPTRESPAWNNUMPLAYERS" ) {
+int ModFNDefault_AdaptRespawnNumPlayers( void ) {
 	return level.numPlayingClients;
 }
 
@@ -827,7 +827,7 @@ Can be used to add additional registered items, which are added to a configstrin
 client caching purposes.
 ================
 */
-LOGFUNCTION_VOID( ModFNDefault_AddRegisteredItems, ( void ), (), "G_MODFN_ADDREGISTEREDITEMS" ) {
+void ModFNDefault_AddRegisteredItems( void ) {
 	// players always start with the base weapon
 	RegisterItem( BG_FindItemForWeapon( WP_PHASER ) );
 	RegisterItem( BG_FindItemForWeapon( WP_COMPRESSION_RIFLE ) );	//this is for the podium at the end, make sure we have the model
@@ -872,8 +872,7 @@ void SaveRegisteredItems( void ) {
 Allows replacing an item with a different item during initial spawn.
 ================
 */
-LOGFUNCTION_RET( gitem_t *, ModFNDefault_CheckReplaceItem, ( gitem_t *item ),
-		( item ), "G_MODFN_CHECKREPLACEITEM" ) {
+gitem_t *ModFNDefault_CheckReplaceItem( gitem_t *item ) {
 	return item;
 }
 
@@ -885,8 +884,7 @@ Allows permanently removing an item during initial spawn.
 Returns qtrue to disable item, qfalse to spawn item normally.
 ================
 */
-LOGFUNCTION_RET( qboolean, ModFNDefault_CheckItemSpawnDisabled, ( gitem_t *item ),
-		( item ), "G_MODFN_CHECKITEMSPAWNDISABLED" ) {
+qboolean ModFNDefault_CheckItemSpawnDisabled( gitem_t *item ) {
 	return qfalse;
 }
 

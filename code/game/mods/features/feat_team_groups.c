@@ -28,7 +28,7 @@ static struct {
 ModTeamGroups_SetConfigStrings
 ============
 */
-LOGFUNCTION_SVOID( ModTeamGroups_SetConfigStrings, ( void ), (), "G_TEAMGROUPS" ) {
+static void ModTeamGroups_SetConfigStrings( void ) {
 	trap_SetConfigstring( CS_RED_GROUP, *MOD_STATE->forceRedGroup ? MOD_STATE->forceRedGroup : MOD_STATE->redGroup );
 	trap_SetConfigstring( CS_BLUE_GROUP, *MOD_STATE->forceBlueGroup ? MOD_STATE->forceBlueGroup : MOD_STATE->blueGroup );
 	MOD_STATE->csInitialized = qtrue;
@@ -42,8 +42,7 @@ Force a certain value for red and/or blue team group configstrings. Values can b
 to use default group. Used by Assimilation mode when setting borg team.
 ============
 */
-LOGFUNCTION_VOID( ModTeamGroups_Shared_ForceConfigStrings, ( const char *redGroup, const char *blueGroup ),
-		( redGroup, blueGroup ), "G_TEAMGROUPS" ) {
+void ModTeamGroups_Shared_ForceConfigStrings( const char *redGroup, const char *blueGroup ) {
 	EF_ERR_ASSERT( MOD_STATE );
 	Q_strncpyz( MOD_STATE->forceRedGroup, redGroup ? redGroup : "", sizeof( MOD_STATE->forceRedGroup ) );
 	Q_strncpyz( MOD_STATE->forceBlueGroup, blueGroup ? blueGroup : "", sizeof( MOD_STATE->forceBlueGroup ) );
@@ -62,9 +61,8 @@ Check if current model matches team race. Returns empty string if source model i
 and a random one should be selected instead.
 ============
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(ConvertPlayerModel),
-		( MODFN_CTV, int clientNum, const char *userinfo, const char *source_model, char *output, unsigned int outputSize ),
-		( MODFN_CTN, clientNum, userinfo, source_model, output, outputSize ), "G_PLAYERMODELS G_MODFN_CONVERTPLAYERMODEL" ) {
+static void MOD_PREFIX(ConvertPlayerModel)( MODFN_CTV, int clientNum, const char *userinfo, const char *source_model,
+		char *output, unsigned int outputSize ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	if ( client->sess.sessionTeam == TEAM_RED || client->sess.sessionTeam == TEAM_BLUE ) {
@@ -89,8 +87,8 @@ LOGFUNCTION_SVOID( MOD_PREFIX(ConvertPlayerModel),
 Selects a random model that matches team race requirement. Returns empty string on error.
 ============
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(RandomPlayerModel), ( MODFN_CTV, int clientNum, const char *userinfo, char *output, unsigned int outputSize ),
-		( MODFN_CTN, clientNum, userinfo, output, outputSize ), "G_PLAYERMODELS G_MODFN_RANDOMPLAYERMODEL" ) {
+static void MOD_PREFIX(RandomPlayerModel)( MODFN_CTV, int clientNum, const char *userinfo,
+		char *output, unsigned int outputSize ) {
 	gclient_t *client = &level.clients[clientNum];
 	*output = '\0';
 
@@ -115,7 +113,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(RandomPlayerModel), ( MODFN_CTV, int clientNum, co
 Delay full initialization until g_gametype is determined, because other mods might have modified it.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostModInit), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTMODINIT" ) {
+static void MOD_PREFIX(PostModInit)( MODFN_CTV ) {
 	MODFN_NEXT( PostModInit, ( MODFN_NC ) );
 
 	if ( G_ModUtils_GetLatchedValue( "g_gametype", "0", 0 ) >= GT_TEAM ) {
@@ -143,7 +141,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostModInit), ( MODFN_CTV ), ( MODFN_CTN ), "G_MOD
 ModTeamGroups_Init
 ================
 */
-LOGFUNCTION_VOID( ModTeamGroups_Init, ( void ), (), "G_MOD_INIT" ) {
+void ModTeamGroups_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 

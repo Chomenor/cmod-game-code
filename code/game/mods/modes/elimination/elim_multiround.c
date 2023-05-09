@@ -303,7 +303,7 @@ static int MOD_PREFIX(EffectiveScore)( MODFN_CTV, int clientNum, effectiveScoreT
 Generate final match awards based on Gladiator mod.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(CalculateAwards), ( MODFN_CTV, int clientNum, char *msg ), ( MODFN_CTN, clientNum, msg ), "G_MODFN_CALCULATEAWARDS" ) {
+static void MOD_PREFIX(CalculateAwards)( MODFN_CTV, int clientNum, char *msg ) {
 	if ( MOD_STATE->finalScores_state == FS_COMPLETED ) {
 		gentity_t *ent = &g_entities[clientNum];
 		eliminationMR_client_t *modclient = &MOD_STATE->clients[clientNum];
@@ -373,7 +373,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(CalculateAwards), ( MODFN_CTV, int clientNum, char
 (ModFN) SetScoresConfigStrings
 ============
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(SetScoresConfigStrings), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_SETSCORESCONFIGSTRINGS" ) {
+static void MOD_PREFIX(SetScoresConfigStrings)( MODFN_CTV ) {
 #ifdef FEATURE_HUD_TEAM_ROUND_WINS
 	if ( g_gametype.integer >= GT_TEAM ) {
 		trap_SetConfigstring( CS_SCORES1, va( "%i", MOD_STATE->redWins ) );
@@ -390,7 +390,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(SetScoresConfigStrings), ( MODFN_CTV ), ( MODFN_CT
 (ModFN) ExitLevel
 =============
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(ExitLevel), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_EXITLEVEL" ) {
+static void MOD_PREFIX(ExitLevel)( MODFN_CTV ) {
 	if ( MOD_STATE->pendingRound ) {
 		// Restart when transitioning to next round.
 		trap_SendConsoleCommand( EXEC_APPEND, "map_restart 0\n" );
@@ -404,8 +404,8 @@ LOGFUNCTION_SVOID( MOD_PREFIX(ExitLevel), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN
 (ModFN) PostPlayerDie
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostPlayerDie), ( MODFN_CTV, gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int meansOfDeath, int *awardPoints ),
-		( MODFN_CTN, self, inflictor, attacker, meansOfDeath, awardPoints ), "G_MODFN_POSTPLAYERDIE" ) {
+static void MOD_PREFIX(PostPlayerDie)( MODFN_CTV, gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
+		int meansOfDeath, int *awardPoints ) {
 	int clientNum = self - g_entities;
 	gclient_t *client = &level.clients[clientNum];
 
@@ -425,7 +425,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostPlayerDie), ( MODFN_CTV, gentity_t *self, gent
 (ModFN) GenerateGlobalSessionInfo
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(GenerateGlobalSessionInfo), ( MODFN_CTV, info_string_t *info ), ( MODFN_CTN, info ), "G_MODFN_GENERATEGLOBALSESSIONINFO" ) {
+static void MOD_PREFIX(GenerateGlobalSessionInfo)( MODFN_CTV, info_string_t *info ) {
 	MODFN_NEXT( GenerateGlobalSessionInfo, ( MODFN_NC, info ) );
 
 	if ( WRITE_SESSION ) {
@@ -461,8 +461,7 @@ static void ModElimMultiRound_LoadGlobalSession( void ) {
 (ModFN) GenerateClientSessionInfo
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(GenerateClientSessionInfo), ( MODFN_CTV, int clientNum, info_string_t *info ),
-		( MODFN_CTN, clientNum, info ), "G_MODFN_GENERATECLIENTSESSIONINFO" ) {
+static void MOD_PREFIX(GenerateClientSessionInfo)( MODFN_CTV, int clientNum, info_string_t *info ) {
 	MODFN_NEXT( GenerateClientSessionInfo, ( MODFN_NC, clientNum, info ) );
 
 	if ( WRITE_SESSION ) {
@@ -477,8 +476,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(GenerateClientSessionInfo), ( MODFN_CTV, int clien
 (ModFN) InitClientSession
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(InitClientSession), ( MODFN_CTV, int clientNum, qboolean initialConnect, const info_string_t *info ),
-		( MODFN_CTN, clientNum, initialConnect, info ), "G_MODFN_INITCLIENTSESSION" ) {
+static void MOD_PREFIX(InitClientSession)( MODFN_CTV, int clientNum, qboolean initialConnect, const info_string_t *info ) {
 	eliminationMR_client_t *modclient = &MOD_STATE->clients[clientNum];
 
 	MODFN_NEXT( InitClientSession, ( MODFN_NC, clientNum, initialConnect, info ) );
@@ -498,8 +496,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(InitClientSession), ( MODFN_CTV, int clientNum, qb
 Reset stats and eliminated state when player switches teams or becomes spectator.
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PrePlayerLeaveTeam), ( MODFN_CTV, int clientNum, team_t oldTeam ),
-		( MODFN_CTN, clientNum, oldTeam ), "G_MODFN_PREPLAYERLEAVETEAM" ) {
+static void MOD_PREFIX(PrePlayerLeaveTeam)( MODFN_CTV, int clientNum, team_t oldTeam ) {
 	eliminationMR_client_t *modclient = &MOD_STATE->clients[clientNum];
 
 	MODFN_NEXT( PrePlayerLeaveTeam, ( MODFN_NC, clientNum, oldTeam ) );
@@ -514,7 +511,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PrePlayerLeaveTeam), ( MODFN_CTV, int clientNum, t
 (ModFN) PostGameShutdown
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostGameShutdown), ( MODFN_CTV, qboolean restart ), ( MODFN_CTN, restart ), "G_MODFN_POSTGAMESHUTDOWN" ) {
+static void MOD_PREFIX(PostGameShutdown)( MODFN_CTV, qboolean restart ) {
 	MODFN_NEXT( PostGameShutdown, ( MODFN_NC, restart ) );
 
 #ifdef FEATURE_CURRENTROUND_CVAR
@@ -528,7 +525,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(PostGameShutdown), ( MODFN_CTV, qboolean restart )
 (ModFN) PostRunFrame
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(PostRunFrame), ( MODFN_CTV ), ( MODFN_CTN ), "G_MODFN_POSTRUNFRAME" ) {
+static void MOD_PREFIX(PostRunFrame)( MODFN_CTV ) {
 	MODFN_NEXT( PostRunFrame, ( MODFN_NC ) );
 
 #ifdef FEATURE_FINAL_SCORES
@@ -606,8 +603,7 @@ static roundScoresState_t ModElimMultiRound_GetRoundScoresState( void ) {
 (ModFN) MatchStateTransition
 ================
 */
-LOGFUNCTION_SVOID( MOD_PREFIX(MatchStateTransition), ( MODFN_CTV, matchState_t oldState, matchState_t newState ),
-		( MODFN_CTN, oldState, newState ), "G_MODFN_MATCHSTATETRANSITION" ) {
+static void MOD_PREFIX(MatchStateTransition)( MODFN_CTV, matchState_t oldState, matchState_t newState ) {
 	MODFN_NEXT( MatchStateTransition, ( MODFN_NC, oldState, newState ) );
 
 	if ( newState == MS_WAITING_FOR_PLAYERS ) {
@@ -679,7 +675,7 @@ LOGFUNCTION_SVOID( MOD_PREFIX(MatchStateTransition), ( MODFN_CTV, matchState_t o
 ModElimMultiRound_Init
 ================
 */
-LOGFUNCTION_VOID( ModElimMultiRound_Init, ( void ), (), "G_MOD_INIT G_ELIMINATION_MR" ) {
+void ModElimMultiRound_Init( void ) {
 	if ( !EF_WARN_ASSERT( !MOD_STATE ) ) {
 		return;
 	}

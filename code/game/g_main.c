@@ -572,7 +572,7 @@ int QDECL SortRanks( const void *a, const void *b ) {
 Set CS_SCORES* configstrings during CalculateRanks.
 ============
 */
-LOGFUNCTION_VOID( ModFNDefault_SetScoresConfigStrings, ( void ), (), "G_MODFN_SETSCORESCONFIGSTRINGS" ) {
+void ModFNDefault_SetScoresConfigStrings( void ) {
 	if ( g_gametype.integer >= GT_TEAM ) {
 		trap_SetConfigstring( CS_SCORES1, va("%i", level.teamScores[TEAM_RED] ) );
 		trap_SetConfigstring( CS_SCORES2, va("%i", level.teamScores[TEAM_BLUE] ) );
@@ -832,7 +832,7 @@ void G_ClearObjectives( void )
 Execute change to next round or map when intermission completes.
 =============
 */
-LOGFUNCTION_VOID( ModFNDefault_ExitLevel, ( void ), (), "G_MATCHSTATE" ) {
+void ModFNDefault_ExitLevel( void ) {
 	trap_SendConsoleCommand( EXEC_APPEND, "vstr nextmap\n" );
 }
 
@@ -1024,7 +1024,7 @@ Called every frame and after CalculateRanks, which is called on events like
 Not called if warmup or intermission is already in progress.
 ==================
 */
-LOGFUNCTION_VOID( ModFNDefault_CheckExitRules, ( void ), (), "G_MODFN_CHECKEXITRULES" ) {
+void ModFNDefault_CheckExitRules( void ) {
 	int			i;
 	gclient_t	*cl;
 

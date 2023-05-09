@@ -28,6 +28,9 @@
 #define	LARM_ROFS	0.0f
 #define	LARM_UOFS	-26.0f
 
+// return 0 for null parameter, consistent with qvm behavior
+#define ATOI_SAFE( x ) ( ( x ) ? atoi( x ) : 0 )
+
 void turret_die ( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath )
 {
 	vec3_t	dir;
@@ -203,7 +206,7 @@ void turret_head_think (gentity_t *self)
 		VectorMA( self->r.currentOrigin, rOfs, right, muzzleSpot );
 
 
-		if ( atoi(self->team) == TEAM_RED )
+		if ( ATOI_SAFE(self->team) == TEAM_RED )
 		{
 			//G_Sound(self, G_SoundIndex("sound/enemies/turret/ffire.wav"));
 			fturret_fire( self, muzzleSpot, forward );
@@ -486,11 +489,11 @@ void turret_base_think (gentity_t *self)
 
 			if ( target->takedamage && target->health > 0 && !(target->flags & FL_NOTARGET) )
 			{
-				if ( !target->client && target->team && atoi(target->team) == atoi(self->team) )
+				if ( !target->client && target->team && ATOI_SAFE(target->team) == ATOI_SAFE(self->team) )
 				{//Something of ours we don't want to destroy
 					continue;
 				}
-				if ( target->client && target->client->sess.sessionTeam == atoi(self->team) )
+				if ( target->client && target->client->sess.sessionTeam == ATOI_SAFE(self->team) )
 				{//A bot we don't want to shoot
 					continue;
 				}
@@ -613,7 +616,7 @@ void SP_misc_turret (gentity_t *base)
 	VectorMA( base->s.origin, -8, fwd, base->s.origin );
 	G_SetOrigin(base, base->s.origin);
 	trap_LinkEntity(base);
-	if ( atoi( base->team ) == TEAM_RED )
+	if ( ATOI_SAFE( base->team ) == TEAM_RED )
 	{//red model
 		base->s.modelindex = G_ModelIndex("models/mapobjects/forge/turret.md3");
 		base->s.modelindex2 = G_ModelIndex("models/mapobjects/forge/turret_d1.md3");
@@ -643,7 +646,7 @@ void SP_misc_turret (gentity_t *base)
 
 	//Arm
 	//Does nothing, not solid, gets removed when head explodes
-	if ( atoi( base->team ) == TEAM_RED )
+	if ( ATOI_SAFE( base->team ) == TEAM_RED )
 	{
 		bolt_arm_to_base( base, arm, FARM_FOFS, FARM_ROFS, FARM_UOFS );
 		bolt_head_to_arm( arm, head, FTURR_FOFS, FTURR_ROFS, FTURR_UOFS );
@@ -656,7 +659,7 @@ void SP_misc_turret (gentity_t *base)
 		//VectorCopy( base->r.currentAngles, arm->s.apos.trBase );
 		bolt_head_to_arm( arm, head, TURR_FOFS, TURR_ROFS, TURR_UOFS );
 	}
-	if ( atoi( base->team ) == TEAM_RED )
+	if ( ATOI_SAFE( base->team ) == TEAM_RED )
 	{
 		arm->s.modelindex = G_ModelIndex("models/mapobjects/forge/turret_neck.md3");
 	}
@@ -669,7 +672,7 @@ void SP_misc_turret (gentity_t *base)
 	//Head
 	//Fires when enemy detected, animates, can be blown up
 	VectorCopy( base->r.currentAngles, head->s.apos.trBase );
-	if ( atoi( base->team ) == TEAM_RED )
+	if ( ATOI_SAFE( base->team ) == TEAM_RED )
 	{
 		head->s.modelindex = G_ModelIndex("models/mapobjects/forge/turret_head.md3");
 	}
@@ -743,7 +746,7 @@ void SP_misc_turret (gentity_t *base)
 	G_SoundIndex("sound/enemies/turret/move.wav");
 	G_SoundIndex("sound/enemies/turret/stop.wav");
 	G_SoundIndex("sound/enemies/turret/ping.wav");
-	if ( atoi( base->team ) == TEAM_RED )
+	if ( ATOI_SAFE( base->team ) == TEAM_RED )
 	{
 		G_SoundIndex("sound/enemies/turret/ffire.wav");
 	}
@@ -769,23 +772,16 @@ void SP_misc_turret (gentity_t *base)
 	head->r.ownerNum = arm->s.number;
 	arm->activator = head->activator = base;
 
-	//FIXME: register the weapons whose effects are being used
-	if ( base->team )
+	//register the weapons whose effects are being used
+	if ( ATOI_SAFE( base->team ) == TEAM_RED )
 	{
-		if ( atoi( base->team ) == TEAM_BLUE )
-		{
-			//temp gfx and sounds
-			RegisterItem( BG_FindItemForWeapon( WP_STASIS ) );	//precache the weapon
-		}
-		else
-		{
-			//temp gfx and sounds
-			RegisterItem( BG_FindItemForWeapon( WP_SCAVENGER_RIFLE ) );	//precache the weapon
-		}
+		//temp gfx and sounds
+		RegisterItem( BG_FindItemForWeapon( WP_SCAVENGER_RIFLE ) );	//precache the weapon
 	}
 	else
 	{
-		RegisterItem( BG_FindItemForWeapon( WP_SCAVENGER_RIFLE ) );	//precache the weapon
+		//temp gfx and sounds
+		RegisterItem( BG_FindItemForWeapon( WP_STASIS ) );	//precache the weapon
 	}
 }
 

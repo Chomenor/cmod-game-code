@@ -2332,6 +2332,22 @@ void WP_Assimilate( gentity_t *ent, qboolean alt_fire )
 		}
 	}
 }
+
+/*
+===============
+G_SetQuadFactor
+
+Called ahead of weapon firing functions to set global s_quadFactor value.
+===============
+*/
+static void G_SetQuadFactor( int clientNum ) {
+	if ( G_AssertConnectedClient( clientNum ) && level.clients[clientNum].ps.powerups[PW_QUAD] ) {
+		s_quadFactor = 3;
+	} else {
+		s_quadFactor = 1;
+	}
+}
+
 /*
 ===============
 FireWeapon
@@ -2353,11 +2369,7 @@ void FireWeapon( gentity_t *ent, qboolean alt_fire )
 		WP_DREADNOUGHT
 	};
 
-	if (ent->client->ps.powerups[PW_QUAD] ) {
-		s_quadFactor = 3;
-	} else {
-		s_quadFactor = 1;
-	}
+	G_SetQuadFactor( ent - g_entities );
 
 	// Unghost the player.
 	ent->client->ps.powerups[PW_GHOST] = 0;
@@ -2533,5 +2545,6 @@ void FireSeeker( gentity_t *owner, gentity_t *target, vec3_t origin)
 	VectorNormalize(dir);
 
 	// for now I'm just using the scavenger bullet.
+	G_SetQuadFactor( owner - g_entities );
 	FireScavengerBullet( owner, origin, dir );
 }

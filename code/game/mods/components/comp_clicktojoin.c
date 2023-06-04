@@ -39,7 +39,7 @@ static void MOD_PREFIX(RunPlayerMove)( MODFN_CTV, int clientNum ) {
 	if ( ModClickToJoin_Static_ActiveForClient( clientNum ) && EF_WARN_ASSERT( !recursive ) &&
 			!( client->pers.oldbuttons & BUTTON_ATTACK ) && ( client->pers.cmd.buttons & BUTTON_ATTACK ) ) {
 		recursive = qtrue;
-		SetTeam( &g_entities[clientNum], "auto" );
+		SetTeam( &g_entities[clientNum], "auto", qfalse );
 		recursive = qfalse;
 	}
 }

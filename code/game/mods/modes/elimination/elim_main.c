@@ -288,7 +288,7 @@ static qboolean MOD_PREFIX(CheckJoinAllowed)( MODFN_CTV, int clientNum, join_all
 	gclient_t *client = &level.clients[clientNum];
 	elimination_client_t *modclient = &MOD_STATE->clients[clientNum];
 
-	if ( ModElimination_Shared_MatchLocked() ) {
+	if ( type != CJA_FORCETEAM && ModElimination_Shared_MatchLocked() ) {
 		if ( type == CJA_SETTEAM ) {
 			if ( modclient->eliminated ) {
 				trap_SendServerCommand( clientNum, "cp \"You have been eliminated until next round\"" );

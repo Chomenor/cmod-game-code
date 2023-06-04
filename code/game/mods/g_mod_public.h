@@ -9,6 +9,7 @@ void G_ModsInit( void );
 typedef enum {
 	CJA_AUTOJOIN,
 	CJA_SETTEAM,
+	CJA_FORCETEAM,
 	CJA_SETCLASS,
 } join_allowed_type_t;
 

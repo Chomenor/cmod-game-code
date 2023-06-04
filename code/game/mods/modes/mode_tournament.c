@@ -47,7 +47,9 @@ static qboolean MOD_PREFIX(CheckJoinAllowed)( MODFN_CTV, int clientNum, join_all
 	}
 
 	else if ( level.numNonSpectatorClients >= 2 ) {
-		if ( type != CJA_AUTOJOIN ) {
+		if ( type == CJA_FORCETEAM ) {
+			G_Printf( "Match already in progress.\n" );
+		} else if ( type != CJA_AUTOJOIN ) {
 			trap_SendServerCommand( clientNum, "cp \"Match already in progress.\"" );
 		}
 		
@@ -185,7 +187,7 @@ static void ModTournament_CheckAddPlayers( void ) {
 	}
 
 	// set them to free-for-all team
-	SetTeam( &g_entities[ nextInLine - level.clients ], "f" );
+	SetTeam( &g_entities[ nextInLine - level.clients ], "f", qtrue );
 
 	// if player is being put in mid-match and warmup is disabled, make game is restarted
 	if ( level.time - level.startTime > 1000 && !g_doWarmup.integer ) {

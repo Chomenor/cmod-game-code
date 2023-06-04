@@ -186,7 +186,7 @@ static qboolean MOD_PREFIX(CheckJoinAllowed)( MODFN_CTV, int clientNum, join_all
 		return qfalse;
 	}
 
-	if ( ModAssimilation_MatchLocked() ) {
+	if ( type != CJA_FORCETEAM && ModAssimilation_MatchLocked() ) {
 		if ( type == CJA_SETTEAM ) {
 			if ( modclient->assimilated ) {
 				trap_SendServerCommand( clientNum, "cp \"You have been assimilated until next round\"" );

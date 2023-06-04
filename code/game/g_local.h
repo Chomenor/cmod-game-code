@@ -408,7 +408,7 @@ char *G_NewString( const char *string );
 void DeathmatchScoreboardMessage( gentity_t *ent );
 void BroadcastTeamChange( gclient_t *client, int oldTeam );
 void SetPlayerClassCvar(gentity_t *ent);
-qboolean SetTeam( gentity_t *ent, char *s );
+qboolean SetTeam( gentity_t *ent, char *s, qboolean force );
 void StopFollowing( gentity_t *ent );
 void Cmd_FollowCycle_f( gentity_t *ent, int dir );
 void ClientCommand( int clientNum );

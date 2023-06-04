@@ -519,7 +519,8 @@ If join was blocked, sends appropriate notification message to client.
 */
 qboolean ModFNDefault_CheckJoinAllowed( int clientNum, join_allowed_type_t type, team_t targetTeam ) {
 	// Check for g_maxGameClients limits
-	if ( g_maxGameClients.integer > 0 && level.numNonSpectatorClients >= g_maxGameClients.integer && type != CJA_SETCLASS ) {
+	if ( g_maxGameClients.integer > 0 && level.numNonSpectatorClients >= g_maxGameClients.integer &&
+			type != CJA_SETCLASS && type != CJA_FORCETEAM ) {
 		if ( type != CJA_AUTOJOIN ) {
 			trap_SendServerCommand( clientNum, "cp \"Too many players.\"" );
 		}
@@ -535,7 +536,7 @@ qboolean ModFNDefault_CheckJoinAllowed( int clientNum, join_allowed_type_t type,
 SetTeam
 =================
 */
-qboolean SetTeam( gentity_t *ent, char *s ) {
+qboolean SetTeam( gentity_t *ent, char *s, qboolean force ) {
 	gclient_t			*client = ent->client;
 	team_t				team = TEAM_FREE;
 	team_t				oldTeam = client->sess.sessionTeam;
@@ -571,7 +572,7 @@ qboolean SetTeam( gentity_t *ent, char *s ) {
 			team = PickTeam( clientNum );
 		}
 
-		if ( g_teamForceBalance.integer && !( ent->r.svFlags & SVF_BOT ) &&
+		if ( g_teamForceBalance.integer && !( ent->r.svFlags & SVF_BOT ) && !force &&
 				!modfn.AdjustGeneralConstant( GC_DISABLE_TEAM_FORCE_BALANCE, 0 ) ) {
 			int		counts[TEAM_NUM_TEAMS];
 
@@ -602,7 +603,7 @@ qboolean SetTeam( gentity_t *ent, char *s ) {
 	}
 
 	// decide if we will allow the change
-	if ( team != TEAM_SPECTATOR && !modfn.CheckJoinAllowed( clientNum, CJA_SETTEAM, team ) ) {
+	if ( team != TEAM_SPECTATOR && !modfn.CheckJoinAllowed( clientNum, force ? CJA_FORCETEAM : CJA_SETTEAM, team ) ) {
 		return qfalse;
 	}
 
@@ -663,7 +664,7 @@ void Cmd_Team_f( gentity_t *ent ) {
 
 	trap_Argv( 1, s, sizeof( s ) );
 
-	SetTeam( ent, s );
+	SetTeam( ent, s, qfalse );
 }
 
 /*
@@ -760,7 +761,7 @@ void Cmd_Follow_f( gentity_t *ent ) {
 
 	// first set them to spectator
 	if ( !modfn.SpectatorClient( ent - g_entities ) ) {
-		SetTeam( ent, "spectator" );
+		SetTeam( ent, "spectator", qfalse );
 	}
 
 	ent->client->sess.spectatorState = SPECTATOR_FOLLOW;
@@ -783,7 +784,7 @@ void Cmd_FollowCycle_f( gentity_t *ent, int dir ) {
 
 	// first set them to spectator
 	if ( !modfn.SpectatorClient( ent - g_entities ) ) {
-		SetTeam( ent, "spectator" );
+		SetTeam( ent, "spectator", qfalse );
 	}
 
 	if ( dir != 1 && dir != -1 ) {

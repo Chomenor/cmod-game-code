@@ -572,29 +572,32 @@ void SP_worldspawn( void ) {
 
 	trap_SetConfigstring( CS_MOTD, g_motd.string );		// message of the day
 
-	G_SpawnString( "gravity", "800", &s );
-	trap_Cvar_Set( "g_gravity", s );
+	// No need to set these on every map restart. It might override user modifications.
+	if ( !level.hasRestarted ) {
+		G_SpawnString( "gravity", "800", &s );
+		trap_Cvar_Set( "g_gravity", s );
 
-	//FIXME: in some cases, want to carry over from previous running of this map
-	G_SpawnString( "fraglimit", "0", &s );
-	if ( s && atoi(s) != 0 )
-	{
-		trap_Cvar_Set( "fraglimit", s );
-	}
-	G_SpawnString( "capturelimit", "0", &s );
-	if ( s && atoi(s) != 0 )
-	{
-		trap_Cvar_Set( "capturelimit", s );
-	}
-	G_SpawnString( "timelimit", "0", &s );
-	if ( s && atoi(s) != 0 )
-	{
-		trap_Cvar_Set( "timelimit", s );
-	}
-	G_SpawnString( "timelimitWinningTeam", "", &s );
-	if ( s )
-	{
-		trap_Cvar_Set( "timelimitWinningTeam", s );
+		//FIXME: in some cases, want to carry over from previous running of this map
+		G_SpawnString( "fraglimit", "0", &s );
+		if ( s && atoi(s) != 0 )
+		{
+			trap_Cvar_Set( "fraglimit", s );
+		}
+		G_SpawnString( "capturelimit", "0", &s );
+		if ( s && atoi(s) != 0 )
+		{
+			trap_Cvar_Set( "capturelimit", s );
+		}
+		G_SpawnString( "timelimit", "0", &s );
+		if ( s && atoi(s) != 0 )
+		{
+			trap_Cvar_Set( "timelimit", s );
+		}
+		G_SpawnString( "timelimitWinningTeam", "", &s );
+		if ( s )
+		{
+			trap_Cvar_Set( "timelimitWinningTeam", s );
+		}
 	}
 
 	g_entities[ENTITYNUM_WORLD].s.number = ENTITYNUM_WORLD;

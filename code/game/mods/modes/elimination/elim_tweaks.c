@@ -42,6 +42,9 @@
 // Disable suicides during warmup or intermission.
 #define FEATURE_RESTRICT_SUICIDE
 
+// Disable follow spectators cycling to players who have just been eliminated.
+#define FEATURE_NO_ELIMINATED_CYCLE
+
 typedef struct {
 	int _unused;
 #ifdef FEATURE_SCOREBOARD_TIME_INDICATOR
@@ -167,6 +170,21 @@ static int MOD_PREFIX(AdjustScoreboardAttributes)( MODFN_CTV, int clientNum, sco
 }
 
 /*
+================
+(ModFN) EnableCycleFollow
+================
+*/
+static qboolean MOD_PREFIX(EnableCycleFollow)( MODFN_CTV, int clientNum ) {
+#ifdef FEATURE_NO_ELIMINATED_CYCLE
+	if ( ModElimination_Static_IsPlayerEliminated( clientNum ) ) {
+		return qfalse;
+	}
+#endif
+
+	return MODFN_NEXT( EnableCycleFollow, ( MODFN_NC, clientNum ) );
+}
+
+/*
 =================
 (ModFN) CheckSuicideAllowed
 
@@ -280,6 +298,7 @@ void ModElimTweaks_Init( void ) {
 
 		MODFN_REGISTER( AdjustGeneralConstant, ++modePriorityLevel );
 		MODFN_REGISTER( AdjustScoreboardAttributes, ++modePriorityLevel );
+		MODFN_REGISTER( EnableCycleFollow, ++modePriorityLevel );
 		MODFN_REGISTER( CheckSuicideAllowed, ++modePriorityLevel );
 		MODFN_REGISTER( PostPlayerDie, ++modePriorityLevel );
 		MODFN_REGISTER( PrePlayerLeaveTeam, ++modePriorityLevel );

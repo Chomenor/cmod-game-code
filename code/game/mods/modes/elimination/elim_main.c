@@ -11,9 +11,17 @@
 #include "mods/modes/elimination/elim_local.h"
 
 typedef struct {
-	qboolean eliminated;
-	qboolean eliminatedSpect;	// eliminated and respawned as spectator
-	int score;		// player's true score, even if PERS_SCORE is modified
+	qboolean eliminated;		// eliminated (may still be in death animation)
+	qboolean eliminatedSpect;	// eliminated and respawned as spectator (death animation complete)
+
+	// In FFA mode:
+	// All non-eliminated players have the same score, which equals the total number of players
+	// eliminated since the round started (numEliminated). For eliminated players, score is the
+	// order they were eliminated: 0 = first player eliminated, 1 = second player eliminated, etc.
+	//
+	// In team mode:
+	// Score is the number of players eliminated by this player.
+	int score;
 } elimination_client_t;
 
 static struct {
@@ -477,6 +485,11 @@ void ModElimination_Init( void ) {
 	if ( EF_WARN_ASSERT( !MOD_STATE ) ) {
 		modcfg.mods_enabled.elimination = qtrue;
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
+
+		// Don't allow CTF gametype
+		if ( trap_Cvar_VariableIntegerValue( "g_gametype" ) == GT_CTF ) {
+			trap_Cvar_Set( "g_gametype", "0" );
+		}
 
 		G_RegisterTrackedCvar( &MOD_STATE->g_noJoinTimeout, "g_noJoinTimeout", "120", CVAR_ARCHIVE, qfalse );
 

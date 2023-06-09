@@ -208,7 +208,7 @@ Perform match scores sequence.
 ================
 */
 static void ModElimMultiRound_CheckFinalScores( void ) {
-	if ( MOD_STATE->finalScores_state == FS_PENDING_FIREBALL && level.time >= MOD_STATE->finalScores_endTime - 1500 ) {
+	if ( MOD_STATE->finalScores_state == FS_PENDING_FIREBALL && level.time >= MOD_STATE->finalScores_endTime - 1600 ) {
 		G_GlobalSound( G_SoundIndex( "sound/weapons/explosions/longfireball.wav" ) );
 		MOD_STATE->finalScores_state = FS_PENDING_TEAM_UPDATE;
 	}

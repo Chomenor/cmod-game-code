@@ -769,6 +769,17 @@ void Cmd_Follow_f( gentity_t *ent ) {
 }
 
 /*
+================
+(ModFN) EnableCycleFollow
+
+Returns true if follow spectators will cycle to this client by default.
+================
+*/
+qboolean ModFNDefault_EnableCycleFollow( int clientNum ) {
+	return qtrue;
+}
+
+/*
 =================
 Cmd_FollowCycle_f
 =================
@@ -812,6 +823,11 @@ void Cmd_FollowCycle_f( gentity_t *ent, int dir ) {
 
 		// can't follow another spectator, including myself
 		if ( modfn.SpectatorClient( clientnum ) ) {
+			continue;
+		}
+
+		// check if mods allow following this player
+		if ( !modfn.EnableCycleFollow( clientnum ) ) {
 			continue;
 		}
 

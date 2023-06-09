@@ -150,6 +150,10 @@ MOD_FUNCTION_DEF( CheckJoinAllowed, qboolean, ( PREFIX1 int clientNum, join_allo
 MOD_FUNCTION_DEF( CheckRespawnTime, qboolean, ( PREFIX1 int clientNum, qboolean voluntary ),
 		( PREFIX2 clientNum, voluntary ), return )
 
+// Returns true if follow spectators will cycle to this client by default.
+MOD_FUNCTION_DEF( EnableCycleFollow, qboolean, ( PREFIX1 int clientNum ),
+		( PREFIX2 clientNum ), return )
+
 //////////////////////////
 // client misc
 //////////////////////////

@@ -546,6 +546,8 @@ const char *CG_WeaponPredict_EventToString( int event ) {
 		return "EV_IMOD_HIT";
 	case EV_IMOD_ALTFIRE:
 		return "EV_IMOD_ALTFIRE";
+	case EV_IMOD_ALTFIRE_HIT:
+		return "EV_IMOD_ALTFIRE_HIT";
 	case EV_STASIS:
 		return "EV_STASIS";
 	case EV_GRENADE_SHRAPNEL_EXPLODE:

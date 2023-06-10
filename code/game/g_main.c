@@ -285,13 +285,6 @@ static void G_RegisterCvars( void ) {
 	#include "g_cvar_defs.h"
 	#undef CVAR_DEF
 
-	// check g_gametype range
-	if ( g_gametype.integer < 0 || g_gametype.integer >= GT_MAX_GAME_TYPE ) {
-		G_Printf( "g_gametype %i is out of range, defaulting to 0\n", g_gametype.integer );
-		trap_Cvar_Set( "g_gametype", "0" );
-		G_UpdateTrackedCvar( &g_gametype );
-	}
-
 	// configure g_needpass auto update
 	G_RegisterCvarCallback( &g_password, G_UpdateNeedPass, qtrue );
 }
@@ -332,6 +325,15 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	level.matchState = MS_INIT;
 	level.restartClientsPending = ( restart && G_RetrieveGlobalSessionValue( "numConnected" ) );
 	level.warmupRestarting = ( restart && G_RetrieveGlobalSessionValue( "warmupRestarting" ) );
+
+	// check g_gametype range
+	{
+		int gametype = trap_Cvar_VariableIntegerValue( "g_gametype" );
+		if ( gametype < 0 || gametype >= GT_MAX_GAME_TYPE ) {
+			G_Printf( "g_gametype %i is out of range, defaulting to 0\n", gametype );
+			trap_Cvar_Set( "g_gametype", "0" );
+		}
+	}
 
 	G_ModsInit();
 

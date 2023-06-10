@@ -773,7 +773,7 @@ gitem_t *BG_FindItemWithClassname(const char *name)
 	{
 		return NULL;
 	}
-	for (i = 0; i < bg_numItems; i++)
+	for (i = 1; i < bg_numItems; i++)
 	{
 		item = &bg_itemlist[i];
 		if (!strcmp(name, item->classname))

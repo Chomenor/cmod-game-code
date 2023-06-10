@@ -90,7 +90,7 @@ void ModModcfgCS_Init( void );
 void ModModelGroups_Init( void );
 void ModModelSelection_Init( void );
 void ModPendingItem_Init( void );
-void ModWarmupSequence_Init();
+void ModWarmupSequence_Init( void );
 
 //
 // Click-to-Join support (comp_clicktojoin.c)

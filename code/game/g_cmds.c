@@ -54,7 +54,7 @@ void DeathmatchScoreboardMessage( gentity_t *ent ) {
 					cl->sess.sessionTeam == TEAM_SPECTATOR ? 0 : cl->ps.persistant[PERS_KILLED]),
 			modfn.AdjustScoreboardAttributes(scoreClientNum, SA_ELIMINATED, 0) );
 		j = strlen(entry);
-		if (stringlength + j > 1024)
+		if (stringlength + j >= sizeof(entry))
 			break;
 		strcpy (string + stringlength, entry);
 		stringlength += j;

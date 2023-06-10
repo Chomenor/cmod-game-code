@@ -386,6 +386,7 @@ static void MOD_PREFIX(PreClientConnect)( MODFN_CTV, int clientNum, qboolean fir
 		// Determine borg team color.
 		ModAssimilation_DetermineBorgColor( !firstTime );
 	}
+	MODFN_NEXT( PreClientConnect, ( MODFN_NC, clientNum, firstTime, isBot ) );
 }
 
 /*

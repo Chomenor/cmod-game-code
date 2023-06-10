@@ -314,6 +314,13 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 	G_Printf ("gamename: %s\n", GAMEVERSION);
 	G_Printf ("gamedate: %s\n", __DATE__);
 
+	// set read only cvars
+	// can be changed afterwards by mods
+	trap_Cvar_Register( NULL, "gamename", GAMEVERSION, CVAR_SERVERINFO | CVAR_ROM );
+	trap_Cvar_Set( "gamename", GAMEVERSION );
+	trap_Cvar_Register( NULL, "gamedate", __DATE__, CVAR_ROM );
+	trap_Cvar_Set( "gamedate", __DATE__ );
+
 	init_tonextint(qtrue);
 	srand( randomSeed );
 

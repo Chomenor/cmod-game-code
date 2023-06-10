@@ -50,6 +50,16 @@ qboolean ModFNDefault_CanItemBeDropped( gitem_t *item, int clientNum ) {
 		return qfalse;
 	}
 
+	if ( item->giType == IT_HOLDABLE ) {
+		// no holdable drops in unmodded game
+		return qfalse;
+	}
+
+	if ( item->giType == IT_WEAPON && item->giTag == WP_PHASER ) {
+		// no phaser drops in unmodded game
+		return qfalse;
+	}
+
 	return qtrue;
 }
 
@@ -84,7 +94,7 @@ void TossClientItems( gentity_t *self ) {
 		}
 	}
 
-	if ( weapon > WP_PHASER && self->client->ps.ammo[ weapon ] ) {
+	if ( weapon >= WP_PHASER && self->client->ps.ammo[ weapon ] ) {
 		// find the item type for this weapon
 		item = BG_FindItemForWeapon( weapon );
 
@@ -108,6 +118,16 @@ void TossClientItems( gentity_t *self ) {
 			if ( drop->count < 1 ) {
 				drop->count = 1;
 			}
+			angle += 45;
+		}
+	}
+
+	// holdable drops are normally disabled in CanItemBeDropped, but can be enabled by mods
+	for ( i = 1 ; i < HI_NUM_HOLDABLE ; i++ ) {
+		item = BG_FindItemForHoldable( i );
+		if ( self->client->ps.stats[STAT_HOLDABLE_ITEM] == item - bg_itemlist &&
+				modfn.CanItemBeDropped( item, self - g_entities ) ) {
+			Drop_Item( self, item, angle );
 			angle += 45;
 		}
 	}
@@ -214,7 +234,94 @@ char	*modNames[MOD_MAX] = {
 	"MOD_EXPLOSION",
 };//must be kept up to date with bg_public, meansOfDeath_t
 
-extern void DetonateDetpack(gentity_t *ent);
+/*
+==================
+(ModFN) PlayerDeathDiscardDetpack
+
+Remove any placed detpack owned by a player who was just killed.
+==================
+*/
+void ModFNDefault_PlayerDeathDiscardDetpack( int clientNum ) {
+	gentity_t *self = &g_entities[clientNum];
+	gentity_t *detpack = NULL;
+	const char *classname = BG_FindClassnameForHoldable(HI_DETPACK);
+
+	if (classname)
+	{
+		while ((detpack = G_Find (detpack, FOFS(classname), classname)) != NULL)
+		{
+			if (detpack->parent == self)
+			{
+				detpack->think = DetonateDetpack;		// Detonate next think.
+				detpack->nextthink = level.time;
+			}
+		}
+	}
+}
+
+/*
+==================
+(ModFN) PlayerDeathEffect
+
+Play some weapon-specific effects when player is killed.
+==================
+*/
+void ModFNDefault_PlayerDeathEffect( gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
+		int contents, int killer, int meansOfDeath ) {
+	// check if we are in a NODROP Zone and died from a TRIGGER HURT
+	//  if so, we assume that this resulted from a fall to a "bottomless pit" and
+	//  treat it differently...
+	if ( ( contents & CONTENTS_NODROP ) && meansOfDeath == MOD_TRIGGER_HURT && killer == ENTITYNUM_WORLD ) {
+		self->takedamage = qfalse;
+		return;
+	}
+
+	switch(meansOfDeath)
+	{
+	case MOD_CRIFLE_ALT:
+		G_AddEvent( self, EV_DISINTEGRATION, killer );
+		self->client->ps.powerups[PW_DISINTEGRATE] = level.time + 100000;
+		VectorClear( self->client->ps.velocity );
+		self->takedamage = qfalse;
+		self->r.contents = 0;
+		break;
+	case MOD_QUANTUM_ALT:
+		G_AddEvent( self, EV_DISINTEGRATION2, killer );
+		self->client->ps.powerups[PW_EXPLODE] = level.time + 100000;
+		VectorClear( self->client->ps.velocity );
+		self->takedamage = qfalse;
+		self->r.contents = 0;
+		break;
+	case MOD_SCAVENGER_ALT:
+	case MOD_SCAVENGER_ALT_SPLASH:
+	case MOD_GRENADE:
+	case MOD_GRENADE_ALT:
+	case MOD_GRENADE_SPLASH:
+	case MOD_GRENADE_ALT_SPLASH:
+	case MOD_QUANTUM:
+	case MOD_QUANTUM_SPLASH:
+	case MOD_QUANTUM_ALT_SPLASH:
+	case MOD_DETPACK:
+		G_AddEvent( self, EV_EXPLODESHELL, killer );
+		self->client->ps.powerups[PW_EXPLODE] = level.time + 100000;
+		VectorClear( self->client->ps.velocity );
+		self->takedamage = qfalse;
+		self->r.contents = 0;
+		break;
+	case MOD_DREADNOUGHT:
+	case MOD_DREADNOUGHT_ALT:
+		G_AddEvent( self, EV_ARCWELD_DISINT, killer);
+		self->client->ps.powerups[PW_ARCWELD_DISINT] = level.time + 100000;
+		VectorClear( self->client->ps.velocity );
+		self->takedamage = qfalse;
+		self->r.contents = 0;
+		break;
+
+	default:
+		G_AddEvent( self, irandom(EV_DEATH1, EV_DEATH3), killer );
+		break;
+	}
+}
 
 /*
 ==================
@@ -227,8 +334,6 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	int			contents;
 	int			killer;
 	char		*killerName, *obit;
-	gentity_t	*detpack = NULL;
-	char		*classname = NULL;
 	static		int deathNum;
 	int			awardPoints = 0;	// Amount of points to give/take from attacker (or self if attacker is non-client).
 
@@ -250,18 +355,7 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	contents = trap_PointContents( self->r.currentOrigin, -1 );
 
 	// if already dropped a detpack, blow it up
-	classname = BG_FindClassnameForHoldable(HI_DETPACK);
-	if (classname)
-	{
-		while ((detpack = G_Find (detpack, FOFS(classname), classname)) != NULL)
-		{
-			if (detpack->parent == self)
-			{
-				detpack->think = DetonateDetpack;		// Detonate next think.
-				detpack->nextthink = level.time;
-			}
-		}
-	}
+	modfn.PlayerDeathDiscardDetpack( self - g_entities );
 
 	if ( attacker ) {
 		killer = attacker->s.number;
@@ -415,7 +509,8 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	Team_FragBonuses(self, inflictor, attacker);
 
 	// if client is in a nodrop area, don't drop anything (but return CTF flags!)
-	if ( !( contents & CONTENTS_NODROP ) && meansOfDeath != MOD_SUICIDE && meansOfDeath != MOD_RESPAWN )
+	if ( !( contents & CONTENTS_NODROP ) && meansOfDeath != MOD_RESPAWN &&
+			( meansOfDeath != MOD_SUICIDE || modfn.AdjustGeneralConstant( GC_TOSS_ITEMS_ON_SUICIDE, 0 ) ) )
 	{
 		TossClientItems( self );
 	}
@@ -489,68 +584,10 @@ void player_die( gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int
 	self->client->ps.torsoAnim =
 		( ( self->client->ps.torsoAnim & ANIM_TOGGLEBIT ) ^ ANIM_TOGGLEBIT ) | anim;
 
-	// check if we are in a NODROP Zone and died from a TRIGGER HURT
-	//  if so, we assume that this resulted from a fall to a "bottomless pit" and
-	//  treat it differently...
-	//
-	//  Any problems with other places in the code?
-	if ( ( contents & CONTENTS_NODROP ) && meansOfDeath == MOD_TRIGGER_HURT && killer == ENTITYNUM_WORLD )
-	{
-	}
-	else
-	{
-		// normal death
+	self->die = body_die;
 
-		switch(meansOfDeath)
-		{
-		case MOD_CRIFLE_ALT:
-			G_AddEvent( self, EV_DISINTEGRATION, killer );
-			self->client->ps.powerups[PW_DISINTEGRATE] = level.time + 100000;
-			VectorClear( self->client->ps.velocity );
-			self->takedamage = qfalse;
-			self->r.contents = 0;
-			break;
-		case MOD_QUANTUM_ALT:
-			G_AddEvent( self, EV_DISINTEGRATION2, killer );
-			self->client->ps.powerups[PW_EXPLODE] = level.time + 100000;
-			VectorClear( self->client->ps.velocity );
-			self->takedamage = qfalse;
-			self->r.contents = 0;
-			break;
-		case MOD_SCAVENGER_ALT:
-		case MOD_SCAVENGER_ALT_SPLASH:
-		case MOD_GRENADE:
-		case MOD_GRENADE_ALT:
-		case MOD_GRENADE_SPLASH:
-		case MOD_GRENADE_ALT_SPLASH:
-		case MOD_QUANTUM:
-		case MOD_QUANTUM_SPLASH:
-		case MOD_QUANTUM_ALT_SPLASH:
-		case MOD_DETPACK:
-			G_AddEvent( self, EV_EXPLODESHELL, killer );
-			self->client->ps.powerups[PW_EXPLODE] = level.time + 100000;
-			VectorClear( self->client->ps.velocity );
-			self->takedamage = qfalse;
-			self->r.contents = 0;
-			break;
-		case MOD_DREADNOUGHT:
-		case MOD_DREADNOUGHT_ALT:
-			G_AddEvent( self, EV_ARCWELD_DISINT, killer);
-			self->client->ps.powerups[PW_ARCWELD_DISINT] = level.time + 100000;
-			VectorClear( self->client->ps.velocity );
-			self->takedamage = qfalse;
-			self->r.contents = 0;
-			break;
+	modfn.PlayerDeathEffect( self, inflictor, attacker, contents, killer, meansOfDeath );
 
-		default:
-			G_AddEvent( self, irandom(EV_DEATH1, EV_DEATH3), killer );
-			break;
-		}
-
-		// the body can still be gibbed
-		self->die = body_die;
-
-	}
 	// globally cycle through the different death animations
 	deathNum = ( deathNum + 1 ) % 3;
 
@@ -642,6 +679,19 @@ float ModFNDefault_KnockbackMass( gentity_t *targ, gentity_t *inflictor, gentity
 
 /*
 ============
+(ModFN) GetDamageMult
+
+Returns effective g_dmgmult value.
+Called separately for both damage and knockback calculation, differentiated by knockbackMode parameter.
+============
+*/
+float ModFNDefault_GetDamageMult( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+		vec3_t dir, vec3_t point, int damage, int dflags, int mod, qboolean knockbackMode ) {
+	return g_dmgmult.value;
+}
+
+/*
+============
 G_Damage
 
 targ		entity that is being damaged
@@ -703,15 +753,23 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		return;
 	}
 
+	if ( dflags & DAMAGE_TRIGGERS_ONLY ) {
+		return;
+	}
+
 	adapted = modfn.CheckBorgAdapt( targ, inflictor, attacker, dir, point, damage, dflags, mod );
 
 	// multiply damage times dmgmult
-	damage *= g_dmgmult.value;
+	knockback = ( dflags & DAMAGE_NO_KNOCKBACK ) ? 0 :
+			tonextint( damage * modfn.GetDamageMult( targ, inflictor, attacker, dir, point, damage, dflags, mod, qtrue ) );
+	damage = tonextint( damage * modfn.GetDamageMult( targ, inflictor, attacker, dir, point, damage, dflags, mod, qfalse ) );
 
 	// reduce damage by the attacker's handicap value
 	// unless they are rocket jumping
 	if ( attacker->client && attacker != targ ) {
-		damage = damage * modfn.EffectiveHandicap( attacker - g_entities, EH_DAMAGE ) / 100;
+		int handicap = modfn.EffectiveHandicap( attacker->client - level.clients, EH_DAMAGE );
+		knockback = knockback * handicap / 100;
+		damage = damage * handicap / 100;
 	}
 
 	if ( client )
@@ -741,7 +799,6 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		VectorNormalize(dir);
 	}
 
-	knockback = damage;
 	if ( knockback > 200 ) {
 		knockback = 200;
 	}
@@ -905,7 +962,7 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 	}
 
 	// do the damage
-	if (take)
+	if (take && !( dflags & DAMAGE_NO_HEALTH_DAMAGE ))
 	{
 		// add to the attacker's hit counter
 		if ( (MOD_TELEFRAG != mod) && attacker->client && targ != attacker && targ->health > 0 )
@@ -918,6 +975,15 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 					&& strcmp(targ->classname, "holdable_detpack")) // or the detpack either
 			{
 				attacker->client->ps.persistant[PERS_HITS] += damage;
+			}
+
+			if ( targ->client && ( targ->client->ps.eFlags & EF_TALK ) && modfn.AdjustGeneralConstant( GC_CHAT_HIT_WARNING, 0 ) ) {
+				// Use alternative method to play chat warning, since cgame doesn't support normal team damage sound in ffa.
+				// NOTE: Possibly could be done with a playerstate event to avoid entity limit risks?
+				gentity_t *temp = G_TempEntity( vec3_origin, EV_GLOBAL_SOUND );
+				temp->s.eventParm = G_SoundIndex( "sound/feedback/hit_teammate.wav" );
+				temp->r.svFlags |= SVF_BROADCAST | SVF_SINGLECLIENT;
+				temp->r.singleClient = attacker - g_entities;
 			}
 		}
 

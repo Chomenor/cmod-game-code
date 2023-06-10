@@ -169,11 +169,10 @@ void G_MissileStick( gentity_t *ent, trace_t *trace )
 
 /*
 ================
-G_MissileImpact
-
+(ModFN) MissileImpact
 ================
 */
-void G_MissileImpact( gentity_t *ent, trace_t *trace ) {
+void ModFNDefault_MissileImpact( gentity_t *ent, trace_t *trace ) {
 	gentity_t		*other = NULL, *tent = NULL;
 	qboolean		hitClient = qfalse;
 
@@ -371,7 +370,7 @@ void G_RunMissile( gentity_t *ent ) {
 			return;
 		}
 
-		G_MissileImpact( ent, &tr );
+		modfn.MissileImpact( ent, &tr );
 		if ( (ent->s.eType != ET_MISSILE) && (ent->s.eType != ET_ALT_MISSILE) ) {
 			return;		// exploded
 		}

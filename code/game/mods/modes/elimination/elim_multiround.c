@@ -68,11 +68,24 @@ static struct {
 } *MOD_STATE;
 
 #define TOTAL_ROUNDS ( MOD_STATE->g_mod_noOfGamesPerMatch.integer >= 1 ? MOD_STATE->g_mod_noOfGamesPerMatch.integer : 1 )
-#define MULTI_ROUND_ENABLED ( MOD_STATE->g_mod_noOfGamesPerMatch.integer > 1 )
 
 // Save match state on end of warmup, timelimit reset, and round transition.
 // Don't save state on admin map/restart command or end of match.
 #define WRITE_SESSION ( level.exiting && ( level.matchState < MS_INTERMISSION_ACTIVE || MOD_STATE->pendingRound ) )
+
+/*
+================
+ModElimMultiRound_Static_GetMultiRoundEnabled
+
+Returns whether multiple rounds are enabled.
+================
+*/
+qboolean ModElimMultiRound_Static_GetMultiRoundEnabled( void ) {
+	if ( !MOD_STATE ) {
+		return qfalse;
+	}
+	return MOD_STATE->g_mod_noOfGamesPerMatch.integer > 1;
+}
 
 /*
 ================
@@ -101,6 +114,36 @@ int ModElimMultiRound_Static_GetCurrentRound( void ) {
 	}
 	return MOD_STATE->currentRound <= ModElimMultiRound_Static_GetTotalRounds() ?
 			MOD_STATE->currentRound : ModElimMultiRound_Static_GetTotalRounds();
+}
+
+/*
+================
+ModElimMultiRound_Static_GetIsTiebreakerRound
+
+Returns whether the current round is a tiebreaker round.
+================
+*/
+qboolean ModElimMultiRound_Static_GetIsTiebreakerRound( void ) {
+	if ( !MOD_STATE ) {
+		return qfalse;
+	}
+	return MOD_STATE->tiebreaker;
+}
+
+/*
+================
+ModElimMultiRound_Static_GetIsFinalScores
+
+Returns whether final scores sequence has started.
+================
+*/
+qboolean ModElimMultiRound_Static_GetIsFinalScores( void ) {
+#ifdef FEATURE_FINAL_SCORES
+	if ( MOD_STATE && MOD_STATE->finalScores_state > FS_INACTIVE ) {
+		return qtrue;
+	}
+#endif
+	return qfalse;
 }
 
 #ifdef FEATURE_WARMUP_MESSAGE_SEQUENCE
@@ -143,7 +186,7 @@ Returns message sequence to use during warmup.
 ================
 */
 static qboolean MOD_PREFIX(GetWarmupSequence)( MODFN_CTV, modWarmupSequence_t *sequence ) {
-	if ( !g_doWarmup.integer || !MULTI_ROUND_ENABLED ) {
+	if ( !g_doWarmup.integer || !ModElimMultiRound_Static_GetMultiRoundEnabled() ) {
 		return qfalse;
 	}
 
@@ -235,6 +278,11 @@ static void ModElimMultiRound_CheckFinalScores( void ) {
 		SpawnModelsOnVictoryPads();
 		ModElimMultiRound_FinalScoresDetpackBlast();
 		ModIntermissionReady_Shared_Resume();
+
+		// If UAM music is enabled, it will be reset by awards command, so pick a new random song.
+		// Note: If this picks the same random song as the previous, it doesn't take effect and the default
+		// winner/loser music will play instead. This seems to be consistent with original Gladiator mod.
+		UAMMusic_Static_PlayIntermissionMusic();
 	}
 }
 
@@ -288,7 +336,7 @@ static int MOD_PREFIX(EffectiveScore)( MODFN_CTV, int clientNum, effectiveScoreT
 
 #ifdef FEATURE_SCOREBOARD_ROUND_WINS
 	// Show round wins in place of current game score in scoreboard.
-	if ( type == EST_SCOREBOARD && g_gametype.integer < GT_TEAM && MULTI_ROUND_ENABLED ) {
+	if ( type == EST_SCOREBOARD && g_gametype.integer < GT_TEAM && ModElimMultiRound_Static_GetMultiRoundEnabled() ) {
 		return modclient->roundWins;
 	}
 #endif
@@ -649,7 +697,7 @@ static void MOD_PREFIX(MatchStateTransition)( MODFN_CTV, matchState_t oldState, 
 
 	if ( newState == MS_INTERMISSION_ACTIVE ) {
 		// Decide at this point if we want to start the final score sequence, or go into another round.
-		if ( MULTI_ROUND_ENABLED ) {
+		if ( ModElimMultiRound_Static_GetMultiRoundEnabled() ) {
 			roundScoresState_t state = ModElimMultiRound_GetRoundScoresState();
 
 			if ( state == RSS_INCOMPLETE ) {

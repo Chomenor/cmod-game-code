@@ -58,9 +58,15 @@ static void ModPCClientPredict_AddInfo( char *info ) {
 	char buffer[256];
 	Q_strncpyz( buffer, "ver:" BG_WEAPON_PREDICT_VERSION, sizeof( buffer ) );
 
+	ModPCClientPredict_AddWeaponConstant( buffer, sizeof( buffer ), WC_USE_IMOD_RIFLE, 0, "imodRifle" );
+
 	if ( ModPingcomp_Static_ProjectileCompensationEnabled() ) {
 		Q_strcat( buffer, sizeof( buffer ), " proj:1" );
 		ModPCClientPredict_AddWeaponConstant( buffer, sizeof( buffer ), WC_USE_TRIPMINES, 0, "tm" );
+		ModPCClientPredict_AddWeaponConstant( buffer, sizeof( buffer ), WC_SCAV_VELOCITY, 1500, "ps4p" );
+		ModPCClientPredict_AddWeaponConstant( buffer, sizeof( buffer ), WC_STASIS_VELOCITY, 1100, "ps5p" );
+		ModPCClientPredict_AddWeaponConstant( buffer, sizeof( buffer ), WC_DN_SEARCH_DIST, 256, "ps9a" );
+		ModPCClientPredict_AddWeaponConstant( buffer, sizeof( buffer ), WC_BORG_PROJ_VELOCITY, 1000, "psbp" );
 	}
 
 	Info_SetValueForKey( info, "weaponPredict", buffer );

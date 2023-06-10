@@ -313,7 +313,7 @@ static void PodiumPlacementThink( gentity_t *podium ) {
 SpawnPodium
 ==================
 */
-static gentity_t *SpawnPodium( void ) {
+static gentity_t *SpawnPodium( qboolean teamPodium ) {
 	gentity_t	*podium = G_Spawn();
 	vec3_t		vec;
 
@@ -322,7 +322,7 @@ static gentity_t *SpawnPodium( void ) {
 	podium->s.number = podium - g_entities;
 	podium->clipmask = CONTENTS_SOLID;
 	podium->r.contents = CONTENTS_SOLID;
-	if (g_gametype.integer >= GT_TEAM)
+	if ( teamPodium )
 		podium->s.modelindex = G_ModelIndex( TEAM_PODIUM_MODEL );
 	else
 		podium->s.modelindex = G_ModelIndex( SP_PODIUM_MODEL );
@@ -346,6 +346,8 @@ SpawnModelsOnVictoryPads
 void SpawnModelsOnVictoryPads( void ) {
 	int i;
 	static gentity_t *podium = NULL;
+	static qboolean currentTeamPodium;
+	qboolean useTeamPodium = g_gametype.integer >= GT_TEAM || modfn.AdjustGeneralConstant( GC_FORCE_TEAM_PODIUM, 0 );
 
 	for ( i = 0; i < 3; ++i ) {
 		if ( podiumModels[i] ) {
@@ -354,8 +356,13 @@ void SpawnModelsOnVictoryPads( void ) {
 		}
 	}
 
-	if ( !podium ) {
-		podium = SpawnPodium();
+	// If we don't already have a podium, or have the wrong type, spawn it now.
+	if ( !podium || useTeamPodium != currentTeamPodium ) {
+		if ( podium ) {
+			G_FreeEntity( podium );
+		}
+		podium = SpawnPodium( useTeamPodium );
+		currentTeamPodium = useTeamPodium;
 	}
 
 	// SPAWN PLAYER ON TOP MOST PODIUM
@@ -378,7 +385,7 @@ void SpawnModelsOnVictoryPads( void ) {
 
 	// For non team game types, we want to spawn 3 characters on the victory pad
 	// For team games (GT_TEAM, GT_CTF) we want to have only a single player on the pad
-	if ( g_gametype.integer < GT_TEAM )
+	if ( !useTeamPodium )
 	{
 		if ( level.numPlayingClients >= 2 ) {
 			podiumModels[1] = SpawnModelOnVictoryPad( podium, podiumModelOffsets[1], &g_entities[level.sortedClients[1]] );

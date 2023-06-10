@@ -75,19 +75,6 @@ static int MOD_PREFIX(ModifyAmmoUsage)( MODFN_CTV, int defaultValue, int weapon,
 }
 
 /*
-================
-(ModFN) PmoveInit
-
-Enable alt attack mode.
-================
-*/
-static void MOD_PREFIX(PmoveInit)( MODFN_CTV, int clientNum, pmove_t *pmove ) {
-	MODFN_NEXT( PmoveInit, ( MODFN_NC, clientNum, pmove ) );
-
-	pmove->pModDisintegration = qtrue;
-}
-
-/*
 ============
 (ModFN) CanItemBeDropped
 
@@ -154,6 +141,20 @@ static qboolean MOD_PREFIX(CheckItemSpawnDisabled)( MODFN_CTV, gitem_t *item ) {
 
 /*
 ================
+(ModFN) AltFireConfig
+
+Set rifle to alt fire only.
+================
+*/
+static char MOD_PREFIX(AltFireConfig)( MODFN_CTV, weapon_t weapon ) {
+	if ( weapon == WP_COMPRESSION_RIFLE ) {
+		return 'F';
+	}
+	return MODFN_NEXT( AltFireConfig, ( MODFN_NC, weapon ) );
+}
+
+/*
+================
 ModDisintegration_Init
 ================
 */
@@ -162,13 +163,15 @@ void ModDisintegration_Init( void ) {
 		modcfg.mods_enabled.disintegration = qtrue;
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
+		ModAltFireConfig_Init();
+
 		MODFN_REGISTER( SpawnConfigureClient, ++modePriorityLevel );
 		MODFN_REGISTER( AdjustWeaponConstant, ++modePriorityLevel );
 		MODFN_REGISTER( AdjustGeneralConstant, ++modePriorityLevel );
 		MODFN_REGISTER( ModifyAmmoUsage, ++modePriorityLevel );
-		MODFN_REGISTER( PmoveInit, ++modePriorityLevel );
 		MODFN_REGISTER( CanItemBeDropped, ++modePriorityLevel );
 		MODFN_REGISTER( ModifyDamageFlags, ++modePriorityLevel );
 		MODFN_REGISTER( CheckItemSpawnDisabled, ++modePriorityLevel );
+		MODFN_REGISTER( AltFireConfig, ++modePriorityLevel );
 	}
 }

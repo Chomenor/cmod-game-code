@@ -20,6 +20,17 @@ static struct {
 
 /*
 ================
+ModWarmupSequence_Static_ServerCommand
+
+Helper function which can be used for simple server command events.
+================
+*/
+void ModWarmupSequence_Static_ServerCommand( const char *msg ) {
+	trap_SendServerCommand( -1, msg );
+}
+
+/*
+================
 ModWarmupSequence_Static_AddEventToSequence
 
 Adds event to warmup sequence.

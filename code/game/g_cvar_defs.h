@@ -6,10 +6,6 @@ CVAR_DEF( vmcvar, name, default, flags, announce )
 // don't override the cheat state set by the system
 CVAR_DEF( g_cheats, "sv_cheats", "", 0, qfalse )
 
-// noset vars
-CVAR_DEF( gamename, "gamename", GAMEVERSION , CVAR_SERVERINFO | CVAR_ROM, qfalse )
-CVAR_DEF( gamedate, "gamedate", __DATE__ , CVAR_ROM, qfalse )
-
 // latched vars
 CVAR_DEF( g_gametype, "g_gametype", "0", CVAR_SERVERINFO | CVAR_LATCH, qfalse )
 CVAR_DEF( g_maxclients, "sv_maxclients", "8", CVAR_SERVERINFO | CVAR_LATCH | CVAR_ARCHIVE, qfalse )

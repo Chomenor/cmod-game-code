@@ -15,11 +15,27 @@
 #include "mods/g_mod_local.h"
 
 static struct {
+	// -1 = mod default
+	// 0 = bot_minplayers specifies total number of bots on all teams (Gladiator behavior)
+	// 1 = bot_minplayers specifies number of bots on each team (original EF behavior)
+	trackedCvar_t g_bot_perTeamCount;
+
+	// -1 = mod default
+	// 0 = spectators cause bots to be removed in FFA
+	// 1 = spectators do not cause bots to be removed in FFA
+	trackedCvar_t g_bot_ignoreSpectators;
+
 	trackedCvar_t g_bot_doubleRemove;
 	trackedCvar_t g_bot_fastAdding;
 
 	int checkTime;
 } *MOD_STATE;
+
+#define PER_TEAM_BOT_COUNT ( MOD_STATE->g_bot_perTeamCount.integer >= 0 ? \
+		MOD_STATE->g_bot_perTeamCount.integer : modfn_lcl.AdjustModConstant( MC_BOTADD_PER_TEAM_COUNT, 1 ) )
+#define PER_TEAM_BOT_ADJUST modfn_lcl.AdjustModConstant( MC_BOTADD_PER_TEAM_ADJUST, 0 )
+#define IGNORE_SPECTATORS ( MOD_STATE->g_bot_ignoreSpectators.integer >= 0 ? \
+		MOD_STATE->g_bot_ignoreSpectators.integer : modfn_lcl.AdjustModConstant( MC_BOTADD_IGNORE_SPECTATORS, 1 ) )
 
 typedef struct {
 	qboolean enabled;
@@ -126,7 +142,11 @@ static TeamMinPlayers_t ModBotAdding_ReadTeamMinplayers( void ) {
 		// A single value was set, determine whether it applies to total bots or each team.
 		if ( bot_minplayers.integer > 0 ) {
 			result.enabled = qtrue;
-			result.red = result.blue = bot_minplayers.integer;
+			if ( PER_TEAM_BOT_COUNT ) {
+				result.red = result.blue = bot_minplayers.integer;
+			} else {
+				result.red = result.blue = bot_minplayers.integer / 2;
+			}
 		}
 	}
 	return result;
@@ -159,7 +179,7 @@ static int ModBotAdding_TargetBotsForTeam( team_t team ) {
 	int humans;
 	int minPlayers;
 
-	if ( g_gametype.integer == GT_TOURNAMENT ) {
+	if ( g_gametype.integer == GT_TOURNAMENT || ( g_gametype.integer == GT_FFA && !IGNORE_SPECTATORS ) ) {
 		humans = G_CountHumanPlayers( -1 );
 	} else {
 		humans = G_CountHumanPlayers( team );
@@ -218,7 +238,20 @@ static qboolean ModBotAdding_CheckBots( void ) {
 		// check for removing excess pending bots
 		if ( pendingBots > 0 && pendingBots > totalNeeded ) {
 			if ( G_RemoveRandomBot( TEAM_SPECTATOR ) ) {
+				if ( PER_TEAM_BOT_ADJUST ) {
+					return qtrue;
+				}
 				--pendingBots;
+			}
+		}
+
+		// only change bots for one team per cycle if specified by mod
+		if ( PER_TEAM_BOT_ADJUST ) {
+			// adjust team with most needed change first
+			if ( abs( blueNeeded ) > abs( redNeeded ) || ( abs( blueNeeded ) == abs( redNeeded ) && rand() % 2 ) ) {
+				redNeeded = 0;
+			} else {
+				blueNeeded = 0;
 			}
 		}
 
@@ -318,6 +351,8 @@ void ModBotAdding_Init( void ) {
 
 		MOD_STATE->checkTime = 10000;
 
+		G_RegisterTrackedCvar( &MOD_STATE->g_bot_perTeamCount, "g_bot_perTeamCount", "-1", 0, qfalse );
+		G_RegisterTrackedCvar( &MOD_STATE->g_bot_ignoreSpectators, "g_bot_ignoreSpectators", "-1", 0, qfalse );
 		G_RegisterTrackedCvar( &MOD_STATE->g_bot_doubleRemove, "g_bot_doubleRemove", "0", 0, qfalse );
 		G_RegisterTrackedCvar( &MOD_STATE->g_bot_fastAdding, "g_bot_fastAdding", "0", 0, qfalse );
 

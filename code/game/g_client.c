@@ -1013,22 +1013,6 @@ void ClientBegin( int clientNum ) {
 		SendScoreboardMessageToAllClients();
 	}
 
-	// Use intro holodeck door if desired and we did not come from a restart
-	if ( g_holoIntro.integer && !(ent->r.svFlags & SVF_BOT) && (spawnType == CST_FIRSTTIME || spawnType == CST_MAPCHANGE) )
-	{
-		// kef -- also, don't do this if we're in intermission
-		if (!level.intermissiontime)
-		{
-			client->ps.introTime = level.time + TIME_INTRO;
-			client->ps.pm_type = PM_FREEZE;
-
-			if (g_ghostRespawn.integer)
-			{
-				ent->client->ps.powerups[PW_GHOST] = level.time + (g_ghostRespawn.integer * 1000) + TIME_INTRO;
-			}
-		}
-	}
-
 	// kef -- should reset all of our awards-related stuff
 	G_ClearClientLog(clientNum);
 }
@@ -1143,6 +1127,28 @@ void ModFNDefault_SpawnTransporterEffect( int clientNum, clientSpawnType_t spawn
 
 /*
 ===========
+(ModFN) SetClientGhosting
+
+Activate or deactivate spawn invulnerability on client.
+============
+*/
+void ModFNDefault_SetClientGhosting( int clientNum, qboolean active ) {
+	gclient_t *client = &level.clients[clientNum];
+
+	if ( active ) {
+		int ghostLength = g_ghostRespawn.value * 1000;
+		if ( ghostLength > 0 ) {
+			// If holodeck door intro is playing, start countdown after it completes.
+			int startTime = client->ps.introTime > level.time ? client->ps.introTime : level.time;
+			client->ps.powerups[PW_GHOST] = startTime + ghostLength;
+		}
+	} else {
+		client->ps.powerups[PW_GHOST] = 0;
+	}
+}
+
+/*
+============
 ClientSpawn
 
 Called every time a client is placed fresh in the world:
@@ -1267,12 +1273,6 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
 	client->ps.pm_time = 100;
 
-	// If ghosting is engaged, allow the player to be invulnerable briefly.
-	if (g_ghostRespawn.integer)
-	{
-		ent->client->ps.powerups[PW_GHOST] = level.time + (g_ghostRespawn.integer * 1000);
-	}
-
 	client->inactivityTime = level.time + g_inactivity.integer * 1000;
 
 	// set default animations
@@ -1314,6 +1314,16 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 
 	// print spawn messages
 	modfn.SpawnCenterPrintMessage( clientNum, spawnType );
+
+	// play holodeck intro on initial connect and map change, but not on map restarts
+	if ( g_holoIntro.integer && ( spawnType == CST_FIRSTTIME || spawnType == CST_MAPCHANGE ) &&
+			!( ent->r.svFlags & SVF_BOT ) && !level.intermissiontime ) {
+		client->ps.introTime = level.time + TIME_INTRO;
+		client->ps.pm_type = PM_FREEZE;
+	}
+
+	// if ghosting is engaged, allow the player to be invulnerable briefly
+	modfn.SetClientGhosting( clientNum, qtrue );
 
 	// play transporter effect, but not for spectators or holodeck intro viewers
 	if ( !( modfn.SpectatorClient( clientNum ) ) && !( client->ps.introTime > level.time ) ) {

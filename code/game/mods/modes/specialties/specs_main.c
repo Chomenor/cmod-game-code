@@ -514,6 +514,10 @@ Enable tripmines for the demolitionist's grenade launcher.
 static int MOD_PREFIX(AdjustWeaponConstant)( MODFN_CTV, weaponConstant_t wcType, int defaultValue ) {
 	if ( wcType == WC_USE_TRIPMINES )
 		return 1;
+	if ( wcType == WC_GRENADE_SPLASH_RAD )
+		return 320;
+	if ( wcType == WC_GRENADE_SPLASH_DAM )
+		return 150;
 
 	return MODFN_NEXT( AdjustWeaponConstant, ( MODFN_NC, wcType, defaultValue ) );
 }

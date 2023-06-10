@@ -1062,6 +1062,11 @@ typedef struct {
 	qhandle_t	corner_ll_8_30;
 } cgMedia_t;
 
+typedef struct {
+	int primary[WP_NUM_WEAPONS];
+	int alt[WP_NUM_WEAPONS];
+} weaponValues_t;
+
 // These values are loaded from server mod configstrings.
 typedef struct {
 	// player movement
@@ -1077,6 +1082,9 @@ typedef struct {
 	// alt fire button swapping
 	char altSwapPrefs[WP_NUM_WEAPONS];
 	qboolean altSwapSupport;	// whether server support for "setAltSwap" command is available
+
+	// weapon prediction characteristics
+	weaponValues_t fireRates;
 } modConfig_t;
 
 // The client game static (cgs) structure hold everything

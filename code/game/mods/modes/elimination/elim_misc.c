@@ -97,7 +97,7 @@ void ModElimMisc_Init( void ) {
 		MODFN_REGISTER( SetScoresConfigStrings, ++modePriorityLevel );
 		MODFN_REGISTER( PostRunFrame, ++modePriorityLevel );
 
-		if ( G_ModUtils_GetLatchedValue( "g_mod_elimTweaks", "0", 0 ) ) {
+		if ( modcfg.mods_enabled.uam || G_ModUtils_GetLatchedValue( "g_mod_elimTweaks", "0", 0 ) ) {
 			ModElimTweaks_Init();
 		} else {
 			G_DedPrintf( "NOTE: Recommend setting 'g_mod_elimTweaks' to 1 to enable various "

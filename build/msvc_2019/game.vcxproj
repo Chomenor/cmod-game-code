@@ -213,6 +213,7 @@
     <ClInclude Include="..\..\code\game\mods\modes\assimilation\assim_local.h" />
     <ClInclude Include="..\..\code\game\mods\modes\elimination\elim_local.h" />
     <ClInclude Include="..\..\code\game\mods\modes\specialties\specs_local.h" />
+    <ClInclude Include="..\..\code\game\mods\modes\uam\uam_local.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\code\common\bg_misc.c" />
@@ -254,17 +255,26 @@
     <ClCompile Include="..\..\code\game\g_usable.c" />
     <ClCompile Include="..\..\code\game\g_utils.c" />
     <ClCompile Include="..\..\code\game\g_weapon.c" />
+    <ClCompile Include="..\..\code\game\mods\components\comp_alt_fire_config.c" />
     <ClCompile Include="..\..\code\game\mods\components\comp_clicktojoin.c" />
+    <ClCompile Include="..\..\code\game\mods\components\comp_detpack.c" />
+    <ClCompile Include="..\..\code\game\mods\components\comp_firerate_cs.c" />
+    <ClCompile Include="..\..\code\game\mods\components\comp_forcefield.c" />
+    <ClCompile Include="..\..\code\game\mods\components\comp_ghost_sparkle.c" />
     <ClCompile Include="..\..\code\game\mods\components\comp_holdable_transporter.c" />
     <ClCompile Include="..\..\code\game\mods\components\comp_intermission_ready.c" />
     <ClCompile Include="..\..\code\game\mods\components\comp_modcfg_cs.c" />
     <ClCompile Include="..\..\code\game\mods\components\comp_model_groups.c" />
     <ClCompile Include="..\..\code\game\mods\components\comp_model_selection.c" />
     <ClCompile Include="..\..\code\game\mods\components\comp_pending_item.c" />
+    <ClCompile Include="..\..\code\game\mods\components\comp_quad_effects.c" />
+    <ClCompile Include="..\..\code\game\mods\components\comp_seeker.c" />
+    <ClCompile Include="..\..\code\game\mods\components\comp_timelimit_countdown.c" />
     <ClCompile Include="..\..\code\game\mods\components\comp_warmup_sequence.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_altswap_handler.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_bot_adding.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_debug_modfn.c" />
+    <ClCompile Include="..\..\code\game\mods\features\feat_gladiator_item_enable.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_misc.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_player_move.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_spawn_protect.c" />
@@ -298,6 +308,21 @@
     <ClCompile Include="..\..\code\game\mods\modes\mode_disintegration.c" />
     <ClCompile Include="..\..\code\game\mods\modes\mode_tournament.c" />
     <ClCompile Include="..\..\code\game\mods\modes\specialties\specs_main.c" />
+    <ClCompile Include="..\..\code\game\mods\modes\uam\uam_ammo.c" />
+    <ClCompile Include="..\..\code\game\mods\modes\uam\uam_death_effects.c" />
+    <ClCompile Include="..\..\code\game\mods\modes\uam\uam_end_sound.c" />
+    <ClCompile Include="..\..\code\game\mods\modes\uam\uam_greeting.c" />
+    <ClCompile Include="..\..\code\game\mods\modes\uam\uam_instagib.c" />
+    <ClCompile Include="..\..\code\game\mods\modes\uam\uam_instagib_savewep.c" />
+    <ClCompile Include="..\..\code\game\mods\modes\uam\uam_main.c" />
+    <ClCompile Include="..\..\code\game\mods\modes\uam\uam_music.c" />
+    <ClCompile Include="..\..\code\game\mods\modes\uam\uam_powerups.c" />
+    <ClCompile Include="..\..\code\game\mods\modes\uam\uam_warmup_mode.c" />
+    <ClCompile Include="..\..\code\game\mods\modes\uam\uam_warmup_sequence.c" />
+    <ClCompile Include="..\..\code\game\mods\modes\uam\uam_weapon_effects.c" />
+    <ClCompile Include="..\..\code\game\mods\modes\uam\uam_weapon_spawn.c" />
+    <ClCompile Include="..\..\code\game\mods\modes\uam\uam_weapons.c" />
+    <ClCompile Include="..\..\code\game\mods\modes\uam\uam_winner_taunt.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

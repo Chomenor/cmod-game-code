@@ -128,6 +128,73 @@ void CG_ParseServerinfo( void ) {
 
 /*
 ==================
+CG_ParseWeaponValue
+==================
+*/
+static void CG_ParseWeaponValue( const char *src, weaponValues_t *output ) {
+	int weapon = WP_NONE;
+	qboolean alt = qfalse;
+
+	if ( src[0] >= '1' && src[0] <= '9' ) {
+		weapon = WP_PHASER + ( src[0] - '1' );
+	} else if ( src[0] == 'h' || src[0] == 'H' ) {
+		weapon = WP_VOYAGER_HYPO;
+	} else if ( src[0] == 'a' || src[0] == 'A' ) {
+		weapon = WP_BORG_ASSIMILATOR;
+	} else if ( src[0] == 'b' || src[0] == 'B' ) {
+		weapon = WP_BORG_WEAPON;
+	} else {
+		return;
+	}
+
+	if ( src[1] == 'p' || src[1] == 'P' ) {
+		alt = qfalse;
+	} else if ( src[1] == 'a' || src[1] == 'A' ) {
+		alt = qtrue;
+	} else {
+		return;
+	}
+
+	if ( src[2] != ':' ) {
+		return;
+	}
+
+	if ( alt ) {
+		output->alt[weapon] = atoi( &src[3] );
+	} else {
+		output->primary[weapon] = atoi( &src[3] );
+	}
+}
+
+/*
+==================
+CG_ParseWeaponValues
+
+Parse string of weapon values such as fire rates or ammo usage.
+Format example: "1p:50 2a:100" represents a value of 50 for phaser primary, 100 for rifle alt, and 0 for others.
+==================
+*/
+static void CG_ParseWeaponValues( const char *src, weaponValues_t *output ) {
+	char srcBuffer[256];
+	char *current = srcBuffer;
+	Q_strncpyz( srcBuffer, src, sizeof( srcBuffer ) );
+
+	memset( output, 0, sizeof( *output ) );
+
+	while ( current ) {
+		char *next = strchr( current, ' ' );
+		if ( next ) {
+			*next = '\0';
+			++next;
+		}
+
+		CG_ParseWeaponValue( current, output );
+		current = next;
+	}
+}
+
+/*
+==================
 CG_ParseModConfig
 
 The mod config format provides a standard method for servers to send mod configuration
@@ -181,6 +248,8 @@ void CG_ParseModConfig( void ) {
 					cgs.modConfig.altSwapSupport = atoi( value ) ? qtrue : qfalse;
 				if ( !Q_stricmp( key, "altSwapPrefs" ) )
 					Q_strncpyz( cgs.modConfig.altSwapPrefs, value, sizeof( cgs.modConfig.altSwapPrefs ) );
+				if ( !Q_stricmp( key, "fireRate" ) )
+					CG_ParseWeaponValues( value, &cgs.modConfig.fireRates );
 				if ( !Q_stricmp( key, "weaponPredict" ) )
 					CG_WeaponPredict_LoadConfig( value );
 			}

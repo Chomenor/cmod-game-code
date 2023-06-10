@@ -5,7 +5,7 @@
 * to reduce clutter in the rest of the game code.
 */
 
-#include "g_local.h"
+#include "mods/g_mod_local.h"
 
 void ModFNDefault_GeneralInit( void ) {
 }
@@ -47,9 +47,16 @@ int ModFNDefault_AdjustWeaponConstant( weaponConstant_t wcType, int defaultValue
 void ModFNDefault_PostFireProjectile( gentity_t *projectile ) {
 }
 
+void ModFNDefault_AddWeaponEffect( weaponEffect_t weType, gentity_t *ent, trace_t *trace ) {
+}
+
 int ModFNDefault_ModifyDamageFlags( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		vec3_t dir, vec3_t point, int damage, int dflags, int mod ) {
 	return dflags;
+}
+
+int ModFNDefault_ModifyFireRate( int defaultInterval, int weapon, qboolean alt ) {
+	return defaultInterval;
 }
 
 int ModFNDefault_ModifyAmmoUsage( int defaultValue, int weapon, qboolean alt ) {
@@ -79,6 +86,10 @@ void ModFNDefault_TrapTrace( trace_t *results, const vec3_t start, const vec3_t 
 
 qboolean ModFNDefault_IsBorgQueen( int clientNum ) {
 	return qfalse;
+}
+
+int ModFNDefault_AdjustModConstant( modConstant_t mcType, int defaultValue ) {
+	return defaultValue;
 }
 
 void ModFNDefault_PostModInit( void ) {

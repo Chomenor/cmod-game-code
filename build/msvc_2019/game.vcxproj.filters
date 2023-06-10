@@ -34,6 +34,9 @@
     <Filter Include="game\mods\modes\specialties">
       <UniqueIdentifier>{2DD4AEAF-99E1-DC95-22C8-D8808ED4A84C}</UniqueIdentifier>
     </Filter>
+    <Filter Include="game\mods\modes\uam">
+      <UniqueIdentifier>{1A6AFF5C-86CB-DC6A-0F39-231D7B99132A}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\code\common\bg_local.h">
@@ -140,6 +143,9 @@
     </ClInclude>
     <ClInclude Include="..\..\code\game\mods\modes\specialties\specs_local.h">
       <Filter>game\mods\modes\specialties</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\code\game\mods\modes\uam\uam_local.h">
+      <Filter>game\mods\modes\uam</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -260,7 +266,22 @@
     <ClCompile Include="..\..\code\game\g_weapon.c">
       <Filter>game</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\components\comp_alt_fire_config.c">
+      <Filter>game\mods\components</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\code\game\mods\components\comp_clicktojoin.c">
+      <Filter>game\mods\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\components\comp_detpack.c">
+      <Filter>game\mods\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\components\comp_firerate_cs.c">
+      <Filter>game\mods\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\components\comp_forcefield.c">
+      <Filter>game\mods\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\components\comp_ghost_sparkle.c">
       <Filter>game\mods\components</Filter>
     </ClCompile>
     <ClCompile Include="..\..\code\game\mods\components\comp_holdable_transporter.c">
@@ -281,6 +302,15 @@
     <ClCompile Include="..\..\code\game\mods\components\comp_pending_item.c">
       <Filter>game\mods\components</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\components\comp_quad_effects.c">
+      <Filter>game\mods\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\components\comp_seeker.c">
+      <Filter>game\mods\components</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\components\comp_timelimit_countdown.c">
+      <Filter>game\mods\components</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\code\game\mods\components\comp_warmup_sequence.c">
       <Filter>game\mods\components</Filter>
     </ClCompile>
@@ -291,6 +321,9 @@
       <Filter>game\mods\features</Filter>
     </ClCompile>
     <ClCompile Include="..\..\code\game\mods\features\feat_debug_modfn.c">
+      <Filter>game\mods\features</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\features\feat_gladiator_item_enable.c">
       <Filter>game\mods\features</Filter>
     </ClCompile>
     <ClCompile Include="..\..\code\game\mods\features\feat_misc.c">
@@ -391,6 +424,51 @@
     </ClCompile>
     <ClCompile Include="..\..\code\game\mods\modes\specialties\specs_main.c">
       <Filter>game\mods\modes\specialties</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\modes\uam\uam_ammo.c">
+      <Filter>game\mods\modes\uam</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\modes\uam\uam_death_effects.c">
+      <Filter>game\mods\modes\uam</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\modes\uam\uam_end_sound.c">
+      <Filter>game\mods\modes\uam</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\modes\uam\uam_greeting.c">
+      <Filter>game\mods\modes\uam</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\modes\uam\uam_instagib.c">
+      <Filter>game\mods\modes\uam</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\modes\uam\uam_instagib_savewep.c">
+      <Filter>game\mods\modes\uam</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\modes\uam\uam_main.c">
+      <Filter>game\mods\modes\uam</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\modes\uam\uam_music.c">
+      <Filter>game\mods\modes\uam</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\modes\uam\uam_powerups.c">
+      <Filter>game\mods\modes\uam</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\modes\uam\uam_warmup_mode.c">
+      <Filter>game\mods\modes\uam</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\modes\uam\uam_warmup_sequence.c">
+      <Filter>game\mods\modes\uam</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\modes\uam\uam_weapon_effects.c">
+      <Filter>game\mods\modes\uam</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\modes\uam\uam_weapon_spawn.c">
+      <Filter>game\mods\modes\uam</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\modes\uam\uam_weapons.c">
+      <Filter>game\mods\modes\uam</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\modes\uam\uam_winner_taunt.c">
+      <Filter>game\mods\modes\uam</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

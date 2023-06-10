@@ -537,7 +537,16 @@ qboolean G_ParseSpawnVars( void ) {
 	return qtrue;
 }
 
+/*
+==================
+(ModFN) SetSpawnCS
 
+Called to set certain configstrings during level spawn.
+==================
+*/
+void ModFNDefault_SetSpawnCS( int num, const char *defaultValue ) {
+	trap_SetConfigstring( num, defaultValue );
+}
 
 /*QUAKED worldspawn (0 0 0) ?
 
@@ -565,12 +574,12 @@ void SP_worldspawn( void ) {
 	trap_SetConfigstring( CS_LEVEL_START_TIME, va("%i", level.startTime ) );
 
 	G_SpawnString( "music", "", &s );
-	trap_SetConfigstring( CS_MUSIC, s );
+	modfn.SetSpawnCS( CS_MUSIC, s );
 
 	G_SpawnString( "message", "", &s );
-	trap_SetConfigstring( CS_MESSAGE, s );				// map specific message
+	modfn.SetSpawnCS( CS_MESSAGE, s );				// map specific message
 
-	trap_SetConfigstring( CS_MOTD, g_motd.string );		// message of the day
+	modfn.SetSpawnCS( CS_MOTD, g_motd.string );		// message of the day
 
 	// No need to set these on every map restart. It might override user modifications.
 	if ( !level.hasRestarted ) {

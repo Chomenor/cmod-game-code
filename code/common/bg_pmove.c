@@ -1936,6 +1936,10 @@ static void PM_Weapon( void ) {
 		}
 	}
 
+	if ( pm->modifyFireRate ) {
+		qboolean altAttack = ( pm->cmd.buttons & BUTTON_ALT_ATTACK ) ? qtrue : qfalse;
+		addTime = pm->modifyFireRate( addTime, pm->ps->weapon, altAttack );
+	}
 
 	if ( pm->ps->powerups[PW_HASTE] ) {
 		addTime /= 1.3;

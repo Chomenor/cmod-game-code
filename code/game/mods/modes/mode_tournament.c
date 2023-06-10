@@ -192,7 +192,7 @@ static void ModTournament_CheckAddPlayers( void ) {
 	SetTeam( &g_entities[ nextInLine - level.clients ], "f", qtrue );
 
 	// if player is being put in mid-match and warmup is disabled, make game is restarted
-	if ( level.time - level.startTime > 1000 && !g_doWarmup.integer ) {
+	if ( level.time - level.startTime > 1000 && modfn.WarmupLength() <= 0 ) {
 		trap_SendConsoleCommand( EXEC_APPEND, "map_restart 0\n" );
 		level.exiting = qtrue;
 	}
@@ -246,7 +246,9 @@ void ModTournament_Init( void ) {
 		MODFN_REGISTER( ExitLevel, ++modePriorityLevel );
 		MODFN_REGISTER( SpawnCenterPrintMessage, ++modePriorityLevel );
 
-		if ( G_ModUtils_GetLatchedValue( "g_pModElimination", "0", 0 ) ) {
+		if ( G_ModUtils_GetLatchedValue( "g_mod_uam", "0", 0 ) ) {
+			ModUAM_Init();
+		} else if ( G_ModUtils_GetLatchedValue( "g_pModElimination", "0", 0 ) ) {
 			ModElimination_Init();
 		} else if ( G_ModUtils_GetLatchedValue( "g_pModDisintegration", "0", 0 ) ) {
 			ModDisintegration_Init();

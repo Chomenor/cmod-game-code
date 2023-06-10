@@ -760,6 +760,22 @@ static void CG_TouchTriggerPrediction( playerState_t *ps, qboolean *predictedTel
 
 /*
 =================
+CG_ModifyFireRate
+
+Support using custom fire rate values specified by server.
+=================
+*/
+static int CG_ModifyFireRate( int defaultInterval, int weapon, qboolean alt ) {
+	const int *fireRates = alt ? cgs.modConfig.fireRates.alt : cgs.modConfig.fireRates.primary;
+	if ( EF_WARN_ASSERT( weapon > WP_NONE && weapon < WP_NUM_WEAPONS ) && fireRates[weapon] ) {
+		return fireRates[weapon];
+	}
+
+	return defaultInterval;
+}
+
+/*
+=================
 CG_UpdateCmdBuffer
 
 Retrieves latest usercmds from engine and adds them to command buffer.
@@ -912,6 +928,7 @@ static void CG_InitPmove( playerState_t *ps, usercmd_t *cmd ) {
 	cg_pmove.pModDisintegration = cgs.pModDisintegration > 0;
 
 	cg_pmove.altFireMode = CG_AltFire_PredictionMode( (weapon_t)ps->weapon );
+	cg_pmove.modifyFireRate = CG_ModifyFireRate;
 	cg_pmove.noJumpKeySlowdown = cgs.modConfig.noJumpKeySlowdown;
 	cg_pmove.bounceFix = cgs.modConfig.bounceFix;
 	cg_pmove.snapVectorGravLimit = cgs.modConfig.snapVectorGravLimit;

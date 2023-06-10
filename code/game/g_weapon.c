@@ -21,58 +21,58 @@ static	vec3_t	muzzle;
 
 // Weapon damages are located up here for easy access...
 // Phaser
-#define	PHASER_DAMAGE				6		// 7
-#define PHASER_ALT_RADIUS			12		// 16
+#define	PHASER_DAMAGE				modfn.AdjustWeaponConstant( WC_PHASER_DAMAGE, 6 )
+#define PHASER_ALT_RADIUS			modfn.AdjustWeaponConstant( WC_PHASER_ALT_RADIUS, 12 )
 
 // Compression Rifle
-#define	CRIFLE_DAMAGE				16		// 20
-#define CRIFLE_MAIN_SPLASH_RADIUS	64
-#define CRIFLE_MAIN_SPLASH_DMG		16		// 20
+#define	CRIFLE_DAMAGE				modfn.AdjustWeaponConstant( WC_CRIFLE_DAMAGE, 16 )
+#define CRIFLE_MAIN_SPLASH_RADIUS	modfn.AdjustWeaponConstant( WC_CRIFLE_MAIN_SPLASH_RADIUS, 64 )
+#define CRIFLE_MAIN_SPLASH_DMG		modfn.AdjustWeaponConstant( WC_CRIFLE_MAIN_SPLASH_DMG, 16 )
 #define CRIFLE_ALTDAMAGE			modfn.AdjustWeaponConstant( WC_CRIFLE_ALTDAMAGE, 85 )
 #define CRIFLE_ALT_SPLASH_RADIUS	modfn.AdjustWeaponConstant( WC_CRIFLE_ALT_SPLASH_RADIUS, 32 )
 #define CRIFLE_ALT_SPLASH_DMG		modfn.AdjustWeaponConstant( WC_CRIFLE_ALT_SPLASH_DMG, 10 )
 
 // Imod
-#define	IMOD_DAMAGE					20		// 32
-#define	IMOD_ALT_DAMAGE				48		// 64
+#define	IMOD_DAMAGE					modfn.AdjustWeaponConstant( WC_IMOD_DAMAGE, 20 )
+#define	IMOD_ALT_DAMAGE				modfn.AdjustWeaponConstant( WC_IMOD_ALT_DAMAGE, 48 )
 
 // Scavenger Rifle
-#define SCAV_DAMAGE					8		// 16
-#define SCAV_ALT_DAMAGE				60		// 60
-#define SCAV_ALT_SPLASH_RAD			100
-#define SCAV_ALT_SPLASH_DAM			60		// 60
+#define SCAV_DAMAGE					modfn.AdjustWeaponConstant( WC_SCAV_DAMAGE, 8 )
+#define SCAV_ALT_DAMAGE				modfn.AdjustWeaponConstant( WC_SCAV_ALT_DAMAGE, 60 )
+#define SCAV_ALT_SPLASH_RAD			modfn.AdjustWeaponConstant( WC_SCAV_ALT_SPLASH_RAD, 100 )
+#define SCAV_ALT_SPLASH_DAM			modfn.AdjustWeaponConstant( WC_SCAV_ALT_SPLASH_DAM, 60 )
 
 // Stasis Weapon
-#define STASIS_DAMAGE				9		// 15
-#define STASIS_ALT_DAMAGE			24		// 40
-#define STASIS_ALT_DAMAGE2			12		// 20
+#define STASIS_DAMAGE				modfn.AdjustWeaponConstant( WC_STASIS_DAMAGE, 9 )
+#define STASIS_ALT_DAMAGE			modfn.AdjustWeaponConstant( WC_STASIS_ALT_DAMAGE, 24 )
+#define STASIS_ALT_DAMAGE2			modfn.AdjustWeaponConstant( WC_STASIS_ALT_DAMAGE2, 12 )
 
 // Grenade Launcher
-#define GRENADE_DAMAGE				75		// 100
-#define GRENADE_SPLASH_RAD			160
-#define GRENADE_SPLASH_DAM			75		// 100
-#define GRENADE_ALT_DAMAGE			64
+#define GRENADE_DAMAGE				modfn.AdjustWeaponConstant( WC_GRENADE_DAMAGE, 75 )
+#define GRENADE_SPLASH_RAD			modfn.AdjustWeaponConstant( WC_GRENADE_SPLASH_RAD, 160 )
+#define GRENADE_SPLASH_DAM			modfn.AdjustWeaponConstant( WC_GRENADE_SPLASH_DAM, 75 )
+#define GRENADE_ALT_DAMAGE			64		// appears effectively unused (mines only do splash damage, see g_missile.c)
 
 // Tetrion Disruptor
-#define TETRION_DAMAGE				4		// 5
-#define TETRION_ALT_DAMAGE			17		// 30
+#define TETRION_DAMAGE				modfn.AdjustWeaponConstant( WC_TETRION_DAMAGE, 4 )
+#define TETRION_ALT_DAMAGE			modfn.AdjustWeaponConstant( WC_TETRION_ALT_DAMAGE, 17 )
 
 // Quantum Burst
-#define QUANTUM_DAMAGE				140		// 85		// 100
-#define QUANTUM_SPLASH_DAM			140		// 85		// 128
-#define QUANTUM_SPLASH_RAD			160
-#define QUANTUM_ALT_DAMAGE			140		// 75		// 100
-#define QUANTUM_ALT_SPLASH_DAM		140		// 75		// 128
-#define QUANTUM_ALT_SPLASH_RAD		80
+#define QUANTUM_DAMAGE				modfn.AdjustWeaponConstant( WC_QUANTUM_DAMAGE, 140 )
+#define QUANTUM_SPLASH_DAM			modfn.AdjustWeaponConstant( WC_QUANTUM_SPLASH_DAM, 140 )
+#define QUANTUM_SPLASH_RAD			modfn.AdjustWeaponConstant( WC_QUANTUM_SPLASH_RAD, 160 )
+#define QUANTUM_ALT_DAMAGE			modfn.AdjustWeaponConstant( WC_QUANTUM_ALT_DAMAGE, 140 )
+#define QUANTUM_ALT_SPLASH_DAM		modfn.AdjustWeaponConstant( WC_QUANTUM_ALT_SPLASH_DAM, 140 )
+#define QUANTUM_ALT_SPLASH_RAD		modfn.AdjustWeaponConstant( WC_QUANTUM_ALT_SPLASH_RAD, 80 )
 
 // Dreadnought Weapon
-#define DREADNOUGHT_DAMAGE			8		// 6		// Note that there's two traces, so we can do up to DOUBLE damage...
-#define DREADNOUGHT_WIDTH			9		// 12
-#define DREADNOUGHT_ALTDAMAGE		35		// 40
+#define DREADNOUGHT_DAMAGE			modfn.AdjustWeaponConstant( WC_DREADNOUGHT_DAMAGE, 8 )	// Note that there's two traces, so we can do up to DOUBLE damage...
+#define DREADNOUGHT_WIDTH			modfn.AdjustWeaponConstant( WC_DREADNOUGHT_WIDTH, 9 )
+#define DREADNOUGHT_ALTDAMAGE		modfn.AdjustWeaponConstant( WC_DREADNOUGHT_ALTDAMAGE, 35 )
 
 // Borg Weapon
-#define BORG_PROJ_DAMAGE			20
-#define BORG_TASER_DAMAGE			15
+#define BORG_PROJ_DAMAGE			modfn.AdjustWeaponConstant( WC_BORG_PROJ_DAMAGE, 20 )
+#define BORG_TASER_DAMAGE			modfn.AdjustWeaponConstant( WC_BORG_TASER_DAMAGE, 15 )
 
 /*
 ======================
@@ -250,7 +250,7 @@ void WP_FirePhaser( gentity_t *ent, qboolean alt_fire )
 #define MAXRANGE_CRIFLE		8192
 
 //---------------------------------------------------------
-void WP_FireCompressionRifle ( gentity_t *ent, qboolean alt_fire )
+void WP_FireCompressionRifle ( gentity_t *ent, qboolean alt_fire, qboolean imod_fx )
 //---------------------------------------------------------
 {
 	gentity_t	*tent = 0;
@@ -290,20 +290,37 @@ void WP_FireCompressionRifle ( gentity_t *ent, qboolean alt_fire )
 
 	traceEnt = &g_entities[ tr.entityNum ];
 
-	SnapVector(tr.endpos);		// Make this less networking-intensive.
-	// Render a shot in any case.
-	if ( alt_fire )
-	{
-		tent = G_TempEntity( muzzle, EV_COMPRESSION_RIFLE_ALT );
-		tent->s.eFlags |= EF_ALT_FIRING;
+	if ( imod_fx ) {
+		// Gladiator/instagib style imod shot
+		tent = G_TempEntity( tr.endpos, EV_IMOD );
+		VectorCopy( muzzle, tent->s.origin2 );
+		SnapVector( tent->s.origin2 );
+		SnapVector( tr.endpos );	// try to keep same behavior as rifle...
+		
+		// Add mod effects
+		modfn.AddWeaponEffect( WE_IMOD_RIFLE, ent, &tr );
+	} else {
+		SnapVector(tr.endpos);		// Make this less networking-intensive.
+		// Render a shot in any case.
+		if ( alt_fire )
+		{
+			tent = G_TempEntity( muzzle, EV_COMPRESSION_RIFLE_ALT );
+			tent->s.eFlags |= EF_ALT_FIRING;
+		}
+		else
+		{
+			tent = G_TempEntity( muzzle, EV_COMPRESSION_RIFLE );
+		}
+		// stash our firing direction in the message also
+		VectorSubtract(end, muzzle, tent->s.origin2);
+		VectorShort(tent->s.origin2);
+
+		// Add mod effects
+		if ( alt_fire ) {
+			modfn.AddWeaponEffect( WE_RIFLE_ALT, ent, &tr );
+		}
 	}
-	else
-	{
-		tent = G_TempEntity( muzzle, EV_COMPRESSION_RIFLE );
-	}
-	// stash our firing direction in the message also
-	VectorSubtract(end, muzzle, tent->s.origin2);
-	VectorShort(tent->s.origin2);
+
 	// Only add in impact stuff when told to do so
 	if ( render_impact )
 	{
@@ -349,7 +366,7 @@ void WP_FireCompressionRifle ( gentity_t *ent, qboolean alt_fire )
 			if (((g_gametype.integer >= GT_TEAM) && (ent->client->ps.persistant[PERS_TEAM] != traceEnt->client->ps.persistant[PERS_TEAM]))
 				|| (g_gametype.integer < GT_TEAM))
 			{
-				if (alt_fire)
+				if (alt_fire && modfn.AdjustWeaponConstant( WC_IMPRESSIVE_REWARDS, 1 ))
 				{
 					ent->client->accurateCount++;
 					if ( ent->client->accurateCount >= 2 )
@@ -456,6 +473,11 @@ void WP_FireIMOD ( gentity_t *ent, qboolean alt_fire )
 	gentity_t	*traceEnt = NULL;
 	qboolean	render_impact;
 
+	if ( modfn.AdjustWeaponConstant( WC_USE_IMOD_RIFLE, 0 ) ) {
+		WP_FireCompressionRifle( ent, qtrue, qtrue );
+		return;
+	}
+
 	VectorMA (muzzle, MAXRANGE_IMOD, forward, end);
 
 	// trace only against the solids, so the railgun will go through people
@@ -494,7 +516,7 @@ void WP_FireIMOD ( gentity_t *ent, qboolean alt_fire )
 				if (((g_gametype.integer >= GT_TEAM) && (ent->client->ps.persistant[PERS_TEAM] != traceEnt->client->ps.persistant[PERS_TEAM]))
 					|| (g_gametype.integer < GT_TEAM))
 				{
-					if (alt_fire)
+					if (alt_fire && modfn.AdjustWeaponConstant( WC_IMPRESSIVE_REWARDS, 1 ))
 					{
 						ent->client->accurateCount++;
 						if ( ent->client->accurateCount >= 2 )
@@ -558,6 +580,9 @@ void WP_FireIMOD ( gentity_t *ent, qboolean alt_fire )
 		tent->s.weapon = ent->s.weapon;
 	}
 
+	// Add mod effects
+	modfn.AddWeaponEffect( WE_IMOD, ent, &tr );
+
 	G_LogWeaponFire(ent->s.number, WP_IMOD);
 }
 
@@ -568,7 +593,7 @@ void WP_FireIMOD ( gentity_t *ent, qboolean alt_fire )
 */
 
 #define SCAV_SPREAD			0.5
-#define SCAV_VELOCITY		1500
+#define SCAV_VELOCITY		modfn.AdjustWeaponConstant( WC_SCAV_VELOCITY, 1500 )
 #define SCAV_SIZE			3
 
 #define SCAV_ALT_VELOCITY	1000
@@ -709,7 +734,8 @@ void WP_FireScavenger( gentity_t *ent, qboolean alt_fire )
 ----------------------------------------------
 */
 
-#define STASIS_VELOCITY		1100	//800	//650
+#define STASIS_VELOCITY		modfn.AdjustWeaponConstant( WC_STASIS_VELOCITY, 1100 )
+
 // #define STASIS_SPREAD		5.0		//2.5	//1.8	// Keep the spread relatively small so that you can get multiple projectile impacts when a badie is close
 #define STASIS_SPREAD		0.085f		// Roughly equivalent to sin(5 deg).
 
@@ -951,6 +977,9 @@ void grenadeExplode( gentity_t *ent )
 
 	tent = G_TempEntity( pos, EV_GRENADE_EXPLODE );
 
+	// add mod effects
+	modfn.AddWeaponEffect( WE_GRENADE_PRIMARY, ent, NULL );
+
 	// splash damage (doesn't apply to person directly hit)
 	if ( ent->splashDamage ) {
 		G_RadiusDamage( pos, ent->parent, ent->splashDamage, ent->splashRadius,
@@ -967,6 +996,9 @@ void grenadeSpewShrapnel( gentity_t *ent )
 
 	tent = G_TempEntity( ent->r.currentOrigin, EV_GRENADE_SHRAPNEL_EXPLODE );
 	tent->s.eventParm = DirToByte(ent->pos1);
+
+	// add mod effects
+	modfn.AddWeaponEffect( WE_GRENADE_ALT, ent, NULL );
 
 	// just do radius dmg for altfire
 	if( G_RadiusDamage( ent->r.currentOrigin, ent->parent, ent->splashDamage, ent->splashRadius,
@@ -1059,8 +1091,8 @@ void WP_FireGrenade( gentity_t *ent, qboolean alt_fire )
 			}
 			//now make the new one
 			grenade->classname = "tripwire";
-			grenade->splashDamage = GRENADE_SPLASH_DAM*2*s_quadFactor;
-			grenade->splashRadius = GRENADE_SPLASH_RAD*2;
+			grenade->splashDamage = GRENADE_SPLASH_DAM*s_quadFactor;
+			grenade->splashRadius = GRENADE_SPLASH_RAD;
 			grenade->s.pos.trType = TR_LINEAR;
 			grenade->nextthink = level.time + 1000; // How long 'til she blows
 			grenade->count = 1;//tell it it's a tripwire for when it sticks
@@ -1633,18 +1665,19 @@ void WP_FireDreadnoughtBeam( gentity_t *ent )
 //#define DN_SIDE_DIST	64
 //#define DN_RAND_DEV		8
 
-#define DN_SEARCH_DIST	256
+#define DN_SEARCH_DIST	modfn.AdjustWeaponConstant( WC_DN_SEARCH_DIST, 256 )
 #define DN_SIDE_DIST	128
 #define DN_RAND_DEV		16
 #define DN_ALT_THINK_TIME	100
-#define DN_ALT_SIZE		12
+#define DN_ALT_SIZE		modfn.AdjustWeaponConstant( WC_DN_ALT_SIZE, 12 )
+#define DN_MAX_MOVES	modfn.AdjustWeaponConstant( WC_DN_MAX_MOVES, 0 )
 void DreadnoughtBurstThink(gentity_t *ent)
 {
 	vec3_t startpos, endpos, perp;
 	trace_t tr;
 	gentity_t *traceEnt, *tent;
 	int source;
-	vec3_t dest, mins={-DN_ALT_SIZE,-DN_ALT_SIZE,-1}, maxs={DN_ALT_SIZE,DN_ALT_SIZE,1};
+	vec3_t dest, mins={0,0,-1}, maxs={0,0,1};
 	float dot;
 	static qboolean recursion=qfalse;
 
@@ -1653,6 +1686,9 @@ void DreadnoughtBurstThink(gentity_t *ent)
 		ent->nextthink2 = level.time + DN_ALT_THINK_TIME;
 	}
 	ent->nextthink = ent->nextthink2;
+
+	mins[0] = mins[1] = -DN_ALT_SIZE;
+	maxs[0] = maxs[1] = DN_ALT_SIZE;
 
 	VectorCopy(ent->s.origin, startpos);
 
@@ -1877,6 +1913,14 @@ void DreadnoughtBurstThink(gentity_t *ent)
 		return;
 	}
 
+	// Check for end of range
+	if ( ent->health > 0 ) {
+		if ( !--ent->health ) {
+			G_FreeEntity( ent );
+			return;
+		}
+	}
+
 	// We didn't find anything, so move the entity to the middle destination.
 	ent->target_ent = NULL;
 	VectorCopy(ent->s.origin, ent->s.origin2);
@@ -1930,6 +1974,9 @@ void WP_FireDreadnoughtBurst( gentity_t *ent )
 	VectorCopy( start, bolt->pos1 );
 	VectorCopy( start, bolt->pos2 );
 
+	// number of think cycles before deleting projectile (0 = infinite)
+	bolt->health = DN_MAX_MOVES;
+
 	if ( !modfn.AdjustWeaponConstant( WC_WELDER_SKIP_INITIAL_THINK, 0 ) ) {
 		DreadnoughtBurstThink(bolt);
 	}
@@ -1960,7 +2007,7 @@ void WP_FireDreadnought( gentity_t *ent, qboolean alt_fire )
 //======================================================================
 
 #define BORG_PROJECTILE_SIZE	8
-#define BORG_PROJ_VELOCITY		1000
+#define BORG_PROJ_VELOCITY		modfn.AdjustWeaponConstant( WC_BORG_PROJ_VELOCITY, 1000 )
 
 void WP_FireBorgTaser( gentity_t *ent )
 {
@@ -2155,39 +2202,41 @@ vec3_t WP_MuzzlePoint[WP_NUM_WEAPONS] =
 };
 
 
-float WP_ShotSize[WP_NUM_WEAPONS] =
-{
-	0,							// WP_NONE,
-	0,							// WP_PHASER,
-	0,							// WP_COMPRESSION_RIFLE,
-	0,							// WP_IMOD,
-	SCAV_SIZE,					// WP_SCAVENGER_RIFLE,
-	STASIS_MAIN_MISSILE_BIG*3,	// WP_STASIS,
-	GRENADE_SIZE,				// WP_GRENADE_LAUNCHER,
-	0,							// WP_TETRION_DISRUPTOR,
-	QUANTUM_SIZE,				// WP_QUANTUM_BURST,
-	0,							// WP_DREADNOUGHT,
-	0,							// WP_VOYAGER_HYPO,
-	0,							// WP_BORG_ASSIMILATOR
-	BORG_PROJECTILE_SIZE,		// WP_BORG_WEAPON
-};
+float WP_ShotSize( weapon_t weapon ) {
+	switch ( weapon ) {
+	case WP_SCAVENGER_RIFLE:
+		return SCAV_SIZE;
+	case WP_STASIS:
+		return STASIS_MAIN_MISSILE_BIG*3;
+	case WP_GRENADE_LAUNCHER:
+		return GRENADE_SIZE;
+	case WP_QUANTUM_BURST:
+		return QUANTUM_SIZE;
+	case WP_BORG_WEAPON:
+		return BORG_PROJECTILE_SIZE;
+	}
 
-float WP_ShotAltSize[WP_NUM_WEAPONS] =
-{
-	0,							// WP_NONE,
-	PHASER_ALT_RADIUS,			// WP_PHASER,
-	0,							// WP_COMPRESSION_RIFLE,
-	0,							// WP_IMOD,
-	SCAV_ALT_SIZE,				// WP_SCAVENGER_RIFLE,
-	0,							// WP_STASIS,
-	GRENADE_SIZE,				// WP_GRENADE_LAUNCHER,
-	TETRION_ALT_SIZE,			// WP_TETRION_DISRUPTOR,
-	QUANTUM_SIZE,				// WP_QUANTUM_BURST,
-	DN_ALT_SIZE,				// WP_DREADNOUGHT,
-	0,							// WP_VOYAGER_HYPO,
-	0,							// WP_BORG_ASSIMILATOR
-	0,							// WP_BORG_WEAPON
-};
+	return 0;
+}
+
+float WP_ShotAltSize( weapon_t weapon ) {
+	switch ( weapon ) {
+		case WP_PHASER:
+			return PHASER_ALT_RADIUS;
+		case WP_SCAVENGER_RIFLE:
+			return SCAV_ALT_SIZE;
+		case WP_GRENADE_LAUNCHER:
+			return GRENADE_SIZE;
+		case WP_TETRION_DISRUPTOR:
+			return TETRION_ALT_SIZE;
+		case WP_QUANTUM_BURST:
+			return QUANTUM_SIZE;
+		case WP_DREADNOUGHT:
+			return DN_ALT_SIZE;
+	}
+
+	return 0;
+}
 
 
 
@@ -2340,7 +2389,7 @@ G_SetQuadFactor
 Called ahead of weapon firing functions to set global s_quadFactor value.
 ===============
 */
-static void G_SetQuadFactor( int clientNum ) {
+void G_SetQuadFactor( int clientNum ) {
 	if ( G_AssertConnectedClient( clientNum ) && level.clients[clientNum].ps.powerups[PW_QUAD] ) {
 		s_quadFactor = 3;
 	} else {
@@ -2372,7 +2421,7 @@ void FireWeapon( gentity_t *ent, qboolean alt_fire )
 	G_SetQuadFactor( ent - g_entities );
 
 	// Unghost the player.
-	ent->client->ps.powerups[PW_GHOST] = 0;
+	modfn.SetClientGhosting( ent - g_entities, qfalse );
 
 	// track shots taken for accuracy tracking
 	for (i = 0; i < NUM_FAST_WEAPONS; i++)
@@ -2399,11 +2448,11 @@ void FireWeapon( gentity_t *ent, qboolean alt_fire )
 
 	if (alt_fire)
 	{
-		projsize = WP_ShotAltSize[ent->s.weapon];
+		projsize = WP_ShotAltSize(ent->s.weapon);
 	}
 	else
 	{
-		projsize = WP_ShotSize[ent->s.weapon];
+		projsize = WP_ShotSize(ent->s.weapon);
 	}
 	CalcMuzzlePoint ( ent, forward, right, up, muzzle, projsize);
 
@@ -2416,7 +2465,7 @@ void FireWeapon( gentity_t *ent, qboolean alt_fire )
 		WP_FirePhaser( ent, alt_fire );
 		break;
 	case WP_COMPRESSION_RIFLE:
-		WP_FireCompressionRifle( ent, alt_fire );
+		WP_FireCompressionRifle( ent, alt_fire, qfalse );
 		break;
 	case WP_IMOD:
 		WP_FireIMOD(ent, alt_fire);

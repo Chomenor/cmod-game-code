@@ -521,7 +521,7 @@ qboolean ModFNDefault_CheckJoinAllowed( int clientNum, join_allowed_type_t type,
 	// Check for g_maxGameClients limits
 	if ( g_maxGameClients.integer > 0 && level.numNonSpectatorClients >= g_maxGameClients.integer &&
 			type != CJA_SETCLASS && type != CJA_FORCETEAM ) {
-		if ( type != CJA_AUTOJOIN ) {
+		if ( type != CJA_AUTOJOIN && targetTeam != level.clients[clientNum].sess.sessionTeam ) {
 			trap_SendServerCommand( clientNum, "cp \"Too many players.\"" );
 		}
 
@@ -597,13 +597,13 @@ qboolean SetTeam( gentity_t *ent, char *s, qboolean force ) {
 		team = TEAM_FREE;
 	}
 
-	// ignore redundant change
-	if ( team != TEAM_SPECTATOR && team == oldTeam ) {
+	// decide if we will allow the change, and print any warning messages
+	if ( team != TEAM_SPECTATOR && !modfn.CheckJoinAllowed( clientNum, force ? CJA_FORCETEAM : CJA_SETTEAM, team ) ) {
 		return qfalse;
 	}
 
-	// decide if we will allow the change
-	if ( team != TEAM_SPECTATOR && !modfn.CheckJoinAllowed( clientNum, force ? CJA_FORCETEAM : CJA_SETTEAM, team ) ) {
+	// ignore redundant change
+	if ( team != TEAM_SPECTATOR && team == oldTeam ) {
 		return qfalse;
 	}
 

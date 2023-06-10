@@ -47,10 +47,12 @@ static qboolean MOD_PREFIX(CheckJoinAllowed)( MODFN_CTV, int clientNum, join_all
 	}
 
 	else if ( level.numNonSpectatorClients >= 2 ) {
-		if ( type == CJA_FORCETEAM ) {
-			G_Printf( "Match already in progress.\n" );
-		} else if ( type != CJA_AUTOJOIN ) {
-			trap_SendServerCommand( clientNum, "cp \"Match already in progress.\"" );
+		if ( targetTeam != client->sess.sessionTeam ) {
+			if ( type == CJA_FORCETEAM ) {
+				G_Printf( "Match already in progress.\n" );
+			} else if ( type != CJA_AUTOJOIN ) {
+				trap_SendServerCommand( clientNum, "cp \"Match already in progress.\"" );
+			}
 		}
 		
 		return qfalse;

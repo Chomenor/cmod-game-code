@@ -82,7 +82,9 @@ qboolean ModPCDeadMove_Static_ShiftClient( int clientNum, Smoothing_ShiftInfo_t 
 
 		// update client entity position
 		VectorCopy( movePS.origin, ent->s.pos.trBase );
+		SnapVector( ent->s.pos.trBase );
 		VectorCopy( movePS.viewangles, ent->s.apos.trBase );
+		SnapVector( ent->s.apos.trBase );
 		ent->s.angles2[1] = movePS.movementDir;
 		ent->s.legsAnim = movePS.legsAnim;
 		if ( info_out ) {

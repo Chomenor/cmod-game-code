@@ -23,7 +23,8 @@
 // Skip storing snaps less than this many milliseconds from the previous one
 #define MINIMUM_SNAP_LENGTH 5
 
-// Workaround for QVM compiler bugs when doing float/char conversion with regular VectorCopy
+// Workaround for float/char conversion issues with QVM VectorCopy
+// See VectorCopy definition in q_shared.h
 #define VECTORCOPY_INT(a,b) ((b)[0]=(int)(a)[0],(b)[1]=(int)(a)[1],(b)[2]=(int)(a)[2])
 
 typedef struct {
@@ -44,6 +45,7 @@ typedef struct {
 	qboolean deadOnMover;
 	unsigned char liftCount;
 	float lastMoveZ;
+	float lastLiftZ;
 } smoothing_client_t;
 
 static struct {
@@ -77,20 +79,14 @@ static void ModPCSmoothing_ReadClientSnap( int clientNum, smoothing_client_snap_
 ModPCSmoothing_ApplyClientSnap
 
 Apply stored client position to entity position that will be sent out to other clients.
-
-Call with skipOriginZ true if the snap has not yet caught up to a recent lift movement, to avoid
-overwriting the lifted position and e.g. shifting the client through the bottom of the lift.
 ==============
 */
-static void ModPCSmoothing_ApplyClientSnap( int clientNum, const smoothing_client_snap_t *snap, qboolean skipOriginZ ) {
+static void ModPCSmoothing_ApplyClientSnap( int clientNum, const smoothing_client_snap_t *snap ) {
 	gentity_t *ent = &g_entities[clientNum];
-
-	ent->s.pos.trBase[0] = snap->origin[0];
-	ent->s.pos.trBase[1] = snap->origin[1];
-	if ( !skipOriginZ ) {
-		ent->s.pos.trBase[2] = snap->origin[2];
-	}
+	VectorCopy( snap->origin, ent->s.pos.trBase );
+	SnapVector( ent->s.pos.trBase );	// maybe not ideal, but network savings do seem significant
 	VectorCopy( snap->viewangles, ent->s.apos.trBase );
+	SnapVector( ent->s.apos.trBase );
 	ent->s.angles2[1] = (int)snap->movementDir;
 	ent->s.legsAnim = snap->legsAnim;
 }
@@ -104,9 +100,12 @@ and increment the lift counter.
 ==============
 */
 static void ModPCSmoothing_CheckLiftMove( int clientNum ) {
-	if ( MOD_STATE->clients[clientNum].lastMoveZ != level.clients[clientNum].ps.origin[2] ) {
-		MOD_STATE->clients[clientNum].lastMoveZ = level.clients[clientNum].ps.origin[2];
-		MOD_STATE->clients[clientNum].liftCount++;
+	gclient_t *client = &level.clients[clientNum];
+	smoothing_client_t *modclient = &MOD_STATE->clients[clientNum];
+	if ( modclient->lastMoveZ != client->ps.origin[2] ) {
+		modclient->lastMoveZ = client->ps.origin[2];
+		modclient->lastLiftZ = client->ps.origin[2];
+		modclient->liftCount++;
 	}
 }
 
@@ -172,7 +171,8 @@ Returns qtrue on success, qfalse on error.
 ==============
 */
 static qboolean ModPCSmoothing_RetrieveClientSnap( int clientNum, int time, smoothing_client_snap_t *snap ) {
-	int counter = MOD_STATE->clients[clientNum].snapCounter;
+	smoothing_client_t *modclient = &MOD_STATE->clients[clientNum];
+	int counter = modclient->snapCounter;
 	if ( counter > 0 ) {
 		int maxSnapIndex = counter - 1;
 		int minSnapIndex = counter - MAX_CLIENT_SNAPS > 0 ? counter - MAX_CLIENT_SNAPS : 0;
@@ -204,6 +204,11 @@ static qboolean ModPCSmoothing_RetrieveClientSnap( int clientNum, int time, smoo
 
 			ModPCSmoothing_LerpVector( current_snap->origin, next_snap->origin, lerpFraction, snap->origin );
 			snap->commandTime = time;
+		}
+
+		// if lift is causing z movement, patch the z origin to avoid floating above/below the lift
+		if ( snap->liftCount != modclient->liftCount ) {
+			snap->origin[2] = modclient->lastLiftZ;
 		}
 
 		return qtrue;
@@ -264,8 +269,7 @@ qboolean ModPCSmoothing_Static_ShiftClient( int clientNum, Smoothing_ShiftInfo_t
 		// Apply smoothed position to client entity.
 		targetTime = level.time - ModPCSmoothingOffset_Shared_GetOffset( clientNum );
 		if ( ModPCSmoothing_RetrieveClientSnap( clientNum, targetTime, &snap ) ) {
-			qboolean liftMoved = snap.liftCount != modclient->liftCount ? qtrue : qfalse;
-			ModPCSmoothing_ApplyClientSnap( clientNum, &snap, liftMoved );
+			ModPCSmoothing_ApplyClientSnap( clientNum, &snap );
 			if ( info_out ) {
 				VECTORCOPY_INT( snap.mins, info_out->mins );
 				VECTORCOPY_INT( snap.maxs, info_out->maxs );

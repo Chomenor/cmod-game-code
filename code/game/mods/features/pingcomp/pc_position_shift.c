@@ -23,7 +23,8 @@
 #define MAX_CLIENT_SNAPS 32
 #define CLIENT_SNAP( clientNum, index ) MOD_STATE->clients[clientNum].snaps[ ( index ) % MAX_CLIENT_SNAPS ]
 
-// Workaround for QVM compiler bugs when doing float/char conversion with regular VectorCopy
+// Workaround for float/char conversion issues with QVM VectorCopy
+// See VectorCopy definition in q_shared.h
 #define VECTORCOPY_INT(a,b) ((b)[0]=(int)(a)[0],(b)[1]=(int)(a)[1],(b)[2]=(int)(a)[2])
 
 typedef struct {

@@ -164,6 +164,7 @@ LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 	trap_Cvar_Register( NULL, "g_pModSpecialties", "0", CVAR_SERVERINFO | CVAR_LATCH );
 	trap_Cvar_Register( NULL, "g_pModElimination", "0", CVAR_SERVERINFO | CVAR_LATCH );
 	trap_Cvar_Register( NULL, "g_mod_uam", "0", CVAR_SERVERINFO | CVAR_LATCH );
+	trap_Cvar_Register( NULL, "g_mod_instagib", "0", CVAR_SERVERINFO | CVAR_LATCH );
 
 	// Core mods
 	ModTeamGroups_Init();

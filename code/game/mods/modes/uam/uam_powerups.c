@@ -70,6 +70,23 @@ static modForcefield_touchResponse_t MOD_PREFIX(ForcefieldTouchResponse)(
 
 /*
 ================
+(ModFN) DetpackExplodeEffects
+
+Use random sound for detpack explosion.
+================
+*/
+static void MOD_PREFIX(DetpackExplodeEffects)( MODFN_CTV, gentity_t *detpack ) {
+	static const char *sounds[] = {
+		"sound/weapons/explosions/detpakexplode.wav",
+		"sound/weapons/explosions/explode12.wav",
+		"sound/weapons/explosions/explode5.wav",
+	};
+
+	G_GlobalSound( G_SoundIndex( sounds[irandom( 0, ARRAY_LEN( sounds ) - 1 )] ) );
+}
+
+/*
+================
 (ModFN) AdjustModConstant
 ================
 */
@@ -138,6 +155,7 @@ void ModUAMPowerups_Init( void ) {
 
 		MODFN_REGISTER( ForcefieldConfig, ++modePriorityLevel );
 		MODFN_REGISTER( ForcefieldTouchResponse, ++modePriorityLevel );
+		MODFN_REGISTER( DetpackExplodeEffects, ++modePriorityLevel );
 		MODFN_REGISTER( AdjustModConstant, ++modePriorityLevel );
 		MODFN_REGISTER( AdjustGeneralConstant, ++modePriorityLevel );
 	}

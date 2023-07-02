@@ -863,6 +863,19 @@ void DetpackBlammoThink(gentity_t *ent)
 	ent->nextthink = level.time + FRAMETIME;
 }
 
+/*
+================
+(ModFN) DetpackExplodeEffects
+
+Play additional sounds and effects to accompany detpack explosion.
+================
+*/
+void ModFNDefault_DetpackExplodeEffects( gentity_t *detpack ) {
+	gentity_t *te = G_TempEntity( detpack->s.pos.trBase, EV_GLOBAL_SOUND );
+	te->s.eventParm = G_SoundIndex( "sound/weapons/explosions/detpakexplode.wav" );//cgs.media.detpackExplodeSound
+	te->r.svFlags |= SVF_BROADCAST;
+}
+
 void DetonateDetpack(gentity_t *ent)
 {
 	// find all detpacks. the one whose parent is ent...blow up
@@ -879,11 +892,7 @@ void DetonateDetpack(gentity_t *ent)
 		{
 			// found it. BLAMMO!
 			// play explosion sound to all clients
-			gentity_t	*te = NULL;
-
-			te = G_TempEntity( detpack->s.pos.trBase, EV_GLOBAL_SOUND );
-			te->s.eventParm = G_SoundIndex( "sound/weapons/explosions/detpakexplode.wav" );//cgs.media.detpackExplodeSound
-			te->r.svFlags |= SVF_BROADCAST;
+			modfn.DetpackExplodeEffects( detpack );
 
 			//so we can't be blown up by things we're blowing up
 			detpack->takedamage = 0;

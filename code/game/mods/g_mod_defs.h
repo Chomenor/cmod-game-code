@@ -327,6 +327,10 @@ MOD_FUNCTION_DEF( DetpackPlace, gentity_t *, ( PREFIX1 int clientNum ),
 MOD_FUNCTION_DEF( DetpackShot, void, ( PREFIX1 gentity_t *self, gentity_t *inflictor, gentity_t *attacker, int damage, int meansOfDeath ),
 		( PREFIX2 self, inflictor, attacker, damage, meansOfDeath ), )
 
+// Play additional sounds and effects to accompany detpack explosion.
+MOD_FUNCTION_DEF( DetpackExplodeEffects, void, ( PREFIX1 gentity_t *detpack ),
+		( PREFIX2 detpack ), )
+
 // Remove any placed detpack owned by a player who was just killed.
 MOD_FUNCTION_DEF( PlayerDeathDiscardDetpack, void, ( PREFIX1 int clientNum ),
 		( PREFIX2 clientNum ), )

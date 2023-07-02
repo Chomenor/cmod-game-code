@@ -2,10 +2,10 @@
 * Ping Compensation - Dead Move
 * 
 * If a player dies while in motion while smoothing is enabled, it can lead to
-* inconsistent visual effects as the adjusted view catches up to the playerstate.
+* inconsistent visual effects as the shifted view catches up to the playerstate.
 * 
 * This module provides a workaround for this issue. When a player dies, control
-* of the adjusted view is transferred to this module, and movement of the body
+* of the shifted view is transferred to this module, and movement of the body
 * is simulated starting from the point of death.
 */
 
@@ -19,6 +19,8 @@
 typedef struct {
 	qboolean deadMoveActive;
 	int lastMoveTime;
+	int pm_flags;
+	int pm_time;
 	vec3_t origin;
 	vec3_t velocity;
 } PingcompDeadMove_deadState_t;
@@ -26,23 +28,6 @@ typedef struct {
 static struct {
 	PingcompDeadMove_deadState_t deadStates[MAX_SMOOTHING_CLIENTS];
 } *MOD_STATE;
-
-/*
-==============
-ModPCDeadMove_RunDeadMove
-==============
-*/
-static void ModPCDeadMove_RunDeadMove( playerState_t *ps, int startTime, int endTime ) {
-	pmove_t pm;
-	memset( &pm, 0, sizeof( pm ) );
-	ps->commandTime = startTime;
-	pm.ps = ps;
-	pm.cmd.serverTime = endTime;
-	pm.tracemask = MASK_PLAYERSOLID & ~CONTENTS_BODY;
-	pm.trace = trap_Trace;
-	pm.pointcontents = trap_PointContents;
-	Pmove( &pm, 0, NULL, NULL );
-}
 
 /*
 ==============
@@ -70,17 +55,43 @@ qboolean ModPCDeadMove_Static_ShiftClient( int clientNum, Smoothing_ShiftInfo_t 
 	if ( ModPCDeadMove_Static_DeadMoveActive( clientNum ) ) {
 		gentity_t *ent = &g_entities[clientNum];
 		PingcompDeadMove_deadState_t *deadState = &MOD_STATE->deadStates[clientNum];
+		int frameTime = 0;
 		playerState_t movePS = level.clients[clientNum].ps;
+		pmove_t pm;
 
-		// advance deadState position
+		// Friction of dead bodies is currently very fps-dependent due to PM_DeadMove
+		// behavior, so enable move partitioning for consistency.
+		if ( !VectorCompare( deadState->velocity, vec3_origin ) ) {
+			frameTime = modfn.PmoveFixedLength( ent->r.svFlags & SVF_BOT ? qtrue : qfalse );
+			if ( frameTime <= 0 ) {
+				frameTime = 8;
+			}
+		}
+
+		// Set up pmove
+		pm.ps = &movePS;
+		pm.cmd.serverTime = level.time;
+		pm.tracemask = MASK_PLAYERSOLID & ~CONTENTS_BODY;
+		pm.trace = trap_Trace;
+		pm.pointcontents = trap_PointContents;
+
+		// Advance deadState position
+		movePS.commandTime = deadState->lastMoveTime;
+		movePS.pm_flags = deadState->pm_flags;
+		movePS.pm_time = deadState->pm_time;
 		VectorCopy( deadState->origin, movePS.origin );
 		VectorCopy( deadState->velocity, movePS.velocity );
-		ModPCDeadMove_RunDeadMove( &movePS, deadState->lastMoveTime, level.time );
+		Pmove( &pm, frameTime, NULL, NULL );
+		deadState->lastMoveTime = movePS.commandTime;
+		deadState->pm_flags = movePS.pm_flags;
+		deadState->pm_time = movePS.pm_time;
 		VectorCopy( movePS.origin, deadState->origin );
 		VectorCopy( movePS.velocity, deadState->velocity );
-		deadState->lastMoveTime = level.time;
 
-		// update client entity position
+		// Add any residual left from move partitioning
+		Pmove( &pm, 0, NULL, NULL );
+
+		// Update client entity position
 		VectorCopy( movePS.origin, ent->s.pos.trBase );
 		SnapVector( ent->s.pos.trBase );
 		VectorCopy( movePS.viewangles, ent->s.apos.trBase );
@@ -105,15 +116,18 @@ Activates dead move mode for specified client, enabling use of ModPCDeadMove_Sta
 Dead mode will be automatically reset when player respawns/disconnects.
 ==============
 */
-void ModPCDeadMove_Static_InitDeadMove( int clientNum, vec3_t smoothingOrigin ) {
+void ModPCDeadMove_Static_InitDeadMove( int clientNum, const vec3_t origin, const vec3_t velocity ) {
 	if ( MOD_STATE && clientNum >= 0 && clientNum < WORKING_CLIENT_COUNT &&
 			EF_WARN_ASSERT( level.clients[clientNum].ps.pm_type == PM_DEAD ) &&
 			!MOD_STATE->deadStates[clientNum].deadMoveActive ) {
 		PingcompDeadMove_deadState_t *deadState = &MOD_STATE->deadStates[clientNum];
+		playerState_t *ps = &level.clients[clientNum].ps;
 		deadState->deadMoveActive = qtrue;
 		deadState->lastMoveTime = level.time;
-		VectorCopy( smoothingOrigin, deadState->origin );
-		VectorCopy( level.clients[clientNum].ps.velocity, deadState->velocity );
+		deadState->pm_flags = ps->pm_flags;
+		deadState->pm_time = ps->pm_time;
+		VectorCopy( origin, deadState->origin );
+		VectorCopy( velocity, deadState->velocity );
 	}
 }
 

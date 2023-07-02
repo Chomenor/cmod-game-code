@@ -31,6 +31,7 @@ typedef struct {
 	int commandTime;
 	vec3_t origin;
 	vec3_t viewangles;
+	vec3_t velocity;
 	unsigned char liftCount;
 	char mins[3];
 	char maxs[3];
@@ -50,6 +51,10 @@ typedef struct {
 
 static struct {
 	smoothing_client_t clients[MAX_SMOOTHING_CLIENTS];
+
+	// Set while G_Damage is in progress
+	qboolean currentDamage;
+	vec3_t currentDamageOldVelocity;
 } *MOD_STATE;
 
 /*
@@ -66,6 +71,7 @@ static void ModPCSmoothing_ReadClientSnap( int clientNum, smoothing_client_snap_
 
 	snap->commandTime = client->ps.commandTime;
 	VectorCopy( client->ps.origin, snap->origin );
+	VectorCopy( client->ps.velocity, snap->velocity );
 	VectorCopy( client->ps.viewangles, snap->viewangles );
 	VECTORCOPY_INT( ent->r.mins, snap->mins );
 	VECTORCOPY_INT( ent->r.maxs, snap->maxs );
@@ -243,21 +249,6 @@ qboolean ModPCSmoothing_Static_ShiftClient( int clientNum, Smoothing_ShiftInfo_t
 				return qfalse;
 			}
 
-			if ( !ModPCDeadMove_Static_DeadMoveActive( clientNum ) ) {
-				// Try to initiate dead move
-				if ( ModPCSmoothing_RetrieveClientSnap( clientNum, level.time - ModPCSmoothingOffset_Shared_GetOffset( clientNum ), &snap ) ) {
-					if ( snap.liftCount != modclient->liftCount ) {
-						// If player died on a lift, just disable smoothing until they respawn. This can cause the
-						// player to visually snap to the playerstate position a bit, but is usually pretty minor
-						// and works adequately for this special case.
-						modclient->deadOnMover = qtrue;
-						return qfalse;
-					}
-
-					ModPCDeadMove_Static_InitDeadMove( clientNum, snap.origin );
-				}
-			}
-
 			// Try to retrieve dead move position
 			if ( ModPCDeadMove_Static_ShiftClient( clientNum, info_out ) ) {
 				return qtrue;
@@ -298,6 +289,62 @@ static gentity_t *MOD_PREFIX(CopyToBodyQue)( MODFN_CTV, int clientNum ) {
 
 /*
 ================
+(ModFN) PostPlayerDie
+================
+*/
+static void MOD_PREFIX(PostPlayerDie)( MODFN_CTV, gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
+		int meansOfDeath, int *awardPoints ) {
+	int clientNum = self - g_entities;
+	gclient_t *client = &level.clients[clientNum];
+	smoothing_client_t *modclient = &MOD_STATE->clients[clientNum];
+	smoothing_client_snap_t snap;
+
+	MODFN_NEXT( PostPlayerDie, ( MODFN_NC, self, inflictor, attacker, meansOfDeath, awardPoints ) );
+
+	if ( ModPCSmoothing_RetrieveClientSnap( clientNum, level.time - ModPCSmoothingOffset_Shared_GetOffset( clientNum ), &snap ) ) {
+		if ( snap.liftCount != modclient->liftCount ) {
+			// If player died on a lift, disable time shifting until they respawn. This can cause the
+			// player to visually snap to the playerstate position a bit, but is usually pretty minor
+			// and works adequately for this special case.
+			modclient->deadOnMover = qtrue;
+		} else if ( VectorCompare( client->ps.velocity, vec3_origin ) ) {
+			// If velocity was cleared by death effects also start the dead move with no velocity.
+			ModPCDeadMove_Static_InitDeadMove( clientNum, snap.origin, vec3_origin );
+		} else if ( MOD_STATE->currentDamage ) {
+			// If killed through G_Damage, start the dead move with time-shifted velocity but add in
+			// any knockback that was added during the hit.
+			vec3_t knockback;
+			vec3_t newVelocity;
+			VectorSubtract( client->ps.velocity, MOD_STATE->currentDamageOldVelocity, knockback );
+			VectorAdd( snap.velocity, knockback, newVelocity );
+			ModPCDeadMove_Static_InitDeadMove( clientNum, snap.origin, newVelocity );
+		} else {
+			ModPCDeadMove_Static_InitDeadMove( clientNum, snap.origin, snap.velocity );
+		}
+	}
+}
+
+/*
+================
+(ModFN) Damage
+
+Store current velocity ahead of damage so knockback can be calculated.
+================
+*/
+static void MOD_PREFIX(Damage)( MODFN_CTV, gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+			vec3_t dir, vec3_t point, int damage, int dflags, int mod ) {
+	if ( targ->client ) {
+		MOD_STATE->currentDamage = qtrue;
+		VectorCopy( targ->client->ps.velocity, MOD_STATE->currentDamageOldVelocity );
+	}
+
+	MODFN_NEXT( Damage, ( MODFN_NC, targ, inflictor, attacker, dir, point, damage, dflags, mod ) );
+
+	MOD_STATE->currentDamage = qfalse;
+}
+
+/*
+================
 ModPCSmoothing_Init
 ================
 */
@@ -306,6 +353,8 @@ void ModPCSmoothing_Init( void ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
 		MODFN_REGISTER( CopyToBodyQue, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( PostPlayerDie, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( Damage, MODPRIORITY_LOW );
 
 		ModPlayerMove_Init();	// for ModPCSmoothing_Static_RecordClientMove callback
 		ModPCSmoothingDebug_Init();

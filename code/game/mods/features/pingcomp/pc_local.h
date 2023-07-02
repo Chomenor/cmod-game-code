@@ -55,4 +55,4 @@ int ModPCSmoothingOffset_Shared_GetOffset( int clientNum );
 // Smoothing dead move - pc_dead_move.c
 qboolean ModPCDeadMove_Static_DeadMoveActive( int clientNum );
 qboolean ModPCDeadMove_Static_ShiftClient( int clientNum, Smoothing_ShiftInfo_t *info_out );
-void ModPCDeadMove_Static_InitDeadMove( int clientNum, vec3_t smoothingOrigin );
+void ModPCDeadMove_Static_InitDeadMove( int clientNum, const vec3_t origin, const vec3_t velocity );

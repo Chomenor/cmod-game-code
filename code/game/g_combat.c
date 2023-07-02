@@ -692,7 +692,7 @@ float ModFNDefault_GetDamageMult( gentity_t *targ, gentity_t *inflictor, gentity
 
 /*
 ============
-G_Damage
+(ModFN) Damage
 
 targ		entity that is being damaged
 inflictor	entity that is causing the damage
@@ -713,7 +713,7 @@ dflags		these flags are used to control how G_Damage works
 	DAMAGE_NO_PROTECTION	kills godmode, armor, everything
 ============
 */
-void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+void ModFNDefault_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 				vec3_t dir, vec3_t point, int damage, int dflags, int mod ) {
 	gclient_t	*client = targ->client;
 	int			take;
@@ -1018,6 +1018,18 @@ void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		G_LogWeaponDamage(attacker->s.number, mod, take);
 	}
 
+}
+
+/*
+============
+G_Damage
+
+Wrapper to Damage modfn.
+============
+*/
+void G_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+				vec3_t dir, vec3_t point, int damage, int dflags, int mod ) {
+	modfn.Damage( targ, inflictor, attacker, dir, point, damage, dflags, mod );
 }
 
 

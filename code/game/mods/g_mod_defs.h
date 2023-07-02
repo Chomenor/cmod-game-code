@@ -222,6 +222,11 @@ MOD_FUNCTION_DEF( AddWeaponEffect, void, ( PREFIX1 weaponEffect_t weType, gentit
 // (damage, knockback, death, scoring, etc.)
 //////////////////////////
 
+// Called when a player or entity takes damage.
+MOD_FUNCTION_DEF( Damage, void, ( PREFIX1 gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+		vec3_t dir, vec3_t point, int damage, int dflags, int mod ),
+		( PREFIX2 targ, inflictor, attacker, dir, point, damage, dflags, mod ), )
+
 // Allows adding or modifying damage flags.
 MOD_FUNCTION_DEF( ModifyDamageFlags, int, ( PREFIX1 gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		vec3_t dir, vec3_t point, int damage, int dflags, int mod ),

@@ -478,6 +478,13 @@ MOD_FUNCTION_LOCAL( RandomPlayerModel, void, ( PREFIX1 int clientNum, const char
 MOD_FUNCTION_LOCAL( ForcefieldConfig, void, ( PREFIX1 modForcefield_config_t *config ),
 		( PREFIX2 config ), )
 
+// Returns action to take due to player touching forcefield.
+// Can be called with clientNum -1 and forcefield NULL, as a test for info message purposes.
+// Requires: ModForcefield_Init() from comp_forcefield.c
+MOD_FUNCTION_LOCAL( ForcefieldTouchResponse, modForcefield_touchResponse_t,
+		( PREFIX1 forcefieldRelation_t relation, int clientNum, gentity_t *forcefield ),
+		( PREFIX2 relation, clientNum, forcefield ), return )
+
 // Determine whether portable transporter activates borg teleport mode or regular teleport.
 // Requires: ModHoldableTransporter_Init() from comp_holdable_transporter.c
 MOD_FUNCTION_LOCAL( BorgTeleportEnabled, qboolean, ( PREFIX1 int clientNum ),

@@ -164,20 +164,17 @@ qboolean ModClickToJoin_Static_ActiveForClient( int clientNum );
 //
 
 typedef enum {
-	FFTR_PASS,			// let player through forcefield
 	FFTR_BLOCK,			// don't let player through the forcefield
 	FFTR_KILL,			// kill player who touched the forcefield
+	FFTR_PASS,			// let player through forcefield
+	FFTR_QUICKPASS,		// let player through forcefield without taking it down temporarily
 } modForcefield_touchResponse_t;
 
 typedef struct {
 	// Damage options
 	int health;					// amount of damage forcefields can take
-	int duration;				// length in seconds forcefields last
+	int duration;				// length in seconds forcefields last (if no damage taken)
 	qboolean invulnerable;		// don't allow forcefields to be damaged by weapons fire
-
-	// Touch response
-	modForcefield_touchResponse_t touchFriendResponse;
-	modForcefield_touchResponse_t touchEnemyResponse;
 
 	// Sound effects
 	const char *loopSound;				// give forcefields a background sound (null for no sound)
@@ -188,9 +185,6 @@ typedef struct {
 	// Misc options
 	qboolean bounceProjectiles;			// when invulnerable is set, grenades/tetrion alt bounce off rather than collide
 	qboolean activateDelayMode;			// add extra delay and sound effect when starting forcefield (gladiator style with g_modUseKillingForcefield 1)
-
-	// Applies to pass through forcefields (response type FFTR_PASS)
-	qboolean quickPass;					// alternative method to let players through forcefields without taking them down temporarily
 
 	// Applies to killing forcefields (response type FFTR_KILL)
 	qboolean killForcefieldFlicker;		// play sparkle and sound effect on forcefield when touched (gladiator style)

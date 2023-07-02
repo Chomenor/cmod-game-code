@@ -25,8 +25,19 @@ static struct {
 #define IS_FORCEFIELD( ent ) ( ( ent ) && ( ent )->inuse && ( ent )->s.eType == ET_USEABLE && \
 		( ent )->s.modelindex == HI_SHIELD )
 #define FF_HEALTH ( MOD_STATE->config.invulnerable ? 1000 : MOD_STATE->config.health )
-#define FF_TOUCH_RESPONSE( isFriend ) ( ( isFriend ) ? MOD_STATE->config.touchFriendResponse : \
-		MOD_STATE->config.touchEnemyResponse )
+
+/*
+================
+(ModFN Default) ForcefieldTouchResponse
+================
+*/
+modForcefield_touchResponse_t ModFNDefault_ForcefieldTouchResponse(
+		forcefieldRelation_t relation, int clientNum, gentity_t *forcefield ) {
+	if ( relation == FFR_ENEMY ) {
+		return FFTR_BLOCK;
+	}
+	return FFTR_PASS;
+}
 
 /*
 ================
@@ -36,8 +47,6 @@ static struct {
 void ModFNDefault_ForcefieldConfig( modForcefield_config_t *config ) {
 	config->health = 250;
 	config->duration = 25;
-	config->touchFriendResponse = FFTR_PASS;
-	config->touchEnemyResponse = FFTR_BLOCK;
 }
 
 /*
@@ -59,8 +68,7 @@ Returns whether killing forcefields are enabled, for info message purposes.
 */
 qboolean ModForcefield_Static_KillingForcefieldEnabled( void ) {
 	if ( MOD_STATE ) {
-		ModForcefield_UpdateConfig();
-		if ( MOD_STATE->config.touchEnemyResponse == FFTR_KILL || MOD_STATE->config.touchFriendResponse == FFTR_KILL ) {
+		if ( modfn_lcl.ForcefieldTouchResponse( FFR_ENEMY, -1, NULL ) == FFTR_KILL ) {
 			return qtrue;
 		}
 	}
@@ -139,16 +147,16 @@ ModForcefield_ShieldTouch
 static void ModForcefield_ShieldTouch( gentity_t *self, gentity_t *other, trace_t *trace ) {
 	if ( other->client && G_AssertConnectedClient( other - g_entities ) ) {
 		int clientNum = other - g_entities;
-		forcefieldRelation_t relation = G_GetForcefieldRelation( clientNum, self );
-		modForcefield_touchResponse_t response = FF_TOUCH_RESPONSE( relation != FFR_ENEMY );
+		modForcefield_touchResponse_t response = modfn_lcl.ForcefieldTouchResponse(
+				G_GetForcefieldRelation( clientNum, self ), clientNum, self );
 
 		if ( response == FFTR_PASS ) {
-			if ( MOD_STATE->config.quickPass ) {
-				if ( ModForcefield_DebounceSound( self - g_entities, 50 ) ) {
+			G_ShieldGoNotSolid( self );
+		}
+
+		if ( response == FFTR_QUICKPASS ) {
+			if ( ModForcefield_DebounceSound( self - g_entities, 50 ) ) {
 					G_AddEvent( self, EV_GENERAL_SOUND, G_SoundIndex( "sound/movers/forceup.wav" ) );
-				}
-			} else {
-				G_ShieldGoNotSolid( self );
 			}
 		}
 
@@ -157,9 +165,9 @@ static void ModForcefield_ShieldTouch( gentity_t *self, gentity_t *other, trace_
 			// invulnerability and increments PERS_HITS and PERS_SHIELDS on the forcefield owner
 			// to play feedback sounds (although exactly what gets incrememented and the resulting
 			// sound depends on several factors...)
-			G_Damage( other, self, self->parent, NULL, NULL, 100000, 0, MOD_TRIGGER_HURT );
+			G_Damage( other, self, self->parent, NULL, NULL, 1000, DAMAGE_ALL_TEAMS, MOD_TRIGGER_HURT );
 
-			//player_die( other, self, self->parent, 100000, MOD_TRIGGER_HURT );
+			//player_die( other, self, self->parent, 1000, MOD_TRIGGER_HURT );
 
 			if ( MOD_STATE->config.killForcefieldFlicker ) {
 				// Note: This spams sounds and slows down forcefield expiration if
@@ -352,48 +360,50 @@ static int MOD_PREFIX(ModifyDamageFlags)( MODFN_CTV, gentity_t *targ, gentity_t 
 ==============
 (ModFN) RunPlayerMove
 
-If quickpass is enabled, move friendly forcefields out of the way during player movement.
+Move quick pass forcefields out of the way during player movement.
 ==============
 */
 static void MOD_PREFIX(RunPlayerMove)( MODFN_CTV, int clientNum ) {
-	if ( MOD_STATE->config.quickPass ) {
-		int i;
-		int modifiedEntities[MAX_GENTITIES];
-		int oldContents[MAX_GENTITIES];
-		int modifiedEntityCount = 0;
+	int i;
+	int modifiedEntities[MAX_GENTITIES];
+	int oldContents[MAX_GENTITIES];
+	int modifiedEntityCount = 0;
+	float *playerPos = level.clients[clientNum].ps.origin;
 
-		for ( i = 0; i < MOD_STATE->forcefieldIndexCount; ++i ) {
-			int entityNum = MOD_STATE->forcefieldIndex[i];
-			gentity_t *ent = &g_entities[entityNum];
+	for ( i = 0; i < MOD_STATE->forcefieldIndexCount; ++i ) {
+		int entityNum = MOD_STATE->forcefieldIndex[i];
+		gentity_t *ent = &g_entities[entityNum];
 
-			if ( IS_FORCEFIELD( ent ) ) {
-				forcefieldRelation_t relation = G_GetForcefieldRelation( clientNum, ent );
-				modForcefield_touchResponse_t response = FF_TOUCH_RESPONSE( relation != FFR_ENEMY );
-				if ( response == FFTR_PASS ) {
-					// Save old contents
-					oldContents[modifiedEntityCount] = ent->r.contents;
-					modifiedEntities[modifiedEntityCount] = entityNum;
-					modifiedEntityCount++;
+		// Check position to ensure we are at least close to the forcefield for optimization purposes.
+		if ( IS_FORCEFIELD( ent ) &&
+				playerPos[0] > ent->r.currentOrigin[0] - 500.0f &&
+				playerPos[0] < ent->r.currentOrigin[0] + 500.0f &&
+				playerPos[1] > ent->r.currentOrigin[1] - 500.0f &&
+				playerPos[1] < ent->r.currentOrigin[1] + 500.0f &&
+				playerPos[2] > ent->r.currentOrigin[2] - 500.0f &&
+				playerPos[2] < ent->r.currentOrigin[2] + 500.0f ) {
+			modForcefield_touchResponse_t response = modfn_lcl.ForcefieldTouchResponse(
+					G_GetForcefieldRelation( clientNum, ent ), clientNum, ent );
+			if ( response == FFTR_QUICKPASS ) {
+				// Save old contents
+				oldContents[modifiedEntityCount] = ent->r.contents;
+				modifiedEntities[modifiedEntityCount] = entityNum;
+				modifiedEntityCount++;
 
-					// Temporarily make forcefield pass-through except for weapon fire
-					ent->r.contents &= CONTENTS_SHOTCLIP;
+				// Temporarily make forcefield pass-through except for weapon fire
+				ent->r.contents &= CONTENTS_SHOTCLIP;
 
-					// Still want to handle touch in G_TouchTriggers for sound effects
-					ent->r.contents |= CONTENTS_TRIGGER;
-				}
+				// Still want to handle touch in G_TouchTriggers for sound effects
+				ent->r.contents |= CONTENTS_TRIGGER;
 			}
-		}
-
-		MODFN_NEXT( RunPlayerMove, ( MODFN_NC, clientNum ) );
-
-		// Restore previous contents
-		for ( i = 0; i < modifiedEntityCount; ++i ) {
-			g_entities[modifiedEntities[i]].r.contents = oldContents[i];
 		}
 	}
 
-	else {
-		MODFN_NEXT( RunPlayerMove, ( MODFN_NC, clientNum ) );
+	MODFN_NEXT( RunPlayerMove, ( MODFN_NC, clientNum ) );
+
+	// Restore previous contents
+	for ( i = 0; i < modifiedEntityCount; ++i ) {
+		g_entities[modifiedEntities[i]].r.contents = oldContents[i];
 	}
 }
 

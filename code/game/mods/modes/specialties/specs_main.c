@@ -580,6 +580,24 @@ static void MOD_PREFIX(ConvertPlayerModel)( MODFN_CTV, int clientNum, const char
 
 /*
 ================
+(ModFN) ForcefieldTouchResponse
+
+Allow technician to pass through enemy forcefields.
+================
+*/
+static modForcefield_touchResponse_t MOD_PREFIX(ForcefieldTouchResponse)(
+		MODFN_CTV, forcefieldRelation_t relation, int clientNum, gentity_t *forcefield ) {
+	modForcefield_touchResponse_t response =
+			MODFN_NEXT( ForcefieldTouchResponse, ( MODFN_NC, relation, clientNum, forcefield ) );
+	if ( ( response == FFTR_BLOCK || response == FFTR_KILL ) &&
+			clientNum >= 0 && level.clients[clientNum].sess.sessionClass == PC_TECH ) {
+		return FFTR_PASS;
+	}
+	return response;
+}
+
+/*
+================
 ModSpecialties_Init
 ================
 */
@@ -606,11 +624,15 @@ void ModSpecialties_Init( void ) {
 		MODFN_REGISTER( AdjustWeaponConstant, ++modePriorityLevel );
 		MODFN_REGISTER( ModifyAmmoUsage, ++modePriorityLevel );
 		MODFN_REGISTER( ConvertPlayerModel, ++modePriorityLevel );
+		MODFN_REGISTER( ForcefieldTouchResponse, ++modePriorityLevel );
 
 		ModModelGroups_Init();
 		ModModelSelection_Init();
 
 		// Pending item support for demolitionist detpack
 		ModPendingItem_Init();
+
+		// For technician forcefield handling
+		ModForcefield_Init();
 	}
 }

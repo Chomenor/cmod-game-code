@@ -1102,12 +1102,19 @@ Determine if a certain forcefield belongs to a certain player or their team.
 forcefieldRelation_t G_GetForcefieldRelation( int clientNum, gentity_t *shield ) {
 	if ( G_AssertConnectedClient( clientNum ) ) {
 		gclient_t *client = &level.clients[clientNum];
-
-		if ( shield->parent && shield->parent->client == client )
-			return FFR_SELF;
-
-		if ( g_gametype.integer >= GT_TEAM && client->sess.sessionTeam == shield->s.otherEntityNum2 )
+		if ( g_gametype.integer >= GT_TEAM ) {
+			if ( client->sess.sessionTeam != shield->s.otherEntityNum2 ) {
+				return FFR_ENEMY;
+			}
+			if ( shield->parent && shield->parent->client == client ) {
+				return FFR_SELF;
+			}
 			return FFR_TEAM;
+		}
+
+		if ( shield->parent && shield->parent->client == client ) {
+			return FFR_SELF;
+		}
 	}
 
 	return FFR_ENEMY;

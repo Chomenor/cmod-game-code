@@ -27,24 +27,11 @@ static void MOD_PREFIX(ForcefieldConfig)( MODFN_CTV, modForcefield_config_t *con
 
 	config->killForcefieldFlicker = qtrue;
 	config->killPlayerSizzle = qtrue;
-	config->quickPass = qtrue;
 	config->bounceProjectiles = qtrue;
 
 	// Health
 	config->invulnerable = FORCEFIELD_KILL_ENABLED && GAMETYPE != GT_CTF;
 	config->health = GAMETYPE == GT_CTF ? 500 : 250;	// bit more health in ctf
-
-	// Touch effects
-	config->touchEnemyResponse = FORCEFIELD_KILL_ENABLED ? FFTR_KILL : FFTR_BLOCK;
-	if ( GAMETYPE == GT_CTF ) {
-		// Use pass through forcefields in CTF to enable more strategic uses around flags;
-		// otherwise it feels like you cut off your own team too much.
-		config->touchFriendResponse = FFTR_PASS;
-	} else if ( GAMETYPE == GT_TEAM ) {
-		config->touchFriendResponse = FFTR_BLOCK;
-	} else {
-		config->touchFriendResponse = FORCEFIELD_KILL_ENABLED ? FFTR_KILL : FFTR_BLOCK;
-	}
 
 	// Delay mode
 	config->activateDelayMode = FORCEFIELD_SPAWN_DELAY_ENABLED;
@@ -55,6 +42,30 @@ static void MOD_PREFIX(ForcefieldConfig)( MODFN_CTV, modForcefield_config_t *con
 	config->alternateExpireSound = FORCEFIELD_KILL_ENABLED;
 	config->alternatePassSound = !FORCEFIELD_KILL_ENABLED;
 	config->gladiatorAnnounce = modcfg.mods_enabled.elimination && FORCEFIELD_KILL_ENABLED;
+}
+
+/*
+================
+(ModFN) ForcefieldTouchResponse
+================
+*/
+static modForcefield_touchResponse_t MOD_PREFIX(ForcefieldTouchResponse)(
+		MODFN_CTV, forcefieldRelation_t relation, int clientNum, gentity_t *forcefield ) {
+	if ( GAMETYPE == GT_CTF && relation != FFR_ENEMY ) {
+		// Use pass through forcefields in CTF to enable more strategic uses around flags;
+		// otherwise it feels like you cut off your own team too much.
+		return FFTR_QUICKPASS;
+	}
+
+	if ( FORCEFIELD_KILL_ENABLED ) {
+		if ( relation == FFR_ENEMY || GAMETYPE != GT_TEAM || g_friendlyFire.integer ) {
+			return FFTR_KILL;
+		} else {
+			return FFTR_BLOCK;
+		}
+	}
+
+	return MODFN_NEXT( ForcefieldTouchResponse, ( MODFN_NC, relation, clientNum, forcefield ) );
 }
 
 /*
@@ -126,6 +137,7 @@ void ModUAMPowerups_Init( void ) {
 		ModQuadEffects_Init();
 
 		MODFN_REGISTER( ForcefieldConfig, ++modePriorityLevel );
+		MODFN_REGISTER( ForcefieldTouchResponse, ++modePriorityLevel );
 		MODFN_REGISTER( AdjustModConstant, ++modePriorityLevel );
 		MODFN_REGISTER( AdjustGeneralConstant, ++modePriorityLevel );
 	}

@@ -252,7 +252,6 @@ typedef struct {
 void ModWarmupSequence_Static_ServerCommand( const char *msg );
 void ModWarmupSequence_Static_AddEventToSequence( modWarmupSequence_t *sequence, int time,
 		void ( *operation )( const char *msg ), const char *msg );
-qboolean ModWarmupSequence_Static_SequenceInProgressOrPending( void );
 
 /* ************************************************************************* */
 // Mod Functions

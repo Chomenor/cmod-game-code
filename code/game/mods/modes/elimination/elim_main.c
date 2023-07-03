@@ -196,11 +196,6 @@ Print info messages to clients during ClientSpawn.
 static void MOD_PREFIX(SpawnCenterPrintMessage)( MODFN_CTV, int clientNum, clientSpawnType_t spawnType ) {
 	gclient_t *client = &level.clients[clientNum];
 
-	// Don't print this if warmup sequence is playing or going to be played
-	if ( ModWarmupSequence_Static_SequenceInProgressOrPending() ) {
-		return;
-	}
-
 	if ( client->sess.sessionTeam == TEAM_SPECTATOR || spawnType != CST_RESPAWN ) {
 		trap_SendServerCommand( clientNum, "cp \"Elimination\"" );
 	}

@@ -95,14 +95,19 @@ static qboolean ModWarmupSequence_SequenceInProgress( void ) {
 
 /*
 ================
-ModWarmupSequence_Static_SequenceInProgressOrPending
+(ModFN) SpawnCenterPrintMessage
 
-Returns whether warmup sequence is currently running, or pending until more players join.
+Do a rough check to suppress center print messages if warmup sequence is currently running
+or pending, to avoid too much message spam.
 ================
 */
-qboolean ModWarmupSequence_Static_SequenceInProgressOrPending( void ) {
-	return MOD_STATE && ( ( level.matchState == MS_WARMUP && MOD_STATE->sequenceActive ) ||
-			( level.matchState < MS_WARMUP && ModWarmupSequence_GetLength() ) );
+static void MOD_PREFIX(SpawnCenterPrintMessage)( MODFN_CTV, int clientNum, clientSpawnType_t spawnType ) {
+	if ( ModWarmupSequence_SequenceInProgress() ||
+			( level.matchState == MS_INIT && ModWarmupSequence_GetLength() ) ) {
+		return;
+	}
+
+	MODFN_NEXT( SpawnCenterPrintMessage, ( MODFN_NC, clientNum, spawnType ) );
 }
 
 /*
@@ -179,6 +184,7 @@ void ModWarmupSequence_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
+		MODFN_REGISTER( SpawnCenterPrintMessage, MODPRIORITY_HIGH );
 		MODFN_REGISTER( WarmupLength, MODPRIORITY_GENERAL );
 		MODFN_REGISTER( PostRunFrame, MODPRIORITY_GENERAL );
 		MODFN_REGISTER( MatchStateTransition, MODPRIORITY_GENERAL );

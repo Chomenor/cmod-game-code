@@ -86,9 +86,8 @@ CG_WeaponPredict_LoadValue
 */
 static void CG_WeaponPredict_LoadValue( const char *key, const char *value ) {
 	if ( !Q_stricmp( key, "ver" ) && (
-			// Support either current or old version on the server
-			!Q_stricmp( value, BG_WEAPON_PREDICT_VERSION ) ||
-			!Q_stricmp( value, "uxb09a9y" ) ) ) {
+			// Support server using either old or new version string.
+			!Q_stricmp( value, "uxb09a9y" ) || !Q_stricmp( value, "uxb09a9y-2" ) ) ) {
 		wepPredictCfg.supported = qtrue;
 	}
 	CG_WeaponPredict_LoadBoolean( key, value, "proj", &wepPredictCfg.projectiles );

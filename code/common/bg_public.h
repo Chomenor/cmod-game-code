@@ -788,9 +788,6 @@ extern int Max_Ammo[];
 // weapon fire prediction
 //
 
-// random string to verify client/server compatibility
-#define BG_WEAPON_PREDICT_VERSION "uxb09a9y:2"
-
 #define BG_PREDICTABLE_RANDOM( rand ) ( ( (unsigned int)(rand)&0x7fff ) / ( (float)0x7fff ) )
 #define BG_PREDICTABLE_CRANDOM( rand ) ( 2.0 * ( BG_PREDICTABLE_RANDOM( rand ) - 0.5 ) )
 #define BG_PREDICTABLE_IRANDOM( rand, min, max ) ( ( (unsigned int)rand ) % ( max - min ) + min )

@@ -56,7 +56,15 @@ ModPCClientPredict_AddInfo
 */
 static void ModPCClientPredict_AddInfo( char *info ) {
 	char buffer[256];
-	Q_strncpyz( buffer, "ver:" BG_WEAPON_PREDICT_VERSION, sizeof( buffer ) );
+	const char *version;
+	
+	// If uam is enabled, use the new version string to block old client versions from
+	// enabling weapon prediction, to avoid incompatibilities.
+	version = "uxb09a9y";
+	if ( modcfg.mods_enabled.uam ) {
+		version = "uxb09a9y-2";
+	}
+	Com_sprintf( buffer, sizeof( buffer ), "ver:%s", version );
 
 	ModPCClientPredict_AddWeaponConstant( buffer, sizeof( buffer ), WC_USE_IMOD_RIFLE, 0, "imodRifle" );
 

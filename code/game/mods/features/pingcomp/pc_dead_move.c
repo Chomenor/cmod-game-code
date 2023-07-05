@@ -69,6 +69,7 @@ qboolean ModPCDeadMove_Static_ShiftClient( int clientNum, Smoothing_ShiftInfo_t 
 		}
 
 		// Set up pmove
+		memset( &pm, 0, sizeof( pm ) );
 		pm.ps = &movePS;
 		pm.cmd.serverTime = level.time;
 		pm.tracemask = MASK_PLAYERSOLID & ~CONTENTS_BODY;

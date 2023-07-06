@@ -597,6 +597,18 @@ void G_GlobalSound( int soundIndex ) {
 	te->r.svFlags |= SVF_BROADCAST;
 }
 
+/*
+=============
+G_ClientGlobalSound
+=============
+*/
+void G_ClientGlobalSound( int soundIndex, int clientNum ) {
+	gentity_t *te = G_TempEntity( vec3_origin, EV_GLOBAL_SOUND );
+	te->s.eventParm = soundIndex;
+	te->r.svFlags |= SVF_BROADCAST | SVF_SINGLECLIENT;
+	te->r.singleClient = clientNum;
+}
+
 
 //==============================================================================
 

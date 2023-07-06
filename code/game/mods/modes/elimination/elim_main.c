@@ -489,10 +489,12 @@ void ModElimination_Init( void ) {
 		G_RegisterTrackedCvar( &MOD_STATE->g_noJoinTimeout, "g_noJoinTimeout", "120", CVAR_ARCHIVE, qfalse );
 
 		// Support combining with other mods
-		if ( G_ModUtils_GetLatchedValue( "g_pModDisintegration", "0", 0 ) ) {
-			ModDisintegration_Init();
-		} else if ( G_ModUtils_GetLatchedValue( "g_pModSpecialties", "0", 0 ) ) {
-			ModSpecialties_Init();
+		if ( !modcfg.mods_enabled.razor ) {
+			if ( G_ModUtils_GetLatchedValue( "g_pModDisintegration", "0", 0 ) ) {
+				ModDisintegration_Init();
+			} else if ( G_ModUtils_GetLatchedValue( "g_pModSpecialties", "0", 0 ) ) {
+				ModSpecialties_Init();
+			}
 		}
 
 		MODFN_REGISTER( SpectatorClient, ++modePriorityLevel );

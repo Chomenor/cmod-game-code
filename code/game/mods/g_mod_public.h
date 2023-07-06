@@ -66,10 +66,10 @@ typedef enum {
 	GC_FORCEFIELD_ACTIVATE_DELAY,
 	GC_FORCEFIELD_TAKE_DAMAGE,
 	GC_DETPACK_NO_SHOCKWAVE,
+	GC_SEEKER_PICKUP_SOUND,			// Extra sound effect when picking up Seeker powerup consistent with Pinball mod
 	GC_DECOY_SOUND_EFFECTS,			// Sound effects when decoy is placed/removed
 	GC_CHAT_HIT_WARNING,			// Warning sound when hitting a player without being blocked by shields who is currently chatting
 	GC_FORCE_TEAM_PODIUM,			// Use team podium with only single winner model displayed even in FFA mode
-	GC_DROPPED_ITEM_EXPIRATION,		// Amount of time before auto-removing items dropped by players (0 = never remove)
 	GC_TOSS_ITEMS_ON_SUICIDE,
 } generalConstant_t;
 
@@ -122,6 +122,7 @@ typedef enum {
 	WC_DN_MAX_MOVES,
 	WC_WELDER_SKIP_INITIAL_THINK,
 	WC_IMPRESSIVE_REWARDS,
+	WC_CRIFLE_SPLASH_USE_QUADFACTOR,
 } weaponConstant_t;
 
 // Mod trace flags

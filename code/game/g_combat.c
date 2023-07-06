@@ -679,6 +679,44 @@ float ModFNDefault_KnockbackMass( gentity_t *targ, gentity_t *inflictor, gentity
 
 /*
 ============
+(ModFN) ApplyKnockback
+
+Apply knockback to players when taking damage.
+============
+*/
+void ModFNDefault_ApplyKnockback( gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+		vec3_t dir, vec3_t point, int damage, int dflags, int mod, float knockback ) {
+	vec3_t	kvel;
+	float	mass = modfn.KnockbackMass( targ, inflictor, attacker, dir, point, damage, dflags, mod );
+
+	// flying targets get pushed around a lot more.
+	if (targ->client->ps.powerups[PW_FLIGHT])
+	{
+		mass *= 0.375;
+	}
+
+	VectorScale (dir, g_knockback.value * (float)knockback / mass, kvel);
+	VectorAdd (targ->client->ps.velocity, kvel, targ->client->ps.velocity);
+
+	// set the timer so that the other client can't cancel
+	// out the movement immediately
+	if ( !targ->client->ps.pm_time ) {
+		int		t;
+
+		t = knockback * 2;
+		if ( t < 50 ) {
+			t = 50;
+		}
+		if ( t > 200 ) {
+			t = 200;
+		}
+		targ->client->ps.pm_time = t;
+		targ->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
+	}
+}
+
+/*
+============
 (ModFN) GetDamageMult
 
 Returns effective g_dmgmult value.
@@ -799,7 +837,7 @@ void ModFNDefault_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *atta
 		VectorNormalize(dir);
 	}
 
-	if ( knockback > 200 ) {
+	if ( knockback > 200 && !( dflags & DAMAGE_NO_KNOCKBACK_CAP ) ) {
 		knockback = 200;
 	}
 	if ( targ->flags & FL_NO_KNOCKBACK ) {
@@ -817,33 +855,7 @@ void ModFNDefault_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *atta
 		//if it's non-radius damage knockback from a teammate, don't do it if the damage won't be taken
 		if ( (dflags&DAMAGE_ALL_TEAMS) || (dflags&DAMAGE_RADIUS) || g_friendlyFire.integer || !attacker->client || !OnSameTeam (targ, attacker) )
 		{
-			vec3_t	kvel;
-			float	mass = modfn.KnockbackMass( targ, inflictor, attacker, dir, point, damage, dflags, mod );
-
-			// flying targets get pushed around a lot more.
-			if (targ->client->ps.powerups[PW_FLIGHT])
-			{
-				mass *= 0.375;
-			}
-
-			VectorScale (dir, g_knockback.value * (float)knockback / mass, kvel);
-			VectorAdd (targ->client->ps.velocity, kvel, targ->client->ps.velocity);
-
-			// set the timer so that the other client can't cancel
-			// out the movement immediately
-			if ( !targ->client->ps.pm_time ) {
-				int		t;
-
-				t = knockback * 2;
-				if ( t < 50 ) {
-					t = 50;
-				}
-				if ( t > 200 ) {
-					t = 200;
-				}
-				targ->client->ps.pm_time = t;
-				targ->client->ps.pm_flags |= PMF_TIME_KNOCKBACK;
-			}
+			modfn.ApplyKnockback( targ, inflictor, attacker, dir, point, damage, dflags, mod, knockback );
 		}
 	}
 
@@ -898,7 +910,7 @@ void ModFNDefault_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *atta
 
 	// always give half damage if hurting self
 	// calculated after knockback, so rocket jumping works
-	if ( targ == attacker) {
+	if ( targ == attacker && !( dflags & DAMAGE_NO_HALF_SELF ) ) {
 		damage *= 0.5;
 	}
 
@@ -919,7 +931,7 @@ void ModFNDefault_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *atta
 	// add to the damage inflicted on a player this frame
 	// the total will be turned into screen blends and view angle kicks
 	// at the end of the frame
-	if ( client ) {
+	if ( client && !( dflags & DAMAGE_LIMIT_EFFECTS ) ) {
 		if ( attacker ) {
 			client->ps.persistant[PERS_ATTACKER] = attacker->s.number;
 		} else {
@@ -946,7 +958,7 @@ void ModFNDefault_Damage( gentity_t *targ, gentity_t *inflictor, gentity_t *atta
 
 		// if target's shields (armor) took dmg and the dmg was armor-piercing, display the half-shields effect,
 		//if non-armor-piercing display full shields
-		if (asave)
+		if (asave && !( dflags & DAMAGE_LIMIT_EFFECTS ))
 		{
 			evEnt = G_TempEntity(targ->client->ps.origin, EV_SHIELD_HIT);
 			VectorClear(evEnt->s.pos.trBase);	// save a bit of bandwidth

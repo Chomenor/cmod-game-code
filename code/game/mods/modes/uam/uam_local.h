@@ -2,7 +2,6 @@
 
 void ModUAMAmmo_Init( void );
 void ModUAMDeathEffects_Init( void );
-void ModUAMEndSound_Init( void );
 void ModUAMGreeting_Init( void );
 void ModUAMInstagib_Init( void );
 void ModUAMInstagibSaveWep_Init( void );

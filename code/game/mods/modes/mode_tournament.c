@@ -246,8 +246,12 @@ void ModTournament_Init( void ) {
 		MODFN_REGISTER( ExitLevel, ++modePriorityLevel );
 		MODFN_REGISTER( SpawnCenterPrintMessage, ++modePriorityLevel );
 
-		if ( G_ModUtils_GetLatchedValue( "g_mod_uam", "0", 0 ) ) {
+		if ( trap_Cvar_VariableIntegerValue( "g_modsEnabled" ) >= 2 &&
+				G_ModUtils_GetLatchedValue( "g_mod_uam", "0", 0 ) ) {
 			ModUAM_Init();
+		} else if ( trap_Cvar_VariableIntegerValue( "g_modsEnabled" ) >= 2 &&
+				G_ModUtils_GetLatchedValue( "g_mod_razor", "0", 0 ) ) {
+			ModRazor_Init();
 		} else if ( G_ModUtils_GetLatchedValue( "g_pModElimination", "0", 0 ) ) {
 			ModElimination_Init();
 		} else if ( G_ModUtils_GetLatchedValue( "g_pModDisintegration", "0", 0 ) ) {

@@ -18,6 +18,7 @@ static struct {
 #define GLADIATOR_ANNOUNCEMENTS ( modfn_lcl.AdjustModConstant( MC_DETPACK_GLADIATOR_ANNOUNCEMENTS, 0 ) && !WARMUP_MODE )
 #define PING_SOUND modfn_lcl.AdjustModConstant( MC_DETPACK_PING_SOUND, 0 )
 #define DROP_ON_DEATH modfn_lcl.AdjustModConstant( MC_DETPACK_DROP_ON_DEATH, 0 )
+#define INVULNERABLE modfn_lcl.AdjustModConstant( MC_DETPACK_INVULNERABLE, 0 )
 
 /*
 ================
@@ -31,6 +32,10 @@ static gentity_t *MOD_PREFIX(DetpackPlace)( MODFN_CTV, int clientNum ) {
 	}
 
 	if ( ORIGIN_PATCH ) {
+		// This changes the location of the main blast, shockwave, and explosion if the
+		// detpack is shot to use the position of the detpack rather than of the player
+		// who placed it. Note that this currently differs from Gladiator and Pinball,
+		// which only use the detpack location for the main blast.
 		VectorCopy( detpack->s.pos.trBase, detpack->s.origin );
 	}
 
@@ -41,6 +46,8 @@ static gentity_t *MOD_PREFIX(DetpackPlace)( MODFN_CTV, int clientNum ) {
 	if ( PING_SOUND ) {
 		detpack->s.loopSound = G_SoundIndex( "sound/interface/sensorping.wav" );
 	}
+
+	detpack->takedamage = !INVULNERABLE;
 
 	return detpack;
 }

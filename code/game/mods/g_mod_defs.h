@@ -243,6 +243,11 @@ MOD_FUNCTION_DEF( KnockbackMass, float, ( PREFIX1 gentity_t *targ, gentity_t *in
 		vec3_t dir, vec3_t point, int damage, int dflags, int mod ),
 		( PREFIX2 targ, inflictor, attacker, dir, point, damage, dflags, mod ), return )
 
+// Apply knockback to players when taking damage.
+MOD_FUNCTION_DEF( ApplyKnockback, void, ( PREFIX1 gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+		vec3_t dir, vec3_t point, int damage, int dflags, int mod, float knockback ),
+		( PREFIX2 targ, inflictor, attacker, dir, point, damage, dflags, mod, knockback ), )
+
 // Deals damage from explosion-type sources.
 MOD_FUNCTION_DEF( RadiusDamage, qboolean, ( PREFIX1 vec3_t origin, gentity_t *attacker, float damage, float radius,
 		gentity_t *ignore, int dflags, int mod ),
@@ -275,6 +280,15 @@ MOD_FUNCTION_DEF( CheckItemSpawnDisabled, qboolean, ( PREFIX1 gitem_t *item ),
 MOD_FUNCTION_DEF( CheckItemSuppressed, int, ( PREFIX1 gentity_t *item ),
 		( PREFIX2 item ), return )
 
+// Returns number of milliseconds to delay spawning item at start of level,
+// or 0 for no delay.
+MOD_FUNCTION_DEF( ItemInitialSpawnDelay, int, ( PREFIX1 gentity_t *ent ),
+		( PREFIX2 ent ), return )
+
+// Allow mods to change item respawn time. Called ahead of g_adaptRespawn adjustment.
+MOD_FUNCTION_DEF( AdjustItemRespawnTime, float, ( PREFIX1 float time, const gentity_t *ent ),
+		( PREFIX2 time, ent ), return )
+
 // Returns the effective number of players to use for g_adaptRespawn calculation.
 MOD_FUNCTION_DEF( AdaptRespawnNumPlayers, int, ( VOID1 ),
 		( VOID2 ), return )
@@ -286,6 +300,14 @@ MOD_FUNCTION_DEF( CanItemBeGrabbed, qboolean, ( PREFIX1 gentity_t *item, int cli
 // Check if item can be tossed on death/disconnect.
 MOD_FUNCTION_DEF( CanItemBeDropped, qboolean, ( PREFIX1 gitem_t *item, int clientNum ),
 		( PREFIX2 item, clientNum ), return )
+
+// Set the client origin to use when tossing items.
+MOD_FUNCTION_DEF( ItemTossOrigin, void, ( PREFIX1 int clientNum, vec3_t originOut ),
+		( PREFIX2 clientNum, originOut ), )
+
+// Returns number of milliseconds until dropped item expires (0 = never expires).
+MOD_FUNCTION_DEF( ItemDropExpireTime, int, ( PREFIX1 const gitem_t *item ),
+		( PREFIX2 item ), return )
 
 // Adds ammo when player picks up either a weapon or ammo item.
 MOD_FUNCTION_DEF( AddAmmoForItem, void, ( PREFIX1 int clientNum, gentity_t *item, int weapon, int count ),

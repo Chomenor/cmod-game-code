@@ -55,6 +55,10 @@ int ModFNDefault_ModifyDamageFlags( gentity_t *targ, gentity_t *inflictor, genti
 	return dflags;
 }
 
+float ModFNDefault_AdjustItemRespawnTime( float time, const gentity_t *ent ) {
+	return time;
+}
+
 int ModFNDefault_ModifyFireRate( int defaultInterval, int weapon, qboolean alt ) {
 	return defaultInterval;
 }

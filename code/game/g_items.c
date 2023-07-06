@@ -41,16 +41,15 @@ int ModFNDefault_AdaptRespawnNumPlayers( void ) {
 }
 
 // For more than four players, adjust the respawn times, up to 1/4.
-int adjustRespawnTime(float respawnTime)
+int adjustRespawnTime(float respawnTime, const gentity_t *ent)
 {
 	int numPlayers;
-	if (!g_adaptRespawn.integer)
-	{
-		return((int)respawnTime);
-	}
+
+	// Peform mod adjustments.
+	respawnTime = modfn.AdjustItemRespawnTime( respawnTime, ent );
 
 	numPlayers = modfn.AdaptRespawnNumPlayers();
-	if (numPlayers > 4)
+	if (g_adaptRespawn.integer && numPlayers > 4 && ent->item->giType != IT_POWERUP)
 	{	// Start scaling the respawn times.
 		if (numPlayers > 32)
 		{	// 1/4 time minimum.
@@ -148,7 +147,7 @@ int Pickup_Powerup( gentity_t *ent, gentity_t *other ) {
 		client->ps.persistant[PERS_REWARD] = REWARD_DENIED;
 	}
 
-	return RESPAWN_POWERUP;
+	return adjustRespawnTime(RESPAWN_POWERUP, ent);
 }
 
 //======================================================================
@@ -167,7 +166,7 @@ int Pickup_Holdable( gentity_t *ent, gentity_t *other )
 	// kef -- log the fact that we picked up this item
 	G_LogWeaponItem(other->s.number, bg_itemlist[nItem].giTag);
 
-	return adjustRespawnTime(RESPAWN_HOLDABLE);
+	return adjustRespawnTime(RESPAWN_HOLDABLE, ent);
 }
 
 
@@ -200,7 +199,7 @@ int Pickup_Ammo (gentity_t *ent, gentity_t *other)
 
 	modfn.AddAmmoForItem( other - g_entities, ent, ent->item->giTag, quantity );
 
-	return adjustRespawnTime(RESPAWN_AMMO);
+	return adjustRespawnTime(RESPAWN_AMMO, ent);
 }
 
 //======================================================================
@@ -253,10 +252,10 @@ int Pickup_Weapon (gentity_t *ent, gentity_t *other) {
 	// team deathmatch has slow weapon respawns
 	if ( g_gametype.integer == GT_TEAM )
 	{
-		return adjustRespawnTime(RESPAWN_TEAM_WEAPON);
+		return adjustRespawnTime(RESPAWN_TEAM_WEAPON, ent);
 	}
 
-	return adjustRespawnTime(g_weaponRespawn.integer);
+	return adjustRespawnTime(g_weaponRespawn.integer, ent);
 }
 
 
@@ -290,7 +289,7 @@ int Pickup_Health (gentity_t *ent, gentity_t *other) {
 		return RESPAWN_MEGAHEALTH;			// It also does not adapt like other health pickups.
 	}
 
-	return adjustRespawnTime(RESPAWN_HEALTH);
+	return adjustRespawnTime(RESPAWN_HEALTH, ent);
 }
 
 //======================================================================
@@ -301,7 +300,7 @@ int Pickup_Armor( gentity_t *ent, gentity_t *other ) {
 		other->client->ps.stats[STAT_ARMOR] = other->client->ps.stats[STAT_MAX_HEALTH] * 2;
 	}
 
-	return adjustRespawnTime(RESPAWN_ARMOR);
+	return adjustRespawnTime(RESPAWN_ARMOR, ent);
 }
 
 //======================================================================
@@ -454,6 +453,12 @@ void Touch_Item (gentity_t *ent, gentity_t *other, trace_t *trace) {
 		te->r.svFlags |= SVF_BROADCAST;
 	}
 
+	// special seeker pickup sound
+	if ( ent->item->giType == IT_POWERUP && ent->item->giTag == PW_SEEKER &&
+			modfn.AdjustGeneralConstant( GC_SEEKER_PICKUP_SOUND, 0 ) ) {
+		G_ClientGlobalSound( G_SoundIndex( "sound/enemies/borg/alcoveout.wav" ), other - g_entities );
+	}
+
 	// fire item targets
 	G_UseTargets (ent, other);
 
@@ -522,6 +527,17 @@ void Touch_Item (gentity_t *ent, gentity_t *other, trace_t *trace) {
 
 /*
 ================
+(ModFN) ItemDropExpireTime
+
+Returns number of milliseconds until dropped item expires (0 = never expires).
+================
+*/
+int ModFNDefault_ItemDropExpireTime( const gitem_t *item ) {
+	return 30000;
+}
+
+/*
+================
 LaunchItem
 
 Spawns an item and tosses it forward
@@ -578,7 +594,7 @@ gentity_t *LaunchItem( gitem_t *item, vec3_t origin, vec3_t velocity ) {
 		te->r.svFlags |= SVF_BROADCAST;
 
 	} else { // auto-remove after 30 seconds
-		int duration = modfn.AdjustGeneralConstant( GC_DROPPED_ITEM_EXPIRATION, 30000 );
+		int duration = modfn.ItemDropExpireTime( item );
 		if ( duration > 0 ) {
 			dropped->think = G_FreeEntity;
 			dropped->nextthink = level.time + duration;
@@ -596,6 +612,17 @@ gentity_t *LaunchItem( gitem_t *item, vec3_t origin, vec3_t velocity ) {
 
 /*
 ================
+(ModFN) ItemTossOrigin
+
+Set the client origin to use when tossing items.
+================
+*/
+void ModFNDefault_ItemTossOrigin( int clientNum, vec3_t originOut ) {
+	VectorCopy( level.clients[clientNum].ps.origin, originOut );
+}
+
+/*
+================
 Drop_Item
 
 Spawns an item and tosses it forward
@@ -604,6 +631,7 @@ Spawns an item and tosses it forward
 gentity_t *Drop_Item( gentity_t *ent, gitem_t *item, float angle ) {
 	vec3_t	velocity;
 	vec3_t	angles;
+	vec3_t	origin;
 
 	VectorCopy( ent->s.apos.trBase, angles );
 	angles[YAW] += angle;
@@ -613,7 +641,8 @@ gentity_t *Drop_Item( gentity_t *ent, gitem_t *item, float angle ) {
 	VectorScale( velocity, 150, velocity );
 	velocity[2] += 200 + crandom() * 50;
 
-	return LaunchItem( item, ent->s.pos.trBase, velocity );
+	modfn.ItemTossOrigin( ent - g_entities, origin );
+	return LaunchItem( item, origin, velocity );
 }
 
 
@@ -629,6 +658,24 @@ void Use_Item( gentity_t *ent, gentity_t *other, gentity_t *activator ) {
 }
 
 //======================================================================
+
+/*
+================
+(ModFN) ItemInitialSpawnDelay
+
+Returns number of milliseconds to delay spawning item at start of level,
+or 0 for no delay.
+================
+*/
+int ModFNDefault_ItemInitialSpawnDelay( gentity_t *ent ) {
+	// powerups don't spawn in for a while
+	if ( ent->item->giType == IT_POWERUP ) {
+		float respawn = 45 + crandom() * 15;
+		return respawn * 1000;
+	}
+
+	return 0;
+}
 
 /*
 ================
@@ -688,21 +735,11 @@ void FinishSpawningItem( gentity_t *ent ) {
 		return;
 	}
 
-	// powerups don't spawn in for a while
-	if ( ent->item->giType == IT_POWERUP ) {
-		float	respawn;
-
-		respawn = 45 + crandom() * 15;
-
-		ent->s.eFlags |= EF_NODRAW;
-		ent->r.contents = 0;
-		ent->nextthink = level.time + respawn * 1000;
-		ent->think = RespawnItem;
-		return;
-	}
-	
 	// check if item spawn suppressed
-	suppressed = modfn.CheckItemSuppressed( ent );
+	suppressed = modfn.ItemInitialSpawnDelay( ent );
+	if ( suppressed <= 0 ) {
+		suppressed = modfn.CheckItemSuppressed( ent );
+	}
 	if ( suppressed > 0 ) {
 		ent->nextthink = level.time + suppressed;
 		ent->think = RespawnItem;

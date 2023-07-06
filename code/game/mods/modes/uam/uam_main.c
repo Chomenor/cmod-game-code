@@ -119,6 +119,17 @@ static void MOD_PREFIX(SetSpawnCS)( MODFN_CTV, int num, const char *defaultValue
 
 /*
 ==================
+(ModFN) ItemDropExpireTime
+
+Dropped items don't expire.
+==================
+*/
+static int MOD_PREFIX(ItemDropExpireTime)( MODFN_CTV, const gitem_t *item ) {
+	return 0;
+}
+
+/*
+==================
 (ModFN) AdjustGeneralConstant
 ==================
 */
@@ -131,12 +142,6 @@ static int MOD_PREFIX(AdjustGeneralConstant)( MODFN_CTV, generalConstant_t gcTyp
 		case GC_FORCE_TEAM_PODIUM:
 			if ( !ModElimMultiRound_Static_GetIsFinalScores() ) {
 				return 1;
-			}
-			break;
-		case GC_DROPPED_ITEM_EXPIRATION:
-			// dropped items don't expire
-			if ( modcfg.mods_enabled.elimination ) {
-				return 0;
 			}
 			break;
 		case GC_TOSS_ITEMS_ON_SUICIDE:
@@ -292,7 +297,7 @@ void ModUAM_Init( void ) {
 		ModTimelimitCountdown_Init();
 		ModUAMMusic_Init();
 		ModUAMWinnerTaunt_Init();
-		ModUAMEndSound_Init();
+		ModEndSound_Init();
 		ModGhostSparkle_Init();
 	}
 
@@ -314,6 +319,7 @@ void ModUAM_Init( void ) {
 	MODFN_REGISTER( SpawnCenterPrintMessage, ++modePriorityLevel );
 	MODFN_REGISTER( PostClientSpawn, ++modePriorityLevel );
 	MODFN_REGISTER( SetSpawnCS, ++modePriorityLevel );
+	MODFN_REGISTER( ItemDropExpireTime, ++modePriorityLevel );
 	MODFN_REGISTER( AdjustGeneralConstant, ++modePriorityLevel );
 	MODFN_REGISTER( AdjustModConstant, ++modePriorityLevel );
 	MODFN_REGISTER( CanItemBeDropped, ++modePriorityLevel );

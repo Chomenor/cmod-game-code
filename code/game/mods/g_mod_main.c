@@ -165,6 +165,7 @@ LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 	trap_Cvar_Register( NULL, "g_pModElimination", "0", CVAR_SERVERINFO | CVAR_LATCH );
 	trap_Cvar_Register( NULL, "g_mod_uam", "0", CVAR_SERVERINFO | CVAR_LATCH );
 	trap_Cvar_Register( NULL, "g_mod_instagib", "0", CVAR_SERVERINFO | CVAR_LATCH );
+	trap_Cvar_Register( NULL, "g_mod_razor", "0", CVAR_SERVERINFO | CVAR_LATCH );
 
 	// Core mods
 	ModTeamGroups_Init();
@@ -189,6 +190,8 @@ LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 		ModTournament_Init();
 	} else if ( modsEnabled >= 2 && trap_Cvar_VariableIntegerValue( "g_mod_uam" ) ) {
 		ModUAM_Init();
+	} else if ( modsEnabled >= 2 && trap_Cvar_VariableIntegerValue( "g_mod_razor" ) ) {
+		ModRazor_Init();
 	} else if ( trap_Cvar_VariableIntegerValue( "g_pModElimination" ) ) {
 		ModElimination_Init();
 	} else if ( trap_Cvar_VariableIntegerValue( "g_pModAssimilation" ) ) {
@@ -212,6 +215,12 @@ LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 		trap_Cvar_Set( "g_mod_instagib", "" );
 		trap_Cvar_Set( "g_mod_uam", "" );
 	}
+
+	if ( !modcfg.mods_enabled.razor ) {
+		trap_Cvar_Set( "difficulty", "" );
+	}
+
+	trap_Cvar_Set( "g_mod_razor", modcfg.mods_enabled.razor ? "1" : "" );
 
 	modfn_lcl.PostModInit();
 }

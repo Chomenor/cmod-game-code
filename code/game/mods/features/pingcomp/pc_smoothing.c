@@ -307,6 +307,9 @@ static void MOD_PREFIX(PostPlayerDie)( MODFN_CTV, gentity_t *self, gentity_t *in
 			// player to visually snap to the playerstate position a bit, but is usually pretty minor
 			// and works adequately for this special case.
 			modclient->deadOnMover = qtrue;
+		} else if ( meansOfDeath == MOD_TRIGGER_HURT && modfn_lcl.AdjustModConstant( MC_PINGCOMP_NO_TH_DEAD_MOVE, 0 ) ) {
+			// If mod disables dead move for trigger hurt, keep using time-shifted position with no
+			// move splitting.
 		} else if ( VectorCompare( client->ps.velocity, vec3_origin ) ) {
 			// If velocity was cleared by death effects also start the dead move with no velocity.
 			ModPCDeadMove_Static_InitDeadMove( clientNum, snap.origin, vec3_origin );

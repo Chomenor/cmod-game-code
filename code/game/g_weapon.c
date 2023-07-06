@@ -330,6 +330,12 @@ void WP_FireCompressionRifle ( gentity_t *ent, qboolean alt_fire, qboolean imod_
 		}
 		else if ( splashDmg && splashRadius )
 		{
+			// Quad does not affect rifle splash unless enabled by mod
+			float splashDmgAdjusted = splashDmg;
+			if ( modfn.AdjustWeaponConstant( WC_CRIFLE_SPLASH_USE_QUADFACTOR, 0 ) ) {
+				splashDmgAdjusted *= s_quadFactor;
+			}
+
 			if (alt_fire)
 			{
 				mod = MOD_CRIFLE_ALT_SPLASH;
@@ -339,7 +345,7 @@ void WP_FireCompressionRifle ( gentity_t *ent, qboolean alt_fire, qboolean imod_
 				mod = MOD_CRIFLE_SPLASH;
 			}
 
-			if( G_RadiusDamage( tr.endpos, ent, splashDmg, splashRadius, NULL, 0, mod ) )
+			if( G_RadiusDamage( tr.endpos, ent, splashDmgAdjusted, splashRadius, NULL, 0, mod ) )
 			{
 				// Does a burst radius hit really count as a "hit"?  Not for compression rifles...
 				//g_entities[ent->s.number].client->ps.persistant[PERS_ACCURACY_HITS]++;

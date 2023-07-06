@@ -15,6 +15,7 @@ static struct {
 } *MOD_STATE;
 
 #define QUAD_EFFECTS_ENABLED modfn_lcl.AdjustModConstant( MC_QUAD_EFFECTS_ENABLED, 0 )
+#define PINBALL_STYLE modfn_lcl.AdjustModConstant( MC_QUAD_EFFECTS_PINBALL_STYLE, 0 )
 
 /*
 ================
@@ -61,7 +62,12 @@ static void MOD_PREFIX(AddWeaponEffect)( MODFN_CTV, weaponEffect_t weType, genti
 	}
 
 	if ( weType == WE_RIFLE_ALT && ent->client->ps.powerups[PW_QUAD] ) {
-		G_TempEntity( trace->endpos, EV_EXPLODESHELL );
+		if ( PINBALL_STYLE ) {
+			gentity_t *ev = G_TempEntity( trace->endpos, EV_GRENADE_SHRAPNEL_EXPLODE );
+			ev->s.eventParm = DirToByte( trace->plane.normal );
+		} else {
+			G_TempEntity( trace->endpos, EV_EXPLODESHELL );
+		}
 	}
 
 	if ( weType == WE_GRENADE_PRIMARY && QuadEffects_ActiveForProjectile( ent ) ) {
@@ -104,7 +110,8 @@ static void MOD_PREFIX(MissileImpact)( MODFN_CTV, gentity_t *ent, trace_t *trace
 	}
 
 	if ( QuadEffects_ActiveForProjectile( ent ) &&
-			( ent->methodOfDeath == MOD_QUANTUM || ent->methodOfDeath == MOD_QUANTUM_ALT ) ) {
+			( ent->methodOfDeath == MOD_QUANTUM || ent->methodOfDeath == MOD_QUANTUM_ALT ||
+			( ent->methodOfDeath == MOD_GRENADE && PINBALL_STYLE ) ) ) {
 		qboolean hit_alive_player = G_IsConnectedClient( trace->entityNum ) &&
 				level.clients[trace->entityNum].ps.stats[STAT_HEALTH] > 0;
 

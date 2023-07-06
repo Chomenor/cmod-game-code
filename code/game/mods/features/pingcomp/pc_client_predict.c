@@ -75,6 +75,10 @@ static void ModPCClientPredict_AddInfo( char *info ) {
 		ModPCClientPredict_AddWeaponConstant( buffer, sizeof( buffer ), WC_STASIS_VELOCITY, 1100, "ps5p" );
 		ModPCClientPredict_AddWeaponConstant( buffer, sizeof( buffer ), WC_DN_SEARCH_DIST, 256, "ps9a" );
 		ModPCClientPredict_AddWeaponConstant( buffer, sizeof( buffer ), WC_BORG_PROJ_VELOCITY, 1000, "psbp" );
+
+		if ( modfn_lcl.AdjustModConstant( MC_SEEKER_ACCELERATOR_MODE, 0 ) ) {
+			Q_strcat( buffer, sizeof( buffer ), " seekerAccel:1" );
+		}
 	}
 
 	Info_SetValueForKey( info, "weaponPredict", buffer );

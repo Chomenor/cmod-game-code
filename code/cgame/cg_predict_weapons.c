@@ -18,6 +18,7 @@ static struct {
 	qboolean projectiles;	// whether projectile compensation is enabled
 	qboolean tripMines;		// grenade tripmines enabled
 	qboolean imodRifle;		// gladiator-style instagib rifle enabled
+	qboolean seekerAccel;	// pinball-style weapon acceleration with seeker powerup
 	int projectileSpeed4p;
 	int projectileSpeed4a;
 	int projectileSpeed5p;
@@ -93,6 +94,7 @@ static void CG_WeaponPredict_LoadValue( const char *key, const char *value ) {
 	CG_WeaponPredict_LoadBoolean( key, value, "proj", &wepPredictCfg.projectiles );
 	CG_WeaponPredict_LoadBoolean( key, value, "tm", &wepPredictCfg.tripMines );
 	CG_WeaponPredict_LoadBoolean( key, value, "imodRifle", &wepPredictCfg.imodRifle );
+	CG_WeaponPredict_LoadBoolean( key, value, "seekerAccel", &wepPredictCfg.seekerAccel );
 	CG_WeaponPredict_LoadInteger( key, value, "ps4p", &wepPredictCfg.projectileSpeed4p );
 	CG_WeaponPredict_LoadInteger( key, value, "ps4a", &wepPredictCfg.projectileSpeed4a );
 	CG_WeaponPredict_LoadInteger( key, value, "ps5p", &wepPredictCfg.projectileSpeed5p );
@@ -194,6 +196,8 @@ static const vec3_t CG_WP_MuzzlePoint[WP_NUM_WEAPONS] =
 #define BORG_PROJECTILE_SIZE	8
 #define BORG_PROJ_VELOCITY		( wepPredictCfg.projectileSpeedbp > 0 ? wepPredictCfg.projectileSpeedbp : 1000 )
 #define MAX_FORWARD_TRACE	8192
+
+#define SEEKER_ACCEL_ACTIVE ( wepPredictCfg.seekerAccel && cg.predictedPlayerState.powerups[PW_SEEKER] )
 
 static float CG_WeaponPredict_ShotSize( weapon_t weapon ) {
 	switch ( weapon ) {
@@ -1369,6 +1373,12 @@ static void CG_WeaponPredict_PrimaryAttack( int event ) {
 		SnapVector( proj->cent.currentState.pos.trDelta );
 		proj->cent.currentState.eFlags |= EF_BOUNCE_HALF;
 
+		if ( SEEKER_ACCEL_ACTIVE ) {
+			proj->cent.currentState.eType = ET_ALT_MISSILE;
+			proj->cent.currentState.weapon = WP_QUANTUM_BURST;
+			VectorScale( proj->cent.currentState.pos.trDelta, 2.0f, proj->cent.currentState.pos.trDelta );
+		}
+
 		CG_WeaponPredict_LogPredictedProjectile( proj );
 	}
 
@@ -1389,6 +1399,11 @@ static void CG_WeaponPredict_PrimaryAttack( int event ) {
 		predictedProjectile_t *proj = CG_WeaponPredict_SpawnPredictedProjectile(
 				ET_MISSILE, WP_QUANTUM_BURST, TR_LINEAR, QUANTUM_VELOCITY, QUANTUM_SIZE, &dirs );
 		SnapVector( proj->cent.currentState.pos.trDelta );
+
+		if ( SEEKER_ACCEL_ACTIVE ) {
+			proj->cent.currentState.eType = ET_ALT_MISSILE;
+			VectorScale( proj->cent.currentState.pos.trDelta, 2.5f, proj->cent.currentState.pos.trDelta );
+		}
 
 		CG_WeaponPredict_LogPredictedProjectile( proj );
 	}
@@ -1462,6 +1477,10 @@ static void CG_WeaponPredict_AltAttack( int event ) {
 				ET_ALT_MISSILE, WP_GRENADE_LAUNCHER, moveType, GRENADE_VELOCITY_ALT, GRENADE_SIZE, &dirs );
 		SnapVector( proj->cent.currentState.pos.trDelta );
 		proj->cent.currentState.eFlags |= EF_MISSILE_STICK;
+
+		if ( SEEKER_ACCEL_ACTIVE ) {
+			VectorScale( proj->cent.currentState.pos.trDelta, 2.0f, proj->cent.currentState.pos.trDelta );
+		}
 
 		CG_WeaponPredict_LogPredictedProjectile( proj );
 	}

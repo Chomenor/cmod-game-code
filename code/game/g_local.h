@@ -458,6 +458,7 @@ gentity_t	*G_Spawn (void);
 gentity_t *G_TempEntity( vec3_t origin, int event );
 void	G_Sound( gentity_t *ent, int soundIndex );
 void	G_GlobalSound( int soundIndex );
+void	G_ClientGlobalSound( int soundIndex, int clientNum );
 void	G_FreeEntity( gentity_t *e );
 
 void	G_TouchTriggers (gentity_t *ent);
@@ -495,6 +496,9 @@ qboolean G_RadiusDamage (vec3_t origin, gentity_t *attacker, float damage, float
 #define DAMAGE_ALL_TEAMS			0x00000200	// trek: damage ignores teamdamage settings
 #define DAMAGE_TRIGGERS_ONLY		0x00000400	// no damage, knockback, or effects, but can push triggers
 #define DAMAGE_NO_HEALTH_DAMAGE		0x00000800	// does triggers, knockback and client effects, and hits armor, but no main health damage
+#define DAMAGE_LIMIT_EFFECTS		0x00001000	// disable certain shield and pain effects
+#define DAMAGE_NO_KNOCKBACK_CAP		0x00002000	// disable 200 knockback cap
+#define DAMAGE_NO_HALF_SELF			0x00004000	// don't reduce self damage by half
 
 //
 // g_missile.c

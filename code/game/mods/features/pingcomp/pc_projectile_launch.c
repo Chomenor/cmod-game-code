@@ -137,12 +137,12 @@ int MOD_PREFIX(AdjustGeneralConstant)( MODFN_CTV, generalConstant_t gcType, int 
 ======================
 */
 static void MOD_PREFIX(PostFireProjectile)( MODFN_CTV, gentity_t *projectile ) {
-	if ( projectile->inuse && ModPingcomp_Static_ProjectileCompensationEnabled() ) {
-		ModPCProjectileLaunch_AdvanceProjectile( projectile );
-	}
-
 	if ( projectile->inuse ) {
 		MODFN_NEXT( PostFireProjectile, ( MODFN_NC, projectile ) );
+	}
+
+	if ( projectile->inuse && ModPingcomp_Static_ProjectileCompensationEnabled() ) {
+		ModPCProjectileLaunch_AdvanceProjectile( projectile );
 	}
 }
 
@@ -171,7 +171,7 @@ void ModPCProjectileLaunch_Init( void ) {
 
 		MODFN_REGISTER( AdjustWeaponConstant, MODPRIORITY_GENERAL );
 		MODFN_REGISTER( AdjustGeneralConstant, MODPRIORITY_GENERAL );
-		MODFN_REGISTER( PostFireProjectile, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( PostFireProjectile, MODPRIORITY_HIGH );
 		MODFN_REGISTER( PostRunFrame, MODPRIORITY_GENERAL );
 	}
 }

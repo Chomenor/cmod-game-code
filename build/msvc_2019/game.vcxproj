@@ -212,6 +212,7 @@
     <ClInclude Include="..\..\code\game\mods\g_mod_public.h" />
     <ClInclude Include="..\..\code\game\mods\modes\assimilation\assim_local.h" />
     <ClInclude Include="..\..\code\game\mods\modes\elimination\elim_local.h" />
+    <ClInclude Include="..\..\code\game\mods\modes\razor\razor_local.h" />
     <ClInclude Include="..\..\code\game\mods\modes\specialties\specs_local.h" />
     <ClInclude Include="..\..\code\game\mods\modes\uam\uam_local.h" />
   </ItemGroup>
@@ -258,6 +259,7 @@
     <ClCompile Include="..\..\code\game\mods\components\comp_alt_fire_config.c" />
     <ClCompile Include="..\..\code\game\mods\components\comp_clicktojoin.c" />
     <ClCompile Include="..\..\code\game\mods\components\comp_detpack.c" />
+    <ClCompile Include="..\..\code\game\mods\components\comp_end_sound.c" />
     <ClCompile Include="..\..\code\game\mods\components\comp_firerate_cs.c" />
     <ClCompile Include="..\..\code\game\mods\components\comp_forcefield.c" />
     <ClCompile Include="..\..\code\game\mods\components\comp_ghost_sparkle.c" />
@@ -307,10 +309,18 @@
     <ClCompile Include="..\..\code\game\mods\modes\mode_actionhero.c" />
     <ClCompile Include="..\..\code\game\mods\modes\mode_disintegration.c" />
     <ClCompile Include="..\..\code\game\mods\modes\mode_tournament.c" />
+    <ClCompile Include="..\..\code\game\mods\modes\razor\razor_damage.c" />
+    <ClCompile Include="..\..\code\game\mods\modes\razor\razor_difficulty.c" />
+    <ClCompile Include="..\..\code\game\mods\modes\razor\razor_greeting.c" />
+    <ClCompile Include="..\..\code\game\mods\modes\razor\razor_items.c" />
+    <ClCompile Include="..\..\code\game\mods\modes\razor\razor_main.c" />
+    <ClCompile Include="..\..\code\game\mods\modes\razor\razor_powerups.c" />
+    <ClCompile Include="..\..\code\game\mods\modes\razor\razor_scoring.c" />
+    <ClCompile Include="..\..\code\game\mods\modes\razor\razor_sounds.c" />
+    <ClCompile Include="..\..\code\game\mods\modes\razor\razor_weapons.c" />
     <ClCompile Include="..\..\code\game\mods\modes\specialties\specs_main.c" />
     <ClCompile Include="..\..\code\game\mods\modes\uam\uam_ammo.c" />
     <ClCompile Include="..\..\code\game\mods\modes\uam\uam_death_effects.c" />
-    <ClCompile Include="..\..\code\game\mods\modes\uam\uam_end_sound.c" />
     <ClCompile Include="..\..\code\game\mods\modes\uam\uam_greeting.c" />
     <ClCompile Include="..\..\code\game\mods\modes\uam\uam_instagib.c" />
     <ClCompile Include="..\..\code\game\mods\modes\uam\uam_instagib_savewep.c" />

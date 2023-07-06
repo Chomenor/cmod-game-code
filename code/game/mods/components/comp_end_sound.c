@@ -1,12 +1,12 @@
 /*
-* UAM End Sound
+* End Sound
 * 
-* Play an extra sound effect when the round is over.
+* Play an extra sound effect when entering intermission consistent with Gladiator and Pinball mods.
 */
 
-#define MOD_NAME ModUAMEndSound
+#define MOD_NAME ModEndSound
 
-#include "mods/modes/uam/uam_local.h"
+#include "mods/g_mod_local.h"
 
 static struct {
 	int _unused;
@@ -28,13 +28,13 @@ static void MOD_PREFIX(MatchStateTransition)( MODFN_CTV, matchState_t oldState, 
 
 /*
 ================
-ModUAMEndSound_Init
+ModEndSound_Init
 ================
 */
-void ModUAMEndSound_Init( void ) {
+void ModEndSound_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		MODFN_REGISTER( MatchStateTransition, ++modePriorityLevel );
+		MODFN_REGISTER( MatchStateTransition, MODPRIORITY_GENERAL );
 	}
 }

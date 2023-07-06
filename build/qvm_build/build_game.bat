@@ -66,6 +66,7 @@ set src=game\mods&set name=g_mod_utils&call :compile
 set src=game\mods\components&set name=comp_alt_fire_config&call :compile
 set src=game\mods\components&set name=comp_clicktojoin&call :compile
 set src=game\mods\components&set name=comp_detpack&call :compile
+set src=game\mods\components&set name=comp_end_sound&call :compile
 set src=game\mods\components&set name=comp_firerate_cs&call :compile
 set src=game\mods\components&set name=comp_forcefield&call :compile
 set src=game\mods\components&set name=comp_ghost_sparkle&call :compile
@@ -112,10 +113,18 @@ set src=game\mods\modes\elimination&set name=elim_misc&call :compile
 set src=game\mods\modes\elimination&set name=elim_multiround&call :compile
 set src=game\mods\modes\elimination&set name=elim_timelimit&call :compile
 set src=game\mods\modes\elimination&set name=elim_tweaks&call :compile
+set src=game\mods\modes\razor&set name=razor_damage&call :compile
+set src=game\mods\modes\razor&set name=razor_difficulty&call :compile
+set src=game\mods\modes\razor&set name=razor_greeting&call :compile
+set src=game\mods\modes\razor&set name=razor_items&call :compile
+set src=game\mods\modes\razor&set name=razor_main&call :compile
+set src=game\mods\modes\razor&set name=razor_scoring&call :compile
+set src=game\mods\modes\razor&set name=razor_sounds&call :compile
+set src=game\mods\modes\razor&set name=razor_powerups&call :compile
+set src=game\mods\modes\razor&set name=razor_weapons&call :compile
 set src=game\mods\modes\specialties&set name=specs_main&call :compile
 set src=game\mods\modes\uam&set name=uam_ammo&call :compile
 set src=game\mods\modes\uam&set name=uam_death_effects&call :compile
-set src=game\mods\modes\uam&set name=uam_end_sound&call :compile
 set src=game\mods\modes\uam&set name=uam_powerups&call :compile
 set src=game\mods\modes\uam&set name=uam_greeting&call :compile
 set src=game\mods\modes\uam&set name=uam_instagib&call :compile

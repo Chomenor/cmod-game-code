@@ -18,6 +18,7 @@ static struct {
 
 #define SECONDS_PER_SHOT modfn_lcl.AdjustModConstant( MC_SEEKER_SECONDS_PER_SHOT, 1 )
 #define MOD_TYPE modfn_lcl.AdjustModConstant( MC_SEEKER_MOD_TYPE, MOD_SCAVENGER )
+#define ACCELERATOR_MODE modfn_lcl.AdjustModConstant( MC_SEEKER_ACCELERATOR_MODE, 0 )
 
 /*
 ================
@@ -78,6 +79,38 @@ static void MOD_PREFIX(CheckFireSeeker)( MODFN_CTV, int clientNum ) {
 
 /*
 ================
+(ModFN) PostFireProjectile
+================
+*/
+static void MOD_PREFIX(PostFireProjectile)( MODFN_CTV, gentity_t *projectile ) {
+	MODFN_NEXT( PostFireProjectile, ( MODFN_NC, projectile ) );
+
+	// If accelerator mode is enabled, seeker causes certain fired weapon projectiles to move extra
+	// fast and have different graphics.
+	if ( projectile->inuse && ACCELERATOR_MODE ) {
+		int clientNum = projectile->parent - g_entities;
+		if ( G_AssertConnectedClient( clientNum ) && level.clients[clientNum].ps.powerups[PW_SEEKER] ) {
+			if ( projectile->methodOfDeath == MOD_QUANTUM || projectile->methodOfDeath == MOD_GRENADE ) {
+				projectile->s.eType = ET_ALT_MISSILE;
+				projectile->s.weapon = WP_QUANTUM_BURST;
+			}
+
+			// Note this scaling is currently done after SnapVector, which is probably not
+			// technically ideal but for this case the difference should be negligible.
+
+			if ( projectile->methodOfDeath == MOD_QUANTUM ) {
+				VectorScale( projectile->s.pos.trDelta, 2.5f, projectile->s.pos.trDelta );
+			}
+
+			if ( projectile->methodOfDeath == MOD_GRENADE || projectile->methodOfDeath == MOD_GRENADE_ALT ) {
+				VectorScale( projectile->s.pos.trDelta, 2.0f, projectile->s.pos.trDelta );
+			}
+		}
+	}
+}
+
+/*
+================
 ModSeeker_Init
 
 Call with registerPhoton set if there is a possibility photonAltMode will be enabled
@@ -89,6 +122,7 @@ void ModSeeker_Init( qboolean registerPhoton ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
 		MODFN_REGISTER( CheckFireSeeker, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( PostFireProjectile, MODPRIORITY_GENERAL );
 	}
 
 	if ( registerPhoton ) {

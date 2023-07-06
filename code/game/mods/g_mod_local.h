@@ -16,6 +16,7 @@ typedef struct {
 	qboolean disintegration;
 	qboolean actionhero;
 	qboolean uam;
+	qboolean razor;
 } mods_enabled_t;
 
 typedef struct {
@@ -52,18 +53,24 @@ typedef enum {
 	MC_BOTADD_PER_TEAM_ADJUST,		// only add/remove bots from one team per cycle
 	MC_BOTADD_IGNORE_SPECTATORS,	// spectators don't count as players for FFA bot count calculations
 
+	// ping compensation
+	MC_PINGCOMP_NO_TH_DEAD_MOVE,	// don't perform split body movement after trigger hurt death
+
 	// comp_detpack.c / ModDetpack_Init
 	MC_DETPACK_ORIGIN_PATCH,		// use detpack origin for blast, rather than origin of player who placed it
 	MC_DETPACK_GLADIATOR_ANNOUNCEMENTS,		// gladiator-style audio announcements on detpack place/destroy
 	MC_DETPACK_PING_SOUND,			// gladiator-style ping sound effect on detpack
 	MC_DETPACK_DROP_ON_DEATH,		// drop placed detpack at placement location when player dies, instead of destroying
+	MC_DETPACK_INVULNERABLE,		// detpack can't be destroyed by weapons fire
 
 	// comp_seeker.c / ModSeeker_Init
 	MC_SEEKER_SECONDS_PER_SHOT,		// 0 = disable firing altogether
 	MC_SEEKER_MOD_TYPE,				// e.g. MOD_QUANTUM_ALT
+	MC_SEEKER_ACCELERATOR_MODE,		// use Pinball-style projectile acceleration
 
 	// comp_quad_effects.c / ModQuadEffects_Init
 	MC_QUAD_EFFECTS_ENABLED,
+	MC_QUAD_EFFECTS_PINBALL_STYLE,
 
 	// comp_ghost_sparkle.c / ModGhostSparkle_Init
 	MC_GHOST_SPARKLE_ENABLED,
@@ -77,6 +84,7 @@ void ModActionHero_Init( void );
 void ModAssimilation_Init( void );
 void ModDisintegration_Init( void );
 void ModElimination_Init( void );
+void ModRazor_Init( void );
 void ModSpecialties_Init( void );
 void ModTournament_Init( void );
 void ModUAM_Init( void );
@@ -139,6 +147,7 @@ void ModTeamGroups_Shared_ForceConfigStrings( const char *redGroup, const char *
 void ModAltFireConfig_Init( void );
 void ModClickToJoin_Init( void );
 void ModDetpack_Init( void );
+void ModEndSound_Init( void );
 void ModFireRateCS_Init( void );
 void ModForcefield_Init( void );
 void ModGhostSparkle_Init( void );

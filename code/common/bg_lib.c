@@ -330,15 +330,42 @@ double tan( double x ) {
 }
 
 
-static int randSeed = 0;
+static unsigned int randState[4] = {
+	// start with some base values in case srand is never called
+	0x343b2250,
+	0x7336c098,
+	0x03af11f5,
+	0x92527961
+};
 
-void	srand( unsigned seed ) {
-	randSeed = seed;
+static unsigned int rotl(const unsigned int x, int k) {
+	return (x << k) | (x >> (32 - k));
 }
 
-int		rand( void ) {
-	randSeed = (69069 * randSeed + 1);
-	return randSeed & 0x7fff;
+void srand( unsigned seed ) {
+	randState[0] = seed;
+	randState[1] = rotl( seed, 5 ) * 55829;
+	randState[2] = rotl( seed, 10 ) * 753499;
+	randState[3] = rotl( seed, 17 ) * 859;
+}
+
+int rand( void ) {
+	// xoshiro128** 1.1 by David Blackman and Sebastiano Vigna
+	// adapted from https://prng.di.unimi.it/xoshiro128starstar.c
+	const unsigned int result = rotl(randState[1] * 5, 7) * 9;
+
+	const unsigned int t = randState[1] << 9;
+
+	randState[2] ^= randState[0];
+	randState[3] ^= randState[1];
+	randState[1] ^= randState[2];
+	randState[0] ^= randState[3];
+
+	randState[2] ^= t;
+
+	randState[3] = rotl(randState[3], 11);
+
+	return result & 0x7fff;
 }
 
 double atof( const char *string ) {

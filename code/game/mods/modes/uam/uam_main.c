@@ -313,7 +313,7 @@ void ModUAM_Init( void ) {
 	trap_Cvar_Set( "g_pModSpecialties", "" );
 
 	// Set mod name for server browsers
-	trap_Cvar_Set( "gamename", "uam" );
+	trap_Cvar_Set( "gamename", "UAM" );
 
 	MODFN_REGISTER( GetDamageMult, ++modePriorityLevel );
 	MODFN_REGISTER( SpawnCenterPrintMessage, ++modePriorityLevel );

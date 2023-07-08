@@ -75,6 +75,8 @@ qboolean ModPCDeadMove_Static_ShiftClient( int clientNum, Smoothing_ShiftInfo_t 
 		pm.tracemask = MASK_PLAYERSOLID & ~CONTENTS_BODY;
 		pm.trace = trap_Trace;
 		pm.pointcontents = trap_PointContents;
+		pm.bounceFix = qtrue;
+		pm.snapVectorGravLimit = 100;
 
 		// Advance deadState position
 		movePS.commandTime = deadState->lastMoveTime;

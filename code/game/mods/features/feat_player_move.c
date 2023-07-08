@@ -103,8 +103,9 @@ static void MOD_PREFIX(RunPlayerMove)( MODFN_CTV, int clientNum ) {
 
 	modfn.PmoveInit( clientNum, &pmove );
 
-	if ( isBot && fixedLength > 0 && client->ps.velocity[2] == 0.0f && pmove.cmd.upmove <= 0 ) {
-		// For bots with no vertical movement, skip frame partitioning to save server cpu usage.
+	if ( isBot && fixedLength > 0 && client->ps.velocity[2] == 0.0f && pmove.cmd.upmove <= 0 &&
+			!( client->ps.pm_type == PM_DEAD && ( client->ps.velocity[0] != 0.0f || client->ps.velocity[1] != 0.0f ) ) ) {
+		// For non-dead bots with no vertical movement, skip frame partitioning to save server cpu usage.
 		// Since bots don't do things like circle jumping it shouldn't make a noticeable difference.
 		pmove.cmd.serverTime -= pmove.cmd.serverTime % fixedLength;
 		Pmove( &pmove, 0, ModPlayerMove_PostPmoveCallback, &pmc );

@@ -343,10 +343,10 @@ static unsigned int rotl(const unsigned int x, int k) {
 }
 
 void srand( unsigned seed ) {
-	randState[0] = seed;
-	randState[1] = rotl( seed, 5 ) * 55829;
-	randState[2] = rotl( seed, 10 ) * 753499;
-	randState[3] = rotl( seed, 17 ) * 859;
+	randState[0] = seed ^ 0x343b2250;
+	randState[1] = rotl( seed ^ 0x7336c098, 5 ) * 55829;
+	randState[2] = rotl( seed ^ 0x03af11f5, 10 ) * 753499;
+	randState[3] = rotl( seed ^ 0x92527961, 17 ) * 859;
 }
 
 int rand( void ) {

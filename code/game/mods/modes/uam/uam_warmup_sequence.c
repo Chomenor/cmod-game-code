@@ -92,11 +92,11 @@ static qboolean MOD_PREFIX(GetWarmupSequence)( MODFN_CTV, modWarmupSequence_t *s
 
 /*
 ================
-(ModFN) PreClientConnect
+(ModFN) PostClientConnect
 ================
 */
-static void MOD_PREFIX(PreClientConnect)( MODFN_CTV, int clientNum, qboolean firstTime, qboolean isBot ) {
-	MODFN_NEXT( PreClientConnect, ( MODFN_NC, clientNum, firstTime, isBot ) );
+static void MOD_PREFIX(PostClientConnect)( MODFN_CTV, int clientNum, qboolean firstTime, qboolean isBot ) {
+	MODFN_NEXT( PostClientConnect, ( MODFN_NC, clientNum, firstTime, isBot ) );
 
 	// Clear shortWarmupReady when new players join.
 	// However, players joining during warmup are currently ignored, consistent with Gladiator mod.
@@ -151,7 +151,7 @@ void ModUAMWarmupSequence_Init( void ) {
 		ModWarmupSequence_Init();
 
 		MODFN_REGISTER( GetWarmupSequence, ++modePriorityLevel );
-		MODFN_REGISTER( PreClientConnect, ++modePriorityLevel );
+		MODFN_REGISTER( PostClientConnect, ++modePriorityLevel );
 		MODFN_REGISTER( GenerateGlobalSessionInfo, ++modePriorityLevel );
 	}
 }

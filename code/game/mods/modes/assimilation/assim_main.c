@@ -378,15 +378,15 @@ static void MOD_PREFIX(PrePlayerLeaveTeam)( MODFN_CTV, int clientNum, team_t old
 
 /*
 ================
-(ModFN) PreClientConnect
+(ModFN) PostClientConnect
 ================
 */
-static void MOD_PREFIX(PreClientConnect)( MODFN_CTV, int clientNum, qboolean firstTime, qboolean isBot ) {
+static void MOD_PREFIX(PostClientConnect)( MODFN_CTV, int clientNum, qboolean firstTime, qboolean isBot ) {
 	if ( !MOD_STATE->borgTeam ) {
 		// Determine borg team color.
 		ModAssimilation_DetermineBorgColor( !firstTime );
 	}
-	MODFN_NEXT( PreClientConnect, ( MODFN_NC, clientNum, firstTime, isBot ) );
+	MODFN_NEXT( PostClientConnect, ( MODFN_NC, clientNum, firstTime, isBot ) );
 }
 
 /*
@@ -772,7 +772,7 @@ static void MOD_PREFIX(PostRunFrame)( MODFN_CTV ) {
 	ModAssimilation_CheckReplaceQueen();
 
 	// If server is empty reset the borg team, so the server isn't stuck on the same borg team indefinitely.
-	// New borg team will be selected when first client connects via PreClientConnect.
+	// New borg team will be selected when first client connects via PostClientConnect.
 	if ( MOD_STATE->borgTeam && level.numConnectedClients == 0 ) {
 		G_DedPrintf( "assimilation: Resetting borg team color due to empty server.\n" );
 		MOD_STATE->borgTeam = TEAM_FREE;
@@ -836,7 +836,7 @@ void ModAssimilation_Init( void ) {
 		MODFN_REGISTER( CheckJoinAllowed, ++modePriorityLevel );
 		MODFN_REGISTER( PostPlayerDie, ++modePriorityLevel );
 		MODFN_REGISTER( PrePlayerLeaveTeam, ++modePriorityLevel );
-		MODFN_REGISTER( PreClientConnect, ++modePriorityLevel );
+		MODFN_REGISTER( PostClientConnect, ++modePriorityLevel );
 		MODFN_REGISTER( InitClientSession, ++modePriorityLevel );
 		MODFN_REGISTER( UpdateSessionClass, ++modePriorityLevel );
 		MODFN_REGISTER( SpawnConfigureClient, ++modePriorityLevel );

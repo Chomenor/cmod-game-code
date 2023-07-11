@@ -22,7 +22,7 @@ void ModFNDefault_PostGameShutdown( qboolean restart ) {
 void ModFNDefault_MatchStateTransition( matchState_t oldState, matchState_t newState ) {
 }
 
-void ModFNDefault_PreClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
+void ModFNDefault_PostClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 }
 
 void ModFNDefault_PreClientSpawn( int clientNum, clientSpawnType_t spawnType ) {

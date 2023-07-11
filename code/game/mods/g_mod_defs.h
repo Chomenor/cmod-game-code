@@ -89,9 +89,8 @@ MOD_FUNCTION_DEF( ExitLevel, void, ( VOID1 ),
 // (connection, spawn, disconnect, etc.)
 //////////////////////////
 
-// Called at beginning of ClientConnect when a valid client is connecting.
-// Note that client structures have not yet been initialized at this point.
-MOD_FUNCTION_DEF( PreClientConnect, void, ( PREFIX1 int clientNum, qboolean firstTime, qboolean isBot ),
+// Called after a player is added to the game.
+MOD_FUNCTION_DEF( PostClientConnect, void, ( PREFIX1 int clientNum, qboolean firstTime, qboolean isBot ),
 		( PREFIX2 clientNum, firstTime, isBot ), )
 
 // Called when a player is ready to respawn.

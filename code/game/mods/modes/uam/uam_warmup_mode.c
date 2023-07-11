@@ -13,7 +13,7 @@
 #include "mods/modes/uam/uam_local.h"
 
 static struct {
-	// Warmup mode is set to active in PreClientConnect, and remains active for the rest of
+	// Warmup mode is set to active in PostClientConnect, and remains active for the rest of
 	// the session (until map restart/change).
 	int active;
 } *MOD_STATE;
@@ -230,10 +230,10 @@ static void MOD_PREFIX(MatchStateTransition)( MODFN_CTV, matchState_t oldState, 
 
 /*
 ================
-(ModFN) PreClientConnect
+(ModFN) PostClientConnect
 ================
 */
-static void MOD_PREFIX(PreClientConnect)( MODFN_CTV, int clientNum, qboolean firstTime, qboolean isBot ) {
+static void MOD_PREFIX(PostClientConnect)( MODFN_CTV, int clientNum, qboolean firstTime, qboolean isBot ) {
 	if ( !MOD_STATE->active && modfn.WarmupLength() > 0 && level.matchState < MS_ACTIVE ) {
 		int i;
 
@@ -249,7 +249,7 @@ static void MOD_PREFIX(PreClientConnect)( MODFN_CTV, int clientNum, qboolean fir
 		}
 	}
 
-	MODFN_NEXT( PreClientConnect, ( MODFN_NC, clientNum, firstTime, isBot ) );
+	MODFN_NEXT( PostClientConnect, ( MODFN_NC, clientNum, firstTime, isBot ) );
 }
 
 /*
@@ -280,6 +280,6 @@ void ModUAMWarmupMode_Init( void ) {
 		MODFN_REGISTER( RunPlayerMove, MODPRIORITY_HIGH );
 		MODFN_REGISTER( PostRunFrame, MODPRIORITY_HIGH );
 		MODFN_REGISTER( MatchStateTransition, MODPRIORITY_HIGH );
-		MODFN_REGISTER( PreClientConnect, MODPRIORITY_HIGH );
+		MODFN_REGISTER( PostClientConnect, MODPRIORITY_HIGH );
 	}
 }

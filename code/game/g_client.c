@@ -892,8 +892,6 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 		}
 	}
 
-	modfn.PreClientConnect( clientNum, firstTime, isBot );
-
 	// they can connect
 	ent->client = level.clients + clientNum;
 	client = ent->client;
@@ -938,6 +936,8 @@ char *ClientConnect( int clientNum, qboolean firstTime, qboolean isBot ) {
 	if ( level.intermissiontime ) {
 		SendScoreboardMessageToAllClients();
 	}
+
+	modfn.PostClientConnect( clientNum, firstTime, isBot );
 
 	return NULL;
 }

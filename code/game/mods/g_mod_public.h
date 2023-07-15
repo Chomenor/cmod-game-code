@@ -123,6 +123,7 @@ typedef enum {
 	WC_WELDER_SKIP_INITIAL_THINK,
 	WC_IMPRESSIVE_REWARDS,
 	WC_CRIFLE_SPLASH_USE_QUADFACTOR,
+	WC_ASSIM_NO_STRICT_TEAM_CHECK,		// allow assimilator to work in FFA
 } weaponConstant_t;
 
 // Mod trace flags

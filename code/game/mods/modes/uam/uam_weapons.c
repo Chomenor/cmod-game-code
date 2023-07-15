@@ -29,6 +29,8 @@ static int MOD_PREFIX(AdjustWeaponConstant)( MODFN_CTV, weaponConstant_t wcType,
 		case WC_DN_MAX_MOVES:
 			// 100ms per move, so welder bursts stop after about 10 seconds.
 			return 100;		// orig: 0
+		case WC_ASSIM_NO_STRICT_TEAM_CHECK:
+			return 1;
 
 		case WC_PHASER_DAMAGE:
 			return 7;		// orig: 6
@@ -114,6 +116,21 @@ static char MOD_PREFIX(AltFireConfig)( MODFN_CTV, weapon_t weapon ) {
 
 /*
 ================
+(ModFN) ModifyDamageFlags
+
+Don't allow assimilator weapon to penetrate shields.
+================
+*/
+static int MOD_PREFIX(ModifyDamageFlags)( MODFN_CTV, gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+		vec3_t dir, vec3_t point, int damage, int dflags, int mod ) {
+	if ( mod == MOD_ASSIMILATE ) {
+		dflags &= ~( DAMAGE_NO_ARMOR | DAMAGE_NO_INVULNERABILITY );
+	}
+	return MODFN_NEXT( ModifyDamageFlags, ( MODFN_NC, targ, inflictor, attacker, dir, point, damage, dflags, mod ) );
+}
+
+/*
+================
 ModUAMWeapons_Init
 ================
 */
@@ -136,5 +153,6 @@ void ModUAMWeapons_Init( qboolean allowWeaponCvarChanges ) {
 		MODFN_REGISTER( AdjustWeaponConstant, ++modePriorityLevel );
 		MODFN_REGISTER( ModifyFireRate, ++modePriorityLevel );
 		MODFN_REGISTER( AltFireConfig, ++modePriorityLevel );
+		MODFN_REGISTER( ModifyDamageFlags, ++modePriorityLevel );
 	}
 }

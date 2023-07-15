@@ -2373,7 +2373,9 @@ void WP_Assimilate( gentity_t *ent, qboolean alt_fire )
 
 	tr_ent = &g_entities[tr.entityNum];
 
-	if ( tr_ent && tr_ent->client && tr_ent->health > 0 && ent->client && ent->client->sess.sessionTeam != tr_ent->client->sess.sessionTeam )
+	if ( tr_ent && tr_ent->client && tr_ent->health > 0 && ent->client &&
+			( ent->client->sess.sessionTeam != tr_ent->client->sess.sessionTeam ||
+			modfn.AdjustWeaponConstant( WC_ASSIM_NO_STRICT_TEAM_CHECK, 0 ) ) )
 	{
 		if ( modfn.IsBorgQueen( ent - g_entities ) )
 		{//Borg queen assimilates with one hit

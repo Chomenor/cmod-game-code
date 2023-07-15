@@ -690,6 +690,9 @@ void CalculateRanks( void ) {
 	// if we waited until next frame, simultaneous events like multiple players being hit by explosion
 	// could be handled incorrectly
 	G_CheckExitRules();
+
+	// run mod activities
+	modfn.PostCalculateRanks();
 }
 
 

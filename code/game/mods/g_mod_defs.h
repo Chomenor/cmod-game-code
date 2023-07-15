@@ -55,6 +55,10 @@ MOD_FUNCTION_DEF( PostRunFrame, void, ( VOID1 ),
 MOD_FUNCTION_DEF( PostGameShutdown, void, ( PREFIX1 qboolean restart ),
 		( PREFIX2 restart ), )
 
+// Called after CalculateRanks completes.
+MOD_FUNCTION_DEF( PostCalculateRanks, void, ( VOID1 ),
+		( VOID2 ), )
+
 // Called when level.matchState has been updated.
 MOD_FUNCTION_DEF( MatchStateTransition, void, ( PREFIX1 matchState_t oldState, matchState_t newState ),
 		( PREFIX2 oldState, newState ), )
@@ -484,6 +488,11 @@ MOD_FUNCTION_LOCAL( PostModInit, void, ( VOID1 ),
 // Requires: ModModcfgCS_Init() from comp_modcfg_cs.c
 MOD_FUNCTION_LOCAL( AddModConfigInfo, void, ( PREFIX1 char *info ),
 		( PREFIX2 info ), )
+
+// Allows mods to add values to the client state info shared with the engine.
+// Requires: ModGameInfo_Init() from feat_game_info.c
+MOD_FUNCTION_LOCAL( AddGameInfoClient, void, ( PREFIX1 int clientNum, info_string_t *info ),
+		( PREFIX2 clientNum, info ), )
 
 // Performs processing/conversion of player model to fit mod requirements.
 // Writes empty string to use random model instead.

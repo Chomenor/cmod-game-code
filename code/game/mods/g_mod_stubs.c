@@ -19,6 +19,9 @@ void ModFNDefault_PostRunFrame( void ) {
 void ModFNDefault_PostGameShutdown( qboolean restart ) {
 }
 
+void ModFNDefault_PostCalculateRanks( void ) {
+}
+
 void ModFNDefault_MatchStateTransition( matchState_t oldState, matchState_t newState ) {
 }
 
@@ -94,6 +97,9 @@ qboolean ModFNDefault_IsBorgQueen( int clientNum ) {
 
 int ModFNDefault_AdjustModConstant( modConstant_t mcType, int defaultValue ) {
 	return defaultValue;
+}
+
+void ModFNDefault_AddGameInfoClient( int clientNum, info_string_t *info ) {
 }
 
 void ModFNDefault_PostModInit( void ) {

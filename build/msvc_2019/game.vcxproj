@@ -276,6 +276,7 @@
     <ClCompile Include="..\..\code\game\mods\features\feat_altswap_handler.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_bot_adding.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_debug_modfn.c" />
+    <ClCompile Include="..\..\code\game\mods\features\feat_game_info.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_gladiator_item_enable.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_misc.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_player_move.c" />

@@ -146,6 +146,21 @@ qboolean ModElimMultiRound_Static_GetIsFinalScores( void ) {
 	return qfalse;
 }
 
+/*
+================
+(ModFN) AddGameInfoClient
+
+Share match scores with engine.
+================
+*/
+static void MOD_PREFIX(AddGameInfoClient)( MODFN_CTV, int clientNum, info_string_t *info ) {
+	const eliminationMR_client_t *modclient = &MOD_STATE->clients[clientNum];
+	MODFN_NEXT( AddGameInfoClient, ( MODFN_NC, clientNum, info ) );
+	Info_SetValueForKey_Big( info->s, "matchScore",
+			va( "%i", g_gametype.integer >= GT_TEAM ? modclient->matchKills : modclient->roundWins ) );
+	Info_SetValueForKey_Big( info->s, "matchKills", va( "%i", modclient->matchKills ) );
+}
+
 #ifdef FEATURE_WARMUP_MESSAGE_SEQUENCE
 /*
 ================
@@ -730,6 +745,7 @@ void ModElimMultiRound_Init( void ) {
 
 	MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
+	MODFN_REGISTER( AddGameInfoClient, ++modePriorityLevel );
 	MODFN_REGISTER( AdjustScoreboardAttributes, ++modePriorityLevel );
 	MODFN_REGISTER( EffectiveScore, ++modePriorityLevel );
 	MODFN_REGISTER( CalculateAwards, ++modePriorityLevel );

@@ -13,6 +13,9 @@
 * 
 * This mod requires engine support via the trap_status_scores_override_set_array extension.
 * If not available, this mod will not have any effect.
+* 
+* Note: This module is deprecated and planned to be removed in the future in favor of the game
+* info module (feat_game_info.c) once engine support is ready.
 */
 
 #define MOD_NAME ModStatusScores

@@ -117,6 +117,7 @@ void UAMMusic_Static_PlayIntermissionMusic( void );
 void ModAltSwapHandler_Init( void );
 void ModBotAdding_Init( void );
 void ModDebugModfn_Init( void );
+void ModGameInfo_Init( void );
 void ModGladiatorItemEnable_Init( void );
 void ModMiscFeatures_Init( void );
 void ModPingcomp_Init( void );

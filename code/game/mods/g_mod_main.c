@@ -180,6 +180,7 @@ LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 		ModPingcomp_Init();
 		ModSpectPassThrough_Init();
 		ModSpawnProtect_Init();
+		ModGameInfo_Init();
 		ModStatusScores_Init();
 		ModBotAdding_Init();
 		ModGladiatorItemEnable_Init();

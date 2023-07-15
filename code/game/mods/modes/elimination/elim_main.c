@@ -124,6 +124,18 @@ qboolean ModElimination_Shared_MatchLocked( void ) {
 
 /*
 ================
+(ModFN) AddGameInfoClient
+
+Share player eliminated status with engine.
+================
+*/
+static void MOD_PREFIX(AddGameInfoClient)( MODFN_CTV, int clientNum, info_string_t *info ) {
+	MODFN_NEXT( AddGameInfoClient, ( MODFN_NC, clientNum, info ) );
+	Info_SetValueForKey_Big( info->s, "eliminated", MOD_STATE->clients[clientNum].eliminated ? "1" : "0" );
+}
+
+/*
+================
 (ModFN) SpectatorClient
 
 Treat eliminated players as spectators.
@@ -497,6 +509,7 @@ void ModElimination_Init( void ) {
 			}
 		}
 
+		MODFN_REGISTER( AddGameInfoClient, ++modePriorityLevel );
 		MODFN_REGISTER( SpectatorClient, ++modePriorityLevel );
 		MODFN_REGISTER( AdjustScoreboardAttributes, ++modePriorityLevel );
 		MODFN_REGISTER( EffectiveScore, ++modePriorityLevel );

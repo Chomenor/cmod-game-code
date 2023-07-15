@@ -83,6 +83,7 @@ set src=game\mods\components&set name=comp_warmup_sequence&call :compile
 set src=game\mods\features&set name=feat_altswap_handler&call :compile
 set src=game\mods\features&set name=feat_bot_adding&call :compile
 set src=game\mods\features&set name=feat_debug_modfn&call :compile
+set src=game\mods\features&set name=feat_game_info&call :compile
 set src=game\mods\features&set name=feat_gladiator_item_enable&call :compile
 set src=game\mods\features&set name=feat_misc&call :compile
 set src=game\mods\features&set name=feat_player_move&call :compile

@@ -18,7 +18,7 @@ static struct {
 ======================
 */
 static void MOD_PREFIX(AddWeaponEffect)( MODFN_CTV, weaponEffect_t weType, gentity_t *ent, trace_t *trace ) {
-	if ( weType == WE_IMOD ) {
+	if ( weType == WE_IMOD_END ) {
 		if ( !( trace->surfaceFlags & SURF_NOIMPACT ) ) {
 			gentity_t *tent = G_TempEntity( trace->endpos, EV_GENERAL_SOUND );
 			tent->s.eventParm = G_SoundIndex( "sound/weapons/scavenger/hit_wall.wav" );

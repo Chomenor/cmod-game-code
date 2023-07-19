@@ -546,6 +546,7 @@ void WP_FireIMOD ( gentity_t *ent, qboolean alt_fire )
 		}
 		if ( tr.contents & CONTENTS_SOLID )
 		{
+			modfn.AddWeaponEffect( WE_IMOD_END, ent, &tr );
 			break;		// we hit something solid enough to stop the beam
 		}
 		// unlink this entity, so the next trace will go past it
@@ -585,9 +586,6 @@ void WP_FireIMOD ( gentity_t *ent, qboolean alt_fire )
 		tent->s.eventParm = DirToByte( tr.plane.normal );
 		tent->s.weapon = ent->s.weapon;
 	}
-
-	// Add mod effects
-	modfn.AddWeaponEffect( WE_IMOD, ent, &tr );
 
 	G_LogWeaponFire(ent->s.number, WP_IMOD);
 }

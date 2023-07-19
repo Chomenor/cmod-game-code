@@ -40,7 +40,7 @@ typedef enum {
 } forcefieldEvent_t;
 
 typedef enum {
-	WE_IMOD,
+	WE_IMOD_END,
 	WE_IMOD_RIFLE,
 	WE_RIFLE_ALT,
 	WE_GRENADE_PRIMARY,

@@ -89,7 +89,8 @@ static void MOD_PREFIX(RunPlayerMove)( MODFN_CTV, int clientNum ) {
 	pmc.clientNum = clientNum;
 	pmc.oldEventSequence = ps->eventSequence;
 
-	if ( ps->pm_type == PM_SPECTATOR && client->ps.velocity[0] == 0.0f && client->ps.velocity[1] == 0.0f &&
+	if ( ps->pm_type == PM_SPECTATOR && client->ps.viewheight == DEFAULT_VIEWHEIGHT &&
+			client->ps.velocity[0] == 0.0f && client->ps.velocity[1] == 0.0f &&
 			client->ps.velocity[2] == 0.0f && client->pers.cmd.forwardmove == 0 &&
 			client->pers.cmd.rightmove == 0 && client->pers.cmd.upmove == 0 ) {
 		// Skip full move for stationary spectators to save server cpu usage.

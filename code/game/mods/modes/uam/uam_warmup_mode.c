@@ -203,9 +203,10 @@ static void MOD_PREFIX(PostRunFrame)( MODFN_CTV ) {
 		}
 	}
 
-	if ( level.matchState >= MS_INTERMISSION_QUEUED && level.numPlayingClients < 2 && !level.exiting ) {
+	if ( level.matchState >= MS_INTERMISSION_QUEUED && level.numConnectedClients < 2 && !level.exiting ) {
 		// Similar to the MatchStateTransition check, but applies to intermission,
 		// for consistency with original gladiator mod
+		G_Printf( "uam: Restart due to insufficient players (intermission).\n" );
 		level.exiting = qtrue;
 		trap_SendConsoleCommand( EXEC_APPEND, "map_restart 0\n" );
 		return;
@@ -220,6 +221,7 @@ static void MOD_PREFIX(PostRunFrame)( MODFN_CTV ) {
 static void MOD_PREFIX(MatchStateTransition)( MODFN_CTV, matchState_t oldState, matchState_t newState ) {
 	if ( oldState >= MS_ACTIVE && newState < MS_ACTIVE && modfn.WarmupLength() > 0 ) {
 		// Always restart if dropping back to warmup mode
+		G_Printf( "uam: Restart due to insufficient players.\n" );
 		level.exiting = qtrue;
 		trap_SendConsoleCommand( EXEC_APPEND, "map_restart 0\n" );
 		return;

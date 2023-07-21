@@ -702,9 +702,10 @@ static void MOD_PREFIX(MatchStateTransition)( MODFN_CTV, matchState_t oldState, 
 #endif
 		
 		} else {
-			if ( G_AssertConnectedClient( level.sortedClients[0] ) ) {
-				// Survivor should be first sorted client.
-				eliminationMR_client_t *modclient = &MOD_STATE->clients[level.sortedClients[0]];
+			// Survivor should be first sorted client (except in special cases involving connecting clients).
+			int survivor = level.sortedClients[0];
+			if ( G_AssertConnectedClient( survivor ) && !ModElimination_Static_IsPlayerEliminated( survivor ) ) {
+				eliminationMR_client_t *modclient = &MOD_STATE->clients[survivor];
 				modclient->roundWins++;
 			}
 		}

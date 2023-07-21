@@ -50,7 +50,7 @@ int ModElimination_Static_CountPlayersAlive( void ) {
 			gclient_t *client = &level.clients[i];
 			elimination_client_t *modclient = &MOD_STATE->clients[i];
 
-			if ( client->pers.connected >= CON_CONNECTING && !modclient->eliminated && !modfn.SpectatorClient( i ) ) {
+			if ( client->pers.connected == CON_CONNECTED && !modclient->eliminated && !modfn.SpectatorClient( i ) ) {
 				++count;
 			}
 		}
@@ -77,7 +77,7 @@ int ModElimination_Shared_CountPlayersAliveTeam( team_t team, int ignoreClientNu
 		gclient_t *client = &level.clients[i];
 		elimination_client_t *modclient = &MOD_STATE->clients[i];
 
-		if ( client->pers.connected >= CON_CONNECTING && client->sess.sessionTeam == team &&
+		if ( client->pers.connected == CON_CONNECTED && client->sess.sessionTeam == team &&
 				ignoreClientNum != i && !modclient->eliminated && !modfn.SpectatorClient( i ) ) {
 			++count;
 		}

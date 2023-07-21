@@ -76,7 +76,13 @@ static void MOD_PREFIX(PostRunFrame)( MODFN_CTV ) {
 		else if ( MOD_STATE->finalistMusicState == FMS_DELAY_IN_PROGRESS ) {
 			if ( level.time >= MOD_STATE->finalistMusicDelayEndTime ) {
 				if ( G_ModUtils_ReadGladiatorBoolean( MOD_STATE->g_mod_PlayCountdownMusic.string ) ) {
-					trap_SetConfigstring( CS_MUSIC, finalistMusic[ irandom( 0, ARRAY_LEN( finalistMusic ) - 1) ] );
+					// Don't start finalist music if map is already playing its own custom music.
+					char buffer[256];
+					buffer[0] = '\0';
+					trap_GetConfigstring( CS_MUSIC, buffer, sizeof( buffer ) );
+					if ( !*buffer ) {
+						trap_SetConfigstring( CS_MUSIC, finalistMusic[ irandom( 0, ARRAY_LEN( finalistMusic ) - 1) ] );
+					}
 				}
 				MOD_STATE->finalistMusicState = FMS_COMPLETED;
 			}

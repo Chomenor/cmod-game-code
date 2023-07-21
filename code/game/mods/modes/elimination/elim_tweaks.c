@@ -83,14 +83,15 @@ ModElimTweaks_EliminatedMessage
 */
 static void ModElimTweaks_EliminatedMessage( int clientNum, team_t oldTeam, qboolean eliminated ) {
 	gclient_t *client = &level.clients[clientNum];
+	const char *leavemsg = modcfg.mods_enabled.uam ? "left the battle" : "left the game";
+	const char *playerterm = modcfg.mods_enabled.uam ? "gladiator" : "player";
 
 	if ( g_gametype.integer >= GT_TEAM ) {
 		int playersAlive = ModElimination_Shared_CountPlayersAliveTeam( oldTeam, clientNum );
 		if ( playersAlive >= 1 ) {
 			trap_SendServerCommand( -1, va( "cp \"%s ^7%s\n^%s%i %s%s of team %s left\"",
-					client->pers.netname, eliminated ? "died" : "left the game",
-					oldTeam == TEAM_RED ? "1" : "4", playersAlive,
-					modcfg.mods_enabled.uam ? "gladiator" : "player",
+					client->pers.netname, eliminated ? "died" : leavemsg,
+					oldTeam == TEAM_RED ? "1" : "4", playersAlive, playerterm,
 					playersAlive == 1 ? "" : "s", oldTeam == TEAM_RED ? "red" : "blue" ) );
 			ModElimTweaks_RemainingPlayerSound( playersAlive );
 		}
@@ -99,8 +100,7 @@ static void ModElimTweaks_EliminatedMessage( int clientNum, team_t oldTeam, qboo
 		int playersAlive = ModElimination_Shared_CountPlayersAliveTeam( TEAM_FREE, clientNum );
 		if ( playersAlive >= 2 ) {
 			trap_SendServerCommand( -1, va( "cp \"%s ^7%s\n^4%i %ss in the arena left\"",
-					client->pers.netname, eliminated ? "died" : "left the game",
-					playersAlive, modcfg.mods_enabled.uam ? "gladiator" : "player" ) );
+					client->pers.netname, eliminated ? "died" : leavemsg, playersAlive, playerterm ) );
 			ModElimTweaks_RemainingPlayerSound( playersAlive );
 		}
 	}
@@ -232,15 +232,15 @@ static void MOD_PREFIX(PostPlayerDie)( MODFN_CTV, gentity_t *self, gentity_t *in
 /*
 ================
 (ModFN) PrePlayerLeaveTeam
-
-Reset stats and eliminated state when player switches teams or becomes spectator.
 ================
 */
 static void MOD_PREFIX(PrePlayerLeaveTeam)( MODFN_CTV, int clientNum, team_t oldTeam ) {
+	gclient_t *client = &level.clients[clientNum];
 	MODFN_NEXT( PrePlayerLeaveTeam, ( MODFN_NC, clientNum, oldTeam ) );
 
 #ifdef FEATURE_ELIMINATED_MESSAGES
-	if ( level.matchState == MS_ACTIVE && oldTeam != TEAM_SPECTATOR && !ModElimination_Static_IsPlayerEliminated( clientNum ) ) {
+	if ( level.matchState == MS_ACTIVE && client->pers.connected == CON_CONNECTED &&
+			oldTeam != TEAM_SPECTATOR && !ModElimination_Static_IsPlayerEliminated( clientNum ) ) {
 		ModElimTweaks_EliminatedMessage( clientNum, oldTeam, qfalse );
 	}
 #endif

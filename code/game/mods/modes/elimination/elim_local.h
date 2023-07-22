@@ -7,4 +7,3 @@ void ModElimMultiRound_Init( void );
 
 int ModElimination_Shared_CountPlayersAliveTeam( team_t team, int ignoreClientNum );
 qboolean ModElimination_Static_IsPlayerEliminated( int clientNum );
-qboolean ModElimination_Shared_MatchLocked( void );

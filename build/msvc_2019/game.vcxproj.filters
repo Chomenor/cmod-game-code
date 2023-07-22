@@ -299,6 +299,9 @@
     <ClCompile Include="..\..\code\game\mods\components\comp_intermission_ready.c">
       <Filter>game\mods\components</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\components\comp_join_limit.c">
+      <Filter>game\mods\components</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\code\game\mods\components\comp_modcfg_cs.c">
       <Filter>game\mods\components</Filter>
     </ClCompile>

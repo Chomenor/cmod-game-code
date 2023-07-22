@@ -154,6 +154,7 @@ void ModForcefield_Init( void );
 void ModGhostSparkle_Init( void );
 void ModHoldableTransporter_Init( void );
 void ModIntermissionReady_Init( void );
+void ModJoinLimit_Init( void );
 void ModModcfgCS_Init( void );
 void ModModelGroups_Init( void );
 void ModModelSelection_Init( void );
@@ -220,6 +221,13 @@ typedef struct {
 void ModIntermissionReady_Shared_UpdateConfig( void );
 void ModIntermissionReady_Shared_Suspend( void );
 void ModIntermissionReady_Shared_Resume( void );
+
+//
+// Join limit handling (comp_join_limit.c)
+//
+
+qboolean ModJoinLimit_Static_MatchLocked( void );
+void ModJoinLimit_Static_StartMatchLock( void );
 
 //
 // Modcfg Configstring Handling (comp_modcfg_cs.c)

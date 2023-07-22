@@ -26,11 +26,9 @@ typedef struct {
 
 static struct {
 	elimination_client_t clients[MAX_CLIENTS];
-	trackedCvar_t g_noJoinTimeout;
 
 	// Current round state
 	int numEliminated;
-	int joinLimitTime;
 } *MOD_STATE;
 
 /*
@@ -95,31 +93,6 @@ Returns whether specific player is eliminated.
 */
 qboolean ModElimination_Static_IsPlayerEliminated( int clientNum ) {
 	return MOD_STATE && G_IsConnectedClient( clientNum ) && MOD_STATE->clients[clientNum].eliminated;
-}
-
-/*
-================
-ModElimination_Shared_MatchLocked
-
-Match is considered locked if g_noJoinTimeout has been reached, or if one or more players
-have been eliminated.
-================
-*/
-qboolean ModElimination_Shared_MatchLocked( void ) {
-	EF_ERR_ASSERT( MOD_STATE );
-
-	if ( level.matchState >= MS_ACTIVE ) {
-		if ( MOD_STATE->numEliminated > 0 ) {
-			return qtrue;
-		}
-
-		else if ( MOD_STATE->g_noJoinTimeout.integer > 0 &&
-				level.time >= MOD_STATE->joinLimitTime + ( MOD_STATE->g_noJoinTimeout.integer * 1000 ) ) {
-			return qtrue;
-		}
-	}
-
-	return qfalse;
 }
 
 /*
@@ -294,40 +267,16 @@ static void MOD_PREFIX(CheckExitRules)( MODFN_CTV ) {
 
 /*
 ================
-(ModFN) CheckJoinAllowed
-
-Check if joining or changing team/class is disabled due to match in progress.
+(ModFN) JoinLimitMessage
 ================
 */
-static qboolean MOD_PREFIX(CheckJoinAllowed)( MODFN_CTV, int clientNum, join_allowed_type_t type, team_t targetTeam ) {
-	gclient_t *client = &level.clients[clientNum];
-	elimination_client_t *modclient = &MOD_STATE->clients[clientNum];
-
-	if ( type != CJA_FORCETEAM && ModElimination_Shared_MatchLocked() ) {
-		if ( type == CJA_SETTEAM ) {
-			if ( modclient->eliminated ) {
-				trap_SendServerCommand( clientNum, "cp \"You have been eliminated until next round\"" );
-			} else if ( client->sess.sessionTeam == TEAM_SPECTATOR ) {
-				trap_SendServerCommand( clientNum, "cp \"Wait until next round to join\"" );
-			} else {
-				trap_SendServerCommand( clientNum, "cp \"Wait until next round to change teams\"" );
-			}
-		}
-
-		if ( type == CJA_SETCLASS ) {
-			if ( modclient->eliminated ) {
-				trap_SendServerCommand( clientNum, "cp \"You have been eliminated until next round\"" );
-			} else if ( client->sess.sessionTeam == TEAM_SPECTATOR ) {
-				trap_SendServerCommand( clientNum, "cp \"Wait until next round to join\"" );
-			} else {
-				trap_SendServerCommand( clientNum, "cp \"Wait until next round to change classes\"" );
-			}
-		}
-
-		return qfalse;
+static void MOD_PREFIX(JoinLimitMessage)( MODFN_CTV, int clientNum, join_allowed_type_t type, team_t targetTeam ) {
+	const elimination_client_t *modclient = &MOD_STATE->clients[clientNum];
+	if ( modclient->eliminated ) {
+		trap_SendServerCommand( clientNum, "cp \"You have been eliminated until next round\"" );
+	} else {
+		MODFN_NEXT( JoinLimitMessage, ( MODFN_NC, clientNum, type, targetTeam ) );
 	}
-
-	return MODFN_NEXT( CheckJoinAllowed, ( MODFN_NC, clientNum, type, targetTeam ) );
 }
 
 /*
@@ -347,6 +296,7 @@ static void MOD_PREFIX(PostPlayerDie)( MODFN_CTV, gentity_t *self, gentity_t *in
 	if ( meansOfDeath != MOD_KNOCKOUT ) {
 		modclient->eliminated = qtrue;
 		MOD_STATE->numEliminated++;
+		ModJoinLimit_Static_StartMatchLock();
 
 		// Normally unused, but set in case some server engine modification wants to access it.
 		self->r.svFlags |= SVF_ELIMINATED;
@@ -470,17 +420,6 @@ static void MOD_PREFIX(MatchStateTransition)( MODFN_CTV, matchState_t oldState, 
 		// Shouldn't happen - if players were eliminated we should hit CheckExitRules instead.
 		MOD_STATE->numEliminated = 0;
 	}
-
-	// Update join limit timer.
-	if ( newState == MS_ACTIVE ) {
-		G_DedPrintf( "elimination: Starting join limit countdown due to sufficient players.\n" );
-		MOD_STATE->joinLimitTime = level.time;
-	} else {
-		if ( newState < MS_ACTIVE && MOD_STATE->joinLimitTime ) {
-			G_DedPrintf( "elimination: Resetting join limit time due to insufficient players.\n" );
-		}
-		MOD_STATE->joinLimitTime = 0;
-	}
 }
 
 /*
@@ -497,8 +436,6 @@ void ModElimination_Init( void ) {
 		if ( trap_Cvar_VariableIntegerValue( "g_gametype" ) == GT_CTF ) {
 			trap_Cvar_Set( "g_gametype", "0" );
 		}
-
-		G_RegisterTrackedCvar( &MOD_STATE->g_noJoinTimeout, "g_noJoinTimeout", "120", CVAR_ARCHIVE, qfalse );
 
 		// Support combining with other mods
 		if ( !modcfg.mods_enabled.razor ) {
@@ -518,12 +455,15 @@ void ModElimination_Init( void ) {
 		MODFN_REGISTER( CheckRespawnTime, ++modePriorityLevel );
 		MODFN_REGISTER( AdjustGeneralConstant, ++modePriorityLevel );
 		MODFN_REGISTER( CheckExitRules, ++modePriorityLevel );
-		MODFN_REGISTER( CheckJoinAllowed, ++modePriorityLevel );
+		MODFN_REGISTER( JoinLimitMessage, ++modePriorityLevel );
 		MODFN_REGISTER( PostPlayerDie, ++modePriorityLevel );
 		MODFN_REGISTER( PrePlayerLeaveTeam, ++modePriorityLevel );
 		MODFN_REGISTER( InitClientSession, ++modePriorityLevel );
 		MODFN_REGISTER( PostRunFrame, ++modePriorityLevel );
 		MODFN_REGISTER( MatchStateTransition, ++modePriorityLevel );
+
+		// Disable joining mid-match
+		ModJoinLimit_Init();
 
 		// Initialize additional features
 		ModElimMisc_Init();

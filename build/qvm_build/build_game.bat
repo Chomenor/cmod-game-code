@@ -72,6 +72,7 @@ set src=game\mods\components&set name=comp_forcefield&call :compile
 set src=game\mods\components&set name=comp_ghost_sparkle&call :compile
 set src=game\mods\components&set name=comp_holdable_transporter&call :compile
 set src=game\mods\components&set name=comp_intermission_ready&call :compile
+set src=game\mods\components&set name=comp_join_limit&call :compile
 set src=game\mods\components&set name=comp_modcfg_cs&call :compile
 set src=game\mods\components&set name=comp_model_groups&call :compile
 set src=game\mods\components&set name=comp_model_selection&call :compile

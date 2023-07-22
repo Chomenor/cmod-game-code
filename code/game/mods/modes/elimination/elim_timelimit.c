@@ -100,7 +100,7 @@ ModElimTimelimit_CheckAdjustTimelimit
 ================
 */
 static void ModElimTimelimit_CheckAdjustTimelimit( void ) {
-	if ( level.matchState == MS_ACTIVE && ModElimination_Shared_MatchLocked() ) {
+	if ( level.matchState == MS_ACTIVE && ModJoinLimit_Static_MatchLocked() ) {
 		if ( MOD_STATE->g_mod_onlyBotsTimelimit.integer > 0 && !MOD_STATE->onlyBotsTimelimitActive &&
 				!ModElimTimelimit_HumanPlayersAlive() ) {
 			ModElimTimelimit_ModifyTimelimit( MOD_STATE->g_mod_onlyBotsTimelimit.integer, qfalse );

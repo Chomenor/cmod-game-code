@@ -507,6 +507,12 @@ MOD_FUNCTION_LOCAL( RandomPlayerModel, void, ( PREFIX1 int clientNum, const char
 		unsigned int outputSize ),
 		( PREFIX2 clientNum, userinfo, output, outputSize ), )
 
+// Prints a message when player is blocked from joining team by join limit module.
+// type will be CJA_SETTEAM or CJA_SETCLASS (not called for other types).
+// Requires: ModJoinLimit_Init() from comp_join_limit.c
+MOD_FUNCTION_LOCAL( JoinLimitMessage, void, ( PREFIX1 int clientNum, join_allowed_type_t type, team_t targetTeam ),
+		( PREFIX2 clientNum, type, targetTeam ), )
+
 // Allows configuring forcefield behavior parameters.
 // Requires: ModForcefield_Init() from comp_forcefield.c
 MOD_FUNCTION_LOCAL( ForcefieldConfig, void, ( PREFIX1 modForcefield_config_t *config ),

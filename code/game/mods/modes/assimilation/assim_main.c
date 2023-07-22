@@ -24,13 +24,11 @@ typedef struct {
 
 static struct {
 	assimilation_client_t clients[MAX_CLIENTS];
-	
-	trackedCvar_t g_noJoinTimeout;
+
 	trackedCvar_t g_preferNonBotQueen;
 
 	// Current match state
 	int borgQueenClientNum;		// -1 if not selected
-	int joinLimitTime;	// Time when there were enough players to start the game (0 if not started)
 	int numAssimilated;
 
 	// Which team is borg
@@ -150,67 +148,16 @@ static void ModAssimilation_DetermineBorgColor( qboolean restarting ) {
 
 /*
 ================
-ModAssimilation_MatchLocked
-
-Match is considered locked if g_noJoinTimeout has been reached, or if one or more players
-have been assimilated.
+(ModFN) JoinLimitMessage
 ================
 */
-static qboolean ModAssimilation_MatchLocked( void ) {
-	if ( level.matchState >= MS_ACTIVE ) {
-		if ( MOD_STATE->numAssimilated > 0 ) {
-			return qtrue;
-		}
-
-		else if ( MOD_STATE->g_noJoinTimeout.integer > 0 &&
-				level.time >= MOD_STATE->joinLimitTime + ( MOD_STATE->g_noJoinTimeout.integer * 1000 ) ) {
-			return qtrue;
-		}
+static void MOD_PREFIX(JoinLimitMessage)( MODFN_CTV, int clientNum, join_allowed_type_t type, team_t targetTeam ) {
+	const assimilation_client_t *modclient = &MOD_STATE->clients[clientNum];
+	if ( modclient->assimilated ) {
+		trap_SendServerCommand( clientNum, "cp \"You have been assimilated until next round\"" );
+	} else {
+		MODFN_NEXT( JoinLimitMessage, ( MODFN_NC, clientNum, type, targetTeam ) );
 	}
-
-	return qfalse;
-}
-
-/*
-================
-(ModFN) CheckJoinAllowed
-
-Check if joining or changing team/class is disabled due to match in progress.
-================
-*/
-static qboolean MOD_PREFIX(CheckJoinAllowed)( MODFN_CTV, int clientNum, join_allowed_type_t type, team_t targetTeam ) {
-	gclient_t *client = &level.clients[clientNum];
-	assimilation_client_t *modclient = &MOD_STATE->clients[clientNum];
-
-	if ( level.matchState >= MS_INTERMISSION_QUEUED ) {
-		return qfalse;
-	}
-
-	if ( type != CJA_FORCETEAM && ModAssimilation_MatchLocked() ) {
-		if ( type == CJA_SETTEAM ) {
-			if ( modclient->assimilated ) {
-				trap_SendServerCommand( clientNum, "cp \"You have been assimilated until next round\"" );
-			} else if ( client->sess.sessionTeam == TEAM_SPECTATOR ) {
-				trap_SendServerCommand( clientNum, "cp \"Wait until next round to join\"" );
-			} else {
-				trap_SendServerCommand( clientNum, "cp \"Wait until next round to change teams\"" );
-			}
-		}
-
-		if ( type == CJA_SETCLASS ) {
-			if ( modclient->assimilated ) {
-				trap_SendServerCommand( clientNum, "cp \"You have been assimilated until next round\"" );
-			} else if ( client->sess.sessionTeam == TEAM_SPECTATOR ) {
-				trap_SendServerCommand( clientNum, "cp \"Wait until next round to join\"" );
-			} else {
-				trap_SendServerCommand( clientNum, "cp \"Wait until next round to change class\"" );
-			}
-		}
-
-		return qfalse;
-	}
-
-	return MODFN_NEXT( CheckJoinAllowed, ( MODFN_NC, clientNum, type, targetTeam ) );
 }
 
 /*
@@ -342,6 +289,7 @@ static void MOD_PREFIX(PostPlayerDie)( MODFN_CTV, gentity_t *self, gentity_t *in
 			// Go to Borg team if killed by assimilation.
 			if ( attacker && attacker->client && attacker->client->sess.sessionTeam != self->client->sess.sessionTeam ) {
 				MOD_STATE->numAssimilated++;
+				ModJoinLimit_Static_StartMatchLock();
 				if ( EF_WARN_ASSERT( *awardPoints == 1 ) ) {
 					*awardPoints = 10;	// 10 points for an assimilation
 				}
@@ -365,7 +313,7 @@ static void MOD_PREFIX(PrePlayerLeaveTeam)( MODFN_CTV, int clientNum, team_t old
 	if ( clientNum == MOD_STATE->borgQueenClientNum ) {
 		// If a fully qualified match was in progress when the borg queen quit,
 		// award a win to the other team.
-		if ( level.matchState == MS_ACTIVE && ModAssimilation_MatchLocked() ) {
+		if ( level.matchState == MS_ACTIVE && ModJoinLimit_Static_MatchLocked() ) {
 			level.teamScores[MOD_STATE->borgTeam] -= 500;
 			CalculateRanks();
 			G_LogExit( "The Borg Queen has been killed!" );
@@ -798,17 +746,6 @@ static void MOD_PREFIX(MatchStateTransition)( MODFN_CTV, matchState_t oldState, 
 		// Shouldn't happen - if players were assimilated we should hit CheckExitRules instead.
 		MOD_STATE->numAssimilated = 0;
 	}
-
-	// Update join limit timer.
-	if ( newState == MS_ACTIVE ) {
-		G_DedPrintf( "assimilation: Starting join limit countdown due to sufficient players.\n" );
-		MOD_STATE->joinLimitTime = level.time;
-	} else {
-		if ( newState < MS_ACTIVE && MOD_STATE->joinLimitTime ) {
-			G_DedPrintf( "assimilation: Resetting join limit time due to insufficient players.\n" );
-		}
-		MOD_STATE->joinLimitTime = 0;
-	}
 }
 
 /*
@@ -822,7 +759,6 @@ void ModAssimilation_Init( void ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
 		MOD_STATE->borgQueenClientNum = -1;
-		G_RegisterTrackedCvar( &MOD_STATE->g_noJoinTimeout, "g_noJoinTimeout", "120", CVAR_ARCHIVE, qfalse );
 		G_RegisterTrackedCvar( &MOD_STATE->g_preferNonBotQueen, "g_preferNonBotQueen", "1", 0, qfalse );
 
 		// Support combining with other mods
@@ -833,7 +769,7 @@ void ModAssimilation_Init( void ) {
 		// Register mod functions
 		MODFN_REGISTER( IsBorgQueen, ++modePriorityLevel );
 		MODFN_REGISTER( GenerateGlobalSessionInfo, ++modePriorityLevel );
-		MODFN_REGISTER( CheckJoinAllowed, ++modePriorityLevel );
+		MODFN_REGISTER( JoinLimitMessage, ++modePriorityLevel );
 		MODFN_REGISTER( PostPlayerDie, ++modePriorityLevel );
 		MODFN_REGISTER( PrePlayerLeaveTeam, ++modePriorityLevel );
 		MODFN_REGISTER( PostClientConnect, ++modePriorityLevel );
@@ -855,6 +791,9 @@ void ModAssimilation_Init( void ) {
 		MODFN_REGISTER( AdjustGeneralConstant, ++modePriorityLevel );
 		MODFN_REGISTER( PostRunFrame, ++modePriorityLevel );
 		MODFN_REGISTER( MatchStateTransition, ++modePriorityLevel );
+
+		// Disable joining mid-match
+		ModJoinLimit_Init();
 
 		// Support ModTeamGroups_Shared_ForceConfigStrings function
 		ModTeamGroups_Init();

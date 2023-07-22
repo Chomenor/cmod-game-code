@@ -89,6 +89,29 @@ static qboolean MOD_PREFIX(CheckJoinAllowed)( MODFN_CTV, int clientNum, join_all
 
 /*
 ================
+(ModFN) PreClientSpawn
+
+If a player was placed on a team when they connected, but the match become locked before
+they finished loading, move them to spectator, consistent with Gladiator mod.
+================
+*/
+static void MOD_PREFIX(PreClientSpawn)( MODFN_CTV, int clientNum, clientSpawnType_t spawnType ) {
+	gclient_t *client = &level.clients[clientNum];
+
+	// This is a bit hacky, since normally team changes are always followed by a call
+	// to ClientBegin, but with these spawn type values we should be being called through
+	// ClientBegin already and the correct handling should be done.
+	if ( ( spawnType == CST_FIRSTTIME || spawnType == CST_MAPCHANGE || spawnType == CST_MAPRESTART ) &&
+			client->sess.sessionTeam != TEAM_SPECTATOR && ModJoinLimit_Static_MatchLocked() ) {
+		modfn.PrePlayerLeaveTeam( clientNum, client->sess.sessionTeam );
+		client->sess.sessionTeam = TEAM_SPECTATOR;
+	}
+
+	MODFN_NEXT( PreClientSpawn, ( MODFN_NC, clientNum, spawnType ) );
+}
+
+/*
+================
 (ModFN) MatchStateTransition
 ================
 */
@@ -122,6 +145,7 @@ void ModJoinLimit_Init( void ) {
 		G_RegisterTrackedCvar( &MOD_STATE->g_noJoinTimeout, "g_noJoinTimeout", "120", CVAR_ARCHIVE, qfalse );
 
 		MODFN_REGISTER( CheckJoinAllowed, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( PreClientSpawn, MODPRIORITY_GENERAL );
 		MODFN_REGISTER( MatchStateTransition, MODPRIORITY_GENERAL );
 	}
 }

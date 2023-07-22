@@ -240,7 +240,9 @@ static void MOD_PREFIX(PrePlayerLeaveTeam)( MODFN_CTV, int clientNum, team_t old
 
 #ifdef FEATURE_ELIMINATED_MESSAGES
 	if ( level.matchState == MS_ACTIVE && client->pers.connected == CON_CONNECTED &&
-			oldTeam != TEAM_SPECTATOR && !ModElimination_Static_IsPlayerEliminated( clientNum ) ) {
+			oldTeam != TEAM_SPECTATOR && !ModElimination_Static_IsPlayerEliminated( clientNum ) &&
+			// don't display if being dropped via join limit connecting check
+			client->pers.enterTime != level.time ) {
 		ModElimTweaks_EliminatedMessage( clientNum, oldTeam, qfalse );
 	}
 #endif

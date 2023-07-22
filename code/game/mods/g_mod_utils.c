@@ -37,6 +37,23 @@ char *G_ModUtils_AllocateString( const char *string ) {
 
 /*
 ================
+G_ModUtils_GetMapName
+
+Returns current map name.
+================
+*/
+const char *G_ModUtils_GetMapName( void ) {
+	static const char *name;
+	if ( !name ) {
+		char buffer[256];
+		trap_Cvar_VariableStringBuffer( "mapname", buffer, sizeof( buffer ) );
+		name = G_ModUtils_AllocateString( buffer );
+	}
+	return name;
+}
+
+/*
+================
 G_ModUtils_ReadGladiatorBitflags
 
 Read boolean string in format from Gladiator mod.

@@ -121,6 +121,26 @@ static int MOD_PREFIX(AdjustGeneralConstant)( MODFN_CTV, generalConstant_t gcTyp
 
 /*
 ================
+(ModFN) GeneralInit
+================
+*/
+static void MOD_PREFIX(GeneralInit)( MODFN_CTV ) {
+	MODFN_NEXT( GeneralInit, ( MODFN_NC ) );
+
+	// Disable 'target_remove_powerups' for most maps, because it is often placed ahead of
+	// kill area triggers and interferes with both gold armor teleport and powerup drops.
+	if ( Q_stricmp( G_ModUtils_GetMapName(), "mock-arena" ) ) {
+		gentity_t *trpEntity = NULL;
+		while ( ( trpEntity = G_Find( trpEntity, FOFS( classname ), "target_remove_powerups" ) ) != NULL ) {
+			G_Printf( "razor: Disabling target_remove_powerups '%s'\n",
+					trpEntity->targetname ? trpEntity->targetname : "<null>" );
+			trpEntity->use = NULL;
+		}
+	}
+}
+
+/*
+================
 ModRazorPowerups_Init
 ================
 */
@@ -141,5 +161,6 @@ void ModRazorPowerups_Init( void ) {
 		MODFN_REGISTER( ForcefieldTouchResponse, ++modePriorityLevel );
 		MODFN_REGISTER( AdjustModConstant, ++modePriorityLevel );
 		MODFN_REGISTER( AdjustGeneralConstant, ++modePriorityLevel );
+		MODFN_REGISTER( GeneralInit, ++modePriorityLevel );
 	}
 }

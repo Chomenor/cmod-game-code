@@ -29,6 +29,7 @@ extern mod_config_t modcfg;
 
 int G_ModUtils_GetLatchedValue( const char *cvar_name, const char *default_value, int flags );
 char *G_ModUtils_AllocateString( const char *string );
+const char *G_ModUtils_GetMapName( void );
 qboolean G_ModUtils_ReadGladiatorBoolean( const char *str );
 unsigned int G_ModUtils_ReadGladiatorBitflags( const char *str );
 

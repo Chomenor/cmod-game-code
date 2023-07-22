@@ -192,6 +192,20 @@ static void MOD_PREFIX(SpawnConfigureClient)( MODFN_CTV, int clientNum ) {
 
 /*
 ================
+(ModFN) AddRegisteredItems
+
+Register spawn weapons to avoid loading glitches.
+================
+*/
+static void MOD_PREFIX(AddRegisteredItems)( MODFN_CTV ) {
+	MODFN_NEXT( AddRegisteredItems, ( MODFN_NC ) );
+	RegisterItem( BG_FindItemForWeapon( WP_COMPRESSION_RIFLE ) );
+	RegisterItem( BG_FindItemForWeapon( WP_GRENADE_LAUNCHER ) );
+	RegisterItem( BG_FindItemForWeapon( WP_QUANTUM_BURST ) );
+}
+
+/*
+================
 ModRazorWeapons_Init
 ================
 */
@@ -208,5 +222,6 @@ void ModRazorWeapons_Init( void ) {
 		MODFN_REGISTER( AltFireConfig, ++modePriorityLevel );
 		MODFN_REGISTER( ModifyAmmoUsage, ++modePriorityLevel );
 		MODFN_REGISTER( SpawnConfigureClient, ++modePriorityLevel );
+		MODFN_REGISTER( AddRegisteredItems, ++modePriorityLevel );
 	}
 }

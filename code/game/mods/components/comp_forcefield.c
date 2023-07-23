@@ -265,7 +265,7 @@ static void MOD_PREFIX(ForcefieldAnnounce)( MODFN_CTV, gentity_t *forcefield, fo
 			}
 		}
 
-		if ( event == FSE_REMOVE ) {
+		if ( event == FSE_REMOVE && level.matchState != MS_INTERMISSION_ACTIVE ) {
 			int count = ModForcefield_CountActive();
 			G_GlobalSound( G_SoundIndex( "sound/voice/biessman/misc/goingdown.wav" ) );
 			if ( count <= 0 ) {

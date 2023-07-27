@@ -437,6 +437,9 @@
     <ClCompile Include="..\..\code\game\mods\modes\mode_tournament.c">
       <Filter>game\mods\modes</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\modes\razor\razor_bounds.c">
+      <Filter>game\mods\modes\razor</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\code\game\mods\modes\razor\razor_damage.c">
       <Filter>game\mods\modes\razor</Filter>
     </ClCompile>

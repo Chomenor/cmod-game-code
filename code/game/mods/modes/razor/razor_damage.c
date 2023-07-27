@@ -32,7 +32,8 @@ static void ModRazorDamage_Trace( trace_t *results, const vec3_t start, const ve
 		const vec3_t end, int passEntityNum, int contentMask ) {
 	MOD_STATE->Prev_Trace( results, start, mins, maxs, end, passEntityNum, contentMask );
 
-	if ( results->surfaceFlags & SURF_SKY ) {
+	if ( MOD_STATE->wallHit == WALLHIT_INACTIVE &&
+			ModRazorBounds_Static_CheckTraceHit( results, start, mins, maxs, end, passEntityNum, contentMask ) ) {
 		MOD_STATE->wallHit = WALLHIT_REGISTERED;
 	}
 }
@@ -138,6 +139,8 @@ ModRazorDamage_Init
 void ModRazorDamage_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
+
+		ModRazorBounds_Init();
 
 		MODFN_REGISTER( PmoveInit, ++modePriorityLevel );
 		MODFN_REGISTER( PostPmoveActions, ++modePriorityLevel );

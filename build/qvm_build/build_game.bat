@@ -115,6 +115,7 @@ set src=game\mods\modes\elimination&set name=elim_misc&call :compile
 set src=game\mods\modes\elimination&set name=elim_multiround&call :compile
 set src=game\mods\modes\elimination&set name=elim_timelimit&call :compile
 set src=game\mods\modes\elimination&set name=elim_tweaks&call :compile
+set src=game\mods\modes\razor&set name=razor_bounds&call :compile
 set src=game\mods\modes\razor&set name=razor_damage&call :compile
 set src=game\mods\modes\razor&set name=razor_difficulty&call :compile
 set src=game\mods\modes\razor&set name=razor_greeting&call :compile

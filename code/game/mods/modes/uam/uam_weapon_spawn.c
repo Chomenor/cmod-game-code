@@ -265,13 +265,31 @@ static qboolean MOD_PREFIX(CheckItemSpawnDisabled)( MODFN_CTV, gitem_t *item ) {
 
 /*
 ================
+(ModFN) AddRegisteredItems
+
+Register spawn weapons to avoid loading glitches. All weapons are registered even if they
+are temporarily disabled, because they might be enabled in later rounds. The welder also
+needs to be registered for full forcefield kill sound effects on the client.
+================
+*/
+static void MOD_PREFIX(AddRegisteredItems)( MODFN_CTV ) {
+	weapon_t weapon;
+	MODFN_NEXT( AddRegisteredItems, ( MODFN_NC ) );
+	for ( weapon = WP_PHASER; weapon <= WP_DREADNOUGHT; ++weapon ) {
+		RegisterItem( BG_FindItemForWeapon( weapon ) );
+	}
+
+	RegisterItem( BG_FindItemForWeapon( WP_BORG_WEAPON ) );
+	RegisterItem( BG_FindItemForWeapon( WP_BORG_ASSIMILATOR ) );
+}
+
+/*
+================
 ModUAMWeaponSpawn_Init
 ================
 */
 void ModUAMWeaponSpawn_Init( qboolean allowWeaponCvarChanges ) {
 	if ( !MOD_STATE ) {
-		int i;
-
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
 		// Load cvar values
@@ -289,18 +307,11 @@ void ModUAMWeaponSpawn_Init( qboolean allowWeaponCvarChanges ) {
 			G_RegisterCvarCallback( &MOD_STATE->g_mod_WeaponRoundFlags, ModUAMWeaponSpawn_WeaponCvarCallback, qfalse );
 		}
 
-		// Make sure all the possible weapons are registered.
-		// Although the client will auto-load weapons to some degree, this helps avoid potential glitches.
-		for ( i = WP_PHASER; i < WP_DREADNOUGHT; ++i ) {
-			RegisterItem( BG_FindItemForWeapon( i ) );
-		}
-		RegisterItem( BG_FindItemForWeapon( WP_BORG_WEAPON ) );
-		RegisterItem( BG_FindItemForWeapon( WP_BORG_ASSIMILATOR ) );
-
 		MODFN_REGISTER( SpawnConfigureClient, ++modePriorityLevel );
 		MODFN_REGISTER( PostPlayerDie, ++modePriorityLevel );
 		MODFN_REGISTER( AddAmmoForItem, ++modePriorityLevel );
 		MODFN_REGISTER( CanItemBeDropped, ++modePriorityLevel );
 		MODFN_REGISTER( CheckItemSpawnDisabled, ++modePriorityLevel );
+		MODFN_REGISTER( AddRegisteredItems, ++modePriorityLevel );
 	}
 }

@@ -256,6 +256,19 @@ static void MOD_PREFIX(PostClientConnect)( MODFN_CTV, int clientNum, qboolean fi
 
 /*
 ================
+(ModFN) AddRegisteredItems
+================
+*/
+static void MOD_PREFIX(AddRegisteredItems)( MODFN_CTV ) {
+	MODFN_NEXT( AddRegisteredItems, ( MODFN_NC ) );
+
+	RegisterItem( BG_FindItemForPowerup( PW_FLIGHT ) );
+	RegisterItem( BG_FindItemForHoldable( HI_DETPACK ) );
+	RegisterItem( BG_FindItemForWeapon( WP_VOYAGER_HYPO ) );
+}
+
+/*
+================
 ModUAMWarmupMode_Init
 ================
 */
@@ -264,10 +277,6 @@ void ModUAMWarmupMode_Init( void ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
 		ModAltFireConfig_Init();
-
-		RegisterItem( BG_FindItemForPowerup( PW_FLIGHT ) );
-		RegisterItem( BG_FindItemForHoldable( HI_DETPACK ) );
-		RegisterItem( BG_FindItemForWeapon( WP_VOYAGER_HYPO ) );
 
 		// Use high priority to make sure warmup behavior can override any mod functionality
 		// meant for the regular game.
@@ -283,5 +292,6 @@ void ModUAMWarmupMode_Init( void ) {
 		MODFN_REGISTER( PostRunFrame, MODPRIORITY_HIGH );
 		MODFN_REGISTER( MatchStateTransition, MODPRIORITY_HIGH );
 		MODFN_REGISTER( PostClientConnect, MODPRIORITY_HIGH );
+		MODFN_REGISTER( AddRegisteredItems, ++modePriorityLevel );
 	}
 }

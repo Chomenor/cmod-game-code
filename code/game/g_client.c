@@ -808,6 +808,9 @@ void ClientUserinfoChanged( int clientNum ) {
 		SetSkinForModel( model, "red", model, sizeof( model ) );
 	} else if ( client->sess.sessionTeam == TEAM_BLUE ) {
 		SetSkinForModel( model, "blue", model, sizeof( model ) );
+	} else if ( g_gametype.integer >= GT_TEAM ) {
+		// client requires team skin for spectators
+		SetSkinForModel( model, "red", model, sizeof( model ) );
 	}
 
 	// colors

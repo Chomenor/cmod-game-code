@@ -309,6 +309,7 @@
     <ClCompile Include="..\..\code\game\mods\modes\elimination\elim_timelimit.c" />
     <ClCompile Include="..\..\code\game\mods\modes\elimination\elim_tweaks.c" />
     <ClCompile Include="..\..\code\game\mods\modes\mode_actionhero.c" />
+    <ClCompile Include="..\..\code\game\mods\modes\mode_clanarena.c" />
     <ClCompile Include="..\..\code\game\mods\modes\mode_disintegration.c" />
     <ClCompile Include="..\..\code\game\mods\modes\mode_tournament.c" />
     <ClCompile Include="..\..\code\game\mods\modes\razor\razor_bounds.c" />

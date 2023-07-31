@@ -104,6 +104,7 @@ set src=game\mods\features\pingcomp&set name=pc_smoothing&call :compile
 set src=game\mods\features\pingcomp&set name=pc_smoothing_debug&call :compile
 set src=game\mods\features\pingcomp&set name=pc_smoothing_offset&call :compile
 set src=game\mods\modes&set name=mode_actionhero&call :compile
+set src=game\mods\modes&set name=mode_clanarena&call :compile
 set src=game\mods\modes&set name=mode_disintegration&call :compile
 set src=game\mods\modes&set name=mode_tournament&call :compile
 set src=game\mods\modes\assimilation&set name=assim_borg_adapt&call :compile

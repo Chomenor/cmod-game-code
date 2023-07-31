@@ -17,6 +17,7 @@ typedef struct {
 	qboolean actionhero;
 	qboolean uam;
 	qboolean razor;
+	qboolean clanarena;
 } mods_enabled_t;
 
 typedef struct {
@@ -83,6 +84,7 @@ typedef enum {
 
 void ModActionHero_Init( void );
 void ModAssimilation_Init( void );
+void ModClanArena_Init( void );
 void ModDisintegration_Init( void );
 void ModElimination_Init( void );
 void ModRazor_Init( void );

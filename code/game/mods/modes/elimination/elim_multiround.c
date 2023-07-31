@@ -162,14 +162,17 @@ static void MOD_PREFIX(AddGameInfoClient)( MODFN_CTV, int clientNum, info_string
 }
 
 #ifdef FEATURE_WARMUP_MESSAGE_SEQUENCE
+// Add ellipses to round message in regular Elimination, not clan arena.
+#define ROUND_MESSAGE_ELLIPSES ( modcfg.mods_enabled.clanarena ? "" : "..." )
+
 /*
 ================
 ModElimMultiRound_WarmupTiebreakerMessage
 ================
 */
 static void ModElimMultiRound_WarmupTiebreakerMessage( const char *msg ) {
-	trap_SendServerCommand( -1, va( "cp \"\nRound %i of %i\n\n^5Tiebreaker Round\"",
-			ModElimMultiRound_Static_GetCurrentRound(), ModElimMultiRound_Static_GetTotalRounds() ) );
+	trap_SendServerCommand( -1, va( "cp \"\nRound %i of %i%s\n\n^5Tiebreaker Round\"",
+			ModElimMultiRound_Static_GetCurrentRound(), ModElimMultiRound_Static_GetTotalRounds(), ROUND_MESSAGE_ELLIPSES ) );
 }
 
 /*
@@ -187,8 +190,8 @@ static void ModElimMultiRound_WarmupRoundMessage( const char *msg ) {
 		if ( level.clients[i].pers.connected == CON_CONNECTED && ( msg[0] == 'a' ||
 				( msg[0] == 'b' && !ModClickToJoin_Static_ActiveForClient( i ) ) ||
 				( msg[0] == 'c' && ModClickToJoin_Static_ActiveForClient( i ) ) ) ) {
-			trap_SendServerCommand( i, va( "cp \"Round %i of %i\"", ModElimMultiRound_Static_GetCurrentRound(),
-					ModElimMultiRound_Static_GetTotalRounds() ) );
+			trap_SendServerCommand( i, va( "cp \"Round %i of %i%s\"", ModElimMultiRound_Static_GetCurrentRound(),
+					ModElimMultiRound_Static_GetTotalRounds(), ROUND_MESSAGE_ELLIPSES ) );
 		}
 	}
 }

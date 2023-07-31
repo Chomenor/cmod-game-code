@@ -166,6 +166,7 @@ LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 	trap_Cvar_Register( NULL, "g_mod_uam", "0", CVAR_SERVERINFO | CVAR_LATCH );
 	trap_Cvar_Register( NULL, "g_mod_instagib", "0", CVAR_SERVERINFO | CVAR_LATCH );
 	trap_Cvar_Register( NULL, "g_mod_razor", "0", CVAR_SERVERINFO | CVAR_LATCH );
+	trap_Cvar_Register( NULL, "g_mod_clanArena", "0", CVAR_SERVERINFO | CVAR_LATCH );
 
 	// Core mods
 	ModTeamGroups_Init();
@@ -193,6 +194,8 @@ LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 		ModUAM_Init();
 	} else if ( modsEnabled >= 2 && trap_Cvar_VariableIntegerValue( "g_mod_razor" ) ) {
 		ModRazor_Init();
+	} else if ( modsEnabled >= 2 && trap_Cvar_VariableIntegerValue( "g_mod_clanArena" ) ) {
+		ModClanArena_Init();
 	} else if ( trap_Cvar_VariableIntegerValue( "g_pModElimination" ) ) {
 		ModElimination_Init();
 	} else if ( trap_Cvar_VariableIntegerValue( "g_pModAssimilation" ) ) {
@@ -208,7 +211,7 @@ LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 	// Make sure info cvars are set accurately
 	// Note: UAM handles these separately
 	if ( !modcfg.mods_enabled.uam ) {
-		trap_Cvar_Set( "g_pModElimination", modcfg.mods_enabled.elimination ? "1" : "0" );
+		trap_Cvar_Set( "g_pModElimination", modcfg.mods_enabled.elimination && !modcfg.mods_enabled.clanarena ? "1" : "0" );
 		trap_Cvar_Set( "g_pModAssimilation", modcfg.mods_enabled.assimilation ? "1" : "0" );
 		trap_Cvar_Set( "g_pModActionHero", modcfg.mods_enabled.actionhero ? "1" : "0" );
 		trap_Cvar_Set( "g_pModDisintegration", modcfg.mods_enabled.disintegration ? "1" : "0" );
@@ -222,6 +225,7 @@ LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 	}
 
 	trap_Cvar_Set( "g_mod_razor", modcfg.mods_enabled.razor ? "1" : "" );
+	trap_Cvar_Set( "g_mod_clanArena", modcfg.mods_enabled.clanarena ? "1" : "" );
 
 	modfn_lcl.PostModInit();
 }

@@ -431,6 +431,9 @@
     <ClCompile Include="..\..\code\game\mods\modes\mode_actionhero.c">
       <Filter>game\mods\modes</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\modes\mode_clanarena.c">
+      <Filter>game\mods\modes</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\code\game\mods\modes\mode_disintegration.c">
       <Filter>game\mods\modes</Filter>
     </ClCompile>

@@ -17,7 +17,6 @@
 
 
 #define	RESPAWN_ARMOR		20
-#define	RESPAWN_TEAM_WEAPON	30
 #define	RESPAWN_HEALTH		30
 #define	RESPAWN_AMMO		40
 #define	RESPAWN_HOLDABLE	60
@@ -252,7 +251,7 @@ int Pickup_Weapon (gentity_t *ent, gentity_t *other) {
 	// team deathmatch has slow weapon respawns
 	if ( g_gametype.integer == GT_TEAM )
 	{
-		return adjustRespawnTime(RESPAWN_TEAM_WEAPON, ent);
+		return adjustRespawnTime(g_teamWeaponRespawn.integer, ent);
 	}
 
 	return adjustRespawnTime(g_weaponRespawn.integer, ent);

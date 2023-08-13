@@ -208,6 +208,10 @@ LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 		ModSpecialties_Init();
 	}
 
+	if ( modsEnabled >= 2 && trap_Cvar_VariableIntegerValue( "g_gametype" ) == GT_CTF ) {
+		ModFlagUndercap_Init();
+	}
+
 	// Make sure info cvars are set accurately
 	// Note: UAM handles these separately
 	if ( !modcfg.mods_enabled.uam ) {

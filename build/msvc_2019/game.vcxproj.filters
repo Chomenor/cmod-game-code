@@ -335,6 +335,9 @@
     <ClCompile Include="..\..\code\game\mods\features\feat_debug_modfn.c">
       <Filter>game\mods\features</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\features\feat_flag_undercap.c">
+      <Filter>game\mods\features</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\code\game\mods\features\feat_game_info.c">
       <Filter>game\mods\features</Filter>
     </ClCompile>

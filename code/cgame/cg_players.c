@@ -369,16 +369,9 @@ static void CG_LoadClientInfo( clientInfo_t *ci , int clientNum) {
 		}
 
 		// fall back
-		if ( cgs.gametype >= GT_TEAM ) {
-			// keep skin name
-			if ( !CG_RegisterClientModelname( ci, DEFAULT_MODEL, ci->skinName ) ) {
-				CG_Error( "DEFAULT_MODEL / skin (%s/%s) failed to register",
-					DEFAULT_MODEL, ci->skinName );
-			}
-		} else {
-			if ( !CG_RegisterClientModelname( ci, DEFAULT_MODEL, "default" ) ) {
-				CG_Error( "DEFAULT_MODEL (%s) failed to register", DEFAULT_MODEL );
-			}
+		if ( !( cgs.gametype >= GT_TEAM && CG_RegisterClientModelname( ci, DEFAULT_MODEL, ci->skinName ) ) &&
+				!CG_RegisterClientModelname( ci, DEFAULT_MODEL, "default" ) ) {
+			CG_Error( "DEFAULT_MODEL (%s) failed to register", DEFAULT_MODEL );
 		}
 	}
 

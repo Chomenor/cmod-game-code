@@ -696,7 +696,11 @@ void SetSkinForModel( const char *model, const char *skin, char *output, unsigne
 		*p = '\0';
 
 	if ( skin ) {
-		Com_sprintf( output, size, "%s/%s", temp, skin );
+		if ( strlen( temp ) + strlen( skin ) + 1 >= size ) {
+			Com_sprintf( output, size, "munro/%s", skin );
+		} else {
+			Com_sprintf( output, size, "%s/%s", temp, skin );
+		}
 	} else {
 		Q_strncpyz( output, temp, size );
 	}

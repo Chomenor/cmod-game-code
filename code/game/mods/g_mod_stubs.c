@@ -86,6 +86,9 @@ int ModFNDefault_AdjustScoreboardAttributes( int clientNum, scoreboardAttribute_
 	return defaultValue;
 }
 
+void ModFNDefault_PostFlagCapture( team_t capturingTeam ) {
+}
+
 void ModFNDefault_TrapTrace( trace_t *results, const vec3_t start, const vec3_t mins, const vec3_t maxs,
 		const vec3_t end, int passEntityNum, int contentmask, int modFlags ) {
 	trap_Trace( results, start, mins, maxs, end, passEntityNum, contentmask );

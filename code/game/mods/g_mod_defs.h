@@ -454,6 +454,10 @@ MOD_FUNCTION_DEF( TrapTrace, void, ( PREFIX1 trace_t *results, const vec3_t star
 MOD_FUNCTION_DEF( SetSpawnCS, void, ( PREFIX1 int num, const char *defaultValue ),
 		( PREFIX2 num, defaultValue ), )
 
+// Called when a team scores a point in CTF.
+MOD_FUNCTION_DEF( PostFlagCapture, void, ( PREFIX1 team_t capturingTeam ),
+		( PREFIX2 capturingTeam ), )
+
 //////////////////////////
 // mod-specific
 //////////////////////////

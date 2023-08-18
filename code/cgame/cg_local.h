@@ -600,6 +600,7 @@ typedef struct {
 	qboolean	showScores;
 	int			scoreFadeTime;
 	char		killerName[MAX_NAME_LENGTH];
+	int			respawnPrintTime;	// time of next respawn for displaying countdown
 
 	// centerprinting
 	int			centerPrintTime;

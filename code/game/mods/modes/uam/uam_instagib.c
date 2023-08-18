@@ -15,8 +15,12 @@
 #include "mods/modes/uam/uam_local.h"
 
 static struct {
-	int _unused;
+	// -1 = enabled except in ctf (default), 0 = disabled, 1 = enabled
+	trackedCvar_t g_instagib_rifleJump;
 } *MOD_STATE;
+
+#define RIFLE_JUMP_ENABLED ( MOD_STATE->g_instagib_rifleJump.integer >= 0 ? \
+		MOD_STATE->g_instagib_rifleJump.integer : g_gametype.integer != GT_CTF )
 
 /*
 ======================
@@ -31,10 +35,12 @@ static int MOD_PREFIX(AdjustWeaponConstant)( MODFN_CTV, weaponConstant_t wcType,
 		return 1;
 
 	// Set splash damage for rifle jumping.
-	if ( wcType == WC_CRIFLE_ALT_SPLASH_RADIUS )
-		return 170;
-	if ( wcType == WC_CRIFLE_ALT_SPLASH_DMG )
-		return 140;
+	if ( RIFLE_JUMP_ENABLED ) {
+		if ( wcType == WC_CRIFLE_ALT_SPLASH_RADIUS )
+			return 170;
+		if ( wcType == WC_CRIFLE_ALT_SPLASH_DMG )
+			return 140;
+	}
 
 	return MODFN_NEXT( AdjustWeaponConstant, ( MODFN_NC, wcType, defaultValue ) );
 }
@@ -164,6 +170,8 @@ ModUAMInstagib_Init
 void ModUAMInstagib_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
+
+		G_RegisterTrackedCvar( &MOD_STATE->g_instagib_rifleJump, "g_instagib_rifleJump", "-1", 0, qfalse );
 
 		// Use Disintegration mode as basis
 		ModDisintegration_Init();

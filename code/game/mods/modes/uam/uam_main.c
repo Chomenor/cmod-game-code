@@ -121,11 +121,15 @@ static void MOD_PREFIX(SetSpawnCS)( MODFN_CTV, int num, const char *defaultValue
 ==================
 (ModFN) ItemDropExpireTime
 
-Dropped items don't expire.
+Dropped items don't expire in Elimination mode.
 ==================
 */
 static int MOD_PREFIX(ItemDropExpireTime)( MODFN_CTV, const gitem_t *item ) {
-	return 0;
+	if ( modcfg.mods_enabled.elimination ) {
+		return 0;
+	} else {
+		return MODFN_NEXT( ItemDropExpireTime, ( MODFN_NC, item ) );
+	}
 }
 
 /*
@@ -136,7 +140,10 @@ static int MOD_PREFIX(ItemDropExpireTime)( MODFN_CTV, const gitem_t *item ) {
 static int MOD_PREFIX(AdjustGeneralConstant)( MODFN_CTV, generalConstant_t gcType, int defaultValue ) {
 	switch ( gcType ) {
 		case GC_INTERMISSION_DELAY_TIME:
-			return 5000;
+			if ( modcfg.mods_enabled.elimination ) {
+				return 5000;
+			}
+			break;
 		case GC_CHAT_HIT_WARNING:
 			return 1;
 		case GC_FORCE_TEAM_PODIUM:

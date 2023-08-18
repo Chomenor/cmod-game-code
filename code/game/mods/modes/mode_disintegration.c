@@ -99,7 +99,7 @@ Adjust some damage flags for consistency with original implementation. Probably 
 static int MOD_PREFIX(ModifyDamageFlags)( MODFN_CTV, gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 		vec3_t dir, vec3_t point, int damage, int dflags, int mod ) {
 	if ( mod == MOD_CRIFLE_ALT || mod == MOD_CRIFLE_ALT_SPLASH ) {
-		return DAMAGE_NO_ARMOR | DAMAGE_NO_INVULNERABILITY;
+		dflags |= DAMAGE_NO_ARMOR | DAMAGE_NO_INVULNERABILITY;
 	}
 
 	return MODFN_NEXT( ModifyDamageFlags, ( MODFN_NC, targ, inflictor, attacker, dir, point, damage, dflags, mod ) );

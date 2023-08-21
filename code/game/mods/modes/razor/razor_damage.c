@@ -23,6 +23,9 @@ static struct {
 	wallHitState_t wallHit;
 } *MOD_STATE;
 
+#define IS_FORCEFIELD( ent ) ( ( ent ) && ( ent )->inuse && ( ent )->s.eType == ET_USEABLE && \
+		( ent )->s.modelindex == HI_SHIELD )
+
 /*
 ================
 ModRazorDamage_Trace
@@ -105,8 +108,8 @@ static void MOD_PREFIX(PlayerDeathEffect)( MODFN_CTV, gentity_t *self, gentity_t
 static void MOD_PREFIX(Damage)( MODFN_CTV, gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
 			vec3_t dir, vec3_t point, int damage, int dflags, int mod ) {
 	// Teleport player out if they fell into a damage zone while holding gold armor.
-	if ( targ->client && targ->client->ps.powerups[PW_BATTLESUIT] &&
-			( mod == MOD_TRIGGER_HURT && MOD_STATE->wallHit != WALLHIT_DAMAGE ) ) {
+	if ( targ->client && targ->client->ps.powerups[PW_BATTLESUIT] && mod == MOD_TRIGGER_HURT &&
+			!IS_FORCEFIELD( inflictor ) && MOD_STATE->wallHit != WALLHIT_DAMAGE ) {
 		vec3_t origin, angles;
 		SelectSpawnPoint( targ->client->ps.origin, origin, angles, qtrue, qtrue );
 		TeleportPlayer( targ, origin, angles, TP_NORMAL );

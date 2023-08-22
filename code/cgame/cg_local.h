@@ -11,6 +11,9 @@
 // If you absolutely need something stored, it can either be kept
 // by the server in the server stored userinfos, or stashed in a cvar.
 
+// Addon features
+#define ADDON_RESPAWN_TIMER
+
 
 #define	POWERUP_BLINKS		5
 
@@ -600,7 +603,6 @@ typedef struct {
 	qboolean	showScores;
 	int			scoreFadeTime;
 	char		killerName[MAX_NAME_LENGTH];
-	int			respawnPrintTime;	// time of next respawn for displaying countdown
 
 	// centerprinting
 	int			centerPrintTime;
@@ -1086,6 +1088,13 @@ typedef struct {
 
 	// weapon prediction characteristics
 	weaponValues_t fireRates;
+
+#ifdef ADDON_RESPAWN_TIMER
+	// respawn countdown timer
+	// 0 if disabled, otherwise respawn time will be loaded from playerstate stat fields
+	// this index holds high 16 bits, next index holds low 16 bits
+	int respawnTimerStatIndex;
+#endif
 } modConfig_t;
 
 // The client game static (cgs) structure hold everything

@@ -252,6 +252,11 @@ void CG_ParseModConfig( void ) {
 					CG_ParseWeaponValues( value, &cgs.modConfig.fireRates );
 				if ( !Q_stricmp( key, "weaponPredict" ) )
 					CG_WeaponPredict_LoadConfig( value );
+#ifdef ADDON_RESPAWN_TIMER
+				if ( !Q_stricmp( key, "respawnTimerStatIndex" ) ) {
+					cgs.modConfig.respawnTimerStatIndex = atoi( value );
+				}
+#endif
 			}
 
 			cgs.modConfigSet[i] = qtrue;
@@ -618,17 +623,6 @@ static void CG_ServerCommand( void ) {
 	}
 
 	if ( !strcmp( cmd, "hinfo" ) ) {
-		if ( !atoi( CG_Argv( 1 ) ) ) {
-			// Handle special commands in the format "hinfo 0 <command>". This is is a trick to
-			// allow server to send optional commands which are ignored by incompatible cgame
-			// without warnings, since "hinfo 0" has no effect normally.
-			const char *specialCmd = CG_Argv( 2 );
-			if ( !Q_stricmp( specialCmd, "respawnPrintTime" ) ) {
-				cg.respawnPrintTime = atoi( CG_Argv( 3 ) );
-			}
-			return;
-		}
-
 		CG_ParseHealthInfo();
 		return;
 	}

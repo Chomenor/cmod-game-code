@@ -22,6 +22,27 @@ static struct {
 #define MOD_ENABLED ( MOD_STATE->g_delayRespawn.value > 0.0f )
 
 /*
+==============
+(ModFN) AddModConfigInfo
+==============
+*/
+static void MOD_PREFIX(AddModConfigInfo)( MODFN_CTV, char *info ) {
+	MODFN_NEXT( AddModConfigInfo, ( MODFN_NC, info ) );
+	if ( MOD_ENABLED ) {
+		Info_SetValueForKey( info, "respawnTimerStatIndex", "10" );
+	}
+}
+
+/*
+=============
+ModDelayRespawn_OnCvarUpdate
+=============
+*/
+static void ModDelayRespawn_OnCvarUpdate( trackedCvar_t *cvar ) {
+	ModModcfgCS_Static_Update();
+}
+
+/*
 =============
 ModDelayRespawn_UnlinkBody
 =============
@@ -59,16 +80,21 @@ Send command to clients to display respawn countdown.
 static void MOD_PREFIX(PostPlayerDie)( MODFN_CTV, gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
 		int meansOfDeath, int *awardPoints ) {
 	int clientNum = self - g_entities;
+	playerState_t *ps = &level.clients[clientNum].ps;
 	int *pendingRespawn = &MOD_STATE->pendingRespawn[clientNum];
 
 	MODFN_NEXT( PostPlayerDie, ( MODFN_NC, self, inflictor, attacker, meansOfDeath, awardPoints ) );
 
 	if ( MOD_ENABLED ) {
 		*pendingRespawn = level.time + MOD_STATE->g_delayRespawn.value * 1000;
-		trap_SendServerCommand( self - g_entities, va( "hinfo 0 respawnPrintTime %i", *pendingRespawn ) );
 	} else {
 		*pendingRespawn = 0;
 	}
+
+	// Encode respawn time in playerstate for cgame to access. Needs to be split across
+	// 2 fields because net protocol (msg.c) only sends 16 bits for playerstate stats.
+	ps->stats[10] = ( *pendingRespawn >> 16 ) & 0xffff;
+	ps->stats[11] = *pendingRespawn & 0xffff;
 }
 
 /*
@@ -79,7 +105,7 @@ static void MOD_PREFIX(PostPlayerDie)( MODFN_CTV, gentity_t *self, gentity_t *in
 static qboolean MOD_PREFIX(CheckRespawnTime)( MODFN_CTV, int clientNum, qboolean voluntary ) {
 	int *pendingRespawn = &MOD_STATE->pendingRespawn[clientNum];
 
-	if ( *pendingRespawn ) {
+	if ( MOD_ENABLED && *pendingRespawn ) {
 		if ( !voluntary && level.time >= *pendingRespawn ) {
 			*pendingRespawn = 0;
 			return qtrue;
@@ -124,8 +150,12 @@ void ModDelayRespawn_Init( void ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
 		G_RegisterTrackedCvar( &MOD_STATE->g_delayRespawn, "g_delayRespawn", "0", 0, qfalse );
+		G_RegisterCvarCallback( &MOD_STATE->g_delayRespawn, ModDelayRespawn_OnCvarUpdate, qfalse );
 		G_RegisterTrackedCvar( &MOD_STATE->g_delayRespawnSpawnOnFlagCapture, "g_delayRespawnSpawnOnFlagCapture", "1", 0, qfalse );
 
+		ModModcfgCS_Init();
+
+		MODFN_REGISTER( AddModConfigInfo, MODPRIORITY_GENERAL );
 		MODFN_REGISTER( CopyToBodyQue, MODPRIORITY_GENERAL );
 		MODFN_REGISTER( PostPlayerDie, MODPRIORITY_GENERAL );
 		MODFN_REGISTER( CheckRespawnTime, MODPRIORITY_GENERAL );

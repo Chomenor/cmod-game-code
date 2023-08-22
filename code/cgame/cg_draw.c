@@ -2717,15 +2717,21 @@ static void CG_Draw2D( void ) {
 		CG_DrawCenterString();
 	}
 
+#ifdef ADDON_RESPAWN_TIMER
 	// display the respawn countdown if indicated by server
-	if ( cg.snap->ps.pm_type == PM_DEAD && cg.respawnPrintTime && cg.respawnPrintTime > cg.time ) {
-		vec4_t color = { 1, 1, 1, 1 };
-		char buffer[256];
-		int x;
-		Com_sprintf( buffer, sizeof( buffer ), "RESPAWN IN: %i", ( cg.respawnPrintTime - cg.time - 1 ) / 1000 + 1 );
-		x = ( SCREEN_WIDTH - UI_ProportionalStringWidth( buffer, UI_BIGFONT ) ) / 2;
-		UI_DrawProportionalString( x, SCREEN_HEIGHT - 90, buffer, UI_BIGFONT | UI_DROPSHADOW | UI_BLINK, color );
+	if ( cgs.modConfig.respawnTimerStatIndex > 0 && cgs.modConfig.respawnTimerStatIndex < MAX_STATS - 1 ) {
+		int respawnTime = ( ( cg.snap->ps.stats[cgs.modConfig.respawnTimerStatIndex] & 0xffff ) << 16 ) |
+				( cg.snap->ps.stats[cgs.modConfig.respawnTimerStatIndex + 1] & 0xffff );
+		if ( respawnTime && respawnTime > cg.time ) {
+			vec4_t color = { 1, 1, 1, 1 };
+			char buffer[256];
+			int x;
+			Com_sprintf( buffer, sizeof( buffer ), "RESPAWN IN: %i", ( respawnTime - cg.time - 1 ) / 1000 + 1 );
+			x = ( SCREEN_WIDTH - UI_ProportionalStringWidth( buffer, UI_BIGFONT ) ) / 2;
+			UI_DrawProportionalString( x, SCREEN_HEIGHT - 90, buffer, UI_BIGFONT | UI_DROPSHADOW | UI_BLINK, color );
+		}
 	}
+#endif
 
 	// kef -- need the "use TEAM menu to play" message to draw on top of the bottom bar of scoreboard
 	if ( cg.snap->ps.persistant[PERS_TEAM] == TEAM_SPECTATOR || (cg.snap->ps.eFlags&EF_ELIMINATED) )

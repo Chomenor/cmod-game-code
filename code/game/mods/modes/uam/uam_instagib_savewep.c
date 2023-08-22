@@ -24,7 +24,7 @@ static void SaveWeaponPreference( int clientNum ) {
 	int *weapon = &MOD_STATE->currentWeapon[clientNum];
 	gclient_t *client = &level.clients[clientNum];
 
-	if ( VALID_WEAPON( client->ps.weapon ) ) {
+	if ( !modfn.SpectatorClient( clientNum ) && VALID_WEAPON( client->ps.weapon ) ) {
 		*weapon = client->ps.weapon;
 	}
 }
@@ -65,6 +65,20 @@ Save weapon before leaving team.
 */
 static void MOD_PREFIX(PrePlayerLeaveTeam)( MODFN_CTV, int clientNum, team_t oldTeam ) {
 	MODFN_NEXT( PrePlayerLeaveTeam, ( MODFN_NC, clientNum, oldTeam ) );
+	SaveWeaponPreference( clientNum );
+}
+
+/*
+================
+(ModFN) PostPlayerDie
+
+Save weapon when killed.
+================
+*/
+static void MOD_PREFIX(PostPlayerDie)( MODFN_CTV, gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
+		int meansOfDeath, int *awardPoints ) {
+	int clientNum = self - g_entities;
+	MODFN_NEXT( PostPlayerDie, ( MODFN_NC, self, inflictor, attacker, meansOfDeath, awardPoints ) );
 	SaveWeaponPreference( clientNum );
 }
 
@@ -118,6 +132,7 @@ void ModUAMInstagibSaveWep_Init( void ) {
 		MODFN_REGISTER( InitClientSession, ++modePriorityLevel );
 		MODFN_REGISTER( GenerateClientSessionInfo, ++modePriorityLevel );
 		MODFN_REGISTER( PrePlayerLeaveTeam, ++modePriorityLevel );
+		MODFN_REGISTER( PostPlayerDie, ++modePriorityLevel );
 		MODFN_REGISTER( MatchStateTransition, ++modePriorityLevel );
 		MODFN_REGISTER( PostClientSpawn, ++modePriorityLevel );
 	}

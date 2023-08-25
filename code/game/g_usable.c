@@ -148,6 +148,7 @@ void SP_func_usable( gentity_t *self )
 	if (self->spawnflags & 2)
 	{
 		self->s.eFlags |= EF_ANIM_ALLFAST;
+		G_SpawnInt( "fps", "0", &self->s.powerups );
 	}
 
 	/*

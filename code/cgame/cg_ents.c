@@ -159,7 +159,8 @@ static void CG_Useable( centity_t *cent ) {
 
 	if (s1->eFlags & EF_ANIM_ALLFAST)
 	{
-		ent.frame = (cg.time / 100);
+		int time = s1->powerups > 0 && s1->powerups <= 1000 ? 1000 / s1->powerups : 100;
+		ent.frame = (cg.time / time);
 		ent.renderfx|=RF_WRAP_FRAMES;
 	}
 	else
@@ -226,7 +227,8 @@ static void CG_General( centity_t *cent ) {
 	}
 	else if (s1->eFlags & EF_ANIM_ALLFAST)
 	{
-		ent.frame = (cg.time / 100);
+		int time = s1->powerups > 0 && s1->powerups <= 1000 ? 1000 / s1->powerups : 100;
+		ent.frame = (cg.time / time);
 		ent.renderfx|=RF_WRAP_FRAMES;
 	}
 	else

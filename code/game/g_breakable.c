@@ -300,6 +300,7 @@ void SP_misc_model_breakable( gentity_t *ent )
 	if ( ent->spawnflags & 2 )
 	{
 		ent->s.eFlags |= EF_ANIM_ALLFAST;
+		G_SpawnInt( "fps", "0", &ent->s.powerups );
 	}
 
 	G_SetOrigin( ent, ent->s.origin );

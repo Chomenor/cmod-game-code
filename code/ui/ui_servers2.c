@@ -1120,6 +1120,11 @@ static void ArenaServers_UpdateMenu( void ) {
 		g_arenaservers.list.generic.flags		|= QMF_GRAYED;
 		g_arenaservers.refresh.generic.flags	|= QMF_GRAYED;
 		g_arenaservers.go.generic.flags			|= QMF_GRAYED;
+
+		// don't display thumbnails during refresh, so any lag from image loading
+		// doesn't interfere with server query
+		g_arenaservers.mappic.generic.name = NULL;
+		g_arenaservers.mappic.shader = 0;
 	}
 
 	else {
@@ -1148,10 +1153,10 @@ static void ArenaServers_UpdateMenu( void ) {
 			Com_sprintf( g_arenaservers.statusBuffer, sizeof( g_arenaservers.statusBuffer ),
 					menu_normal_text[MNT_CNT_SERVERS], g_arenaservers.list.numitems, protocolMatches );
 		}
-	}
 
-	// update picture
-	ArenaServers_UpdatePicture();
+		// update picture
+		ArenaServers_UpdatePicture();
+	}
 }
 
 /*

@@ -1579,7 +1579,9 @@ static void Controls_GetConfig( void )
 	s_controls.smoothmouse.curvalue  = UI_ClampCvar( 0, 1, Controls_GetCvarValue( "m_filter" ) );
 	s_controls.alwaysrun.curvalue    = UI_ClampCvar( 0, 1, Controls_GetCvarValue( "cl_run" ) );
 	s_controls.autoswitch.curvalue   = UI_ClampCvar( 0, 2, Controls_GetCvarValue( "cg_autoswitch" ) );
-	s_controls.sensitivity.curvalue  = UI_ClampCvar( 2, 30, Controls_GetCvarValue( "sensitivity" ) );
+	// adjusted sensitivity scaling in range 0.5-32.5 (original range was 2-30)
+	s_controls.sensitivity.curvalue  = UI_ClampCvar( 0, 32,
+			sqrt( Controls_GetCvarValue( "sensitivity" ) * 2.0f - 1.0f ) * 4.0f );
 	s_controls.joyenable.curvalue    = UI_ClampCvar( 0, 1, Controls_GetCvarValue( "in_joystick" ) );
 	s_controls.joythreshold.curvalue = UI_ClampCvar( 0.05, 0.75, Controls_GetCvarValue( "joy_threshold" ) );
 	s_controls.freelook.curvalue     = UI_ClampCvar( 0, 1, Controls_GetCvarValue( "cl_freelook" ) );
@@ -1646,7 +1648,8 @@ static void Controls_SetConfig( void )
 	trap_Cvar_SetValue( "m_filter", s_controls.smoothmouse.curvalue );
 	trap_Cvar_SetValue( "cl_run", s_controls.alwaysrun.curvalue );
 	trap_Cvar_SetValue( "cg_autoswitch", s_controls.autoswitch.curvalue );
-	trap_Cvar_SetValue( "sensitivity", s_controls.sensitivity.curvalue );
+	trap_Cvar_SetValue( "sensitivity",
+			( ( ( s_controls.sensitivity.curvalue * s_controls.sensitivity.curvalue ) / 16.0f ) + 1 ) / 2.0f );
 	trap_Cvar_SetValue( "joy_threshold", s_controls.joythreshold.curvalue );
 	if ( controlsEngineConfig.supportFreeLook ) {
 		trap_Cvar_SetValue( "cl_freelook", s_controls.freelook.curvalue );
@@ -3642,8 +3645,8 @@ static void ControlsMouseJoyStick_MenuInit( void )
 	s_controls.sensitivity.generic.flags		= QMF_SMALLFONT;
 	s_controls.sensitivity.generic.id 			= ID_MOUSESPEED;
 	s_controls.sensitivity.generic.callback		= Controls_MenuEvent;
-	s_controls.sensitivity.minvalue				= 2;
-	s_controls.sensitivity.maxvalue				= 30;
+	s_controls.sensitivity.minvalue				= 0;
+	s_controls.sensitivity.maxvalue				= 32;
 	s_controls.sensitivity.color				= CT_DKPURPLE1;
 	s_controls.sensitivity.color2				= CT_LTPURPLE1;
 	s_controls.sensitivity.generic.name			= PIC_MONBAR2;

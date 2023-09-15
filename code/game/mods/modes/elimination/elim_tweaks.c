@@ -236,7 +236,6 @@ static void MOD_PREFIX(PostPlayerDie)( MODFN_CTV, gentity_t *self, gentity_t *in
 */
 static void MOD_PREFIX(PrePlayerLeaveTeam)( MODFN_CTV, int clientNum, team_t oldTeam ) {
 	gclient_t *client = &level.clients[clientNum];
-	MODFN_NEXT( PrePlayerLeaveTeam, ( MODFN_NC, clientNum, oldTeam ) );
 
 #ifdef FEATURE_ELIMINATED_MESSAGES
 	if ( level.matchState == MS_ACTIVE && client->pers.connected == CON_CONNECTED &&
@@ -246,6 +245,10 @@ static void MOD_PREFIX(PrePlayerLeaveTeam)( MODFN_CTV, int clientNum, team_t old
 		ModElimTweaks_EliminatedMessage( clientNum, oldTeam, qfalse );
 	}
 #endif
+
+	// Call this last, since it may reset eliminated status in elim_main.c
+	// and break ModElimination_Static_IsPlayerEliminated.
+	MODFN_NEXT( PrePlayerLeaveTeam, ( MODFN_NC, clientNum, oldTeam ) );
 }
 
 /*

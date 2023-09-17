@@ -411,6 +411,36 @@ static qboolean CG_WeaponPredict_CanStickGrenade( int entityNum ) {
 
 /*
 ================
+CG_WeaponPredict_EntitySearchRange
+
+Increase allowed match range for predicted entities and events when moving fast or standing on a
+fast mover. This range is just used as a sanity check so it's fine if the values are very rough.
+================
+*/
+static float CG_WeaponPredict_EntitySearchRange( void ) {
+	int groundEntityNum = cg.predictedPlayerState.groundEntityNum;
+	float range = 250.0f;
+
+	float speed = VectorLength( cg.predictedPlayerState.velocity ) / 8.0f;
+	if ( speed > range ) {
+		range = speed;
+	}
+
+	if ( groundEntityNum > 0 && groundEntityNum <= ENTITYNUM_MAX_NORMAL ) {
+		centity_t *cent = &cg_entities[groundEntityNum];
+		if ( cent->currentState.eType == ET_MOVER ) {
+			float speed = VectorLength( cent->currentState.pos.trDelta );
+			if ( speed > range ) {
+				range = speed;
+			}
+		}
+	}
+
+	return range;
+}
+
+/*
+================
 CG_WeaponPredict_FindMatchingEntity
 
 Searches current snapshot for the best matching entity according to eval function.
@@ -627,7 +657,7 @@ static float CG_WeaponPredict_ComparePredictedEvent( const centity_t *cent, void
 		float origin_delta = ORIGIN2_BASED_EVENT( event ) ? Distance( es->origin2, predicted->origin2 ) :
 			Distance( es->pos.trBase, predicted->origin );
 
-		if ( origin_delta < 250.0f ) {
+		if ( origin_delta < CG_WeaponPredict_EntitySearchRange() ) {
 			return origin_delta;
 		}
 	}
@@ -1089,7 +1119,7 @@ static float CG_WeaponPredict_ComparePredictedMissile( const centity_t *cent, vo
 			dot = 0.5f;
 		}
 
-		if ( deltaOrigin < 250.0f ) {
+		if ( deltaOrigin < CG_WeaponPredict_EntitySearchRange() ) {
 			// take dot product into account even if deltaOrigin is 0
 			return deltaOrigin / dot + ( 10.0f - dot );
 		}

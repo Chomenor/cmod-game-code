@@ -1303,7 +1303,7 @@ static void CG_WeaponPredict_FirePredictedImod( const weaponPredictDirs_t *dirs,
 			CG_WeaponPredict_RunPredictedEvent( &tent, cg.predictedPlayerState.commandTime );
 		}
 
-		if ( tr.contents & CONTENTS_SOLID || tr.entityNum == ENTITYNUM_NONE ) {
+		if ( tr.contents & CONTENTS_SOLID || tr.entityNum == ENTITYNUM_NONE || tr.entityNum == ENTITYNUM_WORLD ) {
 			break;
 		}
 

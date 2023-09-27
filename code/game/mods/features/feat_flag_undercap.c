@@ -13,7 +13,7 @@ static struct {
 	// 0 = default (all undercaps allowed)
 	// 1 = limited (block most undercaps, but allow some specific cases)
 	// 2 = strict (disable all undercaps and side captures)
-	trackedCvar_t g_undercapFilter;
+	trackedCvar_t g_undercapLimit;
 
 	// For ctf_voy2 like maps, standard mode disables undercap and scav jump, but allows
 	// jump from regen platform that hits the flag platform from the side without fully
@@ -36,15 +36,15 @@ Returns qtrue if flag capture is allowed.
 ================
 */
 static qboolean ModFlagUndercap_AllowCapture( const gentity_t *player, const gentity_t *flag ) {
-	if ( MOD_STATE->g_undercapFilter.integer <= 0 ) {
+	if ( MOD_STATE->g_undercapLimit.integer <= 0 ) {
 		return qtrue;
 	}
 
-	if ( MOD_STATE->g_undercapFilter.integer < 2 && MOD_STATE->boom2 && !( flag->flags & FL_DROPPED_ITEM ) ) {
+	if ( MOD_STATE->g_undercapLimit.integer < 2 && MOD_STATE->boom2 && !( flag->flags & FL_DROPPED_ITEM ) ) {
 		return qtrue;
 	}
 
-	if ( ( MOD_STATE->g_undercapFilter.integer >= 2 || VOY2_FORCE_STRICT( player ) ) &&
+	if ( ( MOD_STATE->g_undercapLimit.integer >= 2 || VOY2_FORCE_STRICT( player ) ) &&
 			!( flag->flags & FL_DROPPED_ITEM ) ) {
 		// Strict mode: check how far bottom of player is above bottom of flag.
 		float offset = ( player->r.currentOrigin[2] + player->r.mins[2] ) - ( flag->r.currentOrigin[2] + flag->r.mins[2] );
@@ -90,7 +90,7 @@ void ModFlagUndercap_Init( void ) {
 			MOD_STATE->boom2 = qtrue;
 		}
 
-		G_RegisterTrackedCvar( &MOD_STATE->g_undercapFilter, "g_undercapFilter", "0", 0, qfalse );
+		G_RegisterTrackedCvar( &MOD_STATE->g_undercapLimit, "g_undercapLimit", "0", 0, qfalse );
 
 		MODFN_REGISTER( CanItemBeGrabbed, MODPRIORITY_GENERAL );
 	}

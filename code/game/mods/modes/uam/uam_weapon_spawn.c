@@ -265,6 +265,27 @@ static qboolean MOD_PREFIX(CheckItemSpawnDisabled)( MODFN_CTV, gitem_t *item ) {
 
 /*
 ================
+(ModFN) PodiumWeapon
+
+On intermission podium, display weapon given to player at start of round, rather than most
+recently held weapon.
+================
+*/
+static weapon_t MOD_PREFIX(PodiumWeapon)( MODFN_CTV, int clientNum ) {
+	weapon_t weapon;
+	int randomSelected = MOD_STATE->weaponSelection[clientNum] & MOD_STATE->availableWeps;
+
+	for ( weapon = WP_NUM_WEAPONS - 1; weapon >= WP_PHASER; --weapon ) {
+		if ( WEAPON_MASK( weapon ) & randomSelected ) {
+			return weapon;
+		}
+	}
+
+	return MODFN_NEXT( PodiumWeapon, ( MODFN_NC, clientNum ) );
+}
+
+/*
+================
 (ModFN) AddRegisteredItems
 
 Register spawn weapons to avoid loading glitches. All weapons are registered even if they
@@ -312,6 +333,7 @@ void ModUAMWeaponSpawn_Init( qboolean allowWeaponCvarChanges ) {
 		MODFN_REGISTER( AddAmmoForItem, ++modePriorityLevel );
 		MODFN_REGISTER( CanItemBeDropped, ++modePriorityLevel );
 		MODFN_REGISTER( CheckItemSpawnDisabled, ++modePriorityLevel );
+		MODFN_REGISTER( PodiumWeapon, ++modePriorityLevel );
 		MODFN_REGISTER( AddRegisteredItems, ++modePriorityLevel );
 	}
 }

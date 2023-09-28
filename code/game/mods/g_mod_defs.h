@@ -196,6 +196,9 @@ MOD_FUNCTION_DEF( GetPlayerModel, void, ( PREFIX1 int clientNum, const char *use
 MOD_FUNCTION_DEF( CalculateAwards, void, ( PREFIX1 int clientNum, char *msg ),
 		( PREFIX2 clientNum, msg ), )
 
+// Determines which weapon to display for player on the winner podium.
+MOD_FUNCTION_DEF( PodiumWeapon, weapon_t, ( PREFIX1 int clientNum ), ( PREFIX2 clientNum ), return )
+
 //////////////////////////
 // weapon related
 //////////////////////////

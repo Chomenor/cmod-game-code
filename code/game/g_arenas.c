@@ -216,6 +216,17 @@ static void SetPodiumModelOrigin( gentity_t *pad, gentity_t *body, vec3_t offset
 
 /*
 ==================
+(ModFN) PodiumWeapon
+
+Determines which weapon to display for player on the winner podium.
+==================
+*/
+weapon_t ModFNDefault_PodiumWeapon( int clientNum ) {
+	return g_entities[clientNum].s.weapon;
+}
+
+/*
+==================
 SpawnModelOnVictoryPad
 ==================
 */
@@ -239,6 +250,7 @@ static gentity_t *SpawnModelOnVictoryPad( gentity_t *pad, vec3_t offset, gentity
 	body->s.legsAnim = LEGS_IDLE;
 	body->s.torsoAnim = TORSO_STAND;
 
+	body->s.weapon = modfn.PodiumWeapon( ent - g_entities );
 	// fix up some weapon holding / shooting issues
 	if (body->s.weapon==WP_PHASER || body->s.weapon==WP_DREADNOUGHT || body->s.weapon == WP_NONE )
 		body->s.weapon = WP_COMPRESSION_RIFLE;

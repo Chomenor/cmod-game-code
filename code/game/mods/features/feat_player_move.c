@@ -31,6 +31,7 @@ static struct {
 typedef struct {
 	int clientNum;
 	int oldEventSequence;
+	qboolean spectator;
 } postMoveContext_t;
 
 /*
@@ -46,8 +47,10 @@ static void ModPlayerMove_PostPmoveCallback( pmove_t *pmove, qboolean finalFragm
 		pmc->oldEventSequence = level.clients[pmc->clientNum].ps.eventSequence;
 	}
 
-	// Store smoothing position here regardless of trigger mode.
-	ModPCSmoothing_Static_RecordClientMove( pmc->clientNum );
+	if ( !pmc->spectator ) {
+		// Store smoothing position here regardless of trigger mode.
+		ModPCSmoothing_Static_RecordClientMove( pmc->clientNum );
+	}
 }
 
 /*
@@ -78,7 +81,7 @@ static int MOD_PREFIX(PmoveFixedLength)( MODFN_CTV, qboolean isBot ) {
 Performs player movement corresponding to a single input usercmd from the client.
 ==============
 */
-static void MOD_PREFIX(RunPlayerMove)( MODFN_CTV, int clientNum ) {
+static void MOD_PREFIX(RunPlayerMove)( MODFN_CTV, int clientNum, qboolean spectator ) {
 	gclient_t *client = &level.clients[clientNum];
 	playerState_t *ps = &client->ps;
 	pmove_t pmove;
@@ -88,6 +91,7 @@ static void MOD_PREFIX(RunPlayerMove)( MODFN_CTV, int clientNum ) {
 
 	pmc.clientNum = clientNum;
 	pmc.oldEventSequence = ps->eventSequence;
+	pmc.spectator = spectator;
 
 	if ( ps->pm_type == PM_SPECTATOR && client->ps.viewheight == DEFAULT_VIEWHEIGHT &&
 			client->ps.velocity[0] == 0.0f && client->ps.velocity[1] == 0.0f &&

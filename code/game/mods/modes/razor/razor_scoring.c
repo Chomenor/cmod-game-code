@@ -46,10 +46,10 @@ int ModRazorScoring_Static_LastPusher( int clientNum ) {
 (ModFN) RunPlayerMove
 ==============
 */
-static void MOD_PREFIX(RunPlayerMove)( MODFN_CTV, int clientNum ) {
+static void MOD_PREFIX(RunPlayerMove)( MODFN_CTV, int clientNum, qboolean spectator ) {
 	razorScoringClient_t *modclient = &MOD_STATE->clients[clientNum];
 
-	MODFN_NEXT( RunPlayerMove, ( MODFN_NC, clientNum ) );
+	MODFN_NEXT( RunPlayerMove, ( MODFN_NC, clientNum, spectator ) );
 
 	if ( LAST_PUSH_VALID( modclient ) && VectorCompare( level.clients[clientNum].ps.velocity, vec3_origin ) ) {
 		// Reset recorded hit due to no movement.

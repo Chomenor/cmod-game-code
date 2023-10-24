@@ -34,7 +34,7 @@ static int MOD_PREFIX(AdjustGeneralConstant)( MODFN_CTV, generalConstant_t gcTyp
 (ModFN) RunPlayerMove
 ==============
 */
-static void MOD_PREFIX(RunPlayerMove)( MODFN_CTV, int clientNum ) {
+static void MOD_PREFIX(RunPlayerMove)( MODFN_CTV, int clientNum, qboolean spectator ) {
 	gclient_t *client = &level.clients[clientNum];
 
 	// Override the regular speed calculation in ClientThink_real.
@@ -44,7 +44,7 @@ static void MOD_PREFIX(RunPlayerMove)( MODFN_CTV, int clientNum ) {
 		client->ps.speed = tonextint( client->ps.speed * 0.9f );
 	}
 
-	MODFN_NEXT( RunPlayerMove, ( MODFN_NC, clientNum ) );
+	MODFN_NEXT( RunPlayerMove, ( MODFN_NC, clientNum, spectator ) );
 }
 
 /*

@@ -160,8 +160,8 @@ static qboolean MOD_PREFIX(CheckSuicideAllowed)( MODFN_CTV, int clientNum ) {
 Disable actually firing the hypo during warmup.
 ==============
 */
-static void MOD_PREFIX(RunPlayerMove)( MODFN_CTV, int clientNum ) {
-	if ( MOD_STATE->active && !modfn.SpectatorClient( clientNum ) ) {
+static void MOD_PREFIX(RunPlayerMove)( MODFN_CTV, int clientNum, qboolean spectator ) {
+	if ( MOD_STATE->active && !spectator ) {
 		gclient_t *client = &level.clients[clientNum];
 		int respawnedFlag = client->ps.pm_flags & PMF_RESPAWNED;
 		int oldButtons = client->pers.cmd.buttons;
@@ -174,7 +174,7 @@ static void MOD_PREFIX(RunPlayerMove)( MODFN_CTV, int clientNum ) {
 
 		// Run move with fire buttons cleared, so hypo doesn't actually fire
 		client->pers.cmd.buttons &= ~( BUTTON_ATTACK | BUTTON_ALT_ATTACK);
-		MODFN_NEXT( RunPlayerMove, ( MODFN_NC, clientNum ) );
+		MODFN_NEXT( RunPlayerMove, ( MODFN_NC, clientNum, spectator ) );
 
 		client->pers.cmd.buttons = oldButtons;
 		client->ps.pm_flags |= respawnedFlag;
@@ -182,7 +182,7 @@ static void MOD_PREFIX(RunPlayerMove)( MODFN_CTV, int clientNum ) {
 		return;
 	}
 
-	MODFN_NEXT( RunPlayerMove, ( MODFN_NC, clientNum ) );
+	MODFN_NEXT( RunPlayerMove, ( MODFN_NC, clientNum, spectator ) );
 }
 
 /*

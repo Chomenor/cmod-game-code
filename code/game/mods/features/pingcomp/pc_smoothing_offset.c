@@ -386,9 +386,9 @@ static qboolean MOD_PREFIX(ModConsoleCommand)( MODFN_CTV, const char *cmd ) {
 (ModFN) RunPlayerMove
 ==============
 */
-static void MOD_PREFIX(RunPlayerMove)( MODFN_CTV, int clientNum ) {
+static void MOD_PREFIX(RunPlayerMove)( MODFN_CTV, int clientNum, qboolean spectator ) {
 	int oldTime = level.clients[clientNum].ps.commandTime;
-	MODFN_NEXT( RunPlayerMove, ( MODFN_NC, clientNum ) );
+	MODFN_NEXT( RunPlayerMove, ( MODFN_NC, clientNum, spectator ) );
 
 	if ( !SYNCHRONOUS_BOT( clientNum ) && ModPingcomp_Static_SmoothingEnabledForClient( clientNum ) ) {
 		ModPCSmoothingOffset_RegisterClientMove( clientNum, oldTime, level.clients[clientNum].ps.commandTime );

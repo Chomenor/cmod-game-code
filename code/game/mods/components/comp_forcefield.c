@@ -363,47 +363,51 @@ static int MOD_PREFIX(ModifyDamageFlags)( MODFN_CTV, gentity_t *targ, gentity_t 
 Move quick pass forcefields out of the way during player movement.
 ==============
 */
-static void MOD_PREFIX(RunPlayerMove)( MODFN_CTV, int clientNum ) {
-	int i;
-	int modifiedEntities[MAX_GENTITIES];
-	int oldContents[MAX_GENTITIES];
-	int modifiedEntityCount = 0;
-	float *playerPos = level.clients[clientNum].ps.origin;
+static void MOD_PREFIX(RunPlayerMove)( MODFN_CTV, int clientNum, qboolean spectator ) {
+	if ( spectator ) {
+		MODFN_NEXT( RunPlayerMove, ( MODFN_NC, clientNum, spectator ) );
+	} else {
+		int i;
+		int modifiedEntities[MAX_GENTITIES];
+		int oldContents[MAX_GENTITIES];
+		int modifiedEntityCount = 0;
+		float *playerPos = level.clients[clientNum].ps.origin;
 
-	for ( i = 0; i < MOD_STATE->forcefieldIndexCount; ++i ) {
-		int entityNum = MOD_STATE->forcefieldIndex[i];
-		gentity_t *ent = &g_entities[entityNum];
+		for ( i = 0; i < MOD_STATE->forcefieldIndexCount; ++i ) {
+			int entityNum = MOD_STATE->forcefieldIndex[i];
+			gentity_t *ent = &g_entities[entityNum];
 
-		// Check position to ensure we are at least close to the forcefield for optimization purposes.
-		if ( IS_FORCEFIELD( ent ) &&
-				playerPos[0] > ent->r.currentOrigin[0] - 500.0f &&
-				playerPos[0] < ent->r.currentOrigin[0] + 500.0f &&
-				playerPos[1] > ent->r.currentOrigin[1] - 500.0f &&
-				playerPos[1] < ent->r.currentOrigin[1] + 500.0f &&
-				playerPos[2] > ent->r.currentOrigin[2] - 500.0f &&
-				playerPos[2] < ent->r.currentOrigin[2] + 500.0f ) {
-			modForcefield_touchResponse_t response = modfn_lcl.ForcefieldTouchResponse(
-					G_GetForcefieldRelation( clientNum, ent ), clientNum, ent );
-			if ( response == FFTR_QUICKPASS ) {
-				// Save old contents
-				oldContents[modifiedEntityCount] = ent->r.contents;
-				modifiedEntities[modifiedEntityCount] = entityNum;
-				modifiedEntityCount++;
+			// Check position to ensure we are at least close to the forcefield for optimization purposes.
+			if ( IS_FORCEFIELD( ent ) &&
+				 playerPos[0] > ent->r.currentOrigin[0] - 500.0f &&
+				 playerPos[0] < ent->r.currentOrigin[0] + 500.0f &&
+				 playerPos[1] > ent->r.currentOrigin[1] - 500.0f &&
+				 playerPos[1] < ent->r.currentOrigin[1] + 500.0f &&
+				 playerPos[2] > ent->r.currentOrigin[2] - 500.0f &&
+				 playerPos[2] < ent->r.currentOrigin[2] + 500.0f ) {
+				modForcefield_touchResponse_t response = modfn_lcl.ForcefieldTouchResponse(
+				G_GetForcefieldRelation( clientNum, ent ), clientNum, ent );
+				if ( response == FFTR_QUICKPASS ) {
+					// Save old contents
+					oldContents[modifiedEntityCount] = ent->r.contents;
+					modifiedEntities[modifiedEntityCount] = entityNum;
+					modifiedEntityCount++;
 
-				// Temporarily make forcefield pass-through except for weapon fire
-				ent->r.contents &= CONTENTS_SHOTCLIP;
+					// Temporarily make forcefield pass-through except for weapon fire
+					ent->r.contents &= CONTENTS_SHOTCLIP;
 
-				// Still want to handle touch in G_TouchTriggers for sound effects
-				ent->r.contents |= CONTENTS_TRIGGER;
+					// Still want to handle touch in G_TouchTriggers for sound effects
+					ent->r.contents |= CONTENTS_TRIGGER;
+				}
 			}
 		}
-	}
 
-	MODFN_NEXT( RunPlayerMove, ( MODFN_NC, clientNum ) );
+		MODFN_NEXT( RunPlayerMove, ( MODFN_NC, clientNum, spectator ) );
 
-	// Restore previous contents
-	for ( i = 0; i < modifiedEntityCount; ++i ) {
-		g_entities[modifiedEntities[i]].r.contents = oldContents[i];
+		// Restore previous contents
+		for ( i = 0; i < modifiedEntityCount; ++i ) {
+			g_entities[modifiedEntities[i]].r.contents = oldContents[i];
+		}
 	}
 }
 

@@ -30,11 +30,11 @@ qboolean ModClickToJoin_Static_ActiveForClient( int clientNum ) {
 (ModFN) RunPlayerMove
 ==============
 */
-static void MOD_PREFIX(RunPlayerMove)( MODFN_CTV, int clientNum ) {
+static void MOD_PREFIX(RunPlayerMove)( MODFN_CTV, int clientNum, qboolean spectator ) {
 	gclient_t *client = &level.clients[clientNum];
 	static qboolean recursive = qfalse;
 
-	MODFN_NEXT( RunPlayerMove, ( MODFN_NC, clientNum ) );
+	MODFN_NEXT( RunPlayerMove, ( MODFN_NC, clientNum, spectator ) );
 
 	if ( ModClickToJoin_Static_ActiveForClient( clientNum ) && EF_WARN_ASSERT( !recursive ) &&
 			!( client->pers.oldbuttons & BUTTON_ATTACK ) && ( client->pers.cmd.buttons & BUTTON_ATTACK ) ) {

@@ -402,8 +402,9 @@ MOD_FUNCTION_DEF( PmoveInit, void, ( PREFIX1 int clientNum, pmove_t *pmove ),
 		( PREFIX2 clientNum, pmove ), )
 
 // Performs player movement corresponding to a single input usercmd from the client.
-MOD_FUNCTION_DEF( RunPlayerMove, void, ( PREFIX1 int clientNum ),
-		( PREFIX2 clientNum ), )
+// Called for both active players and free moving spectators, but not follow spectators.
+MOD_FUNCTION_DEF( RunPlayerMove, void, ( PREFIX1 int clientNum, qboolean spectator ),
+		( PREFIX2 clientNum, spectator ), )
 
 // Process triggers and other operations after player move(s) have completed.
 // This may be called 0, 1, or multiple times per input usercmd depending on move partitioning.

@@ -1785,7 +1785,7 @@ void ModFNDefault_PostPmoveActions( pmove_t *pmove, int clientNum, int oldEventS
 Performs player movement corresponding to a single input usercmd from the client.
 ==============
 */
-void ModFNDefault_RunPlayerMove( int clientNum ) {
+void ModFNDefault_RunPlayerMove( int clientNum, qboolean spectator ) {
 	gclient_t *client = &level.clients[clientNum];
 	playerState_t *ps = &client->ps;
 	pmove_t pmove;
@@ -1810,7 +1810,7 @@ static void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 		client->ps.pm_type = PM_SPECTATOR;
 		client->ps.speed = 400;	// faster than normal
 
-		modfn.RunPlayerMove( ent - g_entities );
+		modfn.RunPlayerMove( ent - g_entities, qtrue );
 	}
 
 	// attack button cycles through spectators
@@ -1929,7 +1929,7 @@ void ClientThink_real( gentity_t *ent ) {
 
 	oldEventSequence = client->ps.eventSequence;
 
-	modfn.RunPlayerMove( clientNum );
+	modfn.RunPlayerMove( clientNum, qfalse );
 
 	// check for eventTime reset
 	if ( ent->client->ps.eventSequence != oldEventSequence ) {

@@ -1811,6 +1811,8 @@ static void SpectatorThink( gentity_t *ent, usercmd_t *ucmd ) {
 		client->ps.speed = 400;	// faster than normal
 
 		modfn.RunPlayerMove( ent - g_entities, qtrue );
+	} else {
+		modfn.FollowSpectatorThink( ent - g_entities );
 	}
 
 	// attack button cycles through spectators

@@ -62,6 +62,9 @@ float ModFNDefault_AdjustItemRespawnTime( float time, const gentity_t *ent ) {
 	return time;
 }
 
+void ModFNDefault_FollowSpectatorThink( int clientNum ) {
+}
+
 int ModFNDefault_ModifyFireRate( int defaultInterval, int weapon, qboolean alt ) {
 	return defaultInterval;
 }

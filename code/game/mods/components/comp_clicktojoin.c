@@ -26,15 +26,13 @@ qboolean ModClickToJoin_Static_ActiveForClient( int clientNum ) {
 }
 
 /*
-==============
-(ModFN) RunPlayerMove
-==============
+================
+ModClickToJoin_CheckJoinGame
+================
 */
-static void MOD_PREFIX(RunPlayerMove)( MODFN_CTV, int clientNum, qboolean spectator ) {
+static void ModClickToJoin_CheckJoinGame( int clientNum ) {
 	gclient_t *client = &level.clients[clientNum];
 	static qboolean recursive = qfalse;
-
-	MODFN_NEXT( RunPlayerMove, ( MODFN_NC, clientNum, spectator ) );
 
 	if ( ModClickToJoin_Static_ActiveForClient( clientNum ) && EF_WARN_ASSERT( !recursive ) &&
 			!( client->pers.oldbuttons & BUTTON_ATTACK ) && ( client->pers.cmd.buttons & BUTTON_ATTACK ) ) {
@@ -42,6 +40,26 @@ static void MOD_PREFIX(RunPlayerMove)( MODFN_CTV, int clientNum, qboolean specta
 		SetTeam( &g_entities[clientNum], "auto", qfalse );
 		recursive = qfalse;
 	}
+}
+
+/*
+================
+(ModFN) RunPlayerMove
+================
+*/
+static void MOD_PREFIX(RunPlayerMove)( MODFN_CTV, int clientNum, qboolean spectator ) {
+	MODFN_NEXT( RunPlayerMove, ( MODFN_NC, clientNum, spectator ) );
+	ModClickToJoin_CheckJoinGame( clientNum );
+}
+
+/*
+================
+(ModFN) FollowSpectatorThink
+================
+*/
+static void MOD_PREFIX(FollowSpectatorThink)( MODFN_CTV, int clientNum ) {
+	MODFN_NEXT( FollowSpectatorThink, ( MODFN_NC, clientNum ) );
+	ModClickToJoin_CheckJoinGame( clientNum );
 }
 
 /*
@@ -73,6 +91,7 @@ void ModClickToJoin_Init( void ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
 		MODFN_REGISTER( RunPlayerMove, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( FollowSpectatorThink, MODPRIORITY_GENERAL );
 
 		// high priority to override any other messages
 		MODFN_REGISTER( SpawnCenterPrintMessage, MODPRIORITY_HIGH );

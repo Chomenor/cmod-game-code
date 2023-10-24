@@ -406,6 +406,10 @@ MOD_FUNCTION_DEF( PmoveInit, void, ( PREFIX1 int clientNum, pmove_t *pmove ),
 MOD_FUNCTION_DEF( RunPlayerMove, void, ( PREFIX1 int clientNum, qboolean spectator ),
 		( PREFIX2 clientNum, spectator ), )
 
+// Called in place of RunPlayerMove for follow spectators.
+MOD_FUNCTION_DEF( FollowSpectatorThink, void, ( PREFIX1 int clientNum ),
+		( PREFIX2 clientNum ), )
+
 // Process triggers and other operations after player move(s) have completed.
 // This may be called 0, 1, or multiple times per input usercmd depending on move partitioning.
 MOD_FUNCTION_DEF( PostPmoveActions, void, ( PREFIX1 pmove_t *pmove, int clientNum, int oldEventSequence ),

@@ -255,7 +255,7 @@ void ModModelGroups_Shared_RandomModelForRace( const char *race, char *model, un
 void ModPendingItem_Shared_SchedulePendingItem( int clientNum, holdable_t item, int delay );
 
 //
-// Warmup sequences (comp_warmupsequence.c)
+// Warmup sequences (comp_warmup_sequence.c)
 //
 
 #define MAX_INFO_SEQUENCE_EVENTS 20
@@ -367,6 +367,6 @@ extern mod_functions_local_t modfn_lcl;
 #define MOD_STATE MOD_PREFIX( state )
 
 #define MODFN_REGISTER( name, priority ) { \
-	ModFNType_##name modfn = MOD_PREFIX(name); \
-	G_RegisterModFunctionCall( &modFunctionsBackend.name, (modCall_t)modfn, MOD_NAME_STR, priority ); }
+	ModFNType_##name call = MOD_PREFIX(name); \
+	G_RegisterModFunctionCall( &modFunctionsBackend.name, (modCall_t)call, MOD_NAME_STR, priority ); }
 #endif

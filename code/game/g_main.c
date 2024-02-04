@@ -19,9 +19,9 @@ static int trackedCvarCount = 0;
 #include "g_cvar_defs.h"
 #undef CVAR_DEF
 
-void G_InitGame( int levelTime, int randomSeed, int restart );
-void G_RunFrame( int levelTime );
-void G_ShutdownGame( int restart );
+static void G_InitGame( int levelTime, int randomSeed, int restart );
+static void G_RunFrame( int levelTime );
+static void G_ShutdownGame( int restart );
 static void G_CheckExitRules( void );
 
 //=============================
@@ -307,8 +307,8 @@ G_InitGame
 
 ============
 */
-void G_InitGame( int levelTime, int randomSeed, int restart ) {
-	int					i;
+static void G_InitGame( int levelTime, int randomSeed, int restart ) {
+	int i;
 
 	G_Printf ("------- Game Initialization -------\n");
 	G_Printf ("gamename: %s\n", GAMEVERSION);
@@ -456,7 +456,7 @@ void G_InitGame( int levelTime, int randomSeed, int restart ) {
 G_ShutdownGame
 =================
 */
-void G_ShutdownGame( int restart ) {
+static void G_ShutdownGame( int restart ) {
 	G_Printf ("==== ShutdownGame ====\n");
 
 #if 0	// kef -- Pat sez this is causing some trouble these days
@@ -1346,7 +1346,7 @@ G_RunFrame
 Advances the non-player objects in the world
 ================
 */
-void G_RunFrame( int levelTime ) {
+static void G_RunFrame( int levelTime ) {
 	int			i;
 	gentity_t	*ent;
 	int			msec;

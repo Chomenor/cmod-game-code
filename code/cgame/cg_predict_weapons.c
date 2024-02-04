@@ -690,7 +690,6 @@ static void CG_WeaponPredict_CheckPredictedEvents( void ) {
 				centity_t *match = CG_WeaponPredict_FindMatchingEntity( CG_WeaponPredict_ComparePredictedEvent, (void *)pe );
 				if ( match ) {
 					const entityState_t *es = &match->currentState;
-					const float *matchOrigin = ORIGIN2_BASED_EVENT( pe->event ) ? es->origin2 : es->pos.trBase;
 					pe->time = 0;
 					// disable the event from firing
 					match->previousEvent = match->currentState.eType > ET_EVENTS ? 1 : match->currentState.event;

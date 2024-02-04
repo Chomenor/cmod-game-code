@@ -47,6 +47,19 @@ typedef enum {
 	CST_RESPAWN
 } clientSpawnType_t;
 
+typedef enum {
+	CON_DISCONNECTED,
+	CON_CONNECTING,
+	CON_CONNECTED
+} clientConnected_t;
+
+typedef enum {
+	SPECTATOR_NOT,
+	SPECTATOR_FREE,
+	SPECTATOR_FOLLOW,
+	SPECTATOR_SCOREBOARD
+} spectatorState_t;
+
 typedef struct {
 	// this part must match vmCvar_t exactly
 	cvarHandle_t	handle;
@@ -203,19 +216,6 @@ struct gentity_s {
 	gitem_t		*item;			// for bonus items
 };
 
-
-typedef enum {
-	CON_DISCONNECTED,
-	CON_CONNECTING,
-	CON_CONNECTED
-} clientConnected_t;
-
-typedef enum {
-	SPECTATOR_NOT,
-	SPECTATOR_FREE,
-	SPECTATOR_FOLLOW,
-	SPECTATOR_SCOREBOARD
-} spectatorState_t;
 
 typedef struct {
 	int			location;

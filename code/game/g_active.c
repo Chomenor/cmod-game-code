@@ -900,8 +900,8 @@ void DetonateDetpack(gentity_t *ent)
 			G_AddEvent(detpack, EV_DETPACK, 0);
 			G_RadiusDamage( detpack->s.origin, detpack->parent, DETPACK_DAMAGE, DETPACK_RADIUS,
 				detpack, DAMAGE_HALF_NOTLOS|DAMAGE_ALL_TEAMS, MOD_DETPACK );
+
 			// just turn the model invisible and let the entity think for a bit to deliver a shockwave
-			//G_FreeEntity(detpack);
 			detpack->classname = NULL;
 			detpack->s.modelindex = 0;
 

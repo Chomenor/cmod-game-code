@@ -1576,21 +1576,21 @@ static void Controls_GetConfig( void )
 	}
 
 	s_controls.invertmouse.curvalue  = Controls_GetCvarValue( "m_pitch" ) < 0;
-	s_controls.smoothmouse.curvalue  = UI_ClampCvar( 0, 1, Controls_GetCvarValue( "m_filter" ) );
-	s_controls.alwaysrun.curvalue    = UI_ClampCvar( 0, 1, Controls_GetCvarValue( "cl_run" ) );
-	s_controls.autoswitch.curvalue   = UI_ClampCvar( 0, 2, Controls_GetCvarValue( "cg_autoswitch" ) );
+	s_controls.smoothmouse.curvalue  = Com_Clamp( 0, 1, Controls_GetCvarValue( "m_filter" ) );
+	s_controls.alwaysrun.curvalue    = Com_Clamp( 0, 1, Controls_GetCvarValue( "cl_run" ) );
+	s_controls.autoswitch.curvalue   = Com_Clamp( 0, 2, Controls_GetCvarValue( "cg_autoswitch" ) );
 	// adjusted sensitivity scaling in range 0.5-32.5 (original range was 2-30)
-	s_controls.sensitivity.curvalue  = UI_ClampCvar( 0, 32,
+	s_controls.sensitivity.curvalue  = Com_Clamp( 0, 32,
 			sqrt( Controls_GetCvarValue( "sensitivity" ) * 2.0f - 1.0f ) * 4.0f );
-	s_controls.joyenable.curvalue    = UI_ClampCvar( 0, 1, Controls_GetCvarValue( "in_joystick" ) );
-	s_controls.joythreshold.curvalue = UI_ClampCvar( 0.05, 0.75, Controls_GetCvarValue( "joy_threshold" ) );
-	s_controls.freelook.curvalue     = UI_ClampCvar( 0, 1, Controls_GetCvarValue( "cl_freelook" ) );
+	s_controls.joyenable.curvalue    = Com_Clamp( 0, 1, Controls_GetCvarValue( "in_joystick" ) );
+	s_controls.joythreshold.curvalue = Com_Clamp( 0.05, 0.75, Controls_GetCvarValue( "joy_threshold" ) );
+	s_controls.freelook.curvalue     = Com_Clamp( 0, 1, Controls_GetCvarValue( "cl_freelook" ) );
 	if ( controlsEngineConfig.supportRawMouse ) {
 		s_controls.rawmouse.curvalue = VMExt_GVCommandInt( "cmd_get_raw_mouse", 0 ) > 0 ? 1 : 0;
 	}
-	s_keyturnspeed_slider.curvalue   = UI_ClampCvar( 1, 5, Controls_GetCvarValue( "cl_anglespeedkey" ) );
-	s_joyxbutton_box.curvalue		 = UI_ClampCvar( 0, 1, Controls_GetCvarValue( "joy_xbutton" ) );
-	s_joyybutton_box.curvalue        = UI_ClampCvar( 0, 1, Controls_GetCvarValue( "joy_ybutton" ) );
+	s_keyturnspeed_slider.curvalue   = Com_Clamp( 1, 5, Controls_GetCvarValue( "cl_anglespeedkey" ) );
+	s_joyxbutton_box.curvalue		 = Com_Clamp( 0, 1, Controls_GetCvarValue( "joy_xbutton" ) );
+	s_joyybutton_box.curvalue        = Com_Clamp( 0, 1, Controls_GetCvarValue( "joy_ybutton" ) );
 }
 
 /*

@@ -591,10 +591,6 @@ qboolean SetTeam( gentity_t *ent, char *s, qboolean force ) {
 
 			// It's ok, the team we are switching to has less or same number of players
 		}
-
-	} else {
-		// force them to spectators if there aren't any spots free
-		team = TEAM_FREE;
 	}
 
 	// decide if we will allow the change, and print any warning messages

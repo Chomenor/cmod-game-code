@@ -1194,7 +1194,6 @@ qboolean ModFNDefault_RadiusDamage( vec3_t origin, gentity_t *attacker, float da
 G_RadiusDamage
 ============
 */
-extern void tripwireThink ( gentity_t *ent );
 qboolean G_RadiusDamage ( vec3_t origin, gentity_t *attacker, float damage, float radius,
 					gentity_t *ignore, int dflags, int mod) {
 	return modfn.RadiusDamage( origin, attacker, damage, radius, ignore, dflags, mod );

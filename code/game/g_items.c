@@ -24,10 +24,6 @@
 #define	RESPAWN_POWERUP		120
 
 
-/*QUAKED item_botroam (.5 .3 .7) (-16 -16 -24) (16 16 0)
-Bots in MP will go to these spots when there's nothing else to get- helps them patrol.
-*/
-
 /*
 ================
 (ModFN) AdaptRespawnNumPlayers
@@ -983,12 +979,12 @@ void G_SpawnItem (gentity_t *ent, gitem_t *item) {
 	EF_WARN_ASSERT( level.spawning );
 
 	item = modfn.CheckReplaceItem( item );
-	ent->classname = item->classname;
-
-	if ( modfn.CheckItemSpawnDisabled( item ) ) {
+	if ( !item || modfn.CheckItemSpawnDisabled( item ) ) {
 		G_FreeEntity( ent );
 		return;
 	}
+
+	ent->classname = item->classname;
 
 	G_SpawnFloat( "random", "0", &ent->random );
 	G_SpawnFloat( "wait", "0", &ent->wait );

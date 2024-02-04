@@ -49,11 +49,11 @@ typedef enum {
 
 typedef enum {
 	GC_NONE,
-	GC_SKIP_RUN_MISSILE,
+	GC_SKIP_RUN_MISSILE,			// Skip normal G_RunMissile calls
 	GC_EVENT_TIME_OFFSET,
 	GC_SKIP_SPECTATOR_DOOR_TELEPORT,
 	GC_DISABLE_TEAM_FORCE_BALANCE,
-	GC_INTERMISSION_DELAY_TIME,
+	GC_INTERMISSION_DELAY_TIME,		// Length in milliseconds to wait between intermission qualified and intermission start
 	GC_DISABLE_ADDSCORE,
 	GC_ALLOW_BOT_CLASS_SPECIFIER,
 	GC_FORCE_BOTROAMSONLY,
@@ -133,8 +133,12 @@ typedef enum {
 // mod functions (modfn.*)
 //
 
-// Generic function pointer type, needed to avoid compiler warnings
-typedef void (*modCall_t)(void);
+// Generic function pointer type to avoid compiler warnings
+#ifdef Q3_VM
+typedef void ( *modCall_t )( void );
+#else
+typedef void *modCall_t;
+#endif
 
 // Context parameters included in modfn calls
 #define MODFN_CTV modCall_t *next	// "context variables"

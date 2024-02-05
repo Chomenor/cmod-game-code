@@ -104,6 +104,8 @@ void ModElimMisc_Init( void ) {
 					"Elimination enhancements.\n" );
 		}
 
+		ModElimSpectatorChat_Init();
+
 		if ( !modcfg.mods_enabled.tournament ) {
 			ModElimMultiRound_Init();
 		}

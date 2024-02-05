@@ -428,6 +428,9 @@
     <ClCompile Include="..\..\code\game\mods\modes\elimination\elim_multiround.c">
       <Filter>game\mods\modes\elimination</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\modes\elimination\elim_spectator_chat.c">
+      <Filter>game\mods\modes\elimination</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\code\game\mods\modes\elimination\elim_timelimit.c">
       <Filter>game\mods\modes\elimination</Filter>
     </ClCompile>

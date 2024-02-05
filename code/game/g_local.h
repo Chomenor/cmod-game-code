@@ -412,6 +412,7 @@ char *G_NewString( const char *string );
 // g_cmds.c
 //
 void DeathmatchScoreboardMessage( gentity_t *ent );
+char *ConcatArgs( int start );
 void BroadcastTeamChange( gclient_t *client, int oldTeam );
 void SetPlayerClassCvar(gentity_t *ent);
 qboolean SetTeam( gentity_t *ent, char *s, qboolean force );

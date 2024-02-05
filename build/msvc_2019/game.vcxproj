@@ -308,6 +308,7 @@
     <ClCompile Include="..\..\code\game\mods\modes\elimination\elim_main.c" />
     <ClCompile Include="..\..\code\game\mods\modes\elimination\elim_misc.c" />
     <ClCompile Include="..\..\code\game\mods\modes\elimination\elim_multiround.c" />
+    <ClCompile Include="..\..\code\game\mods\modes\elimination\elim_spectator_chat.c" />
     <ClCompile Include="..\..\code\game\mods\modes\elimination\elim_timelimit.c" />
     <ClCompile Include="..\..\code\game\mods\modes\elimination\elim_tweaks.c" />
     <ClCompile Include="..\..\code\game\mods\modes\mode_actionhero.c" />

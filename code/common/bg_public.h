@@ -64,7 +64,7 @@
 // Arbitrary index that the game module uses to write mod config info. Clients will look for
 // mod config prefix in all configstrings, so this can be changed to any non-conflicting value
 // without affecting the client.
-#define CS_MOD_CONFIG		870
+#define CS_MOD_CONFIG		18
 
 typedef enum {
 	GT_FFA,				// free for all

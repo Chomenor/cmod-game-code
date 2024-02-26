@@ -574,6 +574,18 @@ void CG_Missile( centity_t *cent, qboolean altfire ) {
 	}
 	weapon = &cg_weapons[s1->weapon];
 
+	// delay scavenger primary projectiles for more correct visual origin point
+	// with sv_fps > 20 and/or ping compensation enabled
+	if ( s1->weapon == WP_SCAVENGER_RIFLE && s1->eType == ET_MISSILE &&
+			cg.time < s1->pos.trTime + (int)( ( 60 * 1500 ) / VectorLength( s1->pos.trDelta ) ) ) {
+		vec3_t delta;
+		VectorSubtract( s1->pos.trBase, cg.predictedPlayerState.origin, delta );
+		// only apply to nearby projectiles to avoid affecting ones fired by somebody else
+		if ( VectorLengthSquared( delta ) < 64 * 64 ) {
+			return;
+		}
+	}
+
 	// calculate the axis
 	VectorCopy( s1->angles, cent->lerpAngles);
 

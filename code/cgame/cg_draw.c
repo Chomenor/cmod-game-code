@@ -2033,6 +2033,132 @@ CROSSHAIR
 */
 
 
+typedef struct {
+	unsigned char c[3];
+} colorValue_t;
+
+// Represents set of full health, medium health, and low health crosshair colors.
+typedef struct {
+	colorValue_t cv[3];
+} crosshairColors_t;
+
+/*
+=================
+CG_ParseColorValue
+
+Convert hexadecimal string to color value.
+=================
+*/
+static colorValue_t CG_ParseColorValue( const char *src ) {
+	colorValue_t tgt;
+	int value = 0;
+	int i;
+
+	for ( i = 0; i < 6; ++i ) {
+		char c = src[i];
+		if ( !c ) {
+			break;
+		} else if ( c >= '0' && c <= '9' ) {
+			c -= '0';
+		} else if ( c >= 'a' && c <= 'f' ) {
+			c = c - 'a' + 10;
+		} else if ( c >= 'A' && c <= 'F' ) {
+			c = c - 'A' + 10;
+		} else {
+			continue;
+		}
+		value |= c << ( 5 - i ) * 4;
+	}
+
+	tgt.c[0] = ( value >> 16 ) & 255;
+	tgt.c[1] = ( value >> 8 ) & 255;
+	tgt.c[2] = value & 255;
+	return tgt;
+}
+
+/*
+=================
+CG_ParseCrosshairColors
+
+Convert space-separated hexadecimal string to high, medium, and low health crosshair
+colors. If only one value is specified the same color is used for all health conditions.
+=================
+*/
+static crosshairColors_t CG_ParseCrosshairColors( const char *src ) {
+	crosshairColors_t chc;
+	int i;
+	char *parsePtr = *src ? (char *)src : "ffffff ffff00 ff0000";
+	for ( i = 0; i < 3; ++i ) {
+		const char *token = COM_Parse( &parsePtr );
+		if ( !*token && i > 0 ) {
+			// missing token uses the preceding value
+			chc.cv[i] = chc.cv[i - 1];
+		} else {
+			chc.cv[i] = CG_ParseColorValue( token );
+		}
+	}
+	return chc;
+}
+
+/*
+==============
+CG_CrosshairColorLerpVector
+
+Creates interpolation between 'base' and 'next'.
+Proportion is indicated by 'fraction' on a scale from 0 (only base) to 1 (only next).
+==============
+*/
+static void CG_CrosshairColorLerpVector( vec3_t base, vec3_t next, float fraction, vec3_t target ) {
+	target[0] = base[0] + ( next[0] - base[0] ) * fraction;
+	target[1] = base[1] + ( next[1] - base[1] ) * fraction;
+	target[2] = base[2] + ( next[2] - base[2] ) * fraction;
+}
+
+/*
+=================
+CG_GetCrosshairColor
+=================
+*/
+void CG_GetCrosshairColor( int health, int armor, vec4_t hcolor ) {
+	static vec3_t colors[3];
+	static qboolean initialized;
+	static int modificationCount;
+
+	// Read color points from cvar
+	if ( !initialized || cg_crosshairColor.modificationCount != modificationCount ) {
+		crosshairColors_t chc = CG_ParseCrosshairColors( cg_crosshairColor.string );
+		int i;
+		for ( i = 0; i < 3; ++i ) {
+			VectorSet( colors[i], (float)chc.cv[i].c[0] / 255.0f, (float)chc.cv[i].c[1] / 255.0f,
+					(float)chc.cv[i].c[2] / 255.0f );
+		}
+		initialized = qtrue;
+		modificationCount = cg_crosshairColor.modificationCount;
+	}
+
+	// Merge armor into health consistent with CG_GetColorForHealth
+	if ( armor > health ) {
+		health += health;
+	} else {
+		health += armor;
+	}
+
+	hcolor[3] = 1.0f;
+	if ( health >= 99 || !cg_crosshairHealth.integer ) {
+		VectorCopy( colors[0], hcolor );
+	} else if ( health >= 67 ) {
+		CG_CrosshairColorLerpVector( colors[0], colors[1], (float)( 99 - health ) / 33.0f, hcolor );
+	} else if ( health >= 60 ) {
+		VectorCopy( colors[1], hcolor );
+	} else if ( health >= 31 ) {
+		CG_CrosshairColorLerpVector( colors[1], colors[2], (float)( 60 - health ) / 30.0f, hcolor );
+	} else if ( health > 0 ) {
+		VectorCopy( colors[2], hcolor );
+	} else {
+		VectorClear( hcolor );
+	}
+}
+
 /*
 =================
 CG_DrawCrosshair
@@ -2065,13 +2191,10 @@ static void CG_DrawCrosshair(void) {
 	}
 
 	// set color based on health
-	if ( cg_crosshairHealth.integer ) {
-		vec4_t		hcolor;
-
-		CG_ColorForHealth( hcolor );
+	{
+		vec4_t hcolor;
+		CG_GetCrosshairColor( cg.snap->ps.stats[STAT_HEALTH], cg.snap->ps.stats[STAT_ARMOR], hcolor );
 		trap_R_SetColor( hcolor );
-	} else {
-		trap_R_SetColor( NULL );
 	}
 
 	w = h = cg_crosshairSize.value;

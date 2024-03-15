@@ -44,6 +44,7 @@ CVAR_DEF( g_speed, "g_speed", "250", CVAR_SERVERINFO | CVAR_ARCHIVE, qtrue )				
 CVAR_DEF( g_gravity, "g_gravity", "800", CVAR_SERVERINFO | CVAR_ARCHIVE, qtrue )
 CVAR_DEF( g_knockback, "g_knockback", "500", 0, qtrue )
 CVAR_DEF( g_dmgmult, "g_dmgmult", "1", 0, qtrue )
+CVAR_DEF( g_quadFactor, "g_quadFactor", "3", 0, qtrue )
 CVAR_DEF( g_weaponRespawn, "g_weaponrespawn", "5", 0, qtrue )		// Quake 3 default (with 1 ammo weapons) was 5.
 CVAR_DEF( g_teamWeaponRespawn, "g_teamWeaponRespawn", "30", 0, qtrue )	// Used instead of g_weaponrespawn in THM gametype.
 CVAR_DEF( g_adaptRespawn, "g_adaptrespawn", "1", 0, qtrue )		// Make weapons respawn faster with a lot of players.

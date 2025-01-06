@@ -555,20 +555,21 @@ static int CG_CalcFov( void ) {
 	float	zoomFov;
 	float	f;
 	int		inwater;
-	qboolean noFovScaling = qfalse;
+	qboolean fovScaling = qfalse;
 
 	if ( cg.predictedPlayerState.pm_type == PM_INTERMISSION ) {
 		// if in intermission, use a fixed value
 		fov_x = 90;
-		noFovScaling = qtrue;
+		fovScaling = AspectCorrect_UseAdjustedIntermissionFov();
 	} else {
 		// user selectable
 		if ( cgs.dmflags & DF_FIXED_FOV ) {
 			// dmflag to prevent wide fov for all clients
 			fov_x = 80;
-			noFovScaling = qtrue;
+			fovScaling = qfalse;
 		} else {
 			fov_x = cg_fov.value;
+			fovScaling = strchr( cg_fov.string, '*' ) ? qtrue : qfalse;
 			if ( fov_x < 1 ) {
 				fov_x = 1;
 			} else if ( fov_x > FOV_MAX ) {
@@ -628,10 +629,10 @@ static int CG_CalcFov( void ) {
 	if (cg.predictedPlayerState.introTime > cg.time)
 	{	// The stuff is "holodecking in".
 		fov_x = 80;
-		noFovScaling = qtrue;
+		fovScaling = qfalse;
 	}
 
-	if ( !noFovScaling && strchr( cg_fov.string, '*' ) ) {
+	if ( fovScaling ) {
 		// Convert hor+ fov
 		x = ( cg.refdef.height * 4.0f / 3.0f ) / tan( fov_x / 360.0f * M_PI );
 		fov_x = atan2( cg.refdef.width, x ) * 360.0f / M_PI;

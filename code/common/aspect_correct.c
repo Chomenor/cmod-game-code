@@ -230,6 +230,15 @@ AspectCorrect_UseCorrectedGunPosition
 qboolean AspectCorrect_UseCorrectedGunPosition( void ) {
 	return uix.cg_aspectCorrectGunPos.integer >= 0 ? uix.cg_aspectCorrectGunPos.integer : uix.cg_aspectCorrect.integer;
 }
+
+/*
+================
+AspectCorrect_UseAdjustedIntermissionFov
+================
+*/
+qboolean AspectCorrect_UseAdjustedIntermissionFov( void ) {
+	return uix.cg_aspectCorrect.integer && uix.width * 3 > uix.height * 4;
+}
 #endif
 
 #ifdef MODULE_UI

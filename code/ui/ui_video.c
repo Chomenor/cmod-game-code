@@ -3608,6 +3608,9 @@ static float UI_VideoData2SettingsGetCurrentFov( void )
 	trap_Cvar_VariableStringBuffer( "cg_fov", buffer, sizeof( buffer ) );
 	fov = atof( buffer );
 
+	// Apply same clamp as CG_CalcFov
+	fov = Com_Clamp( 1, 120, fov );
+
 	if ( !strchr( buffer, '*' ) ) {
 		// Convert unscaled fov to hor+ version
 		float x = uis.glconfig.vidWidth / tan( fov / 360.0f * M_PI );

@@ -632,19 +632,13 @@ static int CG_CalcFov( void ) {
 	}
 
 	if ( !noFovScaling && strchr( cg_fov.string, '*' ) ) {
-		// Calculate fov_y based on fov_x at theoretical 640x480 resolution
-		x = 640.0 / tan( fov_x / 360 * M_PI );
-		fov_y = atan2( 480.0, x );
-		fov_y = fov_y * 360 / M_PI;
-
-		// Recalculate fov_x based on fov_y
-		x = cg.refdef.height / tan( fov_y / 360 * M_PI );
-		fov_x = atan2( cg.refdef.width, x );
-		fov_x = fov_x * 360 / M_PI;
+		// Convert hor+ fov
+		x = ( cg.refdef.height * 4.0f / 3.0f ) / tan( fov_x / 360.0f * M_PI );
+		fov_x = atan2( cg.refdef.width, x ) * 360.0f / M_PI;
+		fov_y = atan2( cg.refdef.height, x ) * 360.0f / M_PI;
 	} else {
-		x = cg.refdef.width / tan( fov_x / 360 * M_PI );
-		fov_y = atan2( cg.refdef.height, x );
-		fov_y = fov_y * 360 / M_PI;
+		x = cg.refdef.width / tan( fov_x / 360.0f * M_PI );
+		fov_y = atan2( cg.refdef.height, x ) * 360.0f / M_PI;
 	}
 
 	// warp if underwater

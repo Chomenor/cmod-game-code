@@ -3609,14 +3609,9 @@ static float UI_VideoData2SettingsGetCurrentFov( void )
 	fov = atof( buffer );
 
 	if ( !strchr( buffer, '*' ) ) {
-		// Convert existing unscaled fov to scaled version, which is what is used by UI.
-		float x = uis.glconfig.vidWidth / tan( fov / 360 * M_PI );
-		float fov_y = atan2( uis.glconfig.vidHeight, x );
-		fov_y = fov_y * 360 / M_PI;
-
-		x = 480.0 / tan( fov_y / 360 * M_PI );
-		fov = atan2( 640.0, x );
-		fov = fov * 360 / M_PI;
+		// Convert unscaled fov to hor+ version
+		float x = uis.glconfig.vidWidth / tan( fov / 360.0f * M_PI );
+		fov = atan2( uis.glconfig.vidHeight * 4.0f / 3.0f, x ) * 360.0f / M_PI;
 	}
 
 	return fov;

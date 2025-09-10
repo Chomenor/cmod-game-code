@@ -1079,25 +1079,20 @@ ClientCommand
 =================
 */
 void ClientCommand( int clientNum ) {
-	gentity_t *ent;
-	char	cmd[MAX_TOKEN_CHARS];
-
-	ent = g_entities + clientNum;
-	if ( ent->client->pers.connected == CON_DISCONNECTED ) {
-		return;		// not fully in game yet
-	}
-
+	gentity_t *ent = g_entities + clientNum;
+	char cmd[MAX_TOKEN_CHARS];
 
 	trap_Argv( 0, cmd, sizeof( cmd ) );
 
-	// Check if any mods have special handling of this command
-	if ( modfn.ModClientCommand( clientNum, cmd ) ) {
+	// Block most commands for connecting clients as they shouldn't be needed and could allow
+	// exploits, but allow for local clients so team and class commands from UI work correctly.
+	if ( ent->client->pers.connected <= CON_CONNECTING && EF_WARN_ASSERT( !( ent->r.svFlags & SVF_BOT ) )
+			&& !ent->client->pers.localClient && Q_stricmp( cmd, "setAltSwap" ) ) {
 		return;
 	}
 
-	// Team command can be called for connecting client when starting game from UI,
-	// but there shouldn't be a need for any other commands
-	if ( ent->client->pers.connected == CON_CONNECTING && Q_stricmp( cmd, "team" ) ) {
+	// Check if any mods have special handling of this command
+	if ( modfn.ModClientCommand( clientNum, cmd ) ) {
 		return;
 	}
 

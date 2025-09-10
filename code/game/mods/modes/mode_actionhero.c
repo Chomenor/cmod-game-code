@@ -18,6 +18,22 @@ static struct {
 
 /*
 ================
+ModActionhero_RespawnWithFlag
+
+Respawn without causing flags to disappear in CTF mode.
+================
+*/
+static void ModActionhero_RespawnWithFlag( int clientNum ) {
+	gclient_t *client = &level.clients[clientNum];
+	int oldRedFlag = client->ps.powerups[PW_REDFLAG];
+	int oldBlueFlag = client->ps.powerups[PW_BLUEFLAG];
+	ClientSpawn( &g_entities[clientNum], CST_RESPAWN );
+	client->ps.powerups[PW_REDFLAG] = oldRedFlag;
+	client->ps.powerups[PW_BLUEFLAG] = oldBlueFlag;
+}
+
+/*
+================
 ModActionhero_SetHero
 ================
 */
@@ -31,14 +47,14 @@ static void ModActionhero_SetHero( int clientNum ) {
 		int oldHero = MOD_STATE->actionHeroClientNum;
 		MOD_STATE->actionHeroClientNum = -1;
 		if ( level.clients[oldHero].pers.connected == CON_CONNECTED ) {
-			ClientSpawn( &g_entities[oldHero], CST_RESPAWN );
+			ModActionhero_RespawnWithFlag( oldHero );
 		}
 	}
 
 	if ( clientNum != -1 && G_AssertConnectedClient( clientNum ) ) {
 		// Set new hero
 		MOD_STATE->actionHeroClientNum = clientNum;
-		ClientSpawn( &g_entities[clientNum], CST_RESPAWN );
+		ModActionhero_RespawnWithFlag(clientNum );
 	}
 }
 

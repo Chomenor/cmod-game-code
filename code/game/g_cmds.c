@@ -427,9 +427,11 @@ Let everyone know about a team change
 */
 void BroadcastTeamChange( gclient_t *client, int oldTeam )
 {
-	const char *cmd = modfn.AdjustGeneralConstant( GC_JOIN_MESSAGE_CONSOLE_PRINT, 0 ) ? "print" : "cp";
 	if ( level.exiting )
 	{//no need to do this during level changes
+		return;
+	}
+	if ( modfn.AdjustGeneralConstant( GC_SKIP_JOIN_MESSAGES, 0 ) ) {
 		return;
 	}
 	if ( client->sess.sessionTeam == TEAM_RED ) {
@@ -438,20 +440,20 @@ void BroadcastTeamChange( gclient_t *client, int oldTeam )
 		if (!red_team[0])	{
 			Q_strncpyz( red_team, "red team", sizeof( red_team ) );
 		}
-		trap_SendServerCommand( -1, va("%s \"%.15s" S_COLOR_WHITE " joined the %s.\n\"", cmd, client->pers.netname, red_team ) );
+		trap_SendServerCommand( -1, va("cp \"%.15s" S_COLOR_WHITE " joined the %s.\n\"", client->pers.netname, red_team ) );
 	} else if ( client->sess.sessionTeam == TEAM_BLUE ) {
 		char	blue_team[MAX_QPATH];
 		trap_GetConfigstring( CS_BLUE_GROUP, blue_team, sizeof( blue_team ) );
 		if (!blue_team[0]) {
 			Q_strncpyz( blue_team, "blue team", sizeof( blue_team ) );
 		}
-		trap_SendServerCommand( -1, va("%s \"%.15s" S_COLOR_WHITE " joined the %s.\n\"", cmd, client->pers.netname, blue_team ) );
+		trap_SendServerCommand( -1, va("cp \"%.15s" S_COLOR_WHITE " joined the %s.\n\"", client->pers.netname, blue_team ) );
 	} else if ( client->sess.sessionTeam == TEAM_SPECTATOR && oldTeam != TEAM_SPECTATOR ) {
-		trap_SendServerCommand( -1, va("%s \"%.15s" S_COLOR_WHITE " joined the spectators.\n\"",
-		cmd, client->pers.netname));
+		trap_SendServerCommand( -1, va("cp \"%.15s" S_COLOR_WHITE " joined the spectators.\n\"",
+		client->pers.netname));
 	} else if ( client->sess.sessionTeam == TEAM_FREE ) {
-		trap_SendServerCommand( -1, va("%s \"%.15s" S_COLOR_WHITE " joined the battle.\n\"",
-		cmd, client->pers.netname));
+		trap_SendServerCommand( -1, va("cp \"%.15s" S_COLOR_WHITE " joined the battle.\n\"",
+		client->pers.netname));
 	}
 }
 

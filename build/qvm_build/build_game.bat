@@ -88,6 +88,7 @@ set src=game\mods\features&set name=feat_delay_respawn&call :compile
 set src=game\mods\features&set name=feat_flag_undercap&call :compile
 set src=game\mods\features&set name=feat_game_info&call :compile
 set src=game\mods\features&set name=feat_gladiator_item_enable&call :compile
+set src=game\mods\features&set name=feat_join_message&call :compile
 set src=game\mods\features&set name=feat_misc&call :compile
 set src=game\mods\features&set name=feat_player_move&call :compile
 set src=game\mods\features&set name=feat_spect_passthrough&call :compile

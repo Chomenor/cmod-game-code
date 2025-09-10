@@ -116,15 +116,15 @@ static void MOD_PREFIX(GenerateClientSessionStructure)( MODFN_CTV, int clientNum
 
 /*
 ==================
-(ModFN) AdjustGeneralConstant
+(ModFN) AdjustModConstant
 ==================
 */
-static int MOD_PREFIX(AdjustGeneralConstant)( MODFN_CTV, generalConstant_t gcType, int defaultValue ) {
+static int MOD_PREFIX(AdjustModConstant)( MODFN_CTV, modConstant_t mcType, int defaultValue ) {
 	// Currently no enter game message in tournament.
-	if ( gcType == GC_SKIP_ENTER_GAME_PRINT )
+	if ( mcType == MC_SKIP_ENTER_GAME_PRINT )
 		return 1;
 
-	return MODFN_NEXT( AdjustGeneralConstant, ( MODFN_NC, gcType, defaultValue ) );
+	return MODFN_NEXT( AdjustModConstant, ( MODFN_NC, mcType, defaultValue ) );
 }
 
 /*
@@ -243,6 +243,8 @@ void ModTournament_Init( void ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 		MOD_STATE->losingClient = -1;
 
+		ModJoinMessage_Init();
+
 		MODFN_REGISTER( ExitLevel, ++modePriorityLevel );
 		MODFN_REGISTER( SpawnCenterPrintMessage, ++modePriorityLevel );
 
@@ -265,7 +267,7 @@ void ModTournament_Init( void ) {
 		MODFN_REGISTER( CheckJoinAllowed, ++modePriorityLevel );
 		MODFN_REGISTER( PrePlayerLeaveTeam, ++modePriorityLevel );
 		MODFN_REGISTER( GenerateClientSessionStructure, ++modePriorityLevel );
-		MODFN_REGISTER( AdjustGeneralConstant, ++modePriorityLevel );
+		MODFN_REGISTER( AdjustModConstant, ++modePriorityLevel );
 		MODFN_REGISTER( PostRunFrame, ++modePriorityLevel );
 		MODFN_REGISTER( MatchStateTransition, ++modePriorityLevel );
 	}

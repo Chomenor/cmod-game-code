@@ -1007,7 +1007,7 @@ void ClientBegin( int clientNum ) {
 	ClientSpawn( ent, spawnType );
 
 	if ( client->sess.sessionTeam != TEAM_SPECTATOR && !g_holoIntro.integer &&
-			!modfn.AdjustGeneralConstant( GC_SKIP_ENTER_GAME_PRINT, 0 ) ) {
+			!modfn.AdjustGeneralConstant( GC_SKIP_JOIN_MESSAGES, 0 ) ) {
 		trap_SendServerCommand( -1, va("print \"%s" S_COLOR_WHITE " entered the game\n\"", client->pers.netname) );
 	}
 	G_LogPrintf( "ClientBegin: %i\n", clientNum );
@@ -1186,6 +1186,7 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	// during intermission just put the client in viewing spot
 	if ( level.intermissiontime ) {
 		MoveClientToIntermission( ent );
+		modfn.SpawnEnterGameAnnounce( clientNum, spawnType );
 		modfn.SpawnCenterPrintMessage( clientNum, spawnType );
 
 		recursive = qfalse;
@@ -1320,6 +1321,7 @@ void ClientSpawn( gentity_t *ent, clientSpawnType_t spawnType ) {
 	}
 
 	// print spawn messages
+	modfn.SpawnEnterGameAnnounce( clientNum, spawnType );
 	modfn.SpawnCenterPrintMessage( clientNum, spawnType );
 
 	// play holodeck intro on initial connect and map change, but not on map restarts

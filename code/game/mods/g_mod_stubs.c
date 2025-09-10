@@ -43,6 +43,9 @@ void ModFNDefault_PostPlayerDie( gentity_t *self, gentity_t *inflictor, gentity_
 void ModFNDefault_PatchClientSpawn( int clientNum, gentity_t **spawn, vec3_t origin, vec3_t angles ) {
 }
 
+void ModFNDefault_SpawnEnterGameAnnounce( int clientNum, clientSpawnType_t spawnType ) {
+}
+
 int ModFNDefault_AdjustWeaponConstant( weaponConstant_t wcType, int defaultValue ) {
 	return defaultValue;
 }

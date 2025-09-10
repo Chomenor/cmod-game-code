@@ -176,6 +176,10 @@ MOD_FUNCTION_DEF( UpdateSessionClass, void, ( PREFIX1 int clientNum ),
 MOD_FUNCTION_DEF( SpawnConfigureClient, void, ( PREFIX1 int clientNum ),
 		( PREFIX2 clientNum ), )
 
+// Prints announcements such as "player x entered the game" during ClientSpawn.
+MOD_FUNCTION_DEF( SpawnEnterGameAnnounce, void, ( PREFIX1 int clientNum, clientSpawnType_t spawnType ),
+		( PREFIX2 clientNum, spawnType ), )
+
 // Prints info messages to client during ClientSpawn.
 MOD_FUNCTION_DEF( SpawnCenterPrintMessage, void, ( PREFIX1 int clientNum, clientSpawnType_t spawnType ),
 		( PREFIX2 clientNum, spawnType ), )

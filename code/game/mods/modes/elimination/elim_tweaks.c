@@ -127,18 +127,23 @@ static void MOD_PREFIX(IntermissionReadyConfig)( MODFN_CTV, modIntermissionReady
 
 /*
 ==================
-(ModFN) AdjustGeneralConstant
+(ModFN) AdjustModConstant
 ==================
 */
-static int MOD_PREFIX(AdjustGeneralConstant)( MODFN_CTV, generalConstant_t gcType, int defaultValue ) {
+static int MOD_PREFIX(AdjustModConstant)( MODFN_CTV, modConstant_t mcType, int defaultValue ) {
 #ifdef FEATURE_JOIN_MESSAGE_TWEAKS
-	if ( gcType == GC_SKIP_ENTER_GAME_PRINT )
+	if ( mcType == MC_SKIP_ENTER_GAME_PRINT )
 		return 1;
-	if ( gcType == GC_JOIN_MESSAGE_CONSOLE_PRINT )
+	if ( mcType == MC_JOIN_MESSAGE_CONSOLE_PRINT )
+		return 1;
+
+	// Avoid spam during map restarts. Not consistent with original Gladiator mod.
+	// Original Gladiator behavior can be restored by setting g_joinMessageSkipRestart to 0.
+	if ( mcType == MC_JOIN_MESSAGE_SKIP_RESTART )
 		return 1;
 #endif
 
-	return MODFN_NEXT( AdjustGeneralConstant, ( MODFN_NC, gcType, defaultValue ) );
+	return MODFN_NEXT( AdjustModConstant, ( MODFN_NC, mcType, defaultValue ) );
 }
 
 /*
@@ -303,7 +308,7 @@ void ModElimTweaks_Init( void ) {
 	if ( !MOD_STATE ) {
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
-		MODFN_REGISTER( AdjustGeneralConstant, ++modePriorityLevel );
+		MODFN_REGISTER( AdjustModConstant, ++modePriorityLevel );
 		MODFN_REGISTER( AdjustScoreboardAttributes, ++modePriorityLevel );
 		MODFN_REGISTER( EnableCycleFollow, ++modePriorityLevel );
 		MODFN_REGISTER( CheckSuicideAllowed, ++modePriorityLevel );
@@ -311,6 +316,10 @@ void ModElimTweaks_Init( void ) {
 		MODFN_REGISTER( PrePlayerLeaveTeam, ++modePriorityLevel );
 		MODFN_REGISTER( PostRunFrame, ++modePriorityLevel );
 		MODFN_REGISTER( MatchStateTransition, ++modePriorityLevel );
+
+#ifdef FEATURE_JOIN_MESSAGE_TWEAKS
+		ModJoinMessage_Init();
+#endif
 
 #ifdef FEATURE_FINALIST_TIMELIMIT
 		ModElimTimelimit_Init();

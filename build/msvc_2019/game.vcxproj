@@ -281,6 +281,7 @@
     <ClCompile Include="..\..\code\game\mods\features\feat_flag_undercap.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_game_info.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_gladiator_item_enable.c" />
+    <ClCompile Include="..\..\code\game\mods\features\feat_join_message.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_misc.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_player_move.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_spawn_protect.c" />

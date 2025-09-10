@@ -76,6 +76,11 @@ typedef enum {
 
 	// comp_ghost_sparkle.c / ModGhostSparkle_Init
 	MC_GHOST_SPARKLE_ENABLED,
+
+	// feat_join_message.c / ModJoinMessage_Init
+	MC_SKIP_ENTER_GAME_PRINT,
+	MC_JOIN_MESSAGE_CONSOLE_PRINT,	// Use console print for team join messages instead of center print
+	MC_JOIN_MESSAGE_SKIP_RESTART,	// Don't print team join messages during map restart or map change
 } modConstant_t;
 
 /* ************************************************************************* */
@@ -124,6 +129,7 @@ void ModDelayRespawn_Init( void );
 void ModFlagUndercap_Init( void );
 void ModGameInfo_Init( void );
 void ModGladiatorItemEnable_Init( void );
+void ModJoinMessage_Init( void );
 void ModMiscFeatures_Init( void );
 void ModPingcomp_Init( void );
 void ModPlayerMove_Init( void );

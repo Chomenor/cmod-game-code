@@ -11,6 +11,8 @@
 #include "mods/g_mod_local.h"
 
 static struct {
+	// 100 = hero does same damage as normal player, 150 = hero does 1.5x damage (default)
+	trackedCvar_t g_actionHeroDamageFactor;
 	int actionHeroClientNum;
 } *MOD_STATE;
 
@@ -176,7 +178,10 @@ static int MOD_PREFIX(EffectiveHandicap)( MODFN_CTV, int clientNum, effectiveHan
 	pclass_t pclass = client->sess.sessionClass;
 
 	if ( pclass == PC_ACTIONHERO ) {
-		if ( type == EH_DAMAGE || type == EH_MAXHEALTH ) {
+		if ( type == EH_DAMAGE ) {
+			return MOD_STATE->g_actionHeroDamageFactor.integer;
+		}
+		if ( type == EH_MAXHEALTH ) {
 			return 150;
 		}
 		return 100;
@@ -326,6 +331,7 @@ void ModActionHero_Init( void ) {
 		modcfg.mods_enabled.actionhero = qtrue;
 		MOD_STATE = G_Alloc( sizeof( *MOD_STATE ) );
 
+		G_RegisterTrackedCvar( &MOD_STATE->g_actionHeroDamageFactor, "g_actionHeroDamageFactor", "150", 0, qtrue );
 		MOD_STATE->actionHeroClientNum = -1;
 
 		// Register mod functions

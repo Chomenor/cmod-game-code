@@ -853,14 +853,6 @@ int Logging_Assertion( intptr_t result, const char *expression, qboolean error )
 #define LOGFUNCTION_SRET( returntype, name, typedparams, untypedparams, logcond ) \
 	LOGFUNCTION_XRET( static, returntype, , name, typedparams, untypedparams, logcond, -1 )
 
-// Returning function with entity num tag
-#define LOGFUNCTION_ERET( returntype, name, typedparams, untypedparams, entity_num, logcond ) \
-	LOGFUNCTION_XRET( , returntype, , name, typedparams, untypedparams, logcond, entity_num )
-
-// Static returning function with entity num tag
-#define LOGFUNCTION_SERET( returntype, name, typedparams, untypedparams, entity_num, logcond ) \
-	LOGFUNCTION_XRET( static, returntype, , name, typedparams, untypedparams, logcond, entity_num )
-
 #define LOGFUNCTION_XVOID( prefix1, prefix2, name, typedparams, untypedparams, logcond, entity_num ) \
 	prefix1 void prefix2 name typedparams
 
@@ -871,11 +863,3 @@ int Logging_Assertion( intptr_t result, const char *expression, qboolean error )
 // Static void function
 #define LOGFUNCTION_SVOID( name, typedparams, untypedparams, logcond ) \
 	LOGFUNCTION_XVOID( static, , name, typedparams, untypedparams, logcond, -1 )
-
-// Void function with entity num tag
-#define LOGFUNCTION_EVOID( name, typedparams, untypedparams, entity_num, logcond ) \
-	LOGFUNCTION_XVOID( , , name, typedparams, untypedparams, logcond, entity_num )
-
-// Static void function with entity num tag
-#define LOGFUNCTION_SEVOID( name, typedparams, untypedparams, entity_num, logcond ) \
-	LOGFUNCTION_XVOID( static, , name, typedparams, untypedparams, logcond, entity_num )

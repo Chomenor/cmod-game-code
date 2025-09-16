@@ -521,7 +521,7 @@ pclass_t ModFNDefault_RealSessionClass( int clientNum ) {
 (ModFN) ClientRespawn
 ================
 */
-LOGFUNCTION_EVOID( ModFNDefault_ClientRespawn, ( int clientNum ), ( clientNum ), clientNum, "G_MODFN_CLIENTRESPAWN G_CLIENTSTATE" ) {
+LOGFUNCTION_VOID( ModFNDefault_ClientRespawn, ( int clientNum ), ( clientNum ), "G_MODFN_CLIENTRESPAWN G_CLIENTSTATE" ) {
 	gentity_t *ent = &g_entities[clientNum];
 	modfn.CopyToBodyQue( clientNum );
 	ClientSpawn(ent, CST_RESPAWN);

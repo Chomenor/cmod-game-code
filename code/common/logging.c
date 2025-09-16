@@ -16,6 +16,47 @@
 
 /*
 =================
+Logging_LogMsg
+
+Prints message to loggers matching conditions.
+Message does not need trailing newline (it will be automatically added).
+=================
+*/
+void QDECL Logging_LogMsg( const char *conditions, const char *fmt, ... ) {
+	va_list argptr;
+	char msg[16384];
+
+	va_start( argptr, fmt );
+	vsprintf( msg, fmt, argptr );
+	va_end( argptr );
+
+	VMExt_FN_LoggingPrintExt( LP_INFO, conditions, msg );
+}
+
+/*
+=================
+Logging_Printf
+
+Prints message to console and loggers matching conditions.
+Currently message string should contain trailing newline.
+=================
+*/
+void QDECL Logging_Printf( const char *conditions, const char *fmt, ... ) {
+	va_list argptr;
+	char msg[16384];
+
+	va_start( argptr, fmt );
+	vsprintf( msg, fmt, argptr );
+	va_end( argptr );
+
+	if ( !VMExt_FN_LoggingPrintExt( LP_CONSOLE, conditions, msg ) ) {
+		// No engine support - fall back to regular print
+		TRAP_PRINT( msg );
+	}
+}
+
+/*
+=================
 Logging_AssertionWarning
 
 Current generate only one warning per session, to avoid potential console flooding if

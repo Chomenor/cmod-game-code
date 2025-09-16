@@ -99,6 +99,30 @@ static void VMExt_UpdateCachedValue( const char *key, vmext_cached_value_t *outp
 	}
 }
 
+/*
+================
+VMExt_FN_LoggingPrintExt
+
+Returns qtrue on success.
+================
+*/
+qboolean VMExt_FN_LoggingPrintExt( loggingPrintType_t printType, const char *conditions, const char *msg ) {
+	static vmext_cached_value_t callnum;
+	VMExt_UpdateCachedValue( "logging_print_ext", &callnum );
+	if ( callnum.value ) {
+		SYSCALL( callnum.value,
+			( loggingPrintType_t printType, const char *conditions, const char *msg ),
+			( printType, conditions, msg ),
+			( callnum.value, printType, conditions, msg )
+		);
+
+		// Currently just assume success if the log function was available.
+		return qtrue;
+	}
+
+	return qfalse;
+}
+
 #ifdef MODULE_UI
 static vmext_cached_value_t trap_lan_serverstatus;
 

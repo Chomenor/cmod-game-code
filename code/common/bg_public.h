@@ -803,9 +803,16 @@ unsigned int BG_PredictableRNG_Rand( predictableRNG_t *rng, int time );
 // vm_extensions.c
 //
 
+typedef enum {
+	LP_INFO,		// Only log if conditions are met. Don't print to console by default.
+	LP_DEVELOPER,	// Print to console if developer is set to 1.
+	LP_CONSOLE,		// Always print to console.
+} loggingPrintType_t;
+
 qboolean VMExt_GVCommand( char *buffer, unsigned int bufferSize, const char *command );
 int VMExt_GVCommandInt( const char *command, int defaultValue );
 
+qboolean VMExt_FN_LoggingPrintExt( loggingPrintType_t printType, const char *conditions, const char *msg );
 #ifdef MODULE_UI
 qboolean VMExt_FNAvailable_LAN_ServerStatus_Ext( void );
 int VMExt_FN_LAN_ServerStatus_Ext( const char *serverAddress, char *serverStatus, int maxLen, char *extString, int extLen );
@@ -823,6 +830,8 @@ void VMExt_FN_StatusScoresOverride_SetArray( int *sharedArray, int clientCount )
 // logging.c
 //
 
+void QDECL Logging_LogMsg( const char *conditions, const char *fmt, ... );
+void QDECL Logging_Printf( const char *conditions, const char *fmt, ... );
 void Logging_AssertionWarning( const char *expression );
 int Logging_Assertion( intptr_t result, const char *expression, qboolean error );
 

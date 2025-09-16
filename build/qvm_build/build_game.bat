@@ -83,6 +83,7 @@ set src=game\mods\components&set name=comp_timelimit_countdown&call :compile
 set src=game\mods\components&set name=comp_warmup_sequence&call :compile
 set src=game\mods\features&set name=feat_altswap_handler&call :compile
 set src=game\mods\features&set name=feat_bot_adding&call :compile
+set src=game\mods\features&set name=feat_bot_reskill&call :compile
 set src=game\mods\features&set name=feat_debug_modfn&call :compile
 set src=game\mods\features&set name=feat_delay_respawn&call :compile
 set src=game\mods\features&set name=feat_flag_undercap&call :compile

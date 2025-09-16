@@ -124,6 +124,7 @@ void UAMMusic_Static_PlayIntermissionMusic( void );
 
 void ModAltSwapHandler_Init( void );
 void ModBotAdding_Init( void );
+void ModBotReskill_Init( void );
 void ModDebugModfn_Init( void );
 void ModDelayRespawn_Init( void );
 void ModFlagUndercap_Init( void );

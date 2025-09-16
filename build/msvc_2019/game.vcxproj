@@ -276,6 +276,7 @@
     <ClCompile Include="..\..\code\game\mods\components\comp_warmup_sequence.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_altswap_handler.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_bot_adding.c" />
+    <ClCompile Include="..\..\code\game\mods\features\feat_bot_reskill.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_debug_modfn.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_delay_respawn.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_flag_undercap.c" />

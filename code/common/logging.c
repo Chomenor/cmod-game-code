@@ -58,18 +58,16 @@ void QDECL Logging_Printf( const char *conditions, const char *fmt, ... ) {
 /*
 =================
 Logging_AssertionWarning
-
-Current generate only one warning per session, to avoid potential console flooding if
-warning is triggered repeatedly.
 =================
 */
 void Logging_AssertionWarning( const char *expression ) {
 	static qboolean warned = qfalse;
 	if ( !warned ) {
-		char buffer[1024];
-		Com_sprintf( buffer, sizeof( buffer ), "Assertion warning: %s\n", expression );
-		TRAP_PRINT( buffer );
+		Logging_Printf( "WARNINGS ASSERTION", "Assertion failed (warning): %s\n", expression );
+		TRAP_PRINT( "NOTE: Further assertions this session will not be printed to console.\n" );
 		warned = qtrue;
+	} else {
+		Logging_LogMsg( "WARNINGS ASSERTION", "Assertion failed (warning): %s\n", expression );
 	}
 }
 

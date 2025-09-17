@@ -233,10 +233,16 @@ static void ModRazorBounds_InitConfig( void ) {
 		// Disable extra checks on some maps that don't need it, to be safe.
 		BOUNDS_DEBUG_PRINT(( "razor bounds: Using basic profile for map '%s'\n", mapname ));
 		MOD_STATE->mode = RMM_BASIC;
-	} else if ( !Q_stricmp( mapname, "hm_kba" ) || !Q_stricmp( mapname, "forestfrag" ) ) {
+	} else if ( !Q_stricmp( mapname, "hm_kba" ) || !Q_stricmp( mapname, "forestfrag" ) ||
+			!Q_stricmp( mapname, "skytown2" ) ) {
 		BOUNDS_DEBUG_PRINT(( "razor bounds: Using VOT only profile for map '%s'\n", mapname ));
 		MOD_STATE->mode = RMM_VOT_ONLY;
 		MOD_STATE->strictCeiling = qtrue;
+	} else if ( !Q_stricmp( mapname, "cq_ashes" ) ) {
+		BOUNDS_DEBUG_PRINT(( "razor bounds: Using VOT only profile for map '%s'\n", mapname ));
+		MOD_STATE->mode = RMM_VOT_ONLY;
+		MOD_STATE->strictCeiling = qtrue;
+		MOD_STATE->votRange = 1.0f;
 	} else if ( !Q_stricmp( mapname, "ctf_akilo_f4g" ) || !Q_stricmp( mapname, "ctf_fsceleg" ) ||
 			!Q_stricmp( mapname, "skunkysbitch" ) ) {
 		BOUNDS_DEBUG_PRINT(( "razor bounds: Using special profile for map '%s'\n", mapname ));

@@ -528,6 +528,7 @@ void trigger_teleporter_touch (gentity_t *self, gentity_t *other, trace_t *trace
 //
 // g_misc.c
 //
+void G_FindTeams( void );
 void TeleportPlayer2( gentity_t *player, vec3_t origin, vec3_t angles, tpType_t tpType, float speed );
 void TeleportPlayer( gentity_t *player, vec3_t origin, vec3_t angles, tpType_t tpType );
 

@@ -46,7 +46,7 @@ static int ModPCSmoothingDebug_ClientFromArgument( int index ) {
 		return -1;
 	}
 	clientNum = atoi( str );
-	if ( !G_IsConnectedClient( clientNum ) ) {
+	if ( !G_IsValidClient( clientNum ) ) {
 		G_Printf( "Client not connected.\n" );
 		return -1;
 	}

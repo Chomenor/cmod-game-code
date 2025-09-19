@@ -51,7 +51,7 @@ static void ModActionhero_SetHero( int clientNum ) {
 		}
 	}
 
-	if ( clientNum != -1 && G_AssertConnectedClient( clientNum ) ) {
+	if ( clientNum != -1 && G_AssertValidClient( clientNum ) ) {
 		// Set new hero
 		MOD_STATE->actionHeroClientNum = clientNum;
 		ModActionhero_RespawnWithFlag(clientNum );
@@ -260,7 +260,7 @@ static void MOD_PREFIX(SpawnCenterPrintMessage)( MODFN_CTV, int clientNum, clien
 	}
 
 	else if ( client->sess.sessionTeam != TEAM_SPECTATOR && spawnType != CST_RESPAWN &&
-			MOD_STATE->actionHeroClientNum != -1 && G_AssertConnectedClient( MOD_STATE->actionHeroClientNum ) ) {
+			MOD_STATE->actionHeroClientNum != -1 && G_AssertValidClient( MOD_STATE->actionHeroClientNum ) ) {
 		gclient_t *ah = &level.clients[MOD_STATE->actionHeroClientNum];
 		trap_SendServerCommand( clientNum, va( "cp \"Action Hero is %s!\"", ah->pers.netname ) );
 	}

@@ -439,8 +439,8 @@ void SaveRegisteredItems( void );
 //
 // g_utils.c
 //
-qboolean G_AssertConnectedClient( int clientNum );
-qboolean G_IsConnectedClient( int clientNum );
+qboolean G_AssertValidClient( int clientNum );
+qboolean G_IsValidClient( int clientNum );
 
 const char *G_MatchStateString( matchState_t matchState );
 

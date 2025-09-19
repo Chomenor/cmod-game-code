@@ -14,29 +14,30 @@ connected client checks
 
 /*
 ================
-G_AssertConnectedClient
+G_AssertValidClient
 
-Checks a client number that is supposed to be valid and connected to ensure it is actually valid.
-Returns qtrue if client is valid and connected, otherwise returns qfalse and logs warning.
+Returns qtrue if client index is valid and client is either connected or connecting,
+otherwise returns qfalse and logs warning.
 ================
 */
-qboolean G_AssertConnectedClient( int clientNum ) {
+qboolean G_AssertValidClient( int clientNum ) {
 	if ( clientNum >= 0 && clientNum < level.maxclients && level.clients[clientNum].pers.connected >= CON_CONNECTING ) {
 		return qtrue;
 	}
 
-	Logging_AssertionWarning( "G_AssertConnectedClient" );
+	Logging_AssertionWarning( "G_AssertValidClient" );
 	return qfalse;
 }
 
 /*
 ================
-G_IsConnectedClient
+G_IsValidClient
 
-Returns qtrue if client is valid and connected, otherwise returns qfalse.
+Returns qtrue if client index is valid and client is either connected or connecting,
+otherwise returns qfalse.
 ================
 */
-qboolean G_IsConnectedClient( int clientNum ) {
+qboolean G_IsValidClient( int clientNum ) {
 	if ( clientNum >= 0 && clientNum < level.maxclients && level.clients[clientNum].pers.connected >= CON_CONNECTING ) {
 		return qtrue;
 	}

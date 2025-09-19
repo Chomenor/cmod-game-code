@@ -43,7 +43,7 @@ Set bot to specified skill.
 ===================
 */
 static void ReskillBot( int clientNum, int skill ) {
-	if ( G_IsConnectedClient( clientNum ) && ( g_entities[clientNum].r.svFlags & SVF_BOT )
+	if ( G_IsValidClient( clientNum ) && ( g_entities[clientNum].r.svFlags & SVF_BOT )
 			&& EF_WARN_ASSERT( botstates[clientNum] ) && botstates[clientNum]->settings.skill != skill ) {
 		bot_state_t *bs = botstates[clientNum];
 		char userinfo[MAX_INFO_VALUE];

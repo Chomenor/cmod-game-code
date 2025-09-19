@@ -49,7 +49,7 @@ ModPingcomp_Static_SmoothingEnabledForClient
 ==============
 */
 qboolean ModPingcomp_Static_SmoothingEnabledForClient( int clientNum ) {
-	if ( !ModPingcomp_Static_SmoothingEnabled() || !G_IsConnectedClient( clientNum ) ||
+	if ( !ModPingcomp_Static_SmoothingEnabled() || !G_IsValidClient( clientNum ) ||
 			level.clients[clientNum].pers.connected != CON_CONNECTED || clientNum >= MAX_SMOOTHING_CLIENTS ) {
 		return qfalse;
 	}

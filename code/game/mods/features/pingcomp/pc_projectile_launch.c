@@ -40,7 +40,7 @@ Advance projectile forward to compensate for the ping of the player who launched
 static void ModPCProjectileLaunch_AdvanceProjectile( gentity_t *projectile ) {
 	int clientNum = projectile->parent - g_entities;
 
-	if ( G_AssertConnectedClient( clientNum ) ) {
+	if ( G_AssertValidClient( clientNum ) ) {
 		int startTime = level.clients[clientNum].ps.commandTime;
 		int shift = level.time - startTime;
 

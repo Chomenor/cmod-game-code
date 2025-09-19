@@ -89,7 +89,7 @@ static void MOD_PREFIX(PostFireProjectile)( MODFN_CTV, gentity_t *projectile ) {
 	// fast and have different graphics.
 	if ( projectile->inuse && ACCELERATOR_MODE ) {
 		int clientNum = projectile->parent - g_entities;
-		if ( G_AssertConnectedClient( clientNum ) && level.clients[clientNum].ps.powerups[PW_SEEKER] ) {
+		if ( G_AssertValidClient( clientNum ) && level.clients[clientNum].ps.powerups[PW_SEEKER] ) {
 			if ( projectile->methodOfDeath == MOD_QUANTUM || projectile->methodOfDeath == MOD_GRENADE ) {
 				projectile->s.eType = ET_ALT_MISSILE;
 				projectile->s.weapon = WP_QUANTUM_BURST;

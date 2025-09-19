@@ -290,7 +290,7 @@ static void MOD_PREFIX(MatchStateTransition)( MODFN_CTV, matchState_t oldState, 
 					level.winningTeam == TEAM_RED ? "^1TEAM RED" : "^4TEAM BLUE" ) );
 		} else {
 			int survivor = level.sortedClients[0];
-			if ( G_AssertConnectedClient( survivor ) && !ModElimination_Static_IsPlayerEliminated( survivor ) ) {
+			if ( G_AssertValidClient( survivor ) && !ModElimination_Static_IsPlayerEliminated( survivor ) ) {
 				trap_SendServerCommand( -1, va( "cp \"%s\n^2is the survivor!\n\"",
 						level.clients[level.sortedClients[0]].pers.netname ) );
 			}

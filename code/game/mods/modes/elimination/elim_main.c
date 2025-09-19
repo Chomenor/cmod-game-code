@@ -92,7 +92,7 @@ Returns whether specific player is eliminated.
 ================
 */
 qboolean ModElimination_Static_IsPlayerEliminated( int clientNum ) {
-	return MOD_STATE && G_IsConnectedClient( clientNum ) && MOD_STATE->clients[clientNum].eliminated;
+	return MOD_STATE && G_IsValidClient( clientNum ) && MOD_STATE->clients[clientNum].eliminated;
 }
 
 /*
@@ -115,7 +115,7 @@ Treat eliminated players as spectators.
 ================
 */
 static qboolean MOD_PREFIX(SpectatorClient)( MODFN_CTV, int clientNum ) {
-	if( G_AssertConnectedClient( clientNum ) && MOD_STATE->clients[clientNum].eliminatedSpect ) {
+	if( G_AssertValidClient( clientNum ) && MOD_STATE->clients[clientNum].eliminatedSpect ) {
 		return qtrue;
 	}
 
@@ -397,7 +397,7 @@ static void MOD_PREFIX(PostRunFrame)( MODFN_CTV ) {
 			// Patch clientNum ahead of awards command so AW_SPPostgameMenu_f can determine team correctly.
 			// Fixes issue with incorrect "your team won/lost" messages.
 			if ( modclient->eliminatedSpect && client->sess.spectatorState == SPECTATOR_FOLLOW && g_gametype.integer >= GT_TEAM &&
-					level.matchState == MS_INTERMISSION_QUEUED && G_IsConnectedClient( client->sess.spectatorClient ) &&
+					level.matchState == MS_INTERMISSION_QUEUED && G_IsValidClient( client->sess.spectatorClient ) &&
 					level.clients[client->sess.spectatorClient].sess.sessionTeam != client->sess.sessionTeam &&
 					level.time - level.intermissionQueued + 100 >= modfn.AdjustGeneralConstant( GC_INTERMISSION_DELAY_TIME, 2000 ) ) {
 				client->ps.clientNum = i;

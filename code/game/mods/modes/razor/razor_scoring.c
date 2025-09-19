@@ -31,7 +31,7 @@ Returns client number of recent player who pushed this player, or -1 if none.
 ============
 */
 int ModRazorScoring_Static_LastPusher( int clientNum ) {
-	if ( MOD_STATE && G_AssertConnectedClient( clientNum ) ) {
+	if ( MOD_STATE && G_AssertValidClient( clientNum ) ) {
 		razorScoringClient_t *modclient = &MOD_STATE->clients[clientNum];
 		if ( LAST_PUSH_VALID( modclient ) ) {
 			return modclient->lastPushAttacker;

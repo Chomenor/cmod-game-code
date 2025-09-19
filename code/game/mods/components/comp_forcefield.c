@@ -145,7 +145,7 @@ ModForcefield_ShieldTouch
 ================
 */
 static void ModForcefield_ShieldTouch( gentity_t *self, gentity_t *other, trace_t *trace ) {
-	if ( other->client && G_AssertConnectedClient( other - g_entities ) ) {
+	if ( other->client && G_AssertValidClient( other - g_entities ) ) {
 		int clientNum = other - g_entities;
 		modForcefield_touchResponse_t response = modfn_lcl.ForcefieldTouchResponse(
 				G_GetForcefieldRelation( clientNum, self ), clientNum, self );

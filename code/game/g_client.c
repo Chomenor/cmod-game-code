@@ -463,7 +463,7 @@ Returns whether specified client is currently in spectator mode.
 ================
 */
 qboolean ModFNDefault_SpectatorClient( int clientNum ) {
-	if ( G_AssertConnectedClient( clientNum ) && level.clients[clientNum].sess.sessionTeam == TEAM_SPECTATOR ) {
+	if ( G_AssertValidClient( clientNum ) && level.clients[clientNum].sess.sessionTeam == TEAM_SPECTATOR ) {
 		return qtrue;
 	}
 
@@ -478,7 +478,7 @@ Returns effective score values to use for client.
 ================
 */
 int ModFNDefault_EffectiveScore( int clientNum, effectiveScoreType_t type ) {
-	if ( !G_AssertConnectedClient( clientNum ) ) {
+	if ( !G_AssertValidClient( clientNum ) ) {
 		return 0;
 	}
 	

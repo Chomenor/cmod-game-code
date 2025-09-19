@@ -2396,7 +2396,7 @@ Called ahead of weapon firing functions to set global s_quadFactor value.
 ===============
 */
 void G_SetQuadFactor( int clientNum ) {
-	if ( G_AssertConnectedClient( clientNum ) && level.clients[clientNum].ps.powerups[PW_QUAD] ) {
+	if ( G_AssertValidClient( clientNum ) && level.clients[clientNum].ps.powerups[PW_QUAD] ) {
 		s_quadFactor = g_quadFactor.value;
 	} else {
 		s_quadFactor = 1.0f;

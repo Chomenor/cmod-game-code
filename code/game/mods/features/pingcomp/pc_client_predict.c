@@ -29,7 +29,7 @@ cheating security implications).
 ======================
 */
 static unsigned int MOD_PREFIX(WeaponPredictableRNG)( MODFN_CTV, int clientNum ) {
-	if ( PREDICTION_ENABLED && G_AssertConnectedClient( clientNum ) ) {
+	if ( PREDICTION_ENABLED && G_AssertValidClient( clientNum ) ) {
 		return BG_PredictableRNG_Rand( &MOD_STATE->clients[clientNum].rng, level.clients[clientNum].ps.commandTime );
 	}
 

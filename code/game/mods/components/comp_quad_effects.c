@@ -112,7 +112,7 @@ static void MOD_PREFIX(MissileImpact)( MODFN_CTV, gentity_t *ent, trace_t *trace
 	if ( QuadEffects_ActiveForProjectile( ent ) &&
 			( ent->methodOfDeath == MOD_QUANTUM || ent->methodOfDeath == MOD_QUANTUM_ALT ||
 			( ent->methodOfDeath == MOD_GRENADE && PINBALL_STYLE ) ) ) {
-		qboolean hit_alive_player = G_IsConnectedClient( trace->entityNum ) &&
+		qboolean hit_alive_player = G_IsValidClient( trace->entityNum ) &&
 				level.clients[trace->entityNum].ps.stats[STAT_HEALTH] > 0;
 
 		// This check might not be 100% the same as gladiator, but it seems to match the general idea
@@ -144,7 +144,7 @@ static void MOD_PREFIX(PostFireProjectile)( MODFN_CTV, gentity_t *projectile ) {
 
 		if ( projectile->inuse ) {
 			int clientNum = projectile->parent - g_entities;
-			if ( G_AssertConnectedClient( clientNum ) && level.clients[clientNum].ps.powerups[PW_QUAD] ) {
+			if ( G_AssertValidClient( clientNum ) && level.clients[clientNum].ps.powerups[PW_QUAD] ) {
 				MOD_STATE->quadProjectile[entityNum] = 1;
 			}
 		}

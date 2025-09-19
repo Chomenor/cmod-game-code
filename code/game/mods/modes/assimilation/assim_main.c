@@ -181,7 +181,7 @@ static void ModAssimilation_SetQueen( int clientNum ) {
 		}
 	}
 
-	if ( clientNum != -1 && G_AssertConnectedClient( clientNum ) ) {
+	if ( clientNum != -1 && G_AssertValidClient( clientNum ) ) {
 		// Set new queen
 		MOD_STATE->borgQueenClientNum = clientNum;
 		ClientSpawn( &g_entities[clientNum], CST_RESPAWN );

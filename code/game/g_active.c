@@ -968,7 +968,7 @@ Play informational messages or sounds on forcefield events.
 ================
 */
 void ModFNDefault_ForcefieldAnnounce( gentity_t *forcefield, forcefieldEvent_t event ) {
-	if ( event == FSE_CREATE && G_AssertConnectedClient( forcefield->parent - g_entities ) ) {
+	if ( event == FSE_CREATE && G_AssertValidClient( forcefield->parent - g_entities ) ) {
 		trap_SendServerCommand( forcefield->parent - g_entities, "cp \"FORCE FIELD PLACED\"" );
 	}
 }
@@ -1109,7 +1109,7 @@ Determine if a certain forcefield belongs to a certain player or their team.
 ================
 */
 forcefieldRelation_t G_GetForcefieldRelation( int clientNum, gentity_t *shield ) {
-	if ( G_AssertConnectedClient( clientNum ) ) {
+	if ( G_AssertValidClient( clientNum ) ) {
 		gclient_t *client = &level.clients[clientNum];
 		if ( g_gametype.integer >= GT_TEAM ) {
 			if ( client->sess.sessionTeam != shield->s.otherEntityNum2 ) {

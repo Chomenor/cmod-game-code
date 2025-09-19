@@ -1021,7 +1021,7 @@ void Cmd_GameCommand_f( gentity_t *ent ) {
 	trap_Argv( 2, str, sizeof( str ) );
 	order = atoi( str );
 
-	if ( !G_IsConnectedClient( player ) ) {
+	if ( !G_IsValidClient( player ) ) {
 		return;
 	}
 	if ( order < 0 || order >= sizeof(gc_orders)/sizeof(char *) ) {

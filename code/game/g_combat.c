@@ -1132,6 +1132,14 @@ qboolean ModFNDefault_RadiusDamage( vec3_t origin, gentity_t *attacker, float da
 
 	numListedEntities = trap_EntitiesInBox( mins, maxs, entityList, MAX_GENTITIES );
 
+	// randomize order to avoid engine-dependent behavior
+	for ( i = 0; i < numListedEntities - 1; i++ ) {
+		int j = i + rand() % ( numListedEntities - i );
+		int temp = entityList[i];
+		entityList[i] = entityList[j];
+		entityList[j] = temp;
+	}
+
 	for ( e = 0 ; e < numListedEntities ; e++ ) {
 		ent = &g_entities[entityList[ e ]];
 

@@ -32,10 +32,9 @@ static float MOD_PREFIX(GetDamageMult)( MODFN_CTV, gentity_t *targ, gentity_t *i
 			int numPlayers = ModElimination_Static_CountPlayersAlive();
 			if ( numPlayers < 2 )
 				numPlayers = 2;
-			if ( numPlayers > 6 )
-				numPlayers = 6;
-
 			factor = 0.7f * numPlayers;
+			if ( factor > 4.0f )
+				factor = 4.0f;
 		} else {
 			// CTF and basic FFA - higher damage factor
 			int numPlayers = level.numPlayingClients;

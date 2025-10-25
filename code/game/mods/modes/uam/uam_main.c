@@ -78,6 +78,10 @@ static void MOD_PREFIX(PostClientSpawn)( MODFN_CTV, int clientNum, clientSpawnTy
 
 		message[0] = '\0';
 		Q_strcat( message, sizeof( message ), "\n" );
+		if ( ModElimSpectatorChat_Static_IsEnabled() ) {
+			Q_strcat( message, sizeof( message ), "- Protected chat is enabled - "
+					"target chat and public spectator chat is off.\n" );
+		}
 		Q_strcat( message, sizeof( message ), va( "- Forcefield-Kill is %s.\n",
 				ModForcefield_Static_KillingForcefieldEnabled() ? "enabled" : "off" ) );
 		if ( DETPACK_FULL_SELF_DAMAGE ) {

@@ -114,6 +114,9 @@ int ModElimMultiRound_Static_GetCurrentRound( void );
 qboolean ModElimMultiRound_Static_GetIsTiebreakerRound( void );
 qboolean ModElimMultiRound_Static_GetIsFinalScores( void );
 
+// elim_spectator_chat.c
+qboolean ModElimSpectatorChat_Static_IsEnabled( void );
+
 //
 // UAM
 //

@@ -110,6 +110,94 @@ static void MOD_PREFIX(PlayerDeathDiscardDetpack)( MODFN_CTV, int clientNum ) {
 	MODFN_NEXT( PlayerDeathDiscardDetpack, ( MODFN_NC, clientNum ) );
 }
 
+typedef struct {
+	int entityNum;
+	float distance;
+} sortEntry_t;
+
+/*
+================
+SortNearestDistance
+
+Sort target entities from nearest to furthest.
+================
+*/
+int MOD_PREFIX(SortNearestDistance)( const void *a, const void *b ) {
+	const sortEntry_t *ea = (const sortEntry_t *)a;
+	const sortEntry_t *eb = (const sortEntry_t *)b;
+	if ( ea->distance < eb->distance ) {
+		return -1;
+	}
+	if ( ea->distance > eb->distance ) {
+		return 1;
+	}
+	return 0;
+}
+
+/*
+================
+GetDistance
+
+Calculate distance using same formula as RadiusDamage.
+================
+*/
+float MOD_PREFIX(GetDistance)( vec3_t origin, gentity_t *ent ) {
+	int i;
+	vec3_t v;
+	for ( i = 0; i < 3; i++ ) {
+		if ( origin[i] < ent->r.absmin[i] ) {
+			v[i] = ent->r.absmin[i] - origin[i];
+		} else if ( origin[i] > ent->r.absmax[i] ) {
+			v[i] = origin[i] - ent->r.absmax[i];
+		} else {
+			v[i] = 0;
+		}
+	}
+	return VectorLength( v );
+}
+
+/*
+================
+(ModFN) RadiusDamageAdjustEntities
+================
+*/
+static int MOD_PREFIX(RadiusDamageAdjustEntities)( MODFN_CTV, int *entityList, int entityCount, vec3_t origin, gentity_t *attacker, int mod ) {
+	if ( mod == MOD_DETPACK ) {
+		int i;
+
+		if ( DETPACK_PROXIMITY_HIT_ORDER ) {
+			sortEntry_t sortEntries[1024];
+			for ( i = 0; i < entityCount; ++i ) {
+				sortEntries[i].entityNum = entityList[i];
+				sortEntries[i].distance = MOD_PREFIX(GetDistance)( origin, &g_entities[entityList[i]] );
+			}
+			qsort( sortEntries, entityCount, sizeof( *sortEntries ), MOD_PREFIX(SortNearestDistance) );
+			for ( i = 0; i < entityCount; ++i ) {
+				entityList[i] = sortEntries[i].entityNum;
+			}
+		}
+	}
+	return entityCount;
+}
+
+/*
+================
+(ModFN) Damage
+================
+*/
+static void MOD_PREFIX(Damage)( MODFN_CTV, gentity_t *targ, gentity_t *inflictor, gentity_t *attacker,
+			vec3_t dir, vec3_t point, int damage, int dflags, int mod ) {
+	if ( mod == MOD_DETPACK ) {
+		if ( DETPACK_FULL_SELF_DAMAGE ) {
+			dflags |= DAMAGE_NO_HALF_SELF;
+		}
+		if ( attacker && attacker->health <= 0 && DETPACK_SKIP_DMG_IF_OWNER_DIES ) {
+			dflags |= DAMAGE_TRIGGERS_ONLY;
+		}
+	}
+	MODFN_NEXT( Damage, ( MODFN_NC, targ, inflictor, attacker, dir, point, damage, dflags, mod ) );
+}
+
 /*
 ================
 ModDetpack_Init
@@ -122,5 +210,7 @@ void ModDetpack_Init( void ) {
 		MODFN_REGISTER( DetpackPlace, MODPRIORITY_GENERAL );
 		MODFN_REGISTER( DetpackShot, MODPRIORITY_GENERAL );
 		MODFN_REGISTER( PlayerDeathDiscardDetpack, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( RadiusDamageAdjustEntities, MODPRIORITY_GENERAL );
+		MODFN_REGISTER( Damage, MODPRIORITY_GENERAL );
 	}
 }

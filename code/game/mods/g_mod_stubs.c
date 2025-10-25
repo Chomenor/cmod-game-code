@@ -61,6 +61,11 @@ int ModFNDefault_ModifyDamageFlags( gentity_t *targ, gentity_t *inflictor, genti
 	return dflags;
 }
 
+int ModFNDefault_RadiusDamageAdjustEntities( int *entityList, int entityCount, vec3_t origin,
+		gentity_t *attacker, int mod ) {
+	return entityCount;
+}
+
 float ModFNDefault_AdjustItemRespawnTime( float time, const gentity_t *ent ) {
 	return time;
 }

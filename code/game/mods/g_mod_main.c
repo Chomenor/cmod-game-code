@@ -187,6 +187,7 @@ LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 		ModGladiatorItemEnable_Init();
 		ModJoinMessage_Init();
 		ModBotReskill_Init();
+		ModPowerupMods_Init();
 	}
 
 	// Game modes

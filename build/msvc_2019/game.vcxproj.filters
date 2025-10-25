@@ -359,6 +359,9 @@
     <ClCompile Include="..\..\code\game\mods\features\feat_player_move.c">
       <Filter>game\mods\features</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\features\feat_powerup_mods.c">
+      <Filter>game\mods\features</Filter>
+    </ClCompile>
     <ClCompile Include="..\..\code\game\mods\features\feat_spawn_protect.c">
       <Filter>game\mods\features</Filter>
     </ClCompile>

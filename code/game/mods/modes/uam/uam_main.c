@@ -80,6 +80,15 @@ static void MOD_PREFIX(PostClientSpawn)( MODFN_CTV, int clientNum, clientSpawnTy
 		Q_strcat( message, sizeof( message ), "\n" );
 		Q_strcat( message, sizeof( message ), va( "- Forcefield-Kill is %s.\n",
 				ModForcefield_Static_KillingForcefieldEnabled() ? "enabled" : "off" ) );
+		if ( DETPACK_FULL_SELF_DAMAGE ) {
+			Q_strcat( message, sizeof( message ), "- Detpack Full Self Damage is enabled.\n" );
+		}
+		if ( DETPACK_PROXIMITY_HIT_ORDER ) {
+			Q_strcat( message, sizeof( message ), "- Detpack Proximity hit order is enabled.\n" );
+		}
+		if ( DETPACK_SKIP_DMG_IF_OWNER_DIES ) {
+			Q_strcat( message, sizeof( message ), "- Detpack Anti-Suicide is enabled.\n" );
+		}
 		Q_strcat( message, sizeof( message ), va( "- Unlagged is %s.\n",
 				ModPingcomp_Static_PingCompensationEnabled() ? "enabled" : "off" ) );
 		if ( ModElimMultiRound_Static_GetMultiRoundEnabled() ) {

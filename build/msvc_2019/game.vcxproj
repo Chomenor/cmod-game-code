@@ -285,6 +285,7 @@
     <ClCompile Include="..\..\code\game\mods\features\feat_join_message.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_misc.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_player_move.c" />
+    <ClCompile Include="..\..\code\game\mods\features\feat_powerup_mods.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_spawn_protect.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_spect_passthrough.c" />
     <ClCompile Include="..\..\code\game\mods\features\feat_status_scores.c" />

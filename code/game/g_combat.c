@@ -1140,6 +1140,9 @@ qboolean ModFNDefault_RadiusDamage( vec3_t origin, gentity_t *attacker, float da
 		entityList[j] = temp;
 	}
 
+	// allow mods to adjust order
+	numListedEntities = modfn.RadiusDamageAdjustEntities( entityList, numListedEntities, origin, attacker, mod );
+
 	for ( e = 0 ; e < numListedEntities ; e++ ) {
 		ent = &g_entities[entityList[ e ]];
 

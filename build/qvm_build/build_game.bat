@@ -92,6 +92,7 @@ set src=game\mods\features&set name=feat_gladiator_item_enable&call :compile
 set src=game\mods\features&set name=feat_join_message&call :compile
 set src=game\mods\features&set name=feat_misc&call :compile
 set src=game\mods\features&set name=feat_player_move&call :compile
+set src=game\mods\features&set name=feat_powerup_mods&call :compile
 set src=game\mods\features&set name=feat_spect_passthrough&call :compile
 set src=game\mods\features&set name=feat_spawn_protect&call :compile
 set src=game\mods\features&set name=feat_status_scores&call :compile

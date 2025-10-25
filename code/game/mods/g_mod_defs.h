@@ -263,6 +263,11 @@ MOD_FUNCTION_DEF( RadiusDamage, qboolean, ( PREFIX1 vec3_t origin, gentity_t *at
 		gentity_t *ignore, int dflags, int mod ),
 		( PREFIX2 origin, attacker, damage, radius, ignore, dflags, mod ), return )
 
+// Support modifying list of entities hit by RadiusDamage. Returns number of entities.
+MOD_FUNCTION_DEF( RadiusDamageAdjustEntities, int, ( PREFIX1 int *entityList, int entityCount, vec3_t origin,
+		gentity_t *attacker, int mod ),
+		( PREFIX2 entityList, entityCount, origin, attacker, mod ), return )
+
 // Play some weapon-specific effects when player is killed.
 MOD_FUNCTION_DEF( PlayerDeathEffect, void, ( PREFIX1 gentity_t *self, gentity_t *inflictor, gentity_t *attacker,
 		int contents, int killer, int meansOfDeath ),

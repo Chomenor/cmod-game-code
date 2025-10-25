@@ -64,6 +64,9 @@ typedef enum {
 	MC_DETPACK_PING_SOUND,			// gladiator-style ping sound effect on detpack
 	MC_DETPACK_DROP_ON_DEATH,		// drop placed detpack at placement location when player dies, instead of destroying
 	MC_DETPACK_INVULNERABLE,		// detpack can't be destroyed by weapons fire
+	MC_DETPACK_FULL_SELF_DAMAGE,	// do full damage to detpack owner instead of original half damage
+	MC_DETPACK_PROXIMITY_HIT_ORDER,		// detpack hits closer targets first
+	MC_DETPACK_SKIP_DMG_IF_OWNER_DIES,	// if detpack owner dies, don't do damage to anything later in hit order
 
 	// comp_seeker.c / ModSeeker_Init
 	MC_SEEKER_SECONDS_PER_SHOT,		// 0 = disable firing altogether
@@ -139,6 +142,7 @@ void ModStatusScores_Init( void );
 void ModTeamGroups_Init( void );
 void ModSpectPassThrough_Init( void );
 void ModVoting_Init( void );
+void ModPowerupMods_Init( void );
 
 //
 // Ping Compensation (pingcomp/*.c)
@@ -215,6 +219,14 @@ typedef struct {
 } modForcefield_config_t;
 
 qboolean ModForcefield_Static_KillingForcefieldEnabled( void );
+
+//
+// Detpack (comp_detpack.c)
+//
+
+#define DETPACK_FULL_SELF_DAMAGE ( modfn_lcl.AdjustModConstant( MC_DETPACK_FULL_SELF_DAMAGE, 0 ) )
+#define DETPACK_PROXIMITY_HIT_ORDER ( modfn_lcl.AdjustModConstant( MC_DETPACK_PROXIMITY_HIT_ORDER, 0 ) )
+#define DETPACK_SKIP_DMG_IF_OWNER_DIES ( modfn_lcl.AdjustModConstant( MC_DETPACK_SKIP_DMG_IF_OWNER_DIES, 0 ) )
 
 //
 // Intermission ready handling (comp_intermissionready.c)

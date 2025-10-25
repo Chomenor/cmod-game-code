@@ -24,12 +24,12 @@ Returns whether join limits are currently active.
 ================
 */
 qboolean ModJoinLimit_Static_MatchLocked( void ) {
-	if ( MOD_STATE ) {
+	if ( MOD_STATE && level.matchState >= MS_ACTIVE ) {
 		if ( MOD_STATE->locked ) {
 			return qtrue;
 		}
 
-		if ( level.matchState >= MS_ACTIVE && MOD_STATE->g_noJoinTimeout.integer > 0 &&
+		if ( MOD_STATE->g_noJoinTimeout.integer > 0 &&
 				level.time >= MOD_STATE->joinLimitTime + ( MOD_STATE->g_noJoinTimeout.integer * 1000 ) ) {
 			return qtrue;
 		}
@@ -46,7 +46,7 @@ Start match lock regardless of timer (e.g. when a player is eliminated or assimi
 ================
 */
 void ModJoinLimit_Static_StartMatchLock( void ) {
-	if ( MOD_STATE ) {
+	if ( MOD_STATE && level.matchState >= MS_ACTIVE ) {
 		MOD_STATE->locked = qtrue;
 	}
 }

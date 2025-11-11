@@ -49,8 +49,10 @@ static void ModRazorDamage_Trace( trace_t *results, const vec3_t start, const ve
 static void MOD_PREFIX(PmoveInit)( MODFN_CTV, int clientNum, pmove_t *pmove ) {
 	MODFN_NEXT( PmoveInit, ( MODFN_NC, clientNum, pmove ) );
 
-	MOD_STATE->Prev_Trace = pmove->trace;
-	pmove->trace = ModRazorDamage_Trace;
+	if ( !modfn.SpectatorClient( clientNum ) ) {
+		MOD_STATE->Prev_Trace = pmove->trace;
+		pmove->trace = ModRazorDamage_Trace;
+	}
 }
 
 /*

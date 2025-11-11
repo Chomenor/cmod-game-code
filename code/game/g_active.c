@@ -2027,8 +2027,8 @@ void SpectatorClientEndFrame( gentity_t *ent ) {
 			} else {
 				// drop them to free spectators unless they are dedicated camera followers
 				if ( ent->client->sess.spectatorClient >= 0 ) {
-					ent->client->sess.spectatorState = SPECTATOR_FREE;
-					ClientBegin( ent->client - level.clients );
+					StopFollowing( ent );
+					ClientSpawn( ent, CST_RESPAWN );
 				}
 			}
 		}

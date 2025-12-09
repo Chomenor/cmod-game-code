@@ -2006,6 +2006,7 @@ void AW_SPPostgameMenu_f( void ) {
 
 	memset( &postgameMenuInfo, 0, sizeof(postgameMenuInfo) );
 
+	CG_LoadDeferredPlayers();
 
 	// IMPORT AWARDS INFORMATION FROM SERVER AND CMD STRING
 	//___________________________________________________________________________________________

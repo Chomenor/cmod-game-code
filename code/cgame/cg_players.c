@@ -654,33 +654,60 @@ void CG_NewClientInfo( int clientNum ) {
 		}
 	}
 
-	// scan for an existing clientinfo that matches this modelname
-	// so we can avoid loading checks if possible
-	if ( !CG_ScanForExistingClientInfo( &newInfo ) ) {
-		qboolean	forceDefer;
-
-		forceDefer = trap_MemoryRemaining() < 2000000;
-
-		// if we are defering loads, just have it pick the first valid
-		if ( forceDefer ||
-			( cg_deferPlayers.integer && !cg_buildScript.integer && !cg.loading &&
-			((clientNum != cg.predictedPlayerState.clientNum) && cg.validPPS) ) ) {
-			// keep whatever they had if it won't violate team skins
-			if ( ci->infoValid &&
-				( cgs.gametype < GT_TEAM || !Q_stricmp( newInfo.skinName, ci->skinName ) ) ) {
-				CG_CopyClientInfoModel( ci, &newInfo );
-				newInfo.deferred = qtrue;
-			} else {
-				// use whatever is available
-				CG_SetDeferredClientInfo( &newInfo, clientNum );
+	// new deferred model handling is enabled by asterisk in cg_deferPlayers,
+	// e.g. "0*" enables it on supported cgame, but falls back to 0 on unsupported cgame
+	if ( strchr( cg_deferPlayers.string, '*' ) && trap_MemoryRemaining() >= 2000000 ) {
+		// update models immediately for new players, or team/class changes,
+		// but defer other mid-game model changes
+		if ( cg_buildScript.integer || cg.loading ||
+				( cg.snap && cg.snap->ps.clientNum == clientNum && !( cg.snap->ps.pm_flags & PMF_FOLLOW ) ) ||
+				( newInfo.team != TEAM_SPECTATOR && ( !ci->infoValid || newInfo.team != ci->team || newInfo.pClass != ci->pClass ||
+					( cgs.gametype >= GT_TEAM && Q_stricmp( newInfo.skinName, ci->skinName ) ) ) ) ) {
+			// load the model immediately
+			if ( !CG_ScanForExistingClientInfo( &newInfo ) ) {
+				CG_LoadClientInfo( &newInfo, clientNum );
 			}
-			// if we are low on memory, leave them with this model
-			if ( forceDefer ) {
-				CG_Printf( "Memory is low.  Using deferred model.\n" );
-				newInfo.deferred = qfalse;
-			}
+		} else if ( !ci->infoValid ) {
+			// this is probably a spectator, so just use placeholder model
+			CG_SetDeferredClientInfo( &newInfo, clientNum );
 		} else {
-			CG_LoadClientInfo( &newInfo, clientNum );
+			// keep the old model for now
+			CG_CopyClientInfoModel( ci, &newInfo );
+			if ( ci->deferred || Q_stricmp( newInfo.modelName, ci->modelName ) || Q_stricmp( newInfo.skinName, ci->skinName ) ) {
+				newInfo.deferred = qtrue;
+			}
+		}
+	}
+
+	else {
+		// scan for an existing clientinfo that matches this modelname
+		// so we can avoid loading checks if possible
+		if ( !CG_ScanForExistingClientInfo( &newInfo ) ) {
+			qboolean	forceDefer;
+
+			forceDefer = trap_MemoryRemaining() < 2000000;
+
+			// if we are defering loads, just have it pick the first valid
+			if ( forceDefer ||
+				( cg_deferPlayers.integer && !cg_buildScript.integer && !cg.loading &&
+				((clientNum != cg.predictedPlayerState.clientNum) && cg.validPPS) ) ) {
+				// keep whatever they had if it won't violate team skins
+				if ( ci->infoValid &&
+					( cgs.gametype < GT_TEAM || !Q_stricmp( newInfo.skinName, ci->skinName ) ) ) {
+					CG_CopyClientInfoModel( ci, &newInfo );
+					newInfo.deferred = qtrue;
+				} else {
+					// use whatever is available
+					CG_SetDeferredClientInfo( &newInfo, clientNum );
+				}
+				// if we are low on memory, leave them with this model
+				if ( forceDefer ) {
+					CG_Printf( "Memory is low.  Using deferred model.\n" );
+					newInfo.deferred = qfalse;
+				}
+			} else {
+				CG_LoadClientInfo( &newInfo, clientNum );
+			}
 		}
 	}
 

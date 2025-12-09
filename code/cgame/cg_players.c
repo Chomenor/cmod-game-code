@@ -654,9 +654,17 @@ void CG_NewClientInfo( int clientNum ) {
 		}
 	}
 
+	// avoid deferring borg queen model
+	if ( cgs.pModAssimilation && !Q_stricmp( newInfo.modelName, "borgqueen" ) &&
+			trap_MemoryRemaining() >= 2000000 ) {
+		if ( !CG_ScanForExistingClientInfo( &newInfo ) ) {
+			CG_LoadClientInfo( &newInfo, clientNum );
+		}
+	}
+
 	// new deferred model handling is enabled by asterisk in cg_deferPlayers,
 	// e.g. "0*" enables it on supported cgame, but falls back to 0 on unsupported cgame
-	if ( strchr( cg_deferPlayers.string, '*' ) && trap_MemoryRemaining() >= 2000000 ) {
+	else if ( strchr( cg_deferPlayers.string, '*' ) && trap_MemoryRemaining() >= 2000000 ) {
 		// update models immediately for new players, or team/class changes,
 		// but defer other mid-game model changes
 		if ( cg_buildScript.integer || cg.loading ||

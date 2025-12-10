@@ -2626,9 +2626,11 @@ static void UI_BotSelectMenu_UpdateGrid( void ) {
 	}
 
 	// set selected model
-	i = botSelectInfo.selectedmodel % MAX_MODELSPERPAGE;
-	botSelectInfo.pics[i].generic.flags |= QMF_HIGHLIGHT;
-	botSelectInfo.picbuttons[i].generic.flags &= ~QMF_PULSEIFFOCUS;
+	if ( botSelectInfo.modelpage == botSelectInfo.selectedmodel / MAX_MODELSPERPAGE ) {
+		i = botSelectInfo.selectedmodel % MAX_MODELSPERPAGE;
+		botSelectInfo.pics[i].generic.flags |= QMF_HIGHLIGHT;
+		botSelectInfo.picbuttons[i].generic.flags &= ~QMF_PULSEIFFOCUS;
+	}
 
 	if( botSelectInfo.numpages > 1 ) {
 		if( botSelectInfo.modelpage > 0 ) {
@@ -2701,7 +2703,6 @@ static void UI_BotSelectMenu_LeftEvent( void* ptr, int event ) {
 	}
 	if( botSelectInfo.modelpage > 0 ) {
 		botSelectInfo.modelpage--;
-		botSelectInfo.selectedmodel = botSelectInfo.modelpage * MAX_MODELSPERPAGE;
 		UI_BotSelectMenu_UpdateGrid();
 	}
 }
@@ -2718,7 +2719,6 @@ static void UI_BotSelectMenu_RightEvent( void* ptr, int event ) {
 	}
 	if( botSelectInfo.modelpage < botSelectInfo.numpages - 1 ) {
 		botSelectInfo.modelpage++;
-		botSelectInfo.selectedmodel = botSelectInfo.modelpage * MAX_MODELSPERPAGE;
 		UI_BotSelectMenu_UpdateGrid();
 	}
 }

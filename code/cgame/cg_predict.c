@@ -1164,9 +1164,13 @@ void CG_PredictPlayerState( void ) {
 				frame->predictedTeleport = qfalse;
 				frame->cmdNum = cmdNum;
 
-				// fudge some values due to rechargeTime not being transferred over network
+				// since rechargeTime isn't transferred over network, originally it would
+				// always be 0 leading to "recharge" every prediction. suppressing it
+				// to make caching and event behavior more reliable. empty phaser effects
+				// are adjusted in cg_weapons.c to preserve original behavior.
 				frame->ps.rechargeTime = 1000;
-				if ( frame->ps.ammo[WP_PHASER] < 19 ) {
+				if ( frame->ps.weapon == WP_VOYAGER_HYPO && frame->ps.ammo[WP_PHASER] < 19 ) {
+					// special case to allow hypo primary during gladiator warmup
 					frame->ps.ammo[WP_PHASER] = 19;
 				}
 

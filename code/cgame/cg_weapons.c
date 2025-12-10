@@ -674,6 +674,56 @@ static void CG_CalculateWeaponPosition( vec3_t origin, vec3_t angles ) {
 
 /*
 ===============
+CG_GetPhaserEffectCycle
+
+Simulate ps.weaponTime values, which decrease from 100 to 0 and loop back
+to 100, to use for phaser effects without depending on network behavior.
+===============
+*/
+static int CG_GetPhaserEffectCycle( centity_t *cent ) {
+	cent->pe.phaserEffectCycle -= ( cg.time - cent->pe.phaserEffectLastTime );
+	if ( cent->pe.phaserEffectCycle < 0 ) {
+		cent->pe.phaserEffectCycle += irandom( 90, 110 );
+	}
+	if ( cent->pe.phaserEffectCycle < 0 ) {
+		cent->pe.phaserEffectCycle = irandom( 90, 110 );
+	}
+	cent->pe.phaserEffectLastTime = cg.time;
+	return cent->pe.phaserEffectCycle;
+}
+
+/*
+===============
+CG_IsPhaserAltFiring
+
+Returns whether self player is currently alt firing.
+===============
+*/
+static qboolean CG_IsPhaserAltFiring( void ) {
+	usercmd_t latestCmd;
+	trap_GetUserCmd( trap_GetCurrentCmdNumber(), &latestCmd );
+	return ( latestCmd.buttons & BUTTON_ALT_ATTACK ) ? qtrue : qfalse;
+}
+
+/*
+===============
+CG_IsPhaserRenderEmpty
+
+Returns whether to treat phaser as empty when rendering beam.
+When alt-firing an empty phaser, the effect alternates between empty and nonempty.
+===============
+*/
+static qboolean CG_IsPhaserRenderEmpty( centity_t *cent ) {
+	if ( cent->currentState.clientNum == cg.predictedPlayerEntity.currentState.clientNum &&
+			cent->pe.empty && CG_IsPhaserAltFiring() ) {
+		int virtualPredictLength = cg.time % 50;
+		return CG_GetPhaserEffectCycle( cent ) >= virtualPredictLength + 12;
+	}
+	return cent->pe.empty;
+}
+
+/*
+===============
 CG_LightningBolt
 
 Origin will be the exact tag point, which is slightly
@@ -687,7 +737,7 @@ angle)
 #define RANGE_BEAM (2048.0)
 #define BEAM_VARIATION	6
 
-void CG_LightningBolt( centity_t *cent, vec3_t origin )
+void CG_LightningBolt( centity_t *cent, vec3_t origin, qboolean empty )
 {
 	trace_t		trace;
 //	gentity_t	*traceEnt;
@@ -774,12 +824,10 @@ void CG_LightningBolt( centity_t *cent, vec3_t origin )
 	switch ( weaponNum )
 	{
 	case WP_PHASER:
-		if (cg.snap->ps.rechargeTime == 0)
-		{
-			if (  cent->currentState.eFlags & EF_ALT_FIRING )
-				FX_PhaserAltFire( origin, trace.endpos, trace.plane.normal, spark, impact, cent->pe.empty );
-			else
-				FX_PhaserFire( origin, trace.endpos, trace.plane.normal, spark, impact, cent->pe.empty );
+		if ( cent->currentState.eFlags & EF_ALT_FIRING ) {
+			FX_PhaserAltFire( origin, trace.endpos, trace.plane.normal, spark, impact, empty );
+		} else {
+			FX_PhaserFire( origin, trace.endpos, trace.plane.normal, spark, impact, empty );
 		}
 		break;
 
@@ -943,39 +991,47 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 	if ( !ps ) {
 		// add weapon stop sound
 		if ( !( cent->currentState.eFlags & EF_FIRING ) && cent->pe.lightningFiring &&
-			cg.predictedPlayerState.ammo[cg.predictedPlayerState.weapon] )
+			( cg.predictedPlayerState.ammo[cg.predictedPlayerState.weapon] ||
+				// originally, this would usually play even for empty phaser due to
+				// predicted recharge, now just play it always
+				weaponNum == WP_PHASER ) )
 		{
 			if (weapon->stopSound)
 			{
 				trap_S_StartSound( cent->lerpOrigin, cent->currentState.number, CHAN_WEAPON, weapon->stopSound );
 			}
 		}
+
 		cent->pe.lightningFiring = qfalse;
-		if ( cent->currentState.eFlags & EF_ALT_FIRING )
-		{
-			// hark, I smell hackery afoot
-			if ((weaponNum == WP_PHASER) && !(cg.predictedPlayerState.ammo[WP_PHASER]))
-			{
-				trap_S_AddLoopingSound( cent->currentState.number, cent->lerpOrigin, vec3_origin, cgs.media.phaserEmptySound );
-				cent->pe.lightningFiring = qtrue;
+
+		if ( cent->currentState.eFlags & ( EF_FIRING | EF_ALT_FIRING ) ) {
+			sfxHandle_t sound = weapon->firingSound;
+
+			// updated empty phaser effects to avoid fps/ping dependency
+			// assumes recharge prediction is disabled in cg_predict.c
+			if ( weaponNum == WP_PHASER && cent->pe.empty ) {
+				// 50ms cycle corresponding to original sv_fps 20 default
+				int virtualPredictLength = cg.time % 50;
+
+				// select sound by emulating original behavior, which involves ps prediction starting
+				// with 1 ammo every client frame due to ps.rechargeTime not being networked.
+				// may need tweaking to exactly match vanilla behavior, but seems to work well enough as is
+				if ( CG_GetPhaserEffectCycle( cent ) < virtualPredictLength + 24 ) {
+					// simulated fire; recharge ammo consumed => no ammo; empty sound
+					sound = cgs.media.phaserEmptySound;
+				} else if ( cent == &cg.predictedPlayerEntity && CG_IsPhaserAltFiring() && virtualPredictLength >= 12 ) {
+					// alt fire command and more than 1 prediction frame => EF_ALT_FIRING set; alt sound
+					sound = weapon->altFiringSound;
+				}
 			}
-			else if ( weapon->altFiringSound )
-			{
-				trap_S_AddLoopingSound( cent->currentState.number, cent->lerpOrigin, vec3_origin, weapon->altFiringSound );
-				cent->pe.lightningFiring = qtrue;
+
+			else if ( cent->currentState.eFlags & EF_ALT_FIRING ) {
+				sound = weapon->altFiringSound;
 			}
-		}
-		else if ( cent->currentState.eFlags & EF_FIRING )
-		{
-			if ((weaponNum == WP_PHASER) && !(cg.predictedPlayerState.ammo[WP_PHASER]))
-			{
-				trap_S_AddLoopingSound( cent->currentState.number, cent->lerpOrigin, vec3_origin, cgs.media.phaserEmptySound );
+
+			if ( sound ) {
 				cent->pe.lightningFiring = qtrue;
-			}
-			else if ( weapon->firingSound )
-			{
-				trap_S_AddLoopingSound( cent->currentState.number, cent->lerpOrigin, vec3_origin, weapon->firingSound );
-				cent->pe.lightningFiring = qtrue;
+				trap_S_AddLoopingSound( cent->currentState.number, cent->lerpOrigin, vec3_origin, sound );
 			}
 		}
 	}
@@ -1070,7 +1126,7 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 	angles[ROLL] = crandom() * 10;
 	AnglesToAxis( angles, flash.axis );
 
-	if (cent->pe.empty)
+	if ( CG_IsPhaserRenderEmpty( cent ) )
 	{	// Make muzzle flash wussy when empty.
 		flash.customShader = cgs.media.phaserMuzzleEmptyShader;
 	}
@@ -1088,9 +1144,7 @@ void CG_AddPlayerWeapon( refEntity_t *parent, playerState_t *ps, centity_t *cent
 	if ( ps || cg.renderingThirdPerson || cent->currentState.number != cg.predictedPlayerState.clientNum )
 	{
 		// add phaser/dreadnought
-		// grrr nonPredictedCent doesn't have the proper empty setting
-		nonPredictedCent->pe.empty = cent->pe.empty;
-		CG_LightningBolt( nonPredictedCent, flash.origin );
+		CG_LightningBolt( nonPredictedCent, flash.origin, CG_IsPhaserRenderEmpty( cent ) );
 
 		// make a dlight for the flash
 		if ( weapon->flashDlightColor[0] || weapon->flashDlightColor[1] || weapon->flashDlightColor[2] ) {
@@ -1138,7 +1192,9 @@ void CG_AddViewWeapon( playerState_t *ps ) {
 			// special hack for phaser/dreadnought...
 			VectorCopy( cg.refdef.vieworg, origin );
 			VectorMA( origin, -8, cg.refdef.viewaxis[2], origin );
-			CG_LightningBolt( &cg_entities[ps->clientNum], origin );
+			CG_LightningBolt(
+				CG_WeaponPredict_IsActive() ? &cg.predictedPlayerEntity : &cg_entities[ps->clientNum],
+				origin, CG_IsPhaserRenderEmpty( &cg.predictedPlayerEntity ) );
 		}
 		return;
 	}

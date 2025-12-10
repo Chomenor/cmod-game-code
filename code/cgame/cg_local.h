@@ -136,6 +136,8 @@ typedef struct {
 	int				painDirection;	// flip from 0 to 1
 	qboolean		empty;
 	int				lightningFiring;
+	int				phaserEffectCycle;
+	int				phaserEffectLastTime;
 
 	// machinegun spinning
 	float			barrelAngle;

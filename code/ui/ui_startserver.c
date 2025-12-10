@@ -2862,6 +2862,31 @@ static void BotSelect_MenuDraw (void)
 
 /*
 =================
+BotSelect_MenuKey
+=================
+*/
+static sfxHandle_t BotSelect_MenuKey( int key ) {
+	switch ( key ) {
+		case K_MWHEELUP:
+			if ( botSelectInfo.modelpage > 0 ) {
+				botSelectInfo.modelpage--;
+				UI_BotSelectMenu_UpdateGrid();
+			}
+			return menu_null_sound;
+
+		case K_MWHEELDOWN:
+			if ( botSelectInfo.modelpage < botSelectInfo.numpages - 1 ) {
+				botSelectInfo.modelpage++;
+				UI_BotSelectMenu_UpdateGrid();
+			}
+			return menu_null_sound;
+	}
+
+	return ( Menu_DefaultKey( &botSelectInfo.menu, key ) );
+}
+
+/*
+=================
 UI_BotSelectMenu_Cache
 =================
 */
@@ -2884,6 +2909,7 @@ static void UI_BotSelectMenu_Init( char *bot )
 	botSelectInfo.menu.wrapAround = qtrue;
 	botSelectInfo.menu.fullscreen = qtrue;
 	botSelectInfo.menu.draw							= BotSelect_MenuDraw;
+	botSelectInfo.menu.key							= BotSelect_MenuKey;
 	botSelectInfo.menu.fullscreen					= qtrue;
 	botSelectInfo.menu.descX						= MENU_DESC_X;
 	botSelectInfo.menu.descY						= MENU_DESC_Y;

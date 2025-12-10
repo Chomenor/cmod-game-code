@@ -200,6 +200,31 @@ static void UI_AddBotsMenu_Draw( void )
 	Menu_Draw( &addBotsMenuInfo.menu );
 }
 
+/*
+=================
+BotSelect_MenuKey
+=================
+*/
+static sfxHandle_t UI_AddBotsMenu_MenuKey( int key ) {
+	switch ( key ) {
+		case K_MWHEELUP:
+			if ( addBotsMenuInfo.baseBotNum > -1 ) {
+				addBotsMenuInfo.baseBotNum--;
+				UI_AddBotsMenu_SetBotNames();
+			}
+			return menu_null_sound;
+
+		case K_MWHEELDOWN:
+			if ( addBotsMenuInfo.baseBotNum + BOTS_VIEWABLE < addBotsMenuInfo.numBots ) {
+				addBotsMenuInfo.baseBotNum++;
+				UI_AddBotsMenu_SetBotNames();
+			}
+			return menu_null_sound;
+	}
+
+	return ( Menu_DefaultKey( &addBotsMenuInfo.menu, key ) );
+}
+
 
 /*
 =================
@@ -323,6 +348,7 @@ static void UI_AddBotsMenu_Init( void )
 
 	memset( &addBotsMenuInfo, 0 ,sizeof(addBotsMenuInfo) );
 	addBotsMenuInfo.menu.draw = UI_AddBotsMenu_Draw;
+	addBotsMenuInfo.menu.key = UI_AddBotsMenu_MenuKey;
 	addBotsMenuInfo.menu.fullscreen = qtrue;
 	addBotsMenuInfo.menu.wrapAround = qtrue;
 	addBotsMenuInfo.delay = 1000;

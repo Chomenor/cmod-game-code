@@ -1270,10 +1270,9 @@ void G_RunThink (gentity_t *ent) {
 	}
 
 	ent->nextthink = 0;
-	if (!ent->think) {
-		G_Error ( "NULL ent->think");
+	if ( EF_WARN_ASSERT( ent->think ) ) {
+		ent->think( ent );
 	}
-	ent->think (ent);
 }
 
 /*

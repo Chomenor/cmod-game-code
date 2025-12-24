@@ -1794,8 +1794,10 @@ void DreadnoughtBurstThink(gentity_t *ent)
 					recursion=qtrue;
 					DreadnoughtBurstThink(ent);
 					recursion=qfalse;
-					ent->nextthink = oldThink;
-					ent->nextthink2 = oldThink;
+					if ( ent->inuse ) {
+						ent->nextthink = oldThink;
+						ent->nextthink2 = oldThink;
+					}
 				}
 
 				return;

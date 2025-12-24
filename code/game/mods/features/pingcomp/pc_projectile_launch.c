@@ -65,6 +65,9 @@ static void ModPCProjectileLaunch_AdvanceProjectile( gentity_t *projectile ) {
 				ModPCPositionShift_Shared_TimeShiftClients( -1, level.time );
 				MOD_STATE->eventTimeOffset = oldLevelTime - level.time;
 				DreadnoughtBurstThink( projectile );
+				if ( !projectile->inuse ) {
+					goto endMove;
+				}
 			}
 
 			// advance missile using time indexes of previous frames.

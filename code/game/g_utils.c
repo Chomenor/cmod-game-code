@@ -354,6 +354,7 @@ float vectoyaw( const vec3_t vec ) {
 
 
 void G_InitGentity( gentity_t *e ) {
+	memset( e, 0, sizeof( *e ) );
 	e->inuse = qtrue;
 	e->classname = "noclass";
 	e->s.number = e - g_entities;

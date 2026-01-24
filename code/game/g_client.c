@@ -986,7 +986,11 @@ void ClientBegin( int clientNum ) {
 	if ( ent->r.linked ) {
 		trap_UnlinkEntity( ent );
 	}
-	G_InitGentity( ent );
+	{
+		int svFlags = ent->r.svFlags & SVF_BOT;
+		G_InitGentity( ent );
+		ent->r.svFlags = svFlags;
+	}
 	ent->touch = 0;
 	ent->pain = 0;
 	ent->client = client;

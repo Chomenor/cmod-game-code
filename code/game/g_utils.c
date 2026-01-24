@@ -458,7 +458,7 @@ gentity_t *G_TempEntity( vec3_t origin, int event ) {
 	e->s.eType = ET_EVENTS + event;
 
 	e->classname = "tempEntity";
-	e->eventTime = level.time;
+	e->eventTime = level.time + modfn.AdjustGeneralConstant( GC_EVENT_TIME_OFFSET, 0 );
 	e->freeAfterEvent = qtrue;
 
 	VectorCopy( origin, snapped );

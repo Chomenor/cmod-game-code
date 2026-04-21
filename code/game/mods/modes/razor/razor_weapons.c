@@ -215,7 +215,7 @@ void ModRazorWeapons_Init( void ) {
 
 		ModAltFireConfig_Init();
 
-		MODFN_REGISTER( EffectiveHandicap, MODPRIORITY_HIGH );
+		MODFN_REGISTER( EffectiveHandicap, ++modePriorityLevel );
 		MODFN_REGISTER( ModifyDamageFlags, ++modePriorityLevel );
 		MODFN_REGISTER( ApplyKnockback, MODPRIORITY_LOW );
 		MODFN_REGISTER( AdjustWeaponConstant, ++modePriorityLevel );

@@ -407,6 +407,7 @@ MOD_FUNCTION_DEF( PmoveFixedLength, int, ( PREFIX1 qboolean isBot ),
 		( PREFIX2 isBot ), return )
 
 // Initialize pmove_t structure ahead of player move.
+// Can also be used to adjust per-move playerstate fields such as speed and gravity.
 MOD_FUNCTION_DEF( PmoveInit, void, ( PREFIX1 int clientNum, pmove_t *pmove ),
 		( PREFIX2 clientNum, pmove ), )
 

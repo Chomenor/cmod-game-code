@@ -31,20 +31,22 @@ static int MOD_PREFIX(AdjustGeneralConstant)( MODFN_CTV, generalConstant_t gcTyp
 
 /*
 ==============
-(ModFN) RunPlayerMove
+(ModFN) PmoveInit
 ==============
 */
-static void MOD_PREFIX(RunPlayerMove)( MODFN_CTV, int clientNum, qboolean spectator ) {
+static void MOD_PREFIX(PmoveInit)( MODFN_CTV, int clientNum, pmove_t *pmove ) {
 	gclient_t *client = &level.clients[clientNum];
 
-	// Override the regular speed calculation in ClientThink_real.
-	client->ps.speed = tonextint( g_speed.value );
-	client->ps.speed = tonextint( client->ps.speed * 1.6f );
-	if ( client->ps.powerups[PW_FLIGHT] ) {
-		client->ps.speed = tonextint( client->ps.speed * 0.9f );
+	if ( client->ps.pm_type != PM_SPECTATOR ) {
+		// Override the regular speed calculation in ClientThink_real.
+		client->ps.speed = tonextint( g_speed.value );
+		client->ps.speed = tonextint( client->ps.speed * 1.6f );
+		if ( client->ps.powerups[PW_FLIGHT] ) {
+			client->ps.speed = tonextint( client->ps.speed * 0.9f );
+		}
 	}
 
-	MODFN_NEXT( RunPlayerMove, ( MODFN_NC, clientNum, spectator ) );
+	MODFN_NEXT( PmoveInit, ( MODFN_NC, clientNum, pmove ) );
 }
 
 /*
@@ -156,7 +158,7 @@ void ModRazor_Init( void ) {
 		trap_Cvar_Set( "gamename", "Razor" );
 
 		MODFN_REGISTER( AdjustGeneralConstant, ++modePriorityLevel );
-		MODFN_REGISTER( RunPlayerMove, ++modePriorityLevel );
+		MODFN_REGISTER( PmoveInit, ++modePriorityLevel );
 		MODFN_REGISTER( ModifyDamageFlags, ++modePriorityLevel );
 		MODFN_REGISTER( CanItemBeDropped, ++modePriorityLevel );
 		MODFN_REGISTER( ItemDropExpireTime, ++modePriorityLevel );

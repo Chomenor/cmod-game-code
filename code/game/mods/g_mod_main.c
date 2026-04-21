@@ -188,6 +188,8 @@ LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 		ModJoinMessage_Init();
 		ModBotReskill_Init();
 		ModPowerupMods_Init();
+		
+		ModSpeedHandicap_Init();
 	}
 
 	// Game modes

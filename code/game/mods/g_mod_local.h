@@ -161,6 +161,15 @@ void ModPCSmoothing_Static_RecordClientMove( int clientNum );
 void ModTeamGroups_Shared_ForceConfigStrings( const char *redGroup, const char *blueGroup );
 
 /* ************************************************************************* */
+// Modifiers - Support additional admin options to modify the game
+/* ************************************************************************* */
+
+void ModSpeedHandicap_Init( void );
+
+// Speed handicap (mdf_speed_handicap.c)
+qboolean ModSpeedHandicap_Static_IsEnabled( void );
+
+/* ************************************************************************* */
 // Components - Modules generally only loaded by other modules
 /* ************************************************************************* */
 

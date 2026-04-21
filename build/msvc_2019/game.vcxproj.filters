@@ -40,6 +40,9 @@
     <Filter Include="game\mods\modes\uam">
       <UniqueIdentifier>{1A6AFF5C-86CB-DC6A-0F39-231D7B99132A}</UniqueIdentifier>
     </Filter>
+    <Filter Include="game\mods\modifiers">
+      <UniqueIdentifier>{325A8865-9EBB-6573-2729-AC2593899C32}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\code\common\bg_local.h">
@@ -532,6 +535,9 @@
     </ClCompile>
     <ClCompile Include="..\..\code\game\mods\modes\uam\uam_winner_taunt.c">
       <Filter>game\mods\modes\uam</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\code\game\mods\modifiers\mdf_speed_handicap.c">
+      <Filter>game\mods\modifiers</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -93,6 +93,9 @@ static void MOD_PREFIX(PostClientSpawn)( MODFN_CTV, int clientNum, clientSpawnTy
 		if ( DETPACK_SKIP_DMG_IF_OWNER_DIES ) {
 			Q_strcat( message, sizeof( message ), "- Detpack Anti-Suicide is enabled.\n" );
 		}
+		if ( ModSpeedHandicap_Static_IsEnabled() ) {
+			Q_strcat( message, sizeof( message ), "- Handicap applies to movement speed.\n" );
+		}
 		Q_strcat( message, sizeof( message ), va( "- Unlagged is %s.\n",
 				ModPingcomp_Static_PingCompensationEnabled() ? "enabled" : "off" ) );
 		if ( ModElimMultiRound_Static_GetMultiRoundEnabled() ) {

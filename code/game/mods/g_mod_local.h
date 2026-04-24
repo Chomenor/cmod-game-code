@@ -165,6 +165,7 @@ void ModTeamGroups_Shared_ForceConfigStrings( const char *redGroup, const char *
 /* ************************************************************************* */
 
 void ModSpeedHandicap_Init( void );
+void ModBotsVsHumans_Init( void );
 
 // Speed handicap (mdf_speed_handicap.c)
 qboolean ModSpeedHandicap_Static_IsEnabled( void );

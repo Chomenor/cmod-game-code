@@ -147,6 +147,7 @@ set src=game\mods\modes\uam&set name=uam_weapon_effects&call :compile
 set src=game\mods\modes\uam&set name=uam_weapon_spawn&call :compile
 set src=game\mods\modes\uam&set name=uam_weapons&call :compile
 set src=game\mods\modes\uam&set name=uam_winner_taunt&call :compile
+set src=game\mods\modifiers&set name=mdf_botsvshumans&call :compile
 set src=game\mods\modifiers&set name=mdf_speed_handicap&call :compile
 set src=common&set name=logging&call :compile
 set src=common&set name=vm_extensions&call :compile

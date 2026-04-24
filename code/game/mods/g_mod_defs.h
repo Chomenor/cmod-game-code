@@ -434,6 +434,15 @@ MOD_FUNCTION_DEF( ModifyAmmoUsage, int, ( PREFIX1 int defaultValue, int weapon, 
 		( PREFIX2 defaultValue, weapon, alt ), return )
 
 //////////////////////////
+// bot related
+//////////////////////////
+
+// Wrapper to trap_AAS_EntityInfo.
+// Returns qfalse to skip calls for remainder of frame for optimization purposes.
+MOD_FUNCTION_DEF( BotEntityInfo, qboolean, ( PREFIX1 int entnum, void *info ),
+		( PREFIX2 entnum, info ), return )
+
+//////////////////////////
 // misc
 //////////////////////////
 

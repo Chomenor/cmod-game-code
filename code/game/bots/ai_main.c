@@ -478,11 +478,26 @@ void BotInterbreeding(void) {
 
 /*
 ==============
+(ModFN) BotEntityInfo
+==============
+*/
+qboolean ModFNDefault_BotEntityInfo( int entnum, void *info ) {
+	trap_AAS_EntityInfo( entnum, info );
+	return qfalse;
+}
+
+/*
+==============
 BotEntityInfo
 ==============
 */
 void BotEntityInfo(int entnum, aas_entityinfo_t *info) {
-	trap_AAS_EntityInfo(entnum, info);
+	static int modfn_skip_time;
+	if ( modfn_skip_time == level.time ) {
+		trap_AAS_EntityInfo( entnum, info );
+	} else if ( !modfn.BotEntityInfo( entnum, info ) ) {
+		modfn_skip_time = level.time;
+	}
 }
 
 /*

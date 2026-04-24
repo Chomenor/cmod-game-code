@@ -343,6 +343,7 @@
     <ClCompile Include="..\..\code\game\mods\modes\uam\uam_weapon_spawn.c" />
     <ClCompile Include="..\..\code\game\mods\modes\uam\uam_weapons.c" />
     <ClCompile Include="..\..\code\game\mods\modes\uam\uam_winner_taunt.c" />
+    <ClCompile Include="..\..\code\game\mods\modifiers\mdf_botsvshumans.c" />
     <ClCompile Include="..\..\code\game\mods\modifiers\mdf_speed_handicap.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

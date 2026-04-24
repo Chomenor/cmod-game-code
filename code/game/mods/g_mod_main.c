@@ -190,6 +190,7 @@ LOGFUNCTION_VOID( G_ModsInit, ( void ), (), "G_MOD_INIT" ) {
 		ModPowerupMods_Init();
 		
 		ModSpeedHandicap_Init();
+		ModBotsVsHumans_Init();
 	}
 
 	// Game modes

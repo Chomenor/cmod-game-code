@@ -169,8 +169,9 @@ static void PlayerSettings_SetMenuItems( void )
 	UI_PlayerInfo_SetInfo( &s_playersettings.playerinfo, LEGS_IDLE, TORSO_STAND, viewangles, vec3_origin, WP_COMPRESSION_RIFLE, qfalse );
 
 	// handicap
-	h = Com_Clamp( 5, 100, trap_Cvar_VariableValue("handicap") );
-	s_playersettings.handicap.curvalue = 20 - h / 5;
+	h = trap_Cvar_VariableValue( "handicap" );
+	h = h > 0 && h <= 100 ? h : 100;
+	s_playersettings.handicap.curvalue = 20 - ( h + 4 ) / 5;
 }
 
 

@@ -736,21 +736,23 @@ char *Q_StripColor(char *string)
 	return string;
 }
 
+// big buffer since qvm format functions don't currently support size limit
+static char fmtBuf[32000];
+
 void QDECL Com_sprintf( char *dest, int size, const char *fmt, ...) {
 	int		len;
 	va_list		argptr;
-	char	bigbuffer[32000];	// big, but small enough to fit in PPC stack
 
 	va_start (argptr,fmt);
-	len = vsprintf (bigbuffer,fmt,argptr);
+	len = vsprintf (fmtBuf,fmt,argptr);
 	va_end (argptr);
-	if ( len >= sizeof( bigbuffer ) ) {
+	if ( len >= sizeof( fmtBuf ) ) {
 		Com_Error( ERR_FATAL, "Com_sprintf: overflowed bigbuffer" );
 	}
+	Q_strncpyz (dest, fmtBuf, size );
 	if (len >= size) {
 		Com_Printf ("Com_sprintf: overflow of %i in %i\n", len, size);
 	}
-	Q_strncpyz (dest, bigbuffer, size );
 }
 
 
@@ -765,7 +767,7 @@ FIXME: make this buffer size safe someday
 */
 char	* QDECL va( char *format, ... ) {
 	va_list		argptr;
-	static char		string[2][32000];	// in case va is called by nested functions
+	static char		string[2][10000];	// in case va is called by nested functions
 	static int		index = 0;
 	char	*buf;
 
@@ -773,9 +775,10 @@ char	* QDECL va( char *format, ... ) {
 	index++;
 
 	va_start (argptr, format);
-	vsprintf (buf, format,argptr);
+	vsprintf (fmtBuf, format,argptr);
 	va_end (argptr);
 
+	Q_strncpyz (buf, fmtBuf, sizeof(string[0]));
 	return buf;
 }
 
